@@ -8,6 +8,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <!-- VexFlow para la notación musical -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js"></script>
+    <!-- html2canvas para capturar la pantalla como imagen -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jsPDF para generar PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* Estilos generales para asegurar que el cuerpo y los elementos principales se adapten */
         html, body {
@@ -21,10 +25,10 @@
             align-items: center; /* Centra el contenido horizontalmente */
             box-sizing: border-box;
             font-family: 'Inter', sans-serif; /* Usar Inter como fuente base */
-            background-color: #f0f4f8; /* Fondo azul grisáceo claro */
+            background-color: #e0f2f7; /* Fondo azul suave para estimular la calma y el aprendizaje */
             color: #334155; /* Color de texto más oscuro */
             line-height: 1.6;
-            font-size: 17px; /* Tamaño de fuente base para zoom 100% */
+            font-size: 18px; /* Tamaño de fuente base ligeramente aumentado para mejor legibilidad */
         }
 
         body {
@@ -34,7 +38,7 @@
 
         /* Contenedor principal de la aplicación */
         .container {
-            background-color: #ffffff;
+            background-color: #ffffff; /* Fondo blanco para el contenedor principal */
             padding: 30px; /* Padding general */
             padding-bottom: 35px; /* Padding inferior para el botón */
             border-radius: 12px;
@@ -51,20 +55,14 @@
             margin-bottom: 20px; /* Margen inferior para evitar recortes */
         }
 
-        /* Encabezados */
-        h1 {
-            color: #1e3a8a;
+        /* La pregunta principal ahora ocupa la posición del h2 */
+        #chordQuestionText {
+            color: #2563eb; /* Color del h2 anterior (azul) */
             text-align: center;
-            margin-bottom: 15px;
-            font-size: 2.4em;
-            font-weight: 700;
-        }
-        h2 {
-            color: #2563eb;
-            margin-top: 10px;
-            margin-bottom: 12px;
-            font-size: 1.8em;
-            text-align: center;
+            font-size: 1.8em; /* Tamaño del h2 anterior */
+            font-weight: 600;
+            margin-top: 10px; /* Ajustado para subir la pregunta */
+            margin-bottom: 8px; /* Reducido para acercar la pregunta al cuadro */
         }
 
         /* Contenedor para la pregunta y el pentagrama (lado a lado en desktop, apilado en móvil) */
@@ -83,7 +81,7 @@
 
         /* Área de la pregunta (cuadrícula de notas) */
         #questionArea {
-            background-color: #eff6ff;
+            background-color: #e6f7ff; /* Azul muy claro para el área de la pregunta */
             padding: 20px;
             border-radius: 10px;
             color: #1e40af;
@@ -151,7 +149,7 @@
         }
 
         .note-display.highlighted {
-            background-color: #facc15;
+            background-color: #facc15; /* Amarillo para resaltar la nota dada */
             color: #334155;
             padding: 4px 8px;
             border-radius: 4px;
@@ -200,31 +198,31 @@
         }
 
         .note-button {
-            background-color: #e2e8f0;
+            background-color: #f0f2f5; /* Gris claro */
             color: #475569;
-            padding: 10px 0;
+            padding: 12px 0; /* Aumentado para mejor tacto en móvil */
             border: 1px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 0.9em;
+            font-size: 1em; /* Aumentado para mejor legibilidad */
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
             user-select: none;
-            min-width: 40px;
+            min-width: 44px; /* Tamaño mínimo de toque recomendado */
             touch-action: manipulation; /* Mejora la respuesta táctil */
             box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         .note-button:hover {
-            background-color: #d1d9e2;
+            background-color: #e2e4e7;
             transform: translateY(-1px);
         }
         .note-button:active {
             transform: translateY(0);
         }
         .note-button.selected {
-            background-color: #2563eb;
+            background-color: #007bff; /* Azul primario para seleccionado */
             color: white;
-            border-color: #1e40af;
+            border-color: #0056b3;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .note-button.disabled {
@@ -236,7 +234,7 @@
 
         /* Visualización de notas seleccionadas (lista de respuesta final) */
         #selectedNotesDisplay {
-            background-color: #eff6ff;
+            background-color: #e6f7ff; /* Azul muy claro */
             padding: 15px;
             border-radius: 8px;
             min-height: 50px;
@@ -253,7 +251,7 @@
             box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         #selectedNotesDisplay strong {
-            color: #1d4ed8;
+            color: #0056b3; /* Azul más oscuro */
         }
 
         /* Grupo de botones de acción principal */
@@ -291,27 +289,27 @@
         }
 
         #confirmAnswerButton {
-            background-color: #22c55e;
+            background-color: #28a745; /* Verde para confirmar */
             color: white;
         }
         #confirmAnswerButton:hover {
-            background-color: #16a34a;
+            background-color: #218838;
         }
 
         #clearAllSelectionButton {
-            background-color: #f59e0b;
+            background-color: #ffc107; /* Naranja para borrar */
             color: white;
         }
         #clearAllSelectionButton:hover {
-            background-color: #d97706;
+            background-color: #e0a800;
         }
 
         #changeQuestionButton {
-            background-color: #64748b;
+            background-color: #6c757d; /* Gris azulado para cambiar ejercicio */
             color: white;
         }
         #changeQuestionButton:hover {
-            background-color: #475569;
+            background-color: #5a6268;
         }
 
         /* Estilos comunes de modal (para retroalimentación y evaluación) */
@@ -447,40 +445,158 @@
 
         /* Visualización del mensaje final */
         #finalMessageDisplay {
-            background-color: #d1fae5;
+            background-color: #e0f7fa; /* Fondo azul claro para la sección final */
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             max-width: 650px;
             width: 100%;
             text-align: center;
-            display: none;
+            display: none; /* Hidden by default */
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 200px;
-            border: 1px solid #6ee7b7;
-            color: #065f46;
+            border: 1px solid #a7d9f5; /* Borde azul claro */
+            color: #004d40; /* Texto verde oscuro */
             box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
-        #finalMessageDisplay h3 {
-            color: #047857;
+
+        /* Contenido a capturar para foto/PDF */
+        #resultsContentToCapture {
+            width: 100%;
+            padding: 15px;
+            background-color: #e0f7fa; /* Un color ligeramente diferente para el área de captura */
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            display: flex; /* Use flexbox for internal layout */
+            flex-direction: column;
+            align-items: center;
+            gap: 15px; /* Spacing between elements inside capture area */
+        }
+
+        /* Removed h3 styling as it's no longer present */
+        /* #finalMessageDisplay h3 {
+            color: #00796b;
             font-size: 2em;
             margin-bottom: 12px;
+        } */
+
+        /* New styles for dynamic stats display */
+        .final-stats-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 15px; /* Spacing between stat boxes */
         }
-        #finalMessageDisplay p {
+
+        .stat-box {
+            background-color: #ffffff; /* Fondo blanco para las cajas de estadísticas */
+            border: 1px solid #b2dfdb; /* Borde verde azulado claro */
+            border-radius: 10px;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 150px; /* Minimum width for each stat box */
+            flex: 1; /* Allow boxes to grow and shrink */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #00796b; /* Verde azulado oscuro */
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #004d40; /* Verde muy oscuro */
+        }
+
+        /* Existing styles for user name input and save options */
+        .user-name-input-group {
+            margin-top: 0px; /* Adjusted margin-top to place it at the top */
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%; /* Ensure it takes full width within capture area */
+        }
+        .user-name-input-group label {
             font-size: 1.1em;
-            margin-bottom: 10px;
+            font-weight: 600;
+            color: #00796b; /* Verde azulado oscuro */
         }
-        #finalMessageDisplay .results-summary {
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-top: 20px;
+        .user-name-input-group input[type="text"] {
+            padding: 10px 15px;
+            border: 1px solid #b2dfdb; /* Borde verde azulado claro */
+            border-radius: 8px;
+            font-size: 1em;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
         }
-        #finalMessageDisplay .email-info {
-            font-style: italic;
-            color: #064e3b;
-            margin-top: 12px;
+        .user-name-input-group input[type="text"]:focus {
+            outline: none;
+            border-color: #009688; /* Verde más brillante al enfocar */
+            box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.3);
+        }
+
+        .save-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 0px; /* Adjusted margin-top to place it at the top */
+            margin-bottom: 20px; /* Added margin-bottom for spacing */
+            flex-wrap: wrap;
+            width: 100%; /* Ensure it takes full width within capture area */
+        }
+        .save-options button {
+            flex: 1 1 auto; /* Allow buttons to expand */
+            min-width: 120px; /* Minimum width for buttons */
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            touch-action: manipulation;
+            box-sizing: border-box;
+        }
+        .save-options button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+        .save-options button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #saveAsPhotoButton {
+            background-color: #4CAF50; /* Verde más intenso */
+            color: white;
+        }
+        #saveAsPhotoButton:hover {
+            background-color: #45a049;
+        }
+
+        #saveAsPdfButton {
+            background-color: #2196F3; /* Azul más intenso */
+            color: white;
+        }
+        #saveAsPdfButton:hover {
+            background-color: #1976D2;
         }
 
         /* Estilos del modal de bienvenida */
@@ -585,7 +701,7 @@
             body {
                 padding: 5px; /* Menos padding para pantallas muy pequeñas */
                 padding-bottom: 20px;
-                font-size: 15px;
+                font-size: 16px; /* Ajuste de fuente base para móviles */
             }
             .container {
                 padding: 15px;
@@ -598,24 +714,27 @@
             h1 {
                 font-size: 2em;
             }
-            h2 {
-                font-size: 1.4em;
+            /* Ajuste para la pregunta principal en móvil */
+            #chordQuestionText {
+                font-size: 1.5em; /* Ligeramente más grande */
+                margin-top: 0px; /* Subido aún más */
+                margin-bottom: 5px; /* Más cerca del cuadro */
             }
             /* En pantallas pequeñas, apila la sección de visualización verticalmente */
             #displaySection {
                 flex-direction: column; /* Apila elementos verticalmente */
                 align-items: center; /* Centra los elementos apilados */
-                gap: 20px; /* Más espacio cuando están apilados */
+                gap: 15px; /* Espacio entre el cuadro de notas y el pentagrama */
             }
             #questionArea {
-                max-width: 95%; /* Ocupa más ancho cuando está apilado */
+                max-width: 160px; /* Ancho más pequeño para el cuadro de notas */
                 width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
                 flex: 0 0 auto; /* Evita el estiramiento */
-                padding: 15px;
+                padding: 10px; /* Padding reducido */
                 min-width: unset; /* Elimina min-width para mayor flexibilidad */
             }
             #staffArea {
-                max-width: 95%;
+                max-width: 180px; /* Ancho máximo aún más pequeño para la partitura */
                 min-width: unset; /* Elimina min-width cuando está apilado */
                 width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
                 flex: 0 0 auto;
@@ -634,8 +753,8 @@
                 max-width: unset;
             }
             .note-button {
-                font-size: 0.85em;
-                padding: 8px 0;
+                font-size: 0.95em; /* Aumentado para mejor legibilidad */
+                padding: 10px 0; /* Aumentado para mejor tacto */
             }
             .action-buttons-group {
                 flex-direction: column; /* Apila los botones de confirmar/siguiente */
@@ -644,33 +763,30 @@
             }
             .action-buttons-group button {
                 width: 100%;
-            }
-            #chordQuestionText { /* Asegura que el texto de la pregunta no se desborde */
-                font-size: 1.2em; /* Ajusta el tamaño de la fuente para que quepa */
-                word-wrap: break-word; /* Permite que las palabras largas se rompan */
-                overflow-wrap: break-word; /* CSS3 alternativa */
+                font-size: 1.1em; /* Ligeramente más pequeño para caber */
+                padding: 12px 20px; /* Ajustado para móviles */
             }
             #questionArea p {
-                font-size: 1.3em;
+                font-size: 1.4em; /* Aumentado para mejor legibilidad */
             }
             .notes-grid {
                 width: 100%; /* Ocupa el 100% del #questionArea en móvil */
-                max-width: 170px; /* Mantiene un ancho máximo para la cuadrícula */
+                max-width: 150px; /* Ancho máximo más pequeño para la cuadrícula */
                 height: auto;
-                max-height: 240px;
+                max-height: 200px; /* Altura máxima para asegurar que los 4 cuadros se vean */
             }
             .grid-cell {
-                padding: 12px 10px;
-                font-size: 1.2em;
+                padding: 8px 6px; /* Padding más pequeño */
+                font-size: 1.1em; /* Tamaño de fuente más pequeño */
             }
             .interval-label {
-                font-size: 0.9em;
+                font-size: 0.9em; /* Mantiene el tamaño relativo */
             }
             .note-display {
-                font-size: 1.6em;
+                font-size: 1.4em; /* Tamaño de fuente más pequeño */
             }
             #selectedNotesDisplay {
-                font-size: 1em;
+                font-size: 1.1em; /* Ligeramente más grande */
             }
             .modal-content .modal-buttons {
                 flex-direction: column;
@@ -679,25 +795,42 @@
                 width: 100%;
             }
             #feedbackModalContent p {
-                font-size: 1em;
-            }
-            #feedbackModalContent strong {
                 font-size: 1.1em;
             }
+            #feedbackModalContent strong {
+                font-size: 1.2em;
+            }
             #feedbackModalContent span {
-                font-size: 1em;
+                font-size: 1.1em;
             }
             #welcomeModalContent h2 {
-                font-size: 2.2em;
+                font-size: 2.5em; /* Ligeramente más grande */
             }
             #welcomeModalContent p {
                 font-size: 1.2em;
             }
+            #welcomeModalContent button {
+                font-size: 1.2em; /* Ligeramente más pequeño para caber */
+                padding: 15px 30px; /* Ajustado para móviles */
+            }
             #musicalStaffCanvas {
                 width: 100%; /* Asegura que el canvas tome el ancho completo de su padre */
                 height: auto;
-                max-width: 280px; /* Ancho máximo más pequeño para el pentagrama en móvil */
+                max-width: 180px; /* Ancho máximo aún más pequeño para el pentagrama en móvil */
                 max-height: 160px; /* Altura máxima más pequeña para el pentagrama en móvil */
+            }
+
+            /* Mobile adjustments for the final stats container */
+            .final-stats-container {
+                flex-direction: column; /* Stack stat boxes vertically on mobile */
+                gap: 10px;
+            }
+            .stat-box {
+                width: 100%; /* Full width on mobile */
+                max-width: 250px; /* Limit max width for readability */
+            }
+            .save-options button {
+                width: 100%; /* Full width for save buttons on mobile */
             }
         }
     </style>
@@ -714,8 +847,7 @@
     </div>
 
     <div class="container" id="mainAppContainer" style="display: none;">
-        <!-- Question text moved to the top -->
-        <h2>Ejercicio:</h2>
+        <!-- Question text now at the top, replacing the "Ejercicio:" heading -->
         <p id="chordQuestionText" style="text-align: center; font-size: 1.3em; font-weight: 600; color: #1e40af; margin-bottom: 10px;">Cargando ejercicio...</p>
 
         <div id="displaySection"> <!-- Container for grid and staff (side-by-side) -->
@@ -747,7 +879,6 @@
         </div>
 
         <div class="input-group">
-            <label>Selecciona las 4 notas del acorde:</label>
             <div class="note-building-controls">
                 <div id="naturalNoteButtons" class="natural-note-buttons">
                     <!-- Natural note buttons will be generated here -->
@@ -757,7 +888,6 @@
                 </div>
             </div>
 
-            <label style="margin-top: 20px;">Notas de tu Respuesta (máx. 4):</label>
             <div id="selectedNotesDisplay">
                 Notas seleccionadas: Ninguna
             </div>
@@ -796,11 +926,33 @@
 
     <!-- Final message display (after ending session) -->
     <div id="finalMessageDisplay">
-        <h3>Entrenamiento Finalizado</h3>
-        <p>¡Gracias por practicar!</p>
-        <p class="results-summary" id="finalResultsSummary"></p>
-        <p class="email-info">En una aplicación real, estos resultados serían enviados a tu correo electrónico para que puedas revisarlos más tarde.</p>
-        <p class="email-info">Para enviar un correo de prueba con tus resultados, haz clic <a id="mailtoLink" href="#" target="_blank">aquí</a>.</p>
+        <div id="resultsContentToCapture"> <!-- New wrapper div for content to be captured -->
+            <!-- Removed h3 "Entrenamiento Finalizado" -->
+            
+            <div class="user-name-input-group"> <!-- Moved to top -->
+                <label for="userNameInput">Tu Nombre:</label>
+                <input type="text" id="userNameInput" placeholder="Introduce tu nombre aquí">
+            </div>
+            <div class="save-options"> <!-- Moved to top -->
+                <button id="saveAsPhotoButton">Guardar como Foto (PNG)</button>
+                <button id="saveAsPdfButton">Guardar como PDF</button>
+            </div>
+            <div class="final-stats-container"> <!-- Moved up -->
+                <div class="stat-box">
+                    <span class="stat-label">Ejercicios Intentados</span>
+                    <span class="stat-value" id="totalExercisesDisplay">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Respuestas Correctas</span>
+                    <span class="stat-value" id="correctAnswersDisplay">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Precisión Total</span>
+                    <span class="stat-value" id="overallAccuracyDisplay">0%</span>
+                </div>
+            </div>
+            <p class="results-summary" id="finalResultsSummary"></p> <!-- Moved to end -->
+        </div>
     </div>
 
     <script type="module">
@@ -885,7 +1037,7 @@
                     "1": ["1", "b7", "5", "b3"],
                     "b3": ["b3", "1", "b7", "5"],
                     "5": ["5", "b3", "1", "b7"],
-                    "b7": ["b7", "5", "b3", "1"],
+                    "b7": ["b7", "b5", "b3", "1"],
                     "9": ["9", "b7", "5", "b3"], // 9 replaces 1
                     "11": ["11", "b3", "1", "b7"] // 11 replaces 5, order: Tension, b3, 1, b7
                 }
@@ -960,7 +1112,7 @@
         let currentGivenLabel = ''; // Stores the label (e.g., "1", "b3", "11") of the given interval
         let currentGivenNote = ''; // Stores the actual note that was given (e.g., "C#")
         let currentOrderedLabelsForDisplay = []; // Stores the labels for the grid in the specific order of the current exercise
-        let currentActualChordIntervals = []; // Stores {label, semitones} for the expected final voicing.
+        let currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing.
 
         // Training Evaluation Variables
         let exercisesCompletedCount = 0; // Exercises completed in the current batch
@@ -1013,7 +1165,13 @@
         // Final Message Elements
         const finalMessageDisplay = document.getElementById('finalMessageDisplay');
         const finalResultsSummary = document.getElementById('finalResultsSummary');
-        const mailtoLink = document.getElementById('mailtoLink');
+        const userNameInput = document.getElementById('userNameInput'); // New: User name input
+        const saveAsPhotoButton = document.getElementById('saveAsPhotoButton'); // New: Save as photo button
+        const saveAsPdfButton = document.getElementById('saveAsPdfButton'); // New: Save as PDF button
+        const resultsContentToCapture = document.getElementById('resultsContentToCapture'); // New: Div to capture
+        const totalExercisesDisplay = document.getElementById('totalExercisesDisplay'); // New stat display
+        const correctAnswersDisplay = document.getElementById('correctAnswersDisplay'); // New stat display
+        const overallAccuracyDisplay = document.getElementById('overallAccuracyDisplay'); // New stat display
 
         // Feedback duration in milliseconds
         const FEEDBACK_DURATION = 3000; // 3 seconds
@@ -1452,8 +1610,8 @@
             
             // Adjust canvas dimensions for smaller screens
             if (window.innerWidth <= 768) {
-                canvas.width = Math.min(containerWidth, 280); // Smaller max-width for mobile
-                canvas.height = 140; // Smaller height for mobile
+                canvas.width = Math.min(containerWidth, 180); // Smaller max-width for mobile
+                canvas.height = 160; // Smaller height for mobile
             }
 
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
@@ -1985,22 +2143,96 @@
             mainAppContainer.style.display = 'none'; // Hide the main app UI // Renamed variable
 
             const overallPercentage = totalExercisesAttempted > 0 ? ((totalCorrectAnswers / totalExercisesAttempted) * 100).toFixed(0) : 0; // Renamed variable
-            finalResultsSummary.innerHTML = `Has respondido un total de **${totalExercisesAttempted}** ejercicios, con **${totalCorrectAnswers}** correctas (${overallPercentage}% de precisión).`; // Renamed variable and text
 
-            // Prepare email link
-            const subject = encodeURIComponent("Resultados de tu Entrenamiento Armónico"); // Renamed text
-            const body = encodeURIComponent(
-                `Hola,\n\nAquí están los resultados de tu Herramienta de Armonización:\n\n` +
-                `Total de ejercicios intentados: ${totalExercisesAttempted}\n` + // Renamed text
-                `Respuestas correctas: ${totalCorrectAnswers}\n` +
-                `Porcentaje de precisión: ${overallPercentage}%\n\n` +
-                `¡Sigue practicando!`
-            );
-            mailtoLink.href = `mailto:?subject=${subject}&body=${body}`;
+            // Update the new stat display elements
+            totalExercisesDisplay.textContent = totalExercisesAttempted;
+            correctAnswersDisplay.textContent = totalCorrectAnswers;
+            overallAccuracyDisplay.textContent = `${overallPercentage}%`;
+
+            // Update the summary text, now optionally including the user's name
+            const userName = userNameInput.value.trim();
+            let summaryText = `¡Gracias por practicar!`; // Base message
+            if (userName) {
+                summaryText = `¡Felicidades, ${userName}! ¡Gracias por practicar!`; // Personalized greeting
+            }
+            finalResultsSummary.innerHTML = summaryText;
 
             finalMessageDisplay.style.display = 'flex'; // Show the final message
             console.log("endSession: Final message displayed.");
         }
+
+        /**
+         * Saves the results content as a PNG image.
+         */
+        async function saveAsPhoto() {
+            showCustomMessage("Guardando...", "Generando imagen PNG de tus resultados...", "info");
+            try {
+                const userName = userNameInput.value.trim();
+                const filename = userName ? `Resultados_Armonico_${userName}.png` : `Resultados_Armonico.png`;
+
+                // Temporarily adjust styles for better capture if needed (e.g., remove scrollbars)
+                const originalOverflow = document.body.style.overflow;
+                document.body.style.overflow = 'hidden';
+
+                const canvas = await html2canvas(resultsContentToCapture, {
+                    scale: 2, // Increase scale for better resolution
+                    useCORS: true, // Important for images if any (though not used here)
+                    logging: false // Disable html2canvas logging
+                });
+
+                document.body.style.overflow = originalOverflow; // Restore overflow
+
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showCustomMessage("¡Éxito!", "Resultados guardados como PNG.", "success");
+            } catch (error) {
+                console.error("Error al guardar como foto:", error);
+                showCustomMessage("Error", "No se pudo guardar la imagen. Inténtalo de nuevo.", "error");
+            }
+        }
+
+        /**
+         * Saves the results content as a PDF document.
+         */
+        async function saveAsPdf() {
+            showCustomMessage("Guardando...", "Generando documento PDF de tus resultados...", "info");
+            try {
+                const userName = userNameInput.value.trim();
+                const filename = userName ? `Resultados_Armonico_${userName}.pdf` : `Resultados_Armonico.pdf`;
+
+                // Temporarily adjust styles for better capture if needed
+                const originalOverflow = document.body.style.overflow;
+                document.body.style.overflow = 'hidden';
+
+                const canvas = await html2canvas(resultsContentToCapture, {
+                    scale: 2, // Increase scale for better resolution
+                    useCORS: true,
+                    logging: false
+                });
+
+                document.body.style.overflow = originalOverflow; // Restore overflow
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new window.jspdf.jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: [canvas.width, canvas.height] // Use canvas dimensions for PDF
+                });
+
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                pdf.save(filename);
+                showCustomMessage("¡Éxito!", "Resultados guardados como PDF.", "success");
+            } catch (error) {
+                console.error("Error al guardar como PDF:", error);
+                showCustomMessage("Error", "No se pudo guardar el PDF. Inténtalo de nuevo.", "error");
+            }
+        }
+
 
         // Event Listeners
         confirmAnswerButton.addEventListener('click', checkAnswer);
@@ -2008,6 +2240,10 @@
         changeQuestionButton.addEventListener('click', handleChangeQuestion);
         continueTrainingButton.addEventListener('click', continueTraining); // Renamed
         endSessionButton.addEventListener('click', endSession); // Renamed
+
+        // New event listeners for save buttons
+        saveAsPhotoButton.addEventListener('click', saveAsPhoto);
+        saveAsPdfButton.addEventListener('click', saveAsPdf);
 
         startButton.addEventListener('click', async () => {
             console.log("startButton: Clicked. Hiding welcome modal and initializing application.");
