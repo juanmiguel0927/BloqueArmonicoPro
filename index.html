@@ -90,36 +90,36 @@
             grid-template-columns: 1fr; /* Una sola columna para el diseño vertical */
             grid-auto-rows: 1fr; /* Hace que las filas tengan la misma altura */
             gap: 2px; /* Espaciado aún más pequeño entre celdas */
-            width: 180px; /* Ancho ajustado para ser más compacto */
-            max-width: 180px; /* Ancho fijo para la visualización vertical */
+            width: 200px; /* Ancho ajustado para ser más compacto */
+            max-width: 200px; /* Ancho fijo para la visualización vertical */
             margin: 0 auto; /* Centra la cuadrícula */
             border: 2px solid #64748b; /* Borde exterior para la cuadrícula */
             border-radius: 5px; /* Esquinas ligeramente redondeadas para el contenedor de la cuadrícula */
             overflow: hidden; /* Asegura que los bordes internos sean limpios */
-            height: 240px; /* Altura fija ajustada para 4 celdas más compactas y visibles */
+            height: 260px; /* Altura fija ajustada para 4 celdas más compactas y visibles */
         }
 
         .grid-cell {
             background-color: #ffffff;
             border: 1px solid #94a3b8; /* Bordes de celda internos */
-            padding: 12px 10px; /* Relleno ajustado para acomodar la etiqueta y la nota */
+            padding: 15px 12px; /* Relleno ajustado para acomodar la etiqueta y la nota */
             display: flex;
             justify-content: space-between; /* Espacio entre la etiqueta y la nota */
             align-items: center;
-            font-size: 1.2em; /* Tamaño de fuente base para las celdas de la cuadrícula */
+            font-size: 1.3em; /* Tamaño de fuente base para las celdas de la cuadrícula */
             font-weight: 700;
             color: #334155;
             box-sizing: border-box; /* Incluye el relleno y el borde en el ancho y alto total del elemento */
         }
 
         .interval-label {
-            font-size: 0.8em; /* Fuente más pequeña para la etiqueta del intervalo */
+            font-size: 0.9em; /* Fuente más pequeña para la etiqueta del intervalo */
             color: #64748b; /* Color más claro para la etiqueta */
             font-weight: normal; /* Peso normal para la etiqueta */
         }
 
         .note-display {
-            font-size: 1.5em; /* Fuente más grande para la nota */
+            font-size: 1.6em; /* Fuente más grande para la nota */
             font-weight: 700;
             color: #334155;
         }
@@ -199,18 +199,6 @@
             background-color: #f1f5f9;
             color: #94a3b8;
         }
-        /* No longer using active-accidental class directly, 'selected' will be enough */
-
-
-        /* Visualización de la nota actual en construcción - REMOVED */
-        /* #currentBuildingNoteDisplay {
-            display: none;
-        } */
-
-        /* Botones para añadir/limpiar la nota actual - REMOVED */
-        /* .button-group-inline {
-            display: none;
-        } */
 
 
         /* Visualización de las notas seleccionadas (lista de respuesta final) */
@@ -543,16 +531,16 @@
         /* Posicionamiento de las teclas negras (Desktop) */
         /* Base: (white_key_width * white_key_index) + (white_key_margin * (white_key_index - 1)) - (black_key_width / 2) */
         /* white_key_width = 40px, white_key_margin = 2px, black_key_width = 25px, half_black_key = 12.5px */
+        /* Total width of one octave: (40px * 7) + (2px * 6) = 280px + 12px = 292px */
 
-        .black-key[data-note="CS"][data-octave="4"] { left: calc(40px - 12.5px); } /* C#4, after 1st white key (C) */
-        .black-key[data-note="DS"][data-octave="4"] { left: calc((40px * 2) + (2px * 1) - 12.5px); } /* D#4, after 2nd white key (D) */
-        /* Skip E - F */
-        .black-key[data-note="FS"][data-octave="4"] { left: calc((40px * 4) + (2px * 3) - 12.5px); } /* F#4, after 4th white key (F) */
-        .black-key[data-note="GS"][data-octave="4"] { left: calc((40px * 5) + (2px * 4) - 12.5px); } /* G#4, after 5th white key (G) */
-        .black-key[data-note="AS"][data-octave="4"] { left: calc((40px * 6) + (2px * 5) - 12.5px); } /* A#4, after 6th white key (A) */
+        /* Octave 4 */
+        .black-key[data-note="CS"][data-octave="4"] { left: calc(40px - 12.5px); }
+        .black-key[data-note="DS"][data-octave="4"] { left: calc((40px * 2) + (2px * 1) - 12.5px); }
+        .black-key[data-note="FS"][data-octave="4"] { left: calc((40px * 4) + (2px * 3) - 12.5px); }
+        .black-key[data-note="GS"][data-octave="4"] { left: calc((40px * 5) + (2px * 4) - 12.5px); }
+        .black-key[data-note="AS"][data-octave="4"] { left: calc((40px * 6) + (2px * 5) - 12.5px); }
 
-        /* Para la segunda octava (octave 5) */
-        /* Ancho total de una octava: (40px * 7 teclas blancas) + (2px * 6 márgenes) = 280 + 12 = 292px */
+        /* Octave 5 */
         .black-key[data-note="CS"][data-octave="5"] { left: calc(292px + 40px - 12.5px); }
         .black-key[data-note="DS"][data-octave="5"] { left: calc(292px + (40px * 2) + (2px * 1) - 12.5px); }
         .black-key[data-note="FS"][data-octave="5"] { left: calc(292px + (40px * 4) + (2px * 3) - 12.5px); }
@@ -612,9 +600,6 @@
                 font-size: 0.7em;
                 padding: 5px 0;
             }
-            /* .button-group-inline {
-                display: none;
-            } */
             .action-buttons-group {
                 flex-direction: column; /* Apila los botones de verificación/siguiente */
                 gap: 6px;
@@ -676,12 +661,14 @@
             /* white_key_width = 25px, white_key_margin = 2px, black_key_width = 15px, half_black_key = 7.5px */
             /* Total width of one octave for mobile: (25px * 7) + (2px * 6) = 175px + 12px = 187px */
 
+            /* Octave 4 Mobile */
             .black-key[data-note="CS"][data-octave="4"] { left: calc(25px - 7.5px); }
             .black-key[data-note="DS"][data-octave="4"] { left: calc((25px * 2) + (2px * 1) - 7.5px); }
             .black-key[data-note="FS"][data-octave="4"] { left: calc((25px * 4) + (2px * 3) - 7.5px); }
             .black-key[data-note="GS"][data-octave="4"] { left: calc((25px * 5) + (2px * 4) - 7.5px); }
             .black-key[data-note="AS"][data-octave="4"] { left: calc((25px * 6) + (2px * 5) - 7.5px); }
 
+            /* Octave 5 Mobile */
             .black-key[data-note="CS"][data-octave="5"] { left: calc(187px + 25px - 7.5px); }
             .black-key[data-note="DS"][data-octave="5"] { left: calc(187px + (25px * 2) + (2px * 1) - 7.5px); }
             .black-key[data-note="FS"][data-octave="5"] { left: calc(187px + (25px * 4) + (2px * 3) - 7.5px); }
@@ -734,11 +721,6 @@
                     <!-- Los botones de accidentales se generarán aquí -->
                 </div>
             </div>
-            <!-- Removed "Add Note to Answer" and "Clear Current Note" buttons -->
-            <!-- <div class="button-group-inline">
-                <button id="addNoteToAnswerButton">Añadir Nota a la Respuesta</button>
-                <button id="clearCurrentNoteButton">Limpiar Nota Actual</button>
-            </div> -->
 
             <label style="margin-top: 20px;">Notas de tu Respuesta (máx. 4):</label>
             <div id="selectedNotesDisplay">
@@ -963,7 +945,6 @@
         ];
         const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
         const accidentalButtonsContainer = document.getElementById('accidentalButtons');
-        // Removed currentBuildingNoteDisplay, addNoteToAnswerButton, clearCurrentNoteButton
         const selectedNotesDisplay = document.getElementById('selectedNotesDisplay');
         const playChordButton = document.getElementById('playChordButton'); // Audio playback button
         const virtualKeyboard = document.getElementById('virtualKeyboard'); // Virtual keyboard container
@@ -1190,7 +1171,7 @@
                 });
             } else {
                 naturalButtons.forEach(button => button.classList.remove('disabled'));
-                accidentalButtons.forEach(button => button.classList.remove('disabled'));
+                accidentalButtons.forEach(button => accidentalButtons.classList.remove('disabled'));
             }
         }
 
@@ -1335,8 +1316,6 @@
                 accidentalButtonsContainer.appendChild(button);
             });
             accidentalButtonsContainer.addEventListener('click', handleAccidentalClick);
-
-            // Removed addNoteToAnswerButton and clearCurrentNoteButton event listeners
         }
 
         /**
@@ -1363,37 +1342,45 @@
                 return;
             }
 
-            const notesToPlayWithOctaves = [];
-            let currentOctave = 5; // Start the highest note in octave 5
+            const finalNotesForPlayback = [];
+            let currentOctaveForPlayback;
+
+            // Determine the starting octave for the highest note (currentCorrectNotes[0])
+            // If the highest note name is C, we start it at C6 to fulfill the C5-C6 range.
+            // Otherwise, start at C5.
+            if (currentCorrectNotes[0] === "C") {
+                currentOctaveForPlayback = 6; // Start C as C6
+            } else {
+                currentOctaveForPlayback = 5; // Start other notes in octave 5
+            }
+
             let lastNoteSemitone = noteToSemitoneMap[currentCorrectNotes[0]];
 
-            notesToPlayWithOctaves.push(`${currentCorrectNotes[0]}${currentOctave}`);
-
-            for (let i = 1; i < currentCorrectNotes.length; i++) {
+            for (let i = 0; i < currentCorrectNotes.length; i++) {
                 const noteName = currentCorrectNotes[i];
                 const noteSemitone = noteToSemitoneMap[noteName];
 
                 // If the current note's semitone is higher than the last one encountered in the descending sequence,
                 // it means we've wrapped around to a lower octave.
+                // This logic correctly assigns octaves for a descending arpeggio.
                 if (noteSemitone > lastNoteSemitone) {
-                    currentOctave--;
+                    currentOctaveForPlayback--;
                 }
-                notesToPlayWithOctaves.push(`${noteName}${currentOctave}`);
+                finalNotesForPlayback.push(`${noteName}${currentOctaveForPlayback}`);
                 lastNoteSemitone = noteSemitone;
             }
 
-            console.log("playChord: Notes to play with octaves:", notesToPlayWithOctaves);
+            console.log("playChord: Notes to play with octaves (sorted by voicing):", finalNotesForPlayback);
 
             // --- Descending Arpeggio ---
             const arpeggioNoteDuration = "8n"; // Duration of each note in arpeggio (e.g., 8th note)
-            // Adjusted for less latency perception
             const arpeggioDelayBetweenNotes = 0.2; // Reduced from 0.45s to 0.2s
 
             let arpeggioStartTime = Tone.now();
             console.log("playChord: Arpeggio start time:", arpeggioStartTime);
-            for (let i = 0; i < notesToPlayWithOctaves.length; i++) {
+            for (let i = 0; i < finalNotesForPlayback.length; i++) {
                 // Schedule each note with a delay
-                const noteToHighlight = notesToPlayWithOctaves[i];
+                const noteToHighlight = finalNotesForPlayback[i];
                 Tone.Transport.scheduleOnce((time) => {
                     console.log(`playChord: Triggering arpeggio note ${noteToHighlight} at ${time}`);
                     synth.triggerAttackRelease(noteToHighlight, arpeggioNoteDuration, time);
@@ -1403,15 +1390,15 @@
 
             // --- Simultaneous Chord after Arpeggio ---
             // Calculate when the arpeggio finishes to start the chord
-            const chordStartTime = arpeggioStartTime + (notesToPlayWithOctaves.length * arpeggioDelayBetweenNotes) + 0.1; // Reduced pause
+            const chordStartTime = arpeggioStartTime + (finalNotesForPlayback.length * arpeggioDelayBetweenNotes) + 0.1; // Reduced pause
             const chordDuration = "0.7s"; // Reduced from 1s to 0.7s
             console.log("playChord: Chord start time:", chordStartTime);
 
             Tone.Transport.scheduleOnce((time) => {
-                console.log(`playChord: Triggering chord ${notesToPlayWithOctaves.join(', ')} at ${time}`);
-                synth.triggerAttackRelease(notesToPlayWithOctaves, chordDuration, time);
+                console.log(`playChord: Triggering chord ${finalNotesForPlayback.join(', ')} at ${time}`);
+                synth.triggerAttackRelease(finalNotesForPlayback, chordDuration, time);
                 // Highlight all notes of the chord simultaneously
-                notesToPlayWithOctaves.forEach(note => highlightKeyboardKeyForPlayback(note, chordDuration));
+                finalNotesForPlayback.forEach(note => highlightKeyboardKeyForPlayback(note, chordDuration));
             }, chordStartTime);
 
             // Start Tone.js Transport if not already running
@@ -1456,6 +1443,7 @@
             // Add 'selected-by-user' class to keys corresponding to selected notes
             selectedUserNotes.forEach(userNote => {
                 // For user selection, we assume the C4-B4 octave for highlighting
+                // We'll highlight the C4-B4 octave by default for user input, as it's a common range.
                 const dataNote = userNote.replace('#', 'S').replace('b', 'B');
                 const keyElement = document.querySelector(`.key[data-note="${dataNote}"][data-octave="4"]`);
                 if (keyElement) {
@@ -1471,12 +1459,12 @@
         function generateVirtualKeyboard() {
             console.log("generateVirtualKeyboard: Generating keyboard elements.");
             virtualKeyboard.innerHTML = '';
-            const whiteKeys = ["C", "D", "E", "F", "G", "A", "B"];
-            const blackKeys = ["C#", "D#", "F#", "G#", "A#"]; // Simplified for display
+            const whiteKeysFullOctave = ["C", "D", "E", "F", "G", "A", "B"];
+            const blackKeysFullOctave = ["C#", "D#", "F#", "G#", "A#"];
 
-            // Generate two octaves (C4 to B5)
+            // Generate Octave 4 (C4-B4) and Octave 5 (C5-B5)
             for (let octave = 4; octave <= 5; octave++) {
-                whiteKeys.forEach(note => {
+                whiteKeysFullOctave.forEach(note => {
                     const key = document.createElement('div');
                     key.classList.add('key', 'white-key');
                     key.dataset.note = note;
@@ -1484,15 +1472,23 @@
                     virtualKeyboard.appendChild(key);
                 });
 
-                blackKeys.forEach(note => {
+                blackKeysFullOctave.forEach(note => {
                     const key = document.createElement('div');
                     key.classList.add('key', 'black-key');
-                    key.dataset.note = note.replace('#', 'S'); // Use 'S' for sharp in data-attribute to avoid issues
+                    key.dataset.note = note.replace('#', 'S');
                     key.dataset.octave = octave;
                     virtualKeyboard.appendChild(key);
                 });
             }
-            console.log("generateVirtualKeyboard: Keyboard elements created.");
+
+            // Add C6 specifically
+            const c6Key = document.createElement('div');
+            c6Key.classList.add('key', 'white-key');
+            c6Key.dataset.note = "C";
+            c6Key.dataset.octave = "6";
+            virtualKeyboard.appendChild(c6Key);
+
+            console.log("generateVirtualKeyboard: Keyboard elements created for C4 to C6.");
         }
 
 
@@ -1650,7 +1646,7 @@
          * Enables all interactive elements of the quiz.
          */
         function enableQuizInteraction() {
-            console.log("enableQuizInteraction: Enabling quiz interaction.");
+            console.log("enableInteraction: Enabling quiz interaction.");
             // Button visibility/disabled state is handled by updateSelectedNotesDisplay based on selectedUserNotes.length
             updateSelectedNotesDisplay();
             playChordButton.disabled = !audioContextStarted; // Enable if audio context is active
@@ -1661,7 +1657,7 @@
 
             // Visually enable all note buttons (remove disabled class)
             document.querySelectorAll('.note-button').forEach(button => button.classList.remove('disabled'));
-            console.log("enableQuizInteraction: Quiz interaction enabled.");
+            console.log("enableInteraction: Quiz interaction enabled.");
         }
 
         /**
