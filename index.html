@@ -8,6 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <!-- VexFlow para la notación musical (usando CDN con la ruta ESM correcta) -->
     <script type="module">
+        console.log("Script principal cargado y comenzando ejecución."); // Mensaje para depuración
+
         // Importar módulos de VexFlow desde la ruta ESM
         import { Renderer, Stave, StaveNote, Voice, Formatter } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
 
@@ -487,7 +489,7 @@
             if (activeAccidental !== '') {
                 attemptToggleCombinedNote();
             } else {
-                // If no natural note is active, just update button visuals
+                // If no accidental is active, just update button visuals
                 updateButtonSelectionVisuals();
             }
         }
@@ -1195,5 +1197,101 @@
             console.log("window.onload: Intro screen displayed, quiz hidden, play button disabled.");
         };
     </script>
+</head>
+<body>
+    <!-- Pantalla de Inicio -->
+    <div id="introScreen">
+        <h2>Bienvenido a Bloque Armónico Pro</h2>
+        <p>Herramienta para desarrollar la técnica de armonización en bloques cerrados 4-way closed.</p>
+        <p>Realizado por Juan Miguel Rios Redondo</p>
+        <button id="startButton">Comenzar</button>
+    </div>
+
+    <div class="container" id="quizContainer" style="display: none;">
+        <h2>Pregunta:</h2>
+        <div id="questionArea">
+            <p id="chordQuestionText">Cargando pregunta...</p>
+            <button id="playChordButton" style="margin-top: 5px; padding: 8px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Reproducir Acorde</button>
+            <div class="notes-grid">
+                <div class="grid-cell" id="gridCell0">
+                    <span class="interval-label"></span>
+                    <span class="note-display"></span>
+                </div>
+                <div class="grid-cell" id="gridCell1">
+                    <span class="interval-label"></span>
+                    <span class="note-display"></span>
+                </div>
+                <div class="grid-cell" id="gridCell2">
+                    <span class="interval-label"></span>
+                    <span class="note-display"></span>
+                </div>
+                <div class="grid-cell" id="gridCell3">
+                    <span class="interval-label"></span>
+                    <span class="note-display"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Selecciona las 4 notas del acorde:</label>
+            <div class="note-building-controls">
+                <div id="naturalNoteButtons" class="natural-note-buttons">
+                    <!-- Los botones de notas naturales se generarán aquí -->
+                </div>
+                <div id="accidentalButtons" class="accidental-buttons">
+                    <!-- Los botones de accidentales se generarán aquí -->
+                </div>
+            </div>
+
+            <label style="margin-top: 20px;">Notas de tu Respuesta (máx. 4):</label>
+            <div id="selectedNotesDisplay">
+                Notas seleccionadas: Ninguna
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="action-buttons-group">
+            <button id="confirmAnswerButton">Confirmar</button>
+            <button id="clearAllSelectionButton">Borrar</button>
+            <button id="changeQuestionButton">Cambiar Pregunta</button>
+        </div>
+
+        <!-- Área para la partitura musical -->
+        <div id="staffArea">
+            <canvas id="musicalStaffCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Modal de Feedback -->
+    <div id="feedbackModalOverlay" class="modal-overlay">
+        <div id="feedbackModalContent" class="modal-content">
+            <!-- El mensaje de feedback se insertará aquí -->
+        </div>
+    </div>
+
+    <!-- Modal de Evaluación -->
+    <div id="evaluationModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Resultados de la Evaluación</h3>
+            <p id="evaluationSummary"></p>
+            <p>Áreas a trabajar:</p>
+            <ul id="adviceList">
+                <!-- Los elementos de consejo se insertarán aquí -->
+            </ul>
+            <div class="modal-buttons">
+                <button id="continueQuizButton">Continuar Quiz</button>
+                <button id="endQuizButton">Terminar Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualización del mensaje final (después de terminar el quiz) -->
+    <div id="finalMessageDisplay">
+        <h3>Quiz Finalizado</h3>
+        <p>¡Gracias por practicar!</p>
+        <p class="results-summary" id="finalResultsSummary"></p>
+        <p class="email-info">En una aplicación real, estos resultados serían enviados a tu correo electrónico para que puedas revisarlos más tarde.</p>
+        <p class="email-info">Para enviar un correo de prueba con tus resultados, haz clic <a id="mailtoLink" href="#" target="_blank">aquí</a>.</p>
+    </div>
 </body>
 </html>
