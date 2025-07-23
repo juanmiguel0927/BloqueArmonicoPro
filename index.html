@@ -613,17 +613,17 @@
             .notes-grid {
                 width: 140px; /* Slightly smaller width for mobile */
                 max-width: 140px; /* Fixed max-width for consistency */
-                height: 190px; /* Adjusted height for 4 cells (approx 47.5px each + 6px gap) */
+                height: 200px; /* Adjusted height for 4 cells (approx 48.5px each + 6px gap) */
             }
             .grid-cell {
                 padding: 8px 6px; /* Reduced padding for smaller cells */
-                font-size: 0.95em; /* Slightly smaller font for mobile cells */
+                font-size: 1em; /* Adjusted font size for mobile cells */
             }
             .interval-label {
-                font-size: 0.7em; /* Adjusted for mobile */
+                font-size: 0.75em; /* Adjusted for mobile */
             }
             .note-display {
-                font-size: 1.2em; /* Adjusted for mobile */
+                font-size: 1.3em; /* Adjusted for mobile */
             }
             #selectedNotesDisplay, #currentBuildingNoteDisplay {
                 font-size: 0.8em;
@@ -996,7 +996,8 @@
             if (!audioContextStarted) {
                 try {
                     await Tone.start();
-                    console.log("AudioContext started successfully!");
+                    Tone.context.lookAhead = 0.0; // Reduce lookAhead for lower latency
+                    console.log("AudioContext started successfully! LookAhead set to 0.0.");
                     audioContextStarted = true;
                     // Initialize the synthesizer with piano-like envelope
                     synth = new Tone.PolySynth(Tone.Synth, {
@@ -1092,7 +1093,9 @@
 
             if (selectedUserNotes.length > 0 && currentOrderedLabelsForDisplay.length === 4) {
                 const correctNotesByLabel = {};
-                const actualRootSemitone = noteToSemitoneMap[currentChordRoot];
+                const actualRootSemitone = noteToSemitoneMap[normalizeNote(currentChordRoot)]; // Normalize root here
+                console.log("updateSelectedNotesDisplay: currentChordRoot", currentChordRoot, "Normalized Root Semitone:", actualRootSemitone);
+
 
                 // currentActualChordIntervals is already built with the specific voicing rule applied
                 // It contains the 4 labels and their relative semitones to the root for the expected answer
@@ -1555,7 +1558,7 @@
 
             // 4. Calculate the actual root note of the chord
             // The root is 'givenNote' minus the 'givenInterval' semitones
-            const actualRootSemitone = (noteToSemitoneMap[currentGivenNote] - givenInterval.semitones + 12) % 12;
+            const actualRootSemitone = (noteToSemitoneMap[normalizeNote(currentGivenNote)] - givenInterval.semitones + 12) % 12; // Normalize givenNote here
             currentChordRoot = canonicalNotes[actualRootSemitone];
             console.log("generateComplexQuestion: Raíz calculada del acorde:", currentChordRoot);
 
