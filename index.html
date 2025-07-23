@@ -78,6 +78,7 @@
             flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas más pequeñas */
             flex-grow: 1;
             min-height: 0;
+            width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
         }
 
         /* Área de la pregunta (cuadrícula de notas) */
@@ -98,6 +99,7 @@
             max-width: 320px; /* Ancho máximo para la cuadrícula */
             min-width: 220px; /* Ancho mínimo para evitar que se aplaste */
             height: fit-content;
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         #questionArea p {
             margin: 0;
@@ -111,7 +113,7 @@
             grid-template-columns: 1fr; /* Una sola columna para diseño vertical */
             grid-template-rows: repeat(4, 1fr); /* 4 filas de igual altura */
             gap: 4px;
-            width: 90%; /* Ancho más fluido */
+            width: 100%; /* Ocupa el 100% del #questionArea */
             max-width: 200px; /* Ancho máximo fijo para la visualización vertical */
             margin: 20px auto;
             border: 2px solid #64748b;
@@ -121,6 +123,7 @@
             max-height: 280px;
             flex-grow: 1;
             min-height: 0;
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
 
         .grid-cell {
@@ -163,6 +166,7 @@
             margin-bottom: 25px;
             flex-grow: 1;
             min-height: 0;
+            width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
         }
         label {
             display: block;
@@ -179,12 +183,14 @@
             margin-bottom: 12px;
             flex-wrap: wrap; /* Permite el ajuste de línea en pantallas pequeñas */
             justify-content: center;
+            width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
         }
         .natural-note-buttons, .accidental-buttons {
             display: grid;
             gap: 5px;
             flex: 1; /* Permite que crezcan */
             min-width: 150px;
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         .natural-note-buttons {
             grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
@@ -207,6 +213,7 @@
             user-select: none;
             min-width: 40px;
             touch-action: manipulation; /* Mejora la respuesta táctil */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         .note-button:hover {
             background-color: #d1d9e2;
@@ -243,6 +250,8 @@
             font-weight: 500;
             margin-bottom: 15px;
             text-align: center; /* Asegura que el texto esté centrado */
+            width: 100%; /* Ocupa el 100% del contenedor padre */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         #selectedNotesDisplay strong {
             color: #1d4ed8;
@@ -257,6 +266,7 @@
             padding-top: 20px;
             margin-bottom: 15px;
             flex-wrap: wrap; /* Permite que los botones se envuelvan */
+            width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
         }
         .action-buttons-group button {
             flex: 1 1 auto; /* Permite que los botones se expandan y contraigan */
@@ -270,6 +280,7 @@
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             touch-action: manipulation; /* Mejora la respuesta táctil */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         .action-buttons-group button:hover {
             transform: translateY(-2px);
@@ -336,6 +347,7 @@
             transform: translateY(-20px);
             transition: transform 0.3s ease;
             margin-top: -100px; /* Mueve el modal más arriba para revelar el pentagrama debajo */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         .modal-overlay.visible .modal-content {
             transform: translateY(0);
@@ -387,6 +399,7 @@
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             touch-action: manipulation; /* Mejora la respuesta táctil */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         .modal-content .modal-buttons button:hover {
             transform: translateY(-2px);
@@ -449,6 +462,7 @@
             min-height: 200px;
             border: 1px solid #6ee7b7;
             color: #065f46;
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         #finalMessageDisplay h3 {
             color: #047857;
@@ -501,6 +515,7 @@
             text-align: center;
             transform: translateY(-30px);
             transition: transform 0.3s ease;
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         #welcomeModalOverlay.visible #welcomeModalContent {
             transform: translateY(0);
@@ -527,6 +542,7 @@
             transition: background-color 0.3s ease, transform 0.2s ease;
             box-shadow: 0 6px 12px rgba(0,0,0,0.2);
             touch-action: manipulation; /* Mejora la respuesta táctil */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
         #welcomeModalContent button:hover {
             background-color: #1e40af;
@@ -568,7 +584,7 @@
         /* Media Queries para ajustes específicos en pantallas más pequeñas */
         @media (max-width: 768px) { /* Para tablets y celulares en orientación horizontal */
             body {
-                padding: 5px;
+                padding: 5px; /* Menos padding para pantallas muy pequeñas */
                 padding-bottom: 20px;
                 font-size: 15px;
             }
@@ -594,14 +610,15 @@
             }
             #questionArea {
                 max-width: 95%; /* Ocupa más ancho cuando está apilado */
-                width: auto;
-                flex: 0 0 auto;
+                width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
+                flex: 0 0 auto; /* Evita el estiramiento */
                 padding: 15px;
+                min-width: unset; /* Elimina min-width para mayor flexibilidad */
             }
             #staffArea {
                 max-width: 95%;
-                min-width: unset;
-                width: auto;
+                min-width: unset; /* Elimina min-width cuando está apilado */
+                width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
                 flex: 0 0 auto;
                 padding: 15px;
             }
@@ -629,12 +646,17 @@
             .action-buttons-group button {
                 width: 100%;
             }
+            #chordQuestionText { /* Asegura que el texto de la pregunta no se desborde */
+                font-size: 1.2em; /* Ajusta el tamaño de la fuente para que quepa */
+                word-wrap: break-word; /* Permite que las palabras largas se rompan */
+                overflow-wrap: break-word; /* CSS3 alternativa */
+            }
             #questionArea p {
                 font-size: 1.3em;
             }
             .notes-grid {
-                width: 170px; /* Ancho fijo para móvil para evitar recortes */
-                max-width: 170px; /* Ancho máximo fijo para consistencia */
+                width: 100%; /* Ocupa el 100% del #questionArea en móvil */
+                max-width: 170px; /* Mantiene un ancho máximo para la cuadrícula */
                 height: auto;
                 max-height: 240px;
             }
@@ -673,7 +695,7 @@
                 font-size: 1.2em;
             }
             #musicalStaffCanvas {
-                width: 100%;
+                width: 100%; /* Asegura que el canvas tome el ancho completo de su padre */
                 height: auto;
                 max-width: 280px; /* Ancho máximo más pequeño para el pentagrama en móvil */
                 max-height: 160px; /* Altura máxima más pequeña para el pentagrama en móvil */
@@ -1425,11 +1447,18 @@
 
             // Resize canvas based on container and screen size
             const containerWidth = canvas.parentElement.clientWidth;
-            canvas.width = Math.min(containerWidth, 550); // Adjusted max-width
-            canvas.height = 180; // Adjusted height
-            if (window.innerWidth <= 768) { canvas.width = Math.min(containerWidth, 280); canvas.height = 140; }
+            // Set canvas width to 100% of its parent, but respect max-width for larger screens
+            canvas.width = Math.min(containerWidth, 550);
+            canvas.height = 180; // Default height for desktop
+            
+            // Adjust canvas dimensions for smaller screens
+            if (window.innerWidth <= 768) {
+                canvas.width = Math.min(containerWidth, 280); // Smaller max-width for mobile
+                canvas.height = 140; // Smaller height for mobile
+            }
 
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
+            // Crucial: Resize the VexFlow renderer to the actual canvas dimensions
             renderer.resize(canvas.width, canvas.height);
             const ctx = renderer.getContext();
             const stave = new Stave(10, 0, canvas.width - 20);
