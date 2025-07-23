@@ -610,15 +610,20 @@
             #questionArea p {
                 font-size: 1.1em;
             }
+            .notes-grid {
+                width: 140px; /* Slightly smaller width for mobile */
+                max-width: 140px; /* Fixed max-width for consistency */
+                height: 190px; /* Adjusted height for 4 cells (approx 47.5px each + 6px gap) */
+            }
             .grid-cell {
-                font-size: 0.9em; /* Ajustado para móvil */
-                padding: 6px 4px; /* Ajustado para móvil */
+                padding: 8px 6px; /* Reduced padding for smaller cells */
+                font-size: 0.95em; /* Slightly smaller font for mobile cells */
             }
             .interval-label {
-                font-size: 0.6em; /* Ajustado para móvil */
+                font-size: 0.7em; /* Adjusted for mobile */
             }
             .note-display {
-                font-size: 1.1em; /* Ajustado para móvil */
+                font-size: 1.2em; /* Adjusted for mobile */
             }
             #selectedNotesDisplay, #currentBuildingNoteDisplay {
                 font-size: 0.8em;
