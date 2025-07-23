@@ -1107,7 +1107,9 @@
         function updateButtonSelectionVisuals() {
             // Remove all 'selected' classes first
             document.querySelectorAll('.note-button').forEach(button => {
-                button.classList.remove('selected');
+                if (button && button.classList) { // Defensive check
+                    button.classList.remove('selected');
+                }
             });
 
             // Apply 'selected' class to buttons that form part of selected notes
@@ -1117,14 +1119,14 @@
 
                 // Select natural button
                 const naturalButton = document.querySelector(`.natural-note-buttons button[data-note="${naturalPart}"]`);
-                if (naturalButton) {
+                if (naturalButton && naturalButton.classList) { // Defensive check
                     naturalButton.classList.add('selected');
                 }
 
                 // Select accidental button if present
                 if (accidentalPart) {
                     const accidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${accidentalPart}"]`);
-                    if (accidentalButton) {
+                    if (accidentalButton && accidentalButton.classList) { // Defensive check
                         accidentalButton.classList.add('selected');
                     }
                 }
@@ -1136,18 +1138,26 @@
 
             if (selectedUserNotes.length >= 4) {
                 naturalButtons.forEach(button => {
-                    if (!button.classList.contains('selected')) { // Only disable if not already selected
+                    if (button && button.classList && !button.classList.contains('selected')) { // Defensive check
                         button.classList.add('disabled');
                     }
                 });
                 accidentalButtons.forEach(button => {
-                    if (!button.classList.contains('selected')) { // Only disable if not already selected
+                    if (button && button.classList && !button.classList.contains('selected')) { // Defensive check
                         button.classList.add('disabled');
                     }
                 });
             } else {
-                naturalButtons.forEach(button => button.classList.remove('disabled'));
-                accidentalButtons.forEach(button => accidentalButtons.classList.remove('disabled'));
+                naturalButtons.forEach(button => {
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('disabled');
+                    }
+                });
+                accidentalButtons.forEach(button => {
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('disabled');
+                    }
+                });
             }
         }
 
@@ -1193,10 +1203,14 @@
                 activeAccidental = '';
                 // Deselect natural and accidental buttons visually
                 document.querySelectorAll('.natural-note-buttons .note-button.selected').forEach(button => {
-                    button.classList.remove('selected');
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('selected');
+                    }
                 });
                 document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => {
-                    button.classList.remove('selected');
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('selected');
+                    }
                 });
             }
         }
@@ -1207,7 +1221,7 @@
          */
         function handleNaturalNoteClick(event) {
             const clickedNote = event.target.dataset.note;
-            if (!clickedNote || event.target.classList.contains('disabled')) return;
+            if (!clickedNote || (event.target.classList && event.target.classList.contains('disabled'))) return; // Defensive check
 
             // If a natural note is already active and the same one is clicked, it means
             // the user is trying to deselect it or finalize a selection with no accidental.
@@ -1238,7 +1252,7 @@
          */
         function handleAccidentalClick(event) {
             const clickedAccidental = event.target.dataset.accidental;
-            if (!clickedAccidental || event.target.classList.contains('disabled')) return;
+            if (!clickedAccidental || (event.target.classList && event.target.classList.contains('disabled'))) return; // Defensive check
 
             // If an accidental is already active and the same one is clicked, it means
             // the user is trying to deselect it or finalize a selection with the current natural.
@@ -1458,6 +1472,11 @@
             // Calculate octave for the highest note to be in G4-G5 range (MIDI 67-79)
             let targetOctaveForHighest;
             const highestSemitoneInOctave = noteToPlaceHighest.semitone;
+
+            // G4 semitone 7, A4 semitone 9, B4 semitone 11
+            // C5 semitone 0, D5 semitone 2, E5 semitone 4, F5 semitone 5, G5 semitone 7
+            // Target range: G4 (semitone 7, octave 4) to G5 (semitone 7, octave 5)
+            // Absolute semitones: G4=55, G5=67
 
             // If the note is C, C#, D, D#, E, F, F# (semitones 0-6), target octave 5 (e.g., C5, F#5)
             if (highestSemitoneInOctave >= noteToSemitoneMap["G"]) { // G, G#, A, A#, B (semitones 7-11)
@@ -1685,7 +1704,11 @@
             playChordButton.disabled = true; // Disable playback button
 
             // Visually disable all note buttons
-            document.querySelectorAll('.note-button').forEach(button => button.classList.add('disabled'));
+            document.querySelectorAll('.note-button').forEach(button => {
+                if (button && button.classList) { // Defensive check
+                    button.classList.add('disabled');
+                }
+            });
 
             // Remove event listeners to prevent interaction
             naturalNoteButtonsContainer.removeEventListener('click', handleNaturalNoteClick);
@@ -1707,7 +1730,11 @@
             accidentalButtonsContainer.addEventListener('click', handleAccidentalClick);
 
             // Visually enable all note buttons (remove disabled class)
-            document.querySelectorAll('.note-button').forEach(button => button.classList.remove('disabled'));
+            document.querySelectorAll('.note-button').forEach(button => {
+                if (button && button.classList) { // Defensive check
+                    button.classList.remove('disabled');
+                }
+            });
             console.log("enableTrainingInteraction: Training interaction enabled.");
         }
 
