@@ -6,6 +6,8 @@
     <title>Bloque Armónico Pro: Herramienta de Entrenamiento</title>
     <!-- Tone.js para la reproducción de audio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <!-- VexFlow para la notación musical -->
+    <script src="https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js"></script>
     <style>
         /* Ajustes de HTML y Body para evitar el desplazamiento */
         html, body {
@@ -479,92 +481,26 @@
             transform: translateY(0);
         }
 
-        /* Estilos del teclado virtual */
-        #virtualKeyboard {
+        /* Estilos para el área de la partitura */
+        #staffArea {
+            margin-top: 15px;
+            text-align: center;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Alinea las teclas blancas en la parte superior */
-            margin-top: 15px;
-            position: relative;
-            background-color: #334155; /* Fondo oscuro para el teclado */
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            width: 98%;
-            max-width: 600px;
-            box-sizing: border-box;
-            overflow-x: auto; /* Permite desplazamiento lateral en pantallas pequeñas */
-            padding-bottom: 20px; /* Espacio para las teclas negras */
+            align-items: center;
+            width: 100%; /* Ocupa todo el ancho disponible */
+            overflow-x: auto; /* Permite desplazamiento si la partitura es muy ancha */
         }
-
-        .key {
-            position: relative;
-            border: 1px solid #94a3b8;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.1s ease;
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        .white-key {
+        #musicalStaffCanvas {
             background-color: #ffffff;
-            width: 40px; /* Ancho de tecla blanca */
-            height: 120px; /* Altura de tecla blanca */
-            margin-right: 2px;
-            z-index: 1;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 100%; /* Ajusta el ancho del canvas al contenedor */
+            max-width: 500px; /* Ancho máximo para escritorio */
+            height: 150px; /* Altura fija para el pentagrama */
+            box-sizing: border-box;
         }
-
-        .white-key:last-child {
-            margin-right: 0;
-        }
-
-        .black-key {
-            background-color: #000000;
-            width: 25px; /* Ancho de tecla negra */
-            height: 70px; /* Altura de tecla negra */
-            position: absolute;
-            margin-left: -12.5px; /* Centra la tecla negra entre dos blancas */
-            z-index: 2;
-        }
-
-        /* Posicionamiento de las teclas negras (Desktop) */
-        /* Base: (white_key_width * white_key_index) + (white_key_margin * (white_key_index - 1)) - (black_key_width / 2) */
-        /* white_key_width = 40px, white_key_margin = 2px, black_key_width = 25px, half_black_key = 12.5px */
-
-        .black-key[data-note="CS"][data-octave="4"] { left: calc(40px - 12.5px); } /* C#4, after 1st white key (C) */
-        .black-key[data-note="DS"][data-octave="4"] { left: calc((40px * 2) + (2px * 1) - 12.5px); } /* D#4, after 2nd white key (D) */
-        /* Skip E - F */
-        .black-key[data-note="FS"][data-octave="4"] { left: calc((40px * 4) + (2px * 3) - 12.5px); } /* F#4, after 4th white key (F) */
-        .black-key[data-note="GS"][data-octave="4"] { left: calc((40px * 5) + (2px * 4) - 12.5px); } /* G#4, after 5th white key (G) */
-        .black-key[data-note="AS"][data-octave="4"] { left: calc((40px * 6) + (2px * 5) - 12.5px); } /* A#4, after 6th white key (A) */
-
-        /* Para la segunda octava (octave 5) */
-        /* Ancho total de una octava: (40px * 7 teclas blancas) + (2px * 6 márgenes) = 280 + 12 = 292px */
-        .black-key[data-note="CS"][data-octave="5"] { left: calc(292px + 40px - 12.5px); }
-        .black-key[data-note="DS"][data-octave="5"] { left: calc(292px + (40px * 2) + (2px * 1) - 12.5px); }
-        .black-key[data-note="FS"][data-octave="5"] { left: calc(292px + (40px * 4) + (2px * 3) - 12.5px); }
-        .black-key[data-note="GS"][data-octave="5"] { left: calc(292px + (40px * 5) + (2px * 4) - 12.5px); }
-        .black-key[data-note="AS"][data-octave="5"] { left: calc(292px + (40px * 6) + (2px * 5) - 12.5px); }
-
-
-        .key.active {
-            background-color: #facc15; /* Amarillo para tecla activa (durante reproducción de audio) */
-            box-shadow: 0 0 15px #facc15;
-        }
-
-        .key.selected-by-user { /* Nuevo estilo para teclas seleccionadas por el usuario */
-            background-color: #2563eb; /* Azul para selección del usuario */
-            box-shadow: 0 0 10px #2563eb;
-            border-color: #1e40af;
-        }
-        .white-key.selected-by-user {
-            background-color: #2563eb;
-        }
-        .black-key.selected-by-user {
-            background-color: #1e40af; /* Un azul más oscuro para teclas negras seleccionadas */
-        }
-
 
         /* Ajustes responsivos */
         @media (max-width: 768px) {
@@ -649,34 +585,9 @@
             #introScreen p {
                 font-size: 1em;
             }
-            #virtualKeyboard {
-                width: 100%; /* Ocupa todo el ancho disponible */
-                padding: 5px;
+            #musicalStaffCanvas {
+                height: 120px; /* Slightly smaller height for staff on mobile */
             }
-            .white-key {
-                width: 25px; /* Reducir ancho de teclas blancas en móvil */
-                height: 80px;
-            }
-            .black-key {
-                width: 15px; /* Reducir ancho de teclas negras en móvil */
-                height: 50px;
-                margin-left: -7.5px;
-            }
-            /* Ajustar posiciones de teclas negras para móvil */
-            /* white_key_width = 25px, white_key_margin = 2px, black_key_width = 15px, half_black_key = 7.5px */
-            /* Total width of one octave for mobile: (25px * 7) + (2px * 6) = 175px + 12px = 187px */
-
-            .black-key[data-note="CS"][data-octave="4"] { left: calc(25px - 7.5px); }
-            .black-key[data-note="DS"][data-octave="4"] { left: calc((25px * 2) + (2px * 1) - 7.5px); }
-            .black-key[data-note="FS"][data-octave="4"] { left: calc((25px * 4) + (2px * 3) - 7.5px); }
-            .black-key[data-note="GS"][data-octave="4"] { left: calc((25px * 5) + (2px * 4) - 7.5px); }
-            .black-key[data-note="AS"][data-octave="4"] { left: calc((25px * 6) + (2px * 5) - 7.5px); }
-
-            .black-key[data-note="CS"][data-octave="5"] { left: calc(187px + 25px - 7.5px); }
-            .black-key[data-note="DS"][data-octave="5"] { left: calc(187px + (25px * 2) + (2px * 1) - 7.5px); }
-            .black-key[data-note="FS"][data-octave="5"] { left: calc(187px + (25px * 4) + (2px * 3) - 7.5px); }
-            .black-key[data-note="GS"][data-octave="5"] { left: calc(187px + (25px * 5) + (2px * 4) - 7.5px); }
-            .black-key[data-note="AS"][data-octave="5"] { left: calc(187px + (25px * 6) + (2px * 5) - 7.5px); }
         }
     </style>
 </head>
@@ -738,9 +649,9 @@
             <button id="changeQuestionButton">Cambiar Pregunta</button>
         </div>
 
-        <!-- Teclado Virtual de Piano -->
-        <div id="virtualKeyboard">
-            <!-- Las teclas se generarán con JavaScript -->
+        <!-- Área para la partitura musical -->
+        <div id="staffArea">
+            <canvas id="musicalStaffCanvas"></canvas>
         </div>
     </div>
 
@@ -776,7 +687,10 @@
         <p class="email-info">Para enviar un correo de prueba con tus resultados, haz clic <a id="mailtoLink" href="#" target="_blank">aquí</a>.</p>
     </div>
 
-    <script>
+    <script type="module">
+        // Importar módulos de VexFlow
+        import { Renderer, Stave, StaveNote, Voice, Formatter } from "https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js";
+
         // Canonical notes (for internal calculations, using sharps)
         const canonicalNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -956,7 +870,7 @@
         const accidentalButtonsContainer = document.getElementById('accidentalButtons');
         const selectedNotesDisplay = document.getElementById('selectedNotesDisplay');
         const playChordButton = document.getElementById('playChordButton'); // Audio playback button
-        const virtualKeyboard = document.getElementById('virtualKeyboard'); // Virtual keyboard container
+        const musicalStaffCanvas = document.getElementById('musicalStaffCanvas'); // Canvas for musical staff
 
         // Main Action Buttons
         const confirmAnswerButton = document.getElementById('confirmAnswerButton');
@@ -1133,8 +1047,6 @@
 
             // Update button selection visual state
             updateButtonSelectionVisuals();
-            // Update keyboard highlighting for user selection
-            updateKeyboardHighlightingForSelection();
         }
 
         /**
@@ -1255,9 +1167,8 @@
             if (activeAccidental !== '') {
                 attemptToggleCombinedNote();
             } else {
-                // If no accidental is active, just update button visuals and keyboard highlighting
+                // If no accidental is active, just update button visuals
                 updateButtonSelectionVisuals();
-                updateKeyboardHighlightingForSelection();
             }
         }
 
@@ -1288,9 +1199,8 @@
             if (activeNaturalNote !== '') {
                 attemptToggleCombinedNote();
             } else {
-                // If no natural note is active, just update button visuals and keyboard highlighting
+                // If no natural note is active, just update button visuals
                 updateButtonSelectionVisuals();
-                updateKeyboardHighlightingForSelection();
             }
         }
 
@@ -1403,11 +1313,10 @@
             console.log("playChord: Arpeggio start time:", arpeggioStartTime);
             for (let i = 0; i < finalNotesForPlayback.length; i++) {
                 // Schedule each note with a delay
-                const noteToHighlight = finalNotesForPlayback[i];
+                const noteToPlay = finalNotesForPlayback[i];
                 Tone.Transport.scheduleOnce((time) => {
-                    console.log(`playChord: Triggering arpeggio note ${noteToHighlight} at ${time}`);
-                    synth.triggerAttackRelease(noteToHighlight, arpeggioNoteDuration, time);
-                    highlightKeyboardKeyForPlayback(noteToHighlight, arpeggioNoteDuration);
+                    console.log(`playChord: Triggering arpeggio note ${noteToPlay} at ${time}`);
+                    synth.triggerAttackRelease(noteToPlay, arpeggioNoteDuration, time);
                 }, arpeggioStartTime + (i * arpeggioDelayBetweenNotes));
             }
 
@@ -1420,8 +1329,6 @@
             Tone.Transport.scheduleOnce((time) => {
                 console.log(`playChord: Triggering chord ${finalNotesForPlayback.join(', ')} at ${time}`);
                 synth.triggerAttackRelease(finalNotesForPlayback, chordDuration, time);
-                // Highlight all notes of the chord simultaneously
-                finalNotesForPlayback.forEach(note => highlightKeyboardKeyForPlayback(note, chordDuration));
             }, chordStartTime);
 
             // Start Tone.js Transport if not already running
@@ -1434,87 +1341,104 @@
         }
 
         /**
-         * Highlights a key on the virtual keyboard for a given duration for *playback*.
-         * @param {string} noteWithOctave - The note (e.g., "C4", "G#5").
-         * @param {string} duration - The duration for which to highlight (e.g., "8n", "1s").
+         * Draws the musical staff with the given notes.
+         * @param {string[]} notesToDisplay - Array of canonical note names (e.g., ["C", "E", "G", "B"]).
          */
-        function highlightKeyboardKeyForPlayback(noteWithOctave, duration) {
-            const [noteName, octave] = Tone.Frequency(noteWithOctave).split();
-            // Convert Tone.js format (C#) to data-note format (CS)
-            const dataNote = noteName.replace('#', 'S').replace('b', 'B');
-            const keyElement = document.querySelector(`.key[data-note="${dataNote}"][data-octave="${octave}"]`);
-
-            if (keyElement) {
-                console.log(`highlightKeyboardKeyForPlayback: Found key for ${noteWithOctave}. Highlighting.`);
-                // Temporarily add 'active' class for playback visual feedback
-                keyElement.classList.add('active');
-                // Remove highlight after duration
-                Tone.Transport.scheduleOnce((time) => {
-                    keyElement.classList.remove('active');
-                }, Tone.now() + Tone.Time(duration).toSeconds());
-            } else {
-                console.warn(`highlightKeyboardKeyForPlayback: Key element not found for ${noteWithOctave} (data-note: ${dataNote}, data-octave: ${octave}).`);
+        function drawMusicalStaff(notesToDisplay) {
+            const canvas = musicalStaffCanvas;
+            if (!canvas) {
+                console.error("Canvas element not found for musical staff.");
+                return;
             }
-        }
 
-        /**
-         * Updates the highlighting of keys on the virtual keyboard based on `selectedUserNotes`.
-         */
-        function updateKeyboardHighlightingForSelection() {
-            // Remove all 'selected-by-user' classes first
-            document.querySelectorAll('.key').forEach(key => {
-                key.classList.remove('selected-by-user');
-            });
+            // Clear previous drawing
+            const context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Add 'selected-by-user' class to keys corresponding to selected notes
-            selectedUserNotes.forEach(userNote => {
-                // For user selection, we assume the C4-B4 octave for highlighting
-                // We'll highlight the C4-B4 octave by default for user input, as it's a common range.
-                const dataNote = userNote.replace('#', 'S').replace('b', 'B');
-                const keyElement = document.querySelector(`.key[data-note="${dataNote}"][data-octave="4"]`);
-                if (keyElement) {
-                    keyElement.classList.add('selected-by-user');
+            // Set canvas dimensions (responsive)
+            const containerWidth = canvas.parentElement.clientWidth;
+            canvas.width = Math.min(containerWidth, 500); // Max width 500px for desktop
+            canvas.height = 150; // Fixed height for staff on desktop
+
+            // Adjust for mobile
+            if (window.innerWidth <= 768) {
+                canvas.width = Math.min(containerWidth, 300); // Smaller max width for mobile
+                canvas.height = 120; // Smaller height for mobile
+            }
+
+
+            const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
+            renderer.resize(canvas.width, canvas.height);
+            const ctx = renderer.getContext();
+
+            // Sort notes by semitone value (lowest to highest) for visual stacking on staff
+            const sortedNotesForDisplay = notesToDisplay.map(noteName => {
+                const semitone = noteToSemitoneMap[normalizeNote(noteName)];
+                return { note: noteName, semitone: semitone };
+            }).sort((a, b) => a.semitone - b.semitone); // Sort ascending
+
+            const vexFlowStaveNotes = [];
+            let currentVexFlowOctave = 4; // Start with C4 as a base octave for display
+            let prevVexFlowSemitone = -1; // To track octave changes for display
+
+            // Determine the starting octave for the lowest note in a way that makes sense visually
+            // For a 4-part chord, it's usually within 2 octaves.
+            // If the chord notes are very low (e.g., all below middle C), we might start lower.
+            // Let's assume the lowest note of the chord is in octave 4, and adjust if needed.
+            if (sortedNotesForDisplay.length > 0) {
+                // If the lowest note's semitone (0-11) is G (7) or higher, it might be better to start in octave 3
+                // to keep the chord within a more central staff range.
+                if (sortedNotesForDisplay[0].semitone >= noteToSemitoneMap["G"]) {
+                    currentVexFlowOctave = 3;
                 }
-            });
-        }
-
-
-        /**
-         * Generates the virtual piano keyboard.
-         */
-        function generateVirtualKeyboard() {
-            console.log("generateVirtualKeyboard: Generating keyboard elements.");
-            virtualKeyboard.innerHTML = '';
-            const whiteKeysFullOctave = ["C", "D", "E", "F", "G", "A", "B"];
-            const blackKeysFullOctave = ["C#", "D#", "F#", "G#", "A#"];
-
-            // Generate Octave 4 (C4-B4), Octave 5 (C5-B5) and C6
-            for (let octave = 4; octave <= 5; octave++) {
-                whiteKeysFullOctave.forEach(note => {
-                    const key = document.createElement('div');
-                    key.classList.add('key', 'white-key');
-                    key.dataset.note = note;
-                    key.dataset.octave = octave;
-                    virtualKeyboard.appendChild(key);
-                });
-
-                blackKeysFullOctave.forEach(note => {
-                    const key = document.createElement('div');
-                    key.classList.add('key', 'black-key');
-                    key.dataset.note = note.replace('#', 'S');
-                    key.dataset.octave = octave;
-                    virtualKeyboard.appendChild(key);
-                });
             }
 
-            // Add C6 specifically
-            const c6Key = document.createElement('div');
-            c6Key.classList.add('key', 'white-key');
-            c6Key.dataset.note = "C";
-            c6Key.dataset.octave = "6";
-            virtualKeyboard.appendChild(c6Key);
 
-            console.log("generateVirtualKeyboard: Keyboard elements created for C4 to C6.");
+            sortedNotesForDisplay.forEach((noteObj, index) => {
+                if (index > 0 && noteObj.semitone < prevVexFlowSemitone) {
+                    // If the current note's semitone is lower than the previous, it means it's in the next octave up
+                    currentVexFlowOctave++;
+                }
+                vexFlowStaveNotes.push(new StaveNote({
+                    keys: [`${noteObj.note.toLowerCase()}/${currentVexFlowOctave}`],
+                    duration: "w" // Whole note for chords
+                }));
+                prevVexFlowSemitone = noteObj.semitone;
+            });
+
+            // Determine clef based on the range of the notes
+            let clef = "treble";
+            if (vexFlowStaveNotes.length > 0) {
+                const lowestVexFlowNoteKey = vexFlowStaveNotes[0].keys[0]; // e.g., "c/4" or "g/3"
+                const [lowestNoteName, lowestNoteOctaveStr] = lowestVexFlowNoteKey.split('/');
+                const lowestNoteOctave = parseInt(lowestNoteOctaveStr);
+
+                // If the lowest note is C4 or lower, consider bass clef
+                // Middle C (C4) in VexFlow is "c/4".
+                // Notes below middle C (like B3, A3, G3) are often better in bass clef.
+                // Let's use a threshold: if the lowest note is G3 or lower, use bass clef.
+                // G3 is typically the lowest note comfortably in bass clef.
+                // Semitone for G is 7. Octave 3.
+                // Absolute semitone for G3 = 7 + (3 * 12) = 43.
+                // Absolute semitone for C4 = 0 + (4 * 12) = 48.
+                if (noteToSemitoneMap[lowestNoteName.toUpperCase()] + (lowestNoteOctave * 12) < (noteToSemitoneMap["C"] + (4 * 12))) {
+                    clef = "bass";
+                }
+            }
+
+            // Create a stave (staff)
+            const stave = new Stave(10, 0, canvas.width - 20); // x, y, width
+            stave.addClef(clef).addTimeSignature("4/4"); // Add determined clef, 4/4 time
+            stave.setContext(ctx).draw();
+
+            // Create a voice and add notes
+            const voice = new Voice({ num_beats: 4, beat_value: 4 }); // 4/4 time (placeholder for chord)
+            voice.addTickables(vexFlowStaveNotes); // Use the notes with assigned octaves
+
+            // Format and draw
+            // Adjust formatter width based on canvas width
+            new Formatter().joinVoices([voice]).format([voice], canvas.width - 30);
+            voice.draw(ctx, stave);
         }
 
 
@@ -1636,6 +1560,9 @@
             const noteDisplaySpanInFirstCell = gridCells[0].querySelector('.note-display');
             noteDisplaySpanInFirstCell.textContent = currentGivenNote;
             noteDisplaySpanInFirstCell.classList.add('highlighted');
+
+            // Draw the musical staff with the correct notes
+            drawMusicalStaff(currentCorrectNotes);
 
             // Clear user's selected notes and feedback message
             console.log("generateComplexQuestion: Clearing selection and feedback.");
@@ -1897,7 +1824,7 @@
             try {
                 console.log("startButton: Initializing quiz components...");
                 generateNoteButtons(); // Generate note buttons on load
-                generateVirtualKeyboard(); // Generate virtual keyboard on load
+                // No need to generate virtual keyboard anymore
                 generateComplexQuestion(); // This includes drawing staff and updating displays
                 console.log("startButton: Quiz components initialized successfully.");
             } catch (error) {
