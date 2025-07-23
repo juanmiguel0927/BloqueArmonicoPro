@@ -73,7 +73,7 @@
             flex-direction: row; /* Por defecto, horizontal */
             justify-content: center;
             align-items: flex-start;
-            gap: 40px;
+            gap: 5px; /* Reducido para que estén "casi pegadas" */
             margin-bottom: 25px;
             flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas más pequeñas */
             flex-grow: 1;
@@ -95,9 +95,8 @@
             justify-content: center;
             border: 1px solid #dbeafe;
             gap: 10px;
-            flex: 1; /* Permite que crezca */
-            max-width: 320px; /* Ancho máximo para la cuadrícula */
-            min-width: 220px; /* Ancho mínimo para evitar que se aplaste */
+            flex: 0 0 250px; /* Ancho fijo para la cuadrícula en desktop */
+            max-width: 250px; /* Ancho máximo para la cuadrícula */
             height: fit-content;
             box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
@@ -560,7 +559,7 @@
             justify-content: center;
             align-items: center;
             width: 100%; /* Ocupa todo el ancho disponible */
-            flex: 2; /* Permite que el área del pentagrama ocupe más espacio */
+            flex: 1; /* Permite que el área del pentagrama ocupe el espacio restante */
             max-width: 550px; /* Ancho máximo para el pentagrama en pantallas grandes */
             min-width: 300px; /* Ancho mínimo para el pentagrama en pantallas pequeñas */
             height: fit-content;
@@ -606,7 +605,7 @@
             #displaySection {
                 flex-direction: column; /* Apila elementos verticalmente */
                 align-items: center; /* Centra los elementos apilados */
-                gap: 20px;
+                gap: 20px; /* Más espacio cuando están apilados */
             }
             #questionArea {
                 max-width: 95%; /* Ocupa más ancho cuando está apilado */
