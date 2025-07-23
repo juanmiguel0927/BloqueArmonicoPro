@@ -1445,12 +1445,15 @@
             const keyElement = document.querySelector(`.key[data-note="${dataNote}"][data-octave="${octave}"]`);
 
             if (keyElement) {
+                console.log(`highlightKeyboardKeyForPlayback: Found key for ${noteWithOctave}. Highlighting.`);
                 // Temporarily add 'active' class for playback visual feedback
                 keyElement.classList.add('active');
                 // Remove highlight after duration
                 Tone.Transport.scheduleOnce((time) => {
                     keyElement.classList.remove('active');
                 }, Tone.now() + Tone.Time(duration).toSeconds());
+            } else {
+                console.warn(`highlightKeyboardKeyForPlayback: Key element not found for ${noteWithOctave} (data-note: ${dataNote}, data-octave: ${octave}).`);
             }
         }
 
