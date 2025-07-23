@@ -90,36 +90,36 @@
             grid-template-columns: 1fr; /* Una sola columna para el diseño vertical */
             grid-auto-rows: 1fr; /* Hace que las filas tengan la misma altura */
             gap: 2px; /* Espaciado aún más pequeño entre celdas */
-            width: 150px; /* Ancho aumentado para mayor claridad */
-            max-width: 150px; /* Ancho fijo para la visualización vertical */
+            width: 200px; /* Ancho ajustado para ser más compacto */
+            max-width: 200px; /* Ancho fijo para la visualización vertical */
             margin: 0 auto; /* Centra la cuadrícula */
             border: 2px solid #64748b; /* Borde exterior para la cuadrícula */
             border-radius: 5px; /* Esquinas ligeramente redondeadas para el contenedor de la cuadrícula */
             overflow: hidden; /* Asegura que los bordes internos sean limpios */
-            height: 180px; /* Altura fija ajustada para asegurar una distribución equitativa para 4 celdas */
+            height: 260px; /* Altura fija ajustada para 4 celdas más compactas y visibles */
         }
 
         .grid-cell {
             background-color: #ffffff;
             border: 1px solid #94a3b8; /* Bordes de celda internos */
-            padding: 10px 8px; /* Relleno ajustado para acomodar la etiqueta y la nota */
+            padding: 15px 12px; /* Relleno ajustado para acomodar la etiqueta y la nota */
             display: flex;
             justify-content: space-between; /* Espacio entre la etiqueta y la nota */
             align-items: center;
-            font-size: 1.2em; /* Tamaño de fuente base para las celdas de la cuadrícula */
+            font-size: 1.3em; /* Tamaño de fuente base para las celdas de la cuadrícula */
             font-weight: 700;
             color: #334155;
             box-sizing: border-box; /* Incluye el relleno y el borde en el ancho y alto total del elemento */
         }
 
         .interval-label {
-            font-size: 0.7em; /* Fuente más pequeña para la etiqueta del intervalo */
+            font-size: 0.9em; /* Fuente más pequeña para la etiqueta del intervalo */
             color: #64748b; /* Color más claro para la etiqueta */
             font-weight: normal; /* Peso normal para la etiqueta */
         }
 
         .note-display {
-            font-size: 1.3em; /* Fuente más grande para la nota */
+            font-size: 1.6em; /* Fuente más grande para la nota */
             font-weight: 700;
             color: #334155;
         }
@@ -137,8 +137,6 @@
             flex-direction: column;
             gap: 6px; /* Espaciado reducido */
             margin-bottom: 15px; /* Margen inferior ajustado */
-            /* Se eliminaron flex-grow y overflow-y: auto de aquí */
-            /* Esta sección NO se desplazará internamente */
         }
         label {
             display: block;
@@ -201,60 +199,7 @@
             background-color: #f1f5f9;
             color: #94a3b8;
         }
-        .note-button.active-accidental { /* Clase específica para accidental seleccionado */
-            background-color: #2563eb;
-            color: white;
-            border-color: #1e40af;
-        }
 
-
-        /* Visualización de la nota actual en construcción */
-        #currentBuildingNoteDisplay {
-            background-color: #f8fafc;
-            padding: 10px; /* Relleno reducido */
-            border-radius: 8px;
-            min-height: 30px; /* Altura mínima reducida */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1em; /* Tamaño de fuente reducido */
-            font-weight: 700;
-            color: #1e40af;
-            border: 1px solid #dbeafe;
-            margin-bottom: 6px; /* Margen reducido */
-        }
-
-        /* Botones para añadir/limpiar la nota actual */
-        .button-group-inline {
-            display: flex;
-            gap: 6px; /* Espaciado reducido */
-            justify-content: center;
-            margin-bottom: 10px; /* Margen reducido */
-        }
-        .button-group-inline button {
-            padding: 7px 12px; /* Relleno reducido */
-            font-size: 0.8em; /* Tamaño de fuente reducido */
-            font-weight: 600;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        #addNoteToAnswerButton {
-            background-color: #059669; /* Verde más oscuro */
-            color: white;
-        }
-        #addNoteToAnswerButton:hover {
-            background-color: #047857;
-        }
-        #clearCurrentNoteButton {
-            background-color: #f59e0b; /* Naranja */
-            color: white;
-        }
-        #clearCurrentNoteButton:hover {
-            background-color: #d97706;
-        }
 
         /* Visualización de las notas seleccionadas (lista de respuesta final) */
         #selectedNotesDisplay {
@@ -456,7 +401,7 @@
             padding: 25px; /* Relleno reducido */
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            max-width: 600px; /* Ancho máximo reducido */
+            max-width: 600px;
             width: 100%;
             text-align: center;
             display: none; /* Oculto por defecto */
@@ -534,6 +479,92 @@
             transform: translateY(0);
         }
 
+        /* Estilos del teclado virtual */
+        #virtualKeyboard {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alinea las teclas blancas en la parte superior */
+            margin-top: 15px;
+            position: relative;
+            background-color: #334155; /* Fondo oscuro para el teclado */
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            width: 98%;
+            max-width: 600px;
+            box-sizing: border-box;
+            overflow-x: auto; /* Permite desplazamiento lateral en pantallas pequeñas */
+            padding-bottom: 20px; /* Espacio para las teclas negras */
+        }
+
+        .key {
+            position: relative;
+            border: 1px solid #94a3b8;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.1s ease;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        .white-key {
+            background-color: #ffffff;
+            width: 40px; /* Ancho de tecla blanca */
+            height: 120px; /* Altura de tecla blanca */
+            margin-right: 2px;
+            z-index: 1;
+        }
+
+        .white-key:last-child {
+            margin-right: 0;
+        }
+
+        .black-key {
+            background-color: #000000;
+            width: 25px; /* Ancho de tecla negra */
+            height: 70px; /* Altura de tecla negra */
+            position: absolute;
+            margin-left: -12.5px; /* Centra la tecla negra entre dos blancas */
+            z-index: 2;
+        }
+
+        /* Posicionamiento de las teclas negras (Desktop) */
+        /* Base: (white_key_width * white_key_index) + (white_key_margin * (white_key_index - 1)) - (black_key_width / 2) */
+        /* white_key_width = 40px, white_key_margin = 2px, black_key_width = 25px, half_black_key = 12.5px */
+        /* Total width of one octave: (40px * 7) + (2px * 6) = 280px + 12px = 292px */
+
+        /* Octave 4 */
+        .black-key[data-note="CS"][data-octave="4"] { left: calc(40px - 12.5px); }
+        .black-key[data-note="DS"][data-octave="4"] { left: calc((40px * 2) + (2px * 1) - 12.5px); }
+        .black-key[data-note="FS"][data-octave="4"] { left: calc((40px * 4) + (2px * 3) - 12.5px); }
+        .black-key[data-note="GS"][data-octave="4"] { left: calc((40px * 5) + (2px * 4) - 12.5px); }
+        .black-key[data-note="AS"][data-octave="4"] { left: calc((40px * 6) + (2px * 5) - 12.5px); }
+
+        /* Octave 5 */
+        .black-key[data-note="CS"][data-octave="5"] { left: calc(292px + 40px - 12.5px); }
+        .black-key[data-note="DS"][data-octave="5"] { left: calc(292px + (40px * 2) + (2px * 1) - 12.5px); }
+        .black-key[data-note="FS"][data-octave="5"] { left: calc(292px + (40px * 4) + (2px * 3) - 12.5px); }
+        .black-key[data-note="GS"][data-octave="5"] { left: calc(292px + (40px * 5) + (2px * 4) - 12.5px); }
+        .black-key[data-note="AS"][data-octave="5"] { left: calc(292px + (40px * 6) + (2px * 5) - 12.5px); }
+
+
+        .key.active {
+            background-color: #facc15; /* Amarillo para tecla activa (durante reproducción de audio) */
+            box-shadow: 0 0 15px #facc15;
+        }
+
+        .key.selected-by-user { /* Nuevo estilo para teclas seleccionadas por el usuario */
+            background-color: #2563eb; /* Azul para selección del usuario */
+            box-shadow: 0 0 10px #2563eb;
+            border-color: #1e40af;
+        }
+        .white-key.selected-by-user {
+            background-color: #2563eb;
+        }
+        .black-key.selected-by-user {
+            background-color: #1e40af; /* Un azul más oscuro para teclas negras seleccionadas */
+        }
+
 
         /* Ajustes responsivos */
         @media (max-width: 768px) {
@@ -569,13 +600,6 @@
                 font-size: 0.7em;
                 padding: 5px 0;
             }
-            .button-group-inline {
-                flex-direction: column;
-                gap: 6px;
-            }
-            .button-group-inline button {
-                width: 100%;
-            }
             .action-buttons-group {
                 flex-direction: column; /* Apila los botones de verificación/siguiente */
                 gap: 6px;
@@ -587,8 +611,14 @@
                 font-size: 1.1em;
             }
             .grid-cell {
-                font-size: 1em;
-                padding: 8px 5px;
+                font-size: 0.9em; /* Ajustado para móvil */
+                padding: 6px 4px; /* Ajustado para móvil */
+            }
+            .interval-label {
+                font-size: 0.6em; /* Ajustado para móvil */
+            }
+            .note-display {
+                font-size: 1.1em; /* Ajustado para móvil */
             }
             #selectedNotesDisplay, #currentBuildingNoteDisplay {
                 font-size: 0.8em;
@@ -614,6 +644,36 @@
             #introScreen p {
                 font-size: 1em;
             }
+            #virtualKeyboard {
+                width: 100%; /* Ocupa todo el ancho disponible */
+                padding: 5px;
+            }
+            .white-key {
+                width: 25px; /* Reducir ancho de teclas blancas en móvil */
+                height: 80px;
+            }
+            .black-key {
+                width: 15px; /* Reducir ancho de teclas negras en móvil */
+                height: 50px;
+                margin-left: -7.5px;
+            }
+            /* Ajustar posiciones de teclas negras para móvil */
+            /* white_key_width = 25px, white_key_margin = 2px, black_key_width = 15px, half_black_key = 7.5px */
+            /* Total width of one octave for mobile: (25px * 7) + (2px * 6) = 175px + 12px = 187px */
+
+            /* Octave 4 Mobile */
+            .black-key[data-note="CS"][data-octave="4"] { left: calc(25px - 7.5px); }
+            .black-key[data-note="DS"][data-octave="4"] { left: calc((25px * 2) + (2px * 1) - 7.5px); }
+            .black-key[data-note="FS"][data-octave="4"] { left: calc((25px * 4) + (2px * 3) - 7.5px); }
+            .black-key[data-note="GS"][data-octave="4"] { left: calc((25px * 5) + (2px * 4) - 7.5px); }
+            .black-key[data-note="AS"][data-octave="4"] { left: calc((25px * 6) + (2px * 5) - 7.5px); }
+
+            /* Octave 5 Mobile */
+            .black-key[data-note="CS"][data-octave="5"] { left: calc(187px + 25px - 7.5px); }
+            .black-key[data-note="DS"][data-octave="5"] { left: calc(187px + (25px * 2) + (2px * 1) - 7.5px); }
+            .black-key[data-note="FS"][data-octave="5"] { left: calc(187px + (25px * 4) + (2px * 3) - 7.5px); }
+            .black-key[data-note="GS"][data-octave="5"] { left: calc(187px + (25px * 5) + (2px * 4) - 7.5px); }
+            .black-key[data-note="AS"][data-octave="5"] { left: calc(187px + (25px * 6) + (2px * 5) - 7.5px); }
         }
     </style>
 </head>
@@ -627,7 +687,6 @@
     </div>
 
     <div class="container" id="quizContainer" style="display: none;">
-        <!-- Título principal eliminado según la solicitud -->
         <h2>Pregunta:</h2>
         <div id="questionArea">
             <p id="chordQuestionText">Cargando pregunta...</p>
@@ -653,10 +712,7 @@
         </div>
 
         <div class="input-group">
-            <label>Construye tu Nota:</label>
-            <div id="currentBuildingNoteDisplay">
-                Nota Actual: Ninguna
-            </div>
+            <label>Selecciona las 4 notas del acorde:</label>
             <div class="note-building-controls">
                 <div id="naturalNoteButtons" class="natural-note-buttons">
                     <!-- Los botones de notas naturales se generarán aquí -->
@@ -664,10 +720,6 @@
                 <div id="accidentalButtons" class="accidental-buttons">
                     <!-- Los botones de accidentales se generarán aquí -->
                 </div>
-            </div>
-            <div class="button-group-inline">
-                <button id="addNoteToAnswerButton">Añadir Nota a la Respuesta</button>
-                <button id="clearCurrentNoteButton">Limpiar Nota Actual</button>
             </div>
 
             <label style="margin-top: 20px;">Notas de tu Respuesta (máx. 4):</label>
@@ -681,6 +733,11 @@
             <button id="confirmAnswerButton">Confirmar</button>
             <button id="clearAllSelectionButton">Borrar</button>
             <button id="changeQuestionButton">Cambiar Pregunta</button>
+        </div>
+
+        <!-- Teclado Virtual de Piano -->
+        <div id="virtualKeyboard">
+            <!-- Las teclas se generarán con JavaScript -->
         </div>
     </div>
 
@@ -870,8 +927,10 @@
 
         // User selected notes for the final answer list
         let selectedUserNotes = [];
-        // The note currently being built by selecting natural + accidental
-        let currentBuildingNote = { natural: '', accidental: '' };
+
+        // New state for the current natural and accidental buttons clicked
+        let activeNaturalNote = ''; // e.g., "C", "D"
+        let activeAccidental = ''; // e.g., "#", "b", "##", "bb" or ""
 
         // DOM elements
         const introScreen = document.getElementById('introScreen');
@@ -886,11 +945,9 @@
         ];
         const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
         const accidentalButtonsContainer = document.getElementById('accidentalButtons');
-        const currentBuildingNoteDisplay = document.getElementById('currentBuildingNoteDisplay');
-        const addNoteToAnswerButton = document.getElementById('addNoteToAnswerButton');
-        const clearCurrentNoteButton = document.getElementById('clearCurrentNoteButton');
         const selectedNotesDisplay = document.getElementById('selectedNotesDisplay');
         const playChordButton = document.getElementById('playChordButton'); // Audio playback button
+        const virtualKeyboard = document.getElementById('virtualKeyboard'); // Virtual keyboard container
 
         // Main Action Buttons
         const confirmAnswerButton = document.getElementById('confirmAnswerButton');
@@ -926,6 +983,7 @@
          * Called on "Start" button click to comply with browser autoplay policy.
          */
         async function startAudioContext() {
+            console.log("Attempting to start AudioContext...");
             if (!audioContextStarted) {
                 try {
                     await Tone.start();
@@ -944,12 +1002,62 @@
                         }
                     }).toDestination();
                     playChordButton.disabled = false; // Enable playback button once synth is ready
+                    console.log("Synth initialized and playChordButton enabled.");
                 } catch (e) {
-                    console.error("Error starting AudioContext:", e);
-                    // Optional: inform the user that audio could not be started
+                    console.error("Error al iniciar AudioContext:", e);
+                    // Inform the user that audio could not be started
+                    playChordButton.disabled = true; // Ensure button remains disabled
+                    // Using a custom message box instead of alert()
+                    showCustomMessage("Error de Audio", "No se pudo iniciar el audio. Por favor, asegúrate de que tu navegador lo permita.", "error");
                 }
+            } else {
+                console.log("AudioContext already started.");
             }
         }
+
+        /**
+         * Shows a custom message box (replaces alert()).
+         * @param {string} title - Title of the message.
+         * @param {string} message - Content of the message.
+         * @param {string} type - 'info', 'success', 'error', 'warning' for styling.
+         */
+        function showCustomMessage(title, message, type = 'info') {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.classList.add('modal-overlay', 'visible');
+            modalOverlay.style.zIndex = 1002; // Higher z-index than other modals
+
+            const modalContent = document.createElement('div');
+            modalContent.classList.add('modal-content');
+            modalContent.innerHTML = `
+                <h3>${title}</h3>
+                <p>${message}</p>
+                <div class="modal-buttons">
+                    <button id="customMessageCloseButton">Cerrar</button>
+                </div>
+            `;
+            // Apply type-specific styling
+            if (type === 'error') {
+                modalContent.style.backgroundColor = '#fee2e2';
+                modalContent.style.color = '#b91c1c';
+                modalContent.style.border = '1px solid #b91c1c';
+            } else if (type === 'success') {
+                 modalContent.style.backgroundColor = '#dcfce7';
+                 modalContent.style.color = '#15803d';
+                 modalContent.style.border = '1px solid #15803d';
+            }
+
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+
+            const closeButton = document.getElementById('customMessageCloseButton');
+            closeButton.style.backgroundColor = '#64748b'; // Grey button
+            closeButton.style.color = 'white';
+            closeButton.addEventListener('click', () => {
+                modalOverlay.classList.remove('visible');
+                setTimeout(() => modalOverlay.remove(), 300); // Remove from DOM after transition
+            });
+        }
+
 
         /**
          * Normalizes a note to its canonical sharp representation for internal comparison.
@@ -965,19 +1073,6 @@
             }
             console.warn(`Unrecognized note for normalization: ${note}`);
             return upperNote; // Fallback for unrecognized notes
-        }
-
-        /**
-         * Updates the display of the currently building note.
-         */
-        function updateCurrentBuildingNoteDisplay() {
-            if (currentBuildingNote.natural === '') {
-                currentBuildingNoteDisplay.textContent = 'Nota Actual: Ninguna';
-            } else {
-                currentBuildingNoteDisplay.textContent = `Nota Actual: ${currentBuildingNote.natural}${currentBuildingNote.accidental}`;
-            }
-            // Enable/disable add button based on whether a natural note has been selected
-            addNoteToAnswerButton.disabled = currentBuildingNote.natural === '';
         }
 
         /**
@@ -1011,7 +1106,7 @@
                 selectedNotesDisplay.innerHTML = 'Notas seleccionadas: Ninguna';
             } else {
                 // Filter out empty strings before joining for cleaner display if fewer than 4 notes are selected
-                selectedNotesDisplay.innerHTML = `Notas seleccionadas: <strong>${displayNotesArray.filter(n => n !== '').join(', ')}</strong>`;
+                selectedNotesDisplay.innerHTML = `Notas seleccionadas: <strong>${selectedUserNotes.join(', ')}</strong>`; // Display raw user notes
             }
 
             // Control visibility/disabled state of action buttons
@@ -1024,21 +1119,102 @@
             changeQuestionButton.style.display = 'block'; // Always visible
             changeQuestionButton.disabled = false; // Always enabled (unless quiz is generally disabled)
 
+            // Update button selection visual state
+            updateButtonSelectionVisuals();
+            // Update keyboard highlighting for user selection
+            updateKeyboardHighlightingForSelection();
+        }
 
-            // Enable/disable note selection buttons based on selection count
+        /**
+         * Updates the visual state of the natural and accidental buttons based on selectedUserNotes.
+         */
+        function updateButtonSelectionVisuals() {
+            // Remove all 'selected' classes first
+            document.querySelectorAll('.note-button').forEach(button => {
+                button.classList.remove('selected');
+            });
+
+            // Apply 'selected' class to buttons that form part of selected notes
+            selectedUserNotes.forEach(userNote => {
+                const naturalPart = userNote.match(/[A-G]/i)[0];
+                const accidentalPart = userNote.replace(naturalPart, '');
+
+                // Select natural button
+                const naturalButton = document.querySelector(`.natural-note-buttons button[data-note="${naturalPart}"]`);
+                if (naturalButton) {
+                    naturalButton.classList.add('selected');
+                }
+
+                // Select accidental button if present
+                if (accidentalPart) {
+                    const accidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${accidentalPart}"]`);
+                    if (accidentalButton) {
+                        accidentalButton.classList.add('selected');
+                    }
+                }
+            });
+
+            // Disable note selection buttons if 4 notes are already selected
             const naturalButtons = naturalNoteButtonsContainer.querySelectorAll('.note-button');
             const accidentalButtons = accidentalButtonsContainer.querySelectorAll('.note-button');
 
             if (selectedUserNotes.length >= 4) {
-                naturalButtons.forEach(button => button.classList.add('disabled'));
-                accidentalButtons.forEach(button => button.classList.add('disabled'));
-                addNoteToAnswerButton.disabled = true;
-                clearCurrentNoteButton.disabled = true;
+                naturalButtons.forEach(button => {
+                    if (!button.classList.contains('selected')) { // Only disable if not already selected
+                        button.classList.add('disabled');
+                    }
+                });
+                accidentalButtons.forEach(button => {
+                    if (!button.classList.contains('selected')) { // Only disable if not already selected
+                        button.classList.add('disabled');
+                    }
+                });
             } else {
                 naturalButtons.forEach(button => button.classList.remove('disabled'));
-                accidentalButtons.forEach(button => button.classList.remove('disabled'));
-                updateCurrentBuildingNoteDisplay(); // Re-evaluate add/clear current based on current building state
-                clearCurrentNoteButton.disabled = false;
+                accidentalButtons.forEach(button => accidentalButtons.classList.remove('disabled'));
+            }
+        }
+
+        /**
+         * Toggles a note in the selectedUserNotes array.
+         * @param {string} note - The note string (e.g., "C", "C#", "Db").
+         */
+        function toggleNoteInAnswer(note) {
+            const normalizedNote = normalizeNote(note);
+            const index = selectedUserNotes.findIndex(n => normalizeNote(n) === normalizedNote);
+
+            if (index > -1) {
+                // Note found, remove it
+                selectedUserNotes.splice(index, 1);
+            } else {
+                // Note not found, add it if less than 4 notes are selected
+                if (selectedUserNotes.length < 4) {
+                    selectedUserNotes.push(note);
+                } else {
+                    showCustomMessage("Límite de Notas", "Ya has seleccionado 4 notas. Por favor, deselecciona una antes de añadir otra.", "info");
+                    return; // Do not update visuals if not added
+                }
+            }
+            updateSelectedNotesDisplay();
+        }
+
+        /**
+         * Attempts to combine active natural and accidental notes and toggle them in the answer.
+         */
+        function attemptToggleCombinedNote() {
+            if (activeNaturalNote !== '') {
+                const fullNote = `${activeNaturalNote}${activeAccidental}`;
+                toggleNoteInAnswer(fullNote);
+                // Reset active selections after attempting to toggle
+                activeNaturalNote = '';
+                activeAccidental = '';
+                // Deselect natural and accidental buttons visually
+                document.querySelectorAll('.natural-note-buttons .note-button.selected').forEach(button => {
+                    button.classList.remove('selected');
+                });
+                document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => {
+                    button.classList.remove('selected');
+                });
             }
         }
 
@@ -1050,23 +1226,29 @@
             const clickedNote = event.target.dataset.note;
             if (!clickedNote || event.target.classList.contains('disabled')) return;
 
-            // Deselect previously selected natural note button
-            const previouslySelected = naturalNoteButtonsContainer.querySelector('.note-button.selected');
-            if (previouslySelected) {
-                previouslySelected.classList.remove('selected');
+            // If a natural note is already active and the same one is clicked, it means
+            // the user is trying to deselect it or finalize a selection with no accidental.
+            if (activeNaturalNote === clickedNote) {
+                if (activeAccidental === '') { // If no accidental is active, toggle the natural note itself
+                    toggleNoteInAnswer(clickedNote);
+                }
+                // In any case, reset activeNaturalNote
+                activeNaturalNote = '';
+            } else {
+                // Set the new active natural note
+                activeNaturalNote = clickedNote;
             }
 
-            currentBuildingNote.natural = clickedNote;
-            currentBuildingNote.accidental = ''; // Reset accidental when a new natural note is chosen
-            event.target.classList.add('selected');
-            updateCurrentBuildingNoteDisplay();
-
-            // Clear accidental button selection
-            const previouslySelectedAccidental = accidentalButtonsContainer.querySelector('.active-accidental');
-            if (previouslySelectedAccidental) {
-                previouslySelectedAccidental.classList.remove('active-accidental');
+            // If an accidental is already active, attempt to toggle the combined note
+            if (activeAccidental !== '') {
+                attemptToggleCombinedNote();
+            } else {
+                // If no accidental is active, just update button visuals and keyboard highlighting
+                updateButtonSelectionVisuals();
+                updateKeyboardHighlightingForSelection();
             }
         }
+
 
         /**
          * Handles click on an accidental button.
@@ -1074,74 +1256,45 @@
          */
         function handleAccidentalClick(event) {
             const clickedAccidental = event.target.dataset.accidental;
-            if (!clickedAccidental || currentBuildingNote.natural === '' || event.target.classList.contains('disabled')) return; // Needs a natural note first
+            if (!clickedAccidental || event.target.classList.contains('disabled')) return;
 
-            // Deselect previously selected accidental button
-            const previouslySelected = accidentalButtonsContainer.querySelector('.active-accidental');
-            if (previouslySelected) {
-                previouslySelected.classList.remove('active-accidental');
-            }
-
-            currentBuildingNote.accidental = clickedAccidental;
-            event.target.classList.add('active-accidental'); // Use a different class for accidentals
-            updateCurrentBuildingNoteDisplay();
-        }
-
-        /**
-         * Adds the currently building note to the final answer list.
-         */
-        function addNoteToAnswer() {
-            if (currentBuildingNote.natural === '') {
-                // No note built yet
-                return;
-            }
-
-            const fullNote = `${currentBuildingNote.natural}${currentBuildingNote.accidental}`;
-            const normalizedFullNote = normalizeNote(fullNote);
-
-            // Check if the normalized note is already in selectedUserNotes (to prevent enharmonic duplicates)
-            const isDuplicate = selectedUserNotes.some(note => normalizeNote(note) === normalizedFullNote);
-
-            if (selectedUserNotes.length < 4 && !isDuplicate) {
-                selectedUserNotes.push(fullNote);
-                clearCurrentBuildingNote(); // Clear building area after adding
-                updateSelectedNotesDisplay();
-            } else if (isDuplicate) {
-                console.log("Duplicate note (or enharmonic already selected).");
-                // Optional: Provide visual feedback to the user about the duplicate
+            // If an accidental is already active and the same one is clicked, it means
+            // the user is trying to deselect it or finalize a selection with the current natural.
+            if (activeAccidental === clickedAccidental) {
+                if (activeNaturalNote === '') { // If no natural is active, this click is ambiguous, do nothing or show message
+                    showCustomMessage("Selección", "Por favor, selecciona primero una nota natural (C, D, E, F, G, A, B).", "info");
+                    return;
+                }
+                // In any case, reset activeAccidental
+                activeAccidental = '';
             } else {
-                console.log("Maximum of 4 notes selected.");
-                // Optional: Provide visual feedback to the user about the maximum notes
+                // Set the new active accidental
+                activeAccidental = clickedAccidental;
+            }
+
+            // If a natural note is already active, attempt to toggle the combined note
+            if (activeNaturalNote !== '') {
+                attemptToggleCombinedNote();
+            } else {
+                // If no natural note is active, just update button visuals and keyboard highlighting
+                updateButtonSelectionVisuals();
+                updateKeyboardHighlightingForSelection();
             }
         }
 
-        /**
-         * Clears the currently building note.
-         */
-        function clearCurrentBuildingNote() {
-            currentBuildingNote = { natural: '', accidental: '' };
-            updateCurrentBuildingNoteDisplay();
-
-            // Deselect all natural and accidental buttons
-            document.querySelectorAll('.natural-note-buttons .note-button.selected').forEach(button => {
-                button.classList.remove('selected');
-            });
-            document.querySelectorAll('.accidental-buttons .active-accidental').forEach(button => {
-                button.classList.remove('active-accidental');
-            });
-        }
 
         /**
-         * Clears all selected notes in the final answer list and the current building note.
+         * Limpia todas las notas seleccionadas en la lista de respuesta final.
          */
         function clearSelection() {
             selectedUserNotes = [];
-            clearCurrentBuildingNote(); // Also clears the building note
-            updateSelectedNotesDisplay(); // This will also handle button visibility
+            activeNaturalNote = ''; // Reset active selection states
+            activeAccidental = '';
+            updateSelectedNotesDisplay(); // This will also handle button and keyboard visuals
         }
 
         /**
-         * Generates the natural and accidental note buttons.
+         * Genera los botones de notas naturales y accidentales.
          */
         function generateNoteButtons() {
             naturalNoteButtonsContainer.innerHTML = '';
@@ -1163,68 +1316,190 @@
                 accidentalButtonsContainer.appendChild(button);
             });
             accidentalButtonsContainer.addEventListener('click', handleAccidentalClick);
-
-            addNoteToAnswerButton.addEventListener('click', addNoteToAnswer);
-            clearCurrentNoteButton.addEventListener('click', clearCurrentBuildingNote);
         }
 
         /**
          * Plays the current correct chord as a descending arpeggio followed by a simultaneous chord.
          */
         async function playChord() {
+            console.log("playChord: Checking audioContextStarted:", audioContextStarted);
             if (!audioContextStarted) {
-                await startAudioContext(); // Ensure context is started before playing
+                console.warn("playChord: AudioContext not started. Attempting to start before playing.");
+                await startAudioContext();
+                if (!audioContextStarted) { // Check again after attempting to start
+                    console.error("playChord: Failed to start AudioContext, cannot play chord.");
+                    return;
+                }
             }
 
             if (!synth) {
-                console.warn("Synth not initialized. Cannot play chord.");
+                console.warn("playChord: Synth not initialized. Cannot play chord.");
                 return;
             }
 
             if (currentCorrectNotes.length === 0) {
-                console.warn("No notes to play.");
+                console.warn("playChord: No notes to play.");
                 return;
             }
 
-            const notesToPlayWithOctaves = [];
-            let currentOctave = 5; // Start the highest note in octave 5
-            let lastNoteSemitone = noteToSemitoneMap[currentCorrectNotes[0]];
+            // Create notes with semitones for sorting
+            const notesWithSemitones = currentCorrectNotes.map(noteName => {
+                const semitone = noteToSemitoneMap[noteName];
+                return { note: noteName, semitone: semitone };
+            });
 
-            notesToPlayWithOctaves.push(`${currentCorrectNotes[0]}${currentOctave}`);
+            // Sort notes by semitone value in descending order
+            notesWithSemitones.sort((a, b) => b.semitone - a.semitone);
 
-            for (let i = 1; i < currentCorrectNotes.length; i++) {
-                const noteName = currentCorrectNotes[i];
-                const noteSemitone = noteToSemitoneMap[noteName];
+            const finalNotesForPlayback = [];
+            let currentOctaveForPlayback;
 
-                // If the current note's semitone is higher than the last one encountered in the descending sequence,
-                // it means we've wrapped around to a lower octave.
-                if (noteSemitone > lastNoteSemitone) {
-                    currentOctave--;
-                }
-                notesToPlayWithOctaves.push(`${noteName}${currentOctave}`);
-                lastNoteSemitone = noteSemitone;
+            // Determine the starting octave for the highest note (notesWithSemitones[0])
+            // The highest note (first in sorted array) should be in C5-C6 range.
+            // If it's C, it should be C6. Otherwise, it should be in octave 5.
+            if (notesWithSemitones[0].note === "C") {
+                currentOctaveForPlayback = 6; // Start C as C6
+            } else {
+                currentOctaveForPlayback = 5; // Start other notes in octave 5
             }
+
+            let lastSemitoneForPlayback = notesWithSemitones[0].semitone; // Semitone of the highest note
+
+            notesWithSemitones.forEach((noteObj, index) => {
+                // If the current note's semitone is higher than the last one (in a descending sequence),
+                // it means we've wrapped around to a lower octave.
+                // Example: G (semitone 7), then C (semitone 0). C is lower, so it should be in a lower octave.
+                // If the sequence is G, E, C, A:
+                // G (octave 5)
+                // E (semitone 4) < G (semitone 7), so E is in octave 5
+                // C (semitone 0) < E (semitone 4), so C is in octave 5
+                // A (semitone 9) > C (semitone 0), so A is in octave 4
+                if (noteObj.semitone > lastSemitoneForPlayback) {
+                    currentOctaveForPlayback--;
+                }
+                finalNotesForPlayback.push(`${noteObj.note}${currentOctaveForPlayback}`);
+                lastSemitoneForPlayback = noteObj.semitone;
+            });
+
+            console.log("playChord: Notes to play with octaves (sorted by voicing):", finalNotesForPlayback);
 
             // --- Descending Arpeggio ---
             const arpeggioNoteDuration = "8n"; // Duration of each note in arpeggio (e.g., 8th note)
-            // For 60-70 BPM, an 8th note duration is between ~0.428s and 0.5s.
-            // Let's use 0.45s for a tempo around 66 BPM.
-            const arpeggioDelayBetweenNotes = 0.45; // Delay in seconds between each note
+            const arpeggioDelayBetweenNotes = 0.2; // Reduced from 0.45s to 0.2s
 
             let arpeggioStartTime = Tone.now();
-            for (let i = 0; i < notesToPlayWithOctaves.length; i++) {
+            console.log("playChord: Arpeggio start time:", arpeggioStartTime);
+            for (let i = 0; i < finalNotesForPlayback.length; i++) {
                 // Schedule each note with a delay
-                synth.triggerAttackRelease(notesToPlayWithOctaves[i], arpeggioNoteDuration, arpeggioStartTime + (i * arpeggioDelayBetweenNotes));
+                const noteToHighlight = finalNotesForPlayback[i];
+                Tone.Transport.scheduleOnce((time) => {
+                    console.log(`playChord: Triggering arpeggio note ${noteToHighlight} at ${time}`);
+                    synth.triggerAttackRelease(noteToHighlight, arpeggioNoteDuration, time);
+                    highlightKeyboardKeyForPlayback(noteToHighlight, arpeggioNoteDuration);
+                }, arpeggioStartTime + (i * arpeggioDelayBetweenNotes));
             }
 
             // --- Simultaneous Chord after Arpeggio ---
             // Calculate when the arpeggio finishes to start the chord
-            const chordStartTime = arpeggioStartTime + (notesToPlayWithOctaves.length * arpeggioDelayBetweenNotes) + 0.2; // Add a small pause after arpeggio
-            const chordDuration = "1s"; // Duration of the simultaneous chord
+            const chordStartTime = arpeggioStartTime + (finalNotesForPlayback.length * arpeggioDelayBetweenNotes) + 0.1; // Reduced pause
+            const chordDuration = "0.7s"; // Reduced from 1s to 0.7s
+            console.log("playChord: Chord start time:", chordStartTime);
 
-            synth.triggerAttackRelease(notesToPlayWithOctaves, chordDuration, chordStartTime);
+            Tone.Transport.scheduleOnce((time) => {
+                console.log(`playChord: Triggering chord ${finalNotesForPlayback.join(', ')} at ${time}`);
+                synth.triggerAttackRelease(finalNotesForPlayback, chordDuration, time);
+                // Highlight all notes of the chord simultaneously
+                finalNotesForPlayback.forEach(note => highlightKeyboardKeyForPlayback(note, chordDuration));
+            }, chordStartTime);
 
-            console.log("Playing descending arpeggio and then simultaneous chord:", notesToPlayWithOctaves);
+            // Start Tone.js Transport if not already running
+            if (Tone.Transport.state !== "started") {
+                Tone.Transport.start();
+                console.log("playChord: Tone.Transport started.");
+            } else {
+                console.log("playChord: Tone.Transport already started.");
+            }
+        }
+
+        /**
+         * Highlights a key on the virtual keyboard for a given duration for *playback*.
+         * @param {string} noteWithOctave - The note (e.g., "C4", "G#5").
+         * @param {string} duration - The duration for which to highlight (e.g., "8n", "1s").
+         */
+        function highlightKeyboardKeyForPlayback(noteWithOctave, duration) {
+            const [noteName, octave] = Tone.Frequency(noteWithOctave).split();
+            // Convert Tone.js format (C#) to data-note format (CS)
+            const dataNote = noteName.replace('#', 'S').replace('b', 'B');
+            const keyElement = document.querySelector(`.key[data-note="${dataNote}"][data-octave="${octave}"]`);
+
+            if (keyElement) {
+                // Temporarily add 'active' class for playback visual feedback
+                keyElement.classList.add('active');
+                // Remove highlight after duration
+                Tone.Transport.scheduleOnce((time) => {
+                    keyElement.classList.remove('active');
+                }, Tone.now() + Tone.Time(duration).toSeconds());
+            }
+        }
+
+        /**
+         * Updates the highlighting of keys on the virtual keyboard based on `selectedUserNotes`.
+         */
+        function updateKeyboardHighlightingForSelection() {
+            // Remove all 'selected-by-user' classes first
+            document.querySelectorAll('.key').forEach(key => {
+                key.classList.remove('selected-by-user');
+            });
+
+            // Add 'selected-by-user' class to keys corresponding to selected notes
+            selectedUserNotes.forEach(userNote => {
+                // For user selection, we assume the C4-B4 octave for highlighting
+                // We'll highlight the C4-B4 octave by default for user input, as it's a common range.
+                const dataNote = userNote.replace('#', 'S').replace('b', 'B');
+                const keyElement = document.querySelector(`.key[data-note="${dataNote}"][data-octave="4"]`);
+                if (keyElement) {
+                    keyElement.classList.add('selected-by-user');
+                }
+            });
+        }
+
+
+        /**
+         * Generates the virtual piano keyboard.
+         */
+        function generateVirtualKeyboard() {
+            console.log("generateVirtualKeyboard: Generating keyboard elements.");
+            virtualKeyboard.innerHTML = '';
+            const whiteKeysFullOctave = ["C", "D", "E", "F", "G", "A", "B"];
+            const blackKeysFullOctave = ["C#", "D#", "F#", "G#", "A#"];
+
+            // Generate Octave 4 (C4-B4) and Octave 5 (C5-B5)
+            for (let octave = 4; octave <= 5; octave++) {
+                whiteKeysFullOctave.forEach(note => {
+                    const key = document.createElement('div');
+                    key.classList.add('key', 'white-key');
+                    key.dataset.note = note;
+                    key.dataset.octave = octave;
+                    virtualKeyboard.appendChild(key);
+                });
+
+                blackKeysFullOctave.forEach(note => {
+                    const key = document.createElement('div');
+                    key.classList.add('key', 'black-key');
+                    key.dataset.note = note.replace('#', 'S');
+                    key.dataset.octave = octave;
+                    virtualKeyboard.appendChild(key);
+                });
+            }
+
+            // Add C6 specifically
+            const c6Key = document.createElement('div');
+            c6Key.classList.add('key', 'white-key');
+            c6Key.dataset.note = "C";
+            c6Key.dataset.octave = "6";
+            virtualKeyboard.appendChild(c6Key);
+
+            console.log("generateVirtualKeyboard: Keyboard elements created for C4 to C6.");
         }
 
 
@@ -1232,48 +1507,48 @@
          * Generates a complex chord question with a visual grid.
          */
         function generateComplexQuestion() {
-            console.log("--- Generando nueva pregunta ---");
+            console.log("generateComplexQuestion: Starting new question generation.");
             // 1. Choose a random chord type
             const chordTypes = Object.keys(chordStructures);
             const randomChordTypeKey = chordTypes[Math.floor(Math.random() * chordTypes.length)];
             const selectedChordType = chordStructures[randomChordTypeKey];
             currentChordTypeKey = randomChordTypeKey;
-            console.log("Tipo de acorde seleccionado:", currentChordTypeKey);
+            console.log("generateComplexQuestion: Tipo de acorde seleccionado:", currentChordTypeKey);
 
             // 2. Choose a random interval to be the lead voice (from defined voicing rules)
             const possibleLeadLabels = Object.keys(selectedChordType.voicing_rules);
             if (possibleLeadLabels.length === 0) {
-                console.error(`Error: No hay reglas de voicing definidas para el acorde ${currentChordTypeKey}.`);
+                console.error(`generateComplexQuestion: Error: No hay reglas de voicing definidas para el acorde ${currentChordTypeKey}.`);
                 chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar la pregunta. Contacta al soporte.";
                 disableQuizInteraction();
                 return;
             }
             const randomLeadLabel = possibleLeadLabels[Math.floor(Math.random() * possibleLeadLabels.length)];
             currentGivenLabel = randomLeadLabel;
-            console.log("Etiqueta de voz principal seleccionada:", currentGivenLabel);
+            console.log("generateComplexQuestion: Etiqueta de voz principal seleccionada:", currentGivenLabel);
 
             // Find the full interval object for the chosen lead label
             const givenInterval = selectedChordType.intervals.find(int => int.label === randomLeadLabel);
             if (!givenInterval) {
-                console.error(`Error: No se encontró el objeto de intervalo para la etiqueta ${randomLeadLabel} en el acorde ${currentChordTypeKey}.`);
+                console.error(`generateComplexQuestion: Error: No se encontró el objeto de intervalo para la etiqueta ${randomLeadLabel} en el acorde ${currentChordTypeKey}.`);
                 chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar la pregunta. Contacta al soporte.";
                 disableQuizInteraction();
                 return;
             }
             currentGivenIntervalName = givenInterval.name;
-            console.log("Nombre de intervalo dado:", currentGivenIntervalName);
+            console.log("generateComplexQuestion: Nombre de intervalo dado:", currentGivenIntervalName);
 
 
             // 3. Choose a random note to be that interval (from canonical notes for consistency)
             const givenNoteIndex = Math.floor(Math.random() * canonicalNotes.length);
             currentGivenNote = canonicalNotes[givenNoteIndex];
-            console.log("Nota dada (principal):", currentGivenNote);
+            console.log("generateComplexQuestion: Nota dada (principal):", currentGivenNote);
 
             // 4. Calculate the actual root note of the chord
             // The root is 'givenNote' minus the 'givenInterval' semitones
             const actualRootSemitone = (noteToSemitoneMap[currentGivenNote] - givenInterval.semitones + 12) % 12;
             currentChordRoot = canonicalNotes[actualRootSemitone];
-            console.log("Raíz calculada del acorde:", currentChordRoot);
+            console.log("generateComplexQuestion: Raíz calculada del acorde:", currentChordRoot);
 
             // Create a map of *all* base intervals for quick lookup (original semitones)
             const originalIntervalsMap = {};
@@ -1284,7 +1559,7 @@
             // Determine the labels for the grid and the actual correct notes for the voicing
             const baseVoicingLabels = selectedChordType.voicing_rules[currentGivenLabel];
             if (!baseVoicingLabels) {
-                console.error(`Error: No hay reglas de voicing para la etiqueta principal "${currentGivenLabel}" en el acorde ${currentChordTypeKey}.`);
+                console.error(`generateComplexQuestion: Error: No hay reglas de voicing para la etiqueta principal "${currentGivenLabel}" en el acorde ${currentChordTypeKey}.`);
                 chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar la pregunta. Contacta al soporte.";
                 disableQuizInteraction();
                 return;
@@ -1302,13 +1577,13 @@
                 if (currentChordTypeKey === "maj7" && currentGivenIntervalName === "fundamental" && label === "7") {
                     semitonesToRoot = originalIntervalsMap["7"] - 2; // Major 7th (11) - 2 = Major 6th (9)
                     displayLabel = "6"; // Change the label for display
-                    console.log("Excepción maj7 aplicada: 7ma cambiada a 6ta.");
+                    console.log("generateComplexQuestion: Excepción maj7 aplicada: 7ma cambiada a 6ta.");
                 } else {
                     semitonesToRoot = originalIntervalsMap[label];
                 }
 
                 if (semitonesToRoot === undefined) {
-                    console.error(`Error: La etiqueta de voicing "${label}" no se encontró en originalIntervalsMap para el acorde ${currentChordTypeKey}. Esto puede indicar una regla de voicing incorrecta o un intervalo base faltante.`);
+                    console.error(`generateComplexQuestion: Error: La etiqueta de voicing "${label}" no se encontró en originalIntervalsMap para el acorde ${currentChordTypeKey}. Esto puede indicar una regla de voicing incorrecta o un intervalo base faltante.`);
                     chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar la pregunta. Contacta al soporte.";
                     disableQuizInteraction();
                     return;
@@ -1319,9 +1594,9 @@
                 currentOrderedLabelsForDisplay.push(displayLabel); // Use the potentially modified displayLabel for the grid
                 currentActualChordIntervals.push({ label: displayLabel, semitones: semitonesToRoot }); // Store for updateSelectedNotesDisplay
             });
-            console.log("currentOrderedLabelsForDisplay (grid labels):", currentOrderedLabelsForDisplay);
-            console.log("currentCorrectNotes (expected correct notes):", currentCorrectNotes);
-            console.log("currentActualChordIntervals (for display matching):", currentActualChordIntervals);
+            console.log("generateComplexQuestion: currentOrderedLabelsForDisplay (grid labels):", currentOrderedLabelsForDisplay);
+            console.log("generateComplexQuestion: currentCorrectNotes (expected correct notes):", currentCorrectNotes);
+            console.log("generateComplexQuestion: currentActualChordIntervals (for display matching):", currentActualChordIntervals);
 
 
             // 6. Formulate the question text (more concise)
@@ -1347,20 +1622,23 @@
             noteDisplaySpanInFirstCell.textContent = currentGivenNote;
             noteDisplaySpanInFirstCell.classList.add('highlighted');
 
-
             // Clear user's selected notes and feedback message
+            console.log("generateComplexQuestion: Clearing selection and feedback.");
             clearSelection(); // Clear all selected notes and current building note
             feedbackModalOverlay.classList.remove('visible'); // Ensure feedback modal is hidden
             feedbackModalContent.className = 'modal-content'; // Reset feedback modal classes
 
             // Ensure quiz elements are enabled for a new question
+            console.log("generateComplexQuestion: Enabling quiz interaction.");
             enableQuizInteraction();
+            console.log("generateComplexQuestion: New question generated successfully.");
         }
 
         /**
          * Disables all interactive elements of the quiz.
          */
         function disableQuizInteraction() {
+            console.log("disableQuizInteraction: Disabling quiz interaction.");
             confirmAnswerButton.disabled = true;
             clearAllSelectionButton.disabled = true;
             changeQuestionButton.disabled = true;
@@ -1372,14 +1650,14 @@
             // Remove event listeners to prevent interaction
             naturalNoteButtonsContainer.removeEventListener('click', handleNaturalNoteClick);
             accidentalButtonsContainer.removeEventListener('click', handleAccidentalClick);
-            addNoteToAnswerButton.removeEventListener('click', addNoteToAnswer);
-            clearCurrentNoteButton.removeEventListener('click', clearCurrentBuildingNote);
+            console.log("disableQuizInteraction: Quiz interaction disabled.");
         }
 
         /**
          * Enables all interactive elements of the quiz.
          */
         function enableQuizInteraction() {
+            console.log("enableInteraction: Enabling quiz interaction.");
             // Button visibility/disabled state is handled by updateSelectedNotesDisplay based on selectedUserNotes.length
             updateSelectedNotesDisplay();
             playChordButton.disabled = !audioContextStarted; // Enable if audio context is active
@@ -1387,17 +1665,17 @@
             // Add event listeners back
             naturalNoteButtonsContainer.addEventListener('click', handleNaturalNoteClick);
             accidentalButtonsContainer.addEventListener('click', handleAccidentalClick);
-            addNoteToAnswerButton.addEventListener('click', addNoteToAnswer);
-            clearCurrentNoteButton.addEventListener('click', clearCurrentBuildingNote);
 
             // Visually enable all note buttons (remove disabled class)
             document.querySelectorAll('.note-button').forEach(button => button.classList.remove('disabled'));
+            console.log("enableInteraction: Quiz interaction enabled.");
         }
 
         /**
          * Handles changing the question without checking the answer.
          */
         function handleChangeQuestion() {
+            console.log("handleChangeQuestion: Change question button clicked.");
             clearSelection(); // Clear any existing selection
             generateComplexQuestion(); // Generate a new question
         }
@@ -1407,12 +1685,12 @@
          * Checks the user's answer.
          */
         async function checkAnswer() { // Made async to await playChord
-            console.log("--- Comprobando respuesta ---");
+            console.log("checkAnswer: Starting answer check.");
             const userNotesNormalized = selectedUserNotes.map(note => normalizeNote(note));
-            console.log("Notas del usuario (normalizadas):", userNotesNormalized);
+            console.log("checkAnswer: Notas del usuario (normalizadas):", userNotesNormalized);
 
             const normalizedCorrectNotes = currentCorrectNotes.map(note => normalizeNote(note));
-            console.log("Notas correctas esperadas (normalizadas):", normalizedCorrectNotes);
+            console.log("checkAnswer: Notas correctas esperadas (normalizadas):", normalizedCorrectNotes);
 
             // Sort both lists for order-independent comparison
             userNotesNormalized.sort();
@@ -1427,6 +1705,7 @@
 
                 if (isCorrect) {
                     feedbackHtml = `<p>¡Correcto! 🎉</p><p>La fundamental es <strong>${currentChordRoot}</strong>. Las notas son: <strong>${currentCorrectNotes.join(', ')}</strong></p>`;
+                    console.log("checkAnswer: Answer is correct. Playing chord.");
                     await playChord(); // Play chord if correct
                 } else {
                     // Detailed incorrect feedback
@@ -1444,6 +1723,7 @@
                     });
                     feedbackHtml += `</p>`;
                     feedbackHtml += `<p>Las notas correctas son: <strong>${currentCorrectNotes.join(', ')}</strong></p>`;
+                    console.log("checkAnswer: Answer is incorrect.");
                 }
             } else {
                 feedbackHtml = `<p>Por favor, selecciona exactamente 4 notas.</p>`;
@@ -1456,6 +1736,7 @@
                     feedbackModalOverlay.classList.remove('visible'); // Hide feedback modal
                     enableQuizInteraction(); // Re-enable interaction
                 }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
+                console.log("checkAnswer: Not 4 notes selected. Showing feedback and returning.");
                 return; // Exit function if selection is not 4 notes
             }
 
@@ -1475,9 +1756,9 @@
                 totalCorrectAnswers++; // Increment total correct for overall score
             }
 
-            console.log("Preguntas respondidas (batch):", questionsAnsweredCount);
-            console.log("Total preguntas (general):", totalQuestionsAttempted);
-            console.log("Datos de sesión del quiz:", quizSessionData);
+            console.log("checkAnswer: Preguntas respondidas (batch):", questionsAnsweredCount);
+            console.log("checkAnswer: Total preguntas (general):", totalQuestionsAttempted);
+            console.log("checkAnswer: Datos de sesión del quiz:", quizSessionData);
 
             feedbackModalContent.className = 'modal-content'; // Reset classes
             feedbackModalContent.classList.add(isCorrect ? 'correct' : 'incorrect');
@@ -1489,7 +1770,7 @@
 
             // Check if it's time for an evaluation
             if (questionsAnsweredCount % QUESTIONS_PER_EVALUATION === 0) {
-                console.log("¡Es hora de la evaluación! Llamando a displayEvaluation().");
+                console.log("checkAnswer: ¡Es hora de la evaluación! Llamando a displayEvaluation().");
                 // Hide feedback modal, then show evaluation modal after a short delay
                 setTimeout(() => {
                     feedbackModalOverlay.classList.remove('visible');
@@ -1497,6 +1778,7 @@
                 }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
             } else {
                 // If not evaluation, just show feedback for a short time and advance
+                console.log("checkAnswer: Not evaluation time. Showing feedback and generating new question.");
                 setTimeout(() => {
                     feedbackModalOverlay.classList.remove('visible'); // Hide feedback modal
                     generateComplexQuestion(); // Generate a new question
@@ -1508,7 +1790,7 @@
          * Displays the evaluation modal with summary and advice.
          */
         function displayEvaluation() {
-            console.log("displayEvaluation() ha sido llamada.");
+            console.log("displayEvaluation: displayEvaluation() ha sido llamada.");
             let batchTotalCorrect = 0;
             let batchTotalQuestions = 0;
             const areasToWorkOn = [];
@@ -1542,13 +1824,14 @@
             }
 
             evaluationModalOverlay.classList.add('visible');
-            console.log("Clase 'visible' añadida al modal de evaluación.");
+            console.log("displayEvaluation: Clase 'visible' añadida al modal de evaluación.");
         }
 
         /**
          * Continues the quiz after evaluation.
          */
         function continueQuiz() {
+            console.log("continueQuiz: Continuing quiz.");
             questionsAnsweredCount = 0; // Reset batch counter
             quizSessionData = {}; // Reset performance data for the new batch
             evaluationModalOverlay.classList.remove('visible');
@@ -1559,6 +1842,7 @@
          * Ends the quiz and displays final results.
          */
         function endQuiz() {
+            console.log("endQuiz: Ending quiz.");
             evaluationModalOverlay.classList.remove('visible');
             quizContainer.style.display = 'none'; // Hide the main quiz UI
 
@@ -1577,6 +1861,7 @@
             mailtoLink.href = `mailto:?subject=${subject}&body=${body}`;
 
             finalMessageDisplay.style.display = 'flex'; // Show the final message
+            console.log("endQuiz: Final message displayed.");
         }
 
         // Event Listeners
@@ -1588,30 +1873,40 @@
         playChordButton.addEventListener('click', playChord); // Event listener for audio playback button
 
         startButton.addEventListener('click', async () => {
-            introScreen.style.display = 'none'; // Hide intro screen
-            quizContainer.style.display = 'flex'; // Show quiz container
-            await startAudioContext(); // Start audio context on first interaction
-            // Initialize the quiz
+            console.log("startButton: Clicked. Hiding intro and showing quiz container.");
+            introScreen.style.display = 'none'; // Hide intro screen immediately
+            quizContainer.style.display = 'flex'; // Show quiz container immediately
+            console.log("startButton: UI transition complete.");
+
+            // Initialize the quiz elements
             try {
+                console.log("startButton: Initializing quiz components...");
                 generateNoteButtons(); // Generate note buttons on load
-                generateComplexQuestion();
-                updateCurrentBuildingNoteDisplay(); // Initialize current note display
-                updateSelectedNotesDisplay(); // Initialize selected notes display and button visibility
+                generateVirtualKeyboard(); // Generate virtual keyboard on load
+                generateComplexQuestion(); // This includes drawing staff and updating displays
+                console.log("startButton: Quiz components initialized successfully.");
             } catch (error) {
-                console.error("Error al cargar la aplicación:", error);
+                console.error("startButton: Error during quiz component initialization:", error);
                 chordQuestionTextDiv.innerHTML = "¡Error al cargar la aplicación! Revisa la consola del navegador.";
-                disableQuizInteraction(); // Disable interaction on error
+                disableQuizInteraction();
+                // Show a custom message box instead of alert()
+                showCustomMessage("Error de Carga", "Hubo un problema al inicializar la aplicación. Por favor, revisa la consola del navegador para más detalles.", "error");
             }
+
+            // Start audio context after initial UI is loaded
+            console.log("startButton: Attempting to start audio context.");
+            await startAudioContext();
+            console.log("startButton: Audio context start attempt completed.");
         });
 
         // Show intro screen on initial load
         window.onload = function() {
+            console.log("window.onload: Window loaded. Initializing intro screen.");
             introScreen.style.display = 'flex';
             quizContainer.style.display = 'none'; // Ensure quiz is hidden initially
             playChordButton.disabled = true; // Disable playback button until audio is ready
+            console.log("window.onload: Intro screen displayed, quiz hidden, play button disabled.");
         };
     </script>
 </body>
 </html>
-
-
