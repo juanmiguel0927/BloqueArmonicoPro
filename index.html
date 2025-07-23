@@ -41,10 +41,9 @@
             border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            gap: 8px; /* Espaciado reducido entre secciones */
+            gap: 10px; /* Espaciado ajustado entre secciones */
             flex-grow: 1; /* Permite que el contenedor crezca y ocupe el espacio disponible */
             max-height: 99vh; /* Limita la altura para evitar que se desborde del body */
-            /* REMOVED: overflow-y: auto; */ /* No scroll */
         }
 
         /* Encabezados */
@@ -667,7 +666,7 @@
 
         <div id="displaySection"> <!-- Contenedor para la cuadrícula y la partitura (lado a lado) -->
             <div id="questionArea">
-                <button id="playChordButton" style="margin-top: 5px; padding: 8px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Reproducir Acorde</button>
+                <!-- REMOVED: <button id="playChordButton" style="margin-top: 5px; padding: 8px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Reproducir Acorde</button> -->
                 <div class="notes-grid">
                     <div class="grid-cell" id="gridCell0">
                         <span class="interval-label"></span>
@@ -935,7 +934,7 @@
         const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
         const accidentalButtonsContainer = document.getElementById('accidentalButtons');
         const selectedNotesDisplay = document.getElementById('selectedNotesDisplay');
-        const playChordButton = document.getElementById('playChordButton'); // Audio playback button
+        // REMOVED: const playChordButton = document.getElementById('playChordButton'); // Audio playback button
         const musicalStaffCanvas = document.getElementById('musicalStaffCanvas'); // Canvas for musical staff
 
         // Main Action Buttons
@@ -991,13 +990,12 @@
                             release: 0.5    // Moderate release
                         }
                     }).toDestination();
-                    playChordButton.disabled = false; // Enable playback button once synth is ready
-                    console.log("Synth initialized and playChordButton enabled.");
+                    // REMOVED: playChordButton.disabled = false; // Enable playback button once synth is ready
+                    console.log("Synth initialized.");
                 } catch (e) {
                     console.error("Error al iniciar AudioContext:", e);
+                    // REMOVED: playChordButton.disabled = true; // Ensure button remains disabled
                     // Inform the user that audio could not be started
-                    playChordButton.disabled = true; // Ensure button remains disabled
-                    // Using a custom message box instead of alert()
                     showCustomMessage("Error de Audio", "No se pudo iniciar el audio. Por favor, asegúrate de que tu navegador lo permita.", "error");
                 }
             } else {
@@ -1421,7 +1419,7 @@
 
             Tone.Transport.scheduleOnce((time) => {
                 console.log(`playChord: Triggering chord ${finalNotesForPlayback.join(', ')} at ${time}`);
-                synth.triggerAttackAttackRelease(finalNotesForPlayback, chordDuration, time); // Use triggerAttackAttackRelease for simultaneous
+                synth.triggerAttackRelease(finalNotesForPlayback, chordDuration, time);
             }, chordStartTime);
 
             // Start Tone.js Transport if not already running
@@ -1725,7 +1723,7 @@
             confirmAnswerButton.disabled = true;
             clearAllSelectionButton.disabled = true;
             changeQuestionButton.disabled = true;
-            playChordButton.disabled = true; // Disable playback button
+            // REMOVED: playChordButton.disabled = true; // Disable playback button
 
             // Visually disable all note buttons
             document.querySelectorAll('.note-button').forEach(button => {
@@ -1747,7 +1745,7 @@
             console.log("enableTrainingInteraction: Enabling training interaction.");
             // Button visibility/disabled state is handled by updateSelectedNotesDisplay based on selectedUserNotes.length
             updateSelectedNotesDisplay();
-            playChordButton.disabled = !audioContextStarted; // Enable if audio context is active
+            // REMOVED: playChordButton.disabled = !audioContextStarted; // Enable if audio context is active
 
             // Add event listeners back
             naturalNoteButtonsContainer.addEventListener('click', handleNaturalNoteClick);
@@ -1961,7 +1959,7 @@
         changeQuestionButton.addEventListener('click', handleChangeQuestion);
         continueTrainingButton.addEventListener('click', continueTraining); // Renamed
         endSessionButton.addEventListener('click', endSession); // Renamed
-        playChordButton.addEventListener('click', playChord); // Event listener for audio playback button
+        // REMOVED: playChordButton.addEventListener('click', playChord); // Event listener for audio playback button
 
         startButton.addEventListener('click', async () => {
             console.log("startButton: Clicked. Hiding welcome modal and initializing application.");
@@ -1996,8 +1994,8 @@
             console.log("window.onload: Window loaded. Initializing welcome modal.");
             welcomeModalOverlay.classList.add('visible'); // Show welcome modal immediately
             mainAppContainer.style.display = 'none'; // Ensure main app is hidden initially
-            playChordButton.disabled = true; // Disable playback button until audio is ready
-            console.log("window.onload: Welcome modal displayed, main app hidden, play button disabled.");
+            // REMOVED: playChordButton.disabled = true; // Disable playback button until audio is ready
+            console.log("window.onload: Welcome modal displayed, main app hidden.");
         };
     </script>
 </body>
