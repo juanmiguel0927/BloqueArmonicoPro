@@ -1170,6 +1170,7 @@
                 }
             }
             updateSelectedNotesDisplay();
+            drawMusicalStaff(selectedUserNotes); // Update staff immediately
         }
 
         /**
@@ -1263,6 +1264,7 @@
             activeNaturalNote = ''; // Reset active selection states
             activeAccidental = '';
             updateSelectedNotesDisplay(); // This will also handle button and keyboard visuals
+            drawMusicalStaff([]); // Clear staff when selection is cleared
         }
 
         /**
@@ -1316,7 +1318,7 @@
 
             // Create notes with semitones for sorting
             const notesWithSemitones = currentCorrectNotes.map(noteName => {
-                const semitone = noteToSemitoneMap[noteName];
+                const semitone = noteToSemitoneMap[normalizeNote(noteName)];
                 return { note: noteName, semitone: semitone };
             });
 
@@ -1420,59 +1422,81 @@
             renderer.resize(canvas.width, canvas.height);
             const ctx = renderer.getContext();
 
-            // Sort notes by semitone value (lowest to highest) for visual stacking on staff
-            const sortedNotesForDisplay = notesToDisplay.map(noteName => {
-                const semitone = noteToSemitoneMap[normalizeNote(noteName)];
-                return { note: noteName, semitone: semitone };
-            }).sort((a, b) => a.semitone - b.semitone); // Sort ascending
+            const stave = new Stave(10, 0, canvas.width - 20);
+            stave.addClef("treble").addTimeSignature("4/4"); // Always treble clef
+            stave.setContext(ctx).draw();
 
-            const vexFlowKeys = [];
-            let currentVexFlowOctave = 4; // Start with C4 as a base octave for display
+            if (notesToDisplay.length === 0) {
+                // If no notes, just draw an empty staff and return
+                return;
+            }
 
-            // Determine the starting octave for the lowest note to ensure it fits on the staff.
-            // If the lowest note is G3 (semitone 7 in octave 3) or lower, use octave 3 as base for VexFlow.
-            // G3 absolute semitone: 7 + (3 * 12) = 43. C4 absolute semitone: 0 + (4 * 12) = 48.
-            if (sortedNotesForDisplay.length > 0) {
-                const lowestNoteSemitone = sortedNotesForDisplay[0].semitone;
-                if (lowestNoteSemitone + (currentVexFlowOctave * 12) < (noteToSemitoneMap["G"] + (4 * 12))) {
-                    currentVexFlowOctave = 3;
+            // 1. Convert notes to absolute semitone values and sort them.
+            let notesWithAbsoluteSemitones = notesToDisplay.map(noteName => {
+                const semitoneInOctave = noteToSemitoneMap[normalizeNote(noteName)];
+                // Initial guess for absolute semitone (e.g., C4 = 48)
+                return {
+                    originalNote: noteName,
+                    semitoneInOctave: semitoneInOctave, // 0-11
+                    absoluteSemitone: semitoneInOctave + (4 * 12) // Assume octave 4 initially
+                };
+            });
+
+            // Sort by the initial guess of absolute semitone
+            notesWithAbsoluteSemitones.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
+
+            // 2. Adjust octaves for stacking: Ensure each note is higher than or equal to the previous one
+            for (let i = 1; i < notesWithAbsoluteSemitones.length; i++) {
+                while (notesWithAbsoluteSemitones[i].absoluteSemitone <= notesWithAbsoluteSemitones[i - 1].absoluteSemitone) {
+                    notesWithAbsoluteSemitones[i].absoluteSemitone += 12; // Move to the next octave
                 }
             }
 
-            // Build the keys array for a single StaveNote representing the chord
-            sortedNotesForDisplay.forEach((noteObj, index) => {
-                let noteNameForVexFlow = noteObj.note.toLowerCase();
-                let octaveForVexFlow = currentVexFlowOctave;
+            // 3. Determine the overall base octave for the chord to fit well on the staff
+            // Aim for the lowest note to be around C4 (middle C) or slightly below.
+            const lowestNoteAbsoluteSemitone = notesWithAbsoluteSemitones[0].absoluteSemitone;
+            const middleC_abs_semitone = noteToSemitoneMap["C"] + (4 * 12); // Absolute semitone for C4 (MIDI 60)
 
-                // Adjust octave for stacked notes to keep the chord compact and on the staff.
-                // This is a heuristic to keep notes within a reasonable visual range (e.g., C3 to C6).
-                // For a 4-note closed voicing, they usually fit within 2 octaves.
-                // Calculate octave relative to the lowest note's octave.
-                if (index > 0) {
-                    const baseSemitone = sortedNotesForDisplay[0].semitone;
-                    const semitoneDiff = noteObj.semitone - baseSemitone;
-                    octaveForVexFlow = currentVexFlowOctave + Math.floor(semitoneDiff / 12);
-                }
+            let octaveAdjustment = 0;
+            // If the lowest note is too high (e.g., C5 or above), shift down
+            if (lowestNoteAbsoluteSemitone >= (middleC_abs_semitone + 12)) { // If lowest note is C5 or higher
+                octaveAdjustment = -1;
+            }
+            // If the lowest note is too low (e.g., G3 or below), shift up
+            // G3 absolute semitone: 7 + (3 * 12) = 43.
+            else if (lowestNoteAbsoluteSemitone < (noteToSemitoneMap["G"] + (3 * 12))) {
+                octaveAdjustment = 1;
+            }
+
+            // Apply the overall octave adjustment to all notes
+            notesWithAbsoluteSemitones.forEach(note => {
+                note.absoluteSemitone += (octaveAdjustment * 12);
+            });
+
+
+            const vexFlowKeys = [];
+            notesWithAbsoluteSemitones.forEach(noteObj => {
+                let noteNameForVexFlow = noteObj.originalNote.toLowerCase();
+                const octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12); // Calculate final octave
 
                 // Handle enharmonic spellings for VexFlow (e.g., Db should be 'db', not 'c#')
-                // This is a heuristic; a more robust solution would involve key signatures
-                if (noteObj.note === "C#") {
+                if (noteObj.originalNote === "C#") {
                     if (currentGivenNote.toUpperCase().includes("DB") || currentChordRoot.toUpperCase().includes("DB")) {
                         noteNameForVexFlow = "db";
                     }
-                } else if (noteObj.note === "D#") {
+                } else if (noteObj.originalNote === "D#") {
                     if (currentGivenNote.toUpperCase().includes("EB") || currentChordRoot.toUpperCase().includes("EB")) {
                         noteNameForVexFlow = "eb";
                     }
-                } else if (noteObj.note === "F#") {
+                } else if (noteObj.originalNote === "F#") {
                     if (currentGivenNote.toUpperCase().includes("GB") || currentChordRoot.toUpperCase().includes("GB")) {
                         noteNameForVexFlow = "gb";
                     }
-                } else if (noteObj.note === "G#") {
+                } else if (noteObj.originalNote === "G#") {
                     if (currentGivenNote.toUpperCase().includes("AB") || currentChordRoot.toUpperCase().includes("AB")) {
                         noteNameForVexFlow = "ab";
                     }
-                } else if (noteObj.note === "A#") {
+                } else if (noteObj.originalNote === "A#") {
                     if (currentGivenNote.toUpperCase().includes("BB") || currentChordRoot.toUpperCase().includes("BB")) {
                         noteNameForVexFlow = "bb";
                     }
@@ -1487,23 +1511,6 @@
                 duration: "w" // Whole note duration
             });
 
-            // Determine clef based on the range of the notes
-            let clef = "treble";
-            if (sortedNotesForDisplay.length > 0) {
-                const lowestNoteSemitone = sortedNotesForDisplay[0].semitone;
-                const lowestNoteOctave = currentVexFlowOctave + Math.floor((lowestNoteSemitone - sortedNotesForDisplay[0].semitone) / 12);
-                // If the lowest note is C4 (middle C) or lower, consider bass clef
-                if (lowestNoteSemitone + (lowestNoteOctave * 12) < (noteToSemitoneMap["C"] + (4 * 12))) {
-                    clef = "bass";
-                }
-            }
-
-            // Create a stave (staff)
-            const stave = new Stave(10, 0, canvas.width - 20); // x, y, width
-            stave.addClef(clef).addTimeSignature("4/4"); // Add determined clef, 4/4 time
-            stave.setContext(ctx).draw();
-
-            // Create a voice and add the single chord note
             const voice = new Voice({ num_beats: 4, beat_value: 4 }); // 4/4 time
             voice.addTickables([chordStaveNote]); // Add the single chord stave note
 
@@ -1632,8 +1639,8 @@
             noteDisplaySpanInFirstCell.textContent = currentGivenNote;
             noteDisplaySpanInFirstCell.classList.add('highlighted');
 
-            // Draw the musical staff with the correct notes
-            drawMusicalStaff(currentCorrectNotes);
+            // Clear staff initially, it will be drawn as user selects notes
+            drawMusicalStaff([]);
 
             // Clear user's selected notes and feedback message
             console.log("generateComplexExercise: Clearing selection and feedback.");
