@@ -455,11 +455,12 @@
             display: none; /* Hidden by default */
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            /* REMOVED: justify-content: center; */ /* Removido para que el contenido empiece desde arriba */
             min-height: 200px;
             border: 1px solid #a7d9f5; /* Borde azul claro */
             color: #004d40; /* Texto verde oscuro */
             box-sizing: border-box; /* Incluir padding y border en el ancho */
+            overflow-y: auto; /* Permite el desplazamiento vertical si el contenido excede la altura */
         }
 
         /* Contenido a capturar para foto/PDF */
