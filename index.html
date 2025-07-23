@@ -113,7 +113,8 @@
             border: 2px solid #64748b; /* Borde exterior para la cuadrícula */
             border-radius: 5px; /* Esquinas ligeramente redondeadas para el contenedor de la cuadrícula */
             overflow: hidden; /* Asegura que los bordes internos sean limpios */
-            /* height: 226px; */ /* REMOVED FIXED HEIGHT */
+            height: auto; /* Allow it to grow/shrink */
+            max-height: 226px; /* Set a max height */
             flex-grow: 1; /* Allow it to grow within #questionArea */
             min-height: 0; /* Allow it to shrink */
         }
@@ -539,10 +540,10 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             width: 100%; /* Ajusta el ancho del canvas al contenedor */
             max-width: 500px; /* Ancho máximo para escritorio */
-            /* height: 150px; */ /* REMOVED FIXED HEIGHT */
+            height: auto; /* Allow it to grow/shrink */
+            max-height: 150px; /* Set a max height to prevent it from getting too tall */
             flex-grow: 1; /* Allow it to grow within #staffArea */
             min-height: 0; /* Allow it to shrink */
-            max-height: 150px; /* Set a max height to prevent it from getting too tall */
             box-sizing: border-box;
         }
 
@@ -604,7 +605,8 @@
             .notes-grid {
                 width: 140px; /* Slightly smaller width for mobile */
                 max-width: 140px; /* Fixed max-width for consistency */
-                /* height: 200px; */ /* REMOVED FIXED HEIGHT */
+                height: auto; /* Allow it to grow/shrink */
+                max-height: 200px; /* Set a max height */
             }
             .grid-cell {
                 padding: 8px 6px; /* Reduced padding for smaller cells */
@@ -641,7 +643,7 @@
                 font-size: 1em;
             }
             #musicalStaffCanvas {
-                /* height: 120px; */ /* REMOVED FIXED HEIGHT */
+                height: auto; /* Allow it to grow/shrink */
                 max-height: 120px; /* Smaller max height for staff on mobile */
             }
         }
@@ -1419,7 +1421,7 @@
 
             Tone.Transport.scheduleOnce((time) => {
                 console.log(`playChord: Triggering chord ${finalNotesForPlayback.join(', ')} at ${time}`);
-                synth.triggerAttackRelease(finalNotesForPlayback, chordDuration, time);
+                synth.triggerAttackAttackRelease(finalNotesForPlayback, chordDuration, time); // Use triggerAttackAttackRelease for simultaneous
             }, chordStartTime);
 
             // Start Tone.js Transport if not already running
@@ -1434,7 +1436,7 @@
         /**
          * Draws the musical staff with the given notes as a whole note chord, always in treble clef.
          * The `currentGivenNote` will be positioned as the highest voice within G4-G5 range.
-         * Other notes in `notesToDisplayRaw` will be placed below it.
+         * Other notes in `notesToDisplayRaw` will be placed below it, in closest descending order.
          * @param {string[]} notesToDisplayRaw - Array of notes to be displayed (e.g., user's selected notes).
          */
         function drawMusicalStaff(notesToDisplayRaw) {
@@ -1442,10 +1444,13 @@
             if (!canvas) { console.error("Canvas element not found for musical staff."); return; }
             const context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Resize canvas based on container and screen size (already good)
             const containerWidth = canvas.parentElement.clientWidth;
             canvas.width = Math.min(containerWidth, 500);
-            canvas.height = 150;
+            canvas.height = 150; // Keep a reasonable height for the staff
             if (window.innerWidth <= 768) { canvas.width = Math.min(containerWidth, 300); canvas.height = 120; }
+
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
             renderer.resize(canvas.width, canvas.height);
             const ctx = renderer.getContext();
@@ -1453,18 +1458,26 @@
             stave.addClef("treble").addTimeSignature("4/4"); // Always treble clef
             stave.setContext(ctx).draw();
 
-            if (notesToDisplayRaw.length === 0) {
+            // Declare these variables at the top of the function
+            const finalStaveNoteKeys = [];
+            const finalStaveNoteAccidentals = [];
+            console.log("drawMusicalStaff: finalStaveNoteKeys declared:", finalStaveNoteKeys); // Add this log
+            console.log("drawMusicalStaff: finalStaveNoteAccidentals declared:", finalStaveNoteAccidentals); // Add this log
+
+            // Collect all unique notes that need to be on the staff, including the given note
+            let allNotesForStaff = new Set();
+            if (currentGivenNote) {
+                allNotesForStaff.add(currentGivenNote);
+            }
+            notesToDisplayRaw.forEach(note => allNotesForStaff.add(note));
+
+            if (allNotesForStaff.size === 0) {
+                console.log("drawMusicalStaff: No notes for staff, returning early.");
                 return; // Draw empty staff if no notes to display
             }
 
-            // 1. Prepare all notes for processing, including currentGivenNote and selectedUserNotes
-            let notesToProcessSet = new Set();
-            if (currentGivenNote) {
-                notesToProcessSet.add(currentGivenNote);
-            }
-            notesToDisplayRaw.forEach(note => notesToProcessSet.add(note));
-
-            let notesToOrder = Array.from(notesToProcessSet).map(noteString => {
+            // Convert notes to objects with original string, semitone (0-11), and placeholder for absolute semitone
+            let processedNotes = Array.from(allNotesForStaff).map(noteString => {
                 return {
                     originalString: noteString,
                     semitone: noteToSemitoneMap[normalizeNote(noteString)], // 0-11
@@ -1472,57 +1485,58 @@
                 };
             });
 
-            // 2. Determine the absolute semitone for the highest note (currentGivenNote) within G4-G5 range
-            let highestNoteObj = notesToOrder.find(n => normalizeNote(n.originalString) === normalizeNote(currentGivenNote));
-            if (!highestNoteObj && notesToOrder.length > 0) {
-                // Fallback: if currentGivenNote is not found (e.g., initial state or removed by user),
-                // take the highest semitone note from the available notes and make it the highest.
-                notesToOrder.sort((a, b) => b.semitone - a.semitone);
-                highestNoteObj = notesToOrder[0];
-            } else if (!highestNoteObj) {
-                return; // No notes at all to draw
+            let orderedNotesForVexFlow = []; // This will hold notes in descending order of absolute semitone for calculation
+            let highestNoteObj;
+
+            // 1. Identify the highest note (currentGivenNote) and place it in the G4-G5 range
+            highestNoteObj = processedNotes.find(n => normalizeNote(n.originalString) === normalizeNote(currentGivenNote));
+
+            if (!highestNoteObj) {
+                // Fallback: If currentGivenNote is not found (e.g., initial load before question, or user removed it from selection),
+                // take the note with the highest semitone from the currently processed notes and make it the highest.
+                // This ensures something is always placed at the top if notes are present.
+                processedNotes.sort((a, b) => b.semitone - a.semitone);
+                highestNoteObj = processedNotes[0];
             }
 
+            // Calculate octave for the highest note to be in G4-G5 range (MIDI 67-79)
+            // G4 is MIDI 67, G5 is MIDI 79.
+            // Semitones from C: C=0, C#=1, D=2, D#=3, E=4, F=5, F#=6, G=7, G#=8, A=9, A#=10, B=11
             const semitoneOfHighest = highestNoteObj.semitone;
             let targetOctaveForHighest;
 
-            // G4 (MIDI 67), C5 (MIDI 60), G5 (MIDI 79)
-            // If note is G, G#, A, A#, B (semitones 7-11), place in octave 4 (G4, A4, B4)
+            // If semitone is G (7), A (9), B (11), place in octave 4 (G4, A4, B4)
             if (semitoneOfHighest >= noteToSemitoneMap["G"]) {
                 targetOctaveForHighest = 4;
             } else { // C, C#, D, D#, E, F, F# (semitones 0-6), place in octave 5 (C5, D5, E5, F5, F#5)
                 targetOctaveForHighest = 5;
             }
             highestNoteObj.absoluteSemitone = semitoneOfHighest + (targetOctaveForHighest * 12);
+            orderedNotesForVexFlow.push(highestNoteObj);
 
-            // 3. Place other notes below the highest, ensuring closest descending order
-            let sortedNotesForVexFlow = [highestNoteObj]; // Start with the highest note
+            // 2. Place other notes below the highest, ensuring closest descending order
+            let remainingNotes = processedNotes.filter(n => n !== highestNoteObj); // Filter by object reference
+            // Sort remaining notes by their semitone value (0-11) for consistent processing order
+            remainingNotes.sort((a, b) => b.semitone - a.semitone);
 
-            let lastAbsoluteSemitone = highestNoteObj.absoluteSemitone;
-
-            // Filter out the highest note from the original list, then sort the rest by semitone (ascending)
-            let remainingNotes = notesToOrder.filter(n => normalizeNote(n.originalString) !== normalizeNote(highestNoteObj.originalString));
-            remainingNotes.sort((a, b) => a.semitone - b.semitone);
+            let lastAbsoluteSemitonePlaced = highestNoteObj.absoluteSemitone;
 
             remainingNotes.forEach(note => {
-                let candidateAbsoluteSemitone = note.semitone + (Math.floor(lastAbsoluteSemitone / 12) * 12);
+                let currentNoteAbsoluteSemitone = note.semitone + (Math.floor(lastAbsoluteSemitonePlaced / 12) * 12);
 
                 // Adjust downwards until it's strictly below the last placed note
-                while (candidateAbsoluteSemitone >= lastAbsoluteSemitone) {
-                    candidateAbsoluteSemitone -= 12;
+                while (currentNoteAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
+                    currentNoteAbsoluteSemitone -= 12; // Move down an octave
                 }
-                note.absoluteSemitone = candidateAbsoluteSemitone;
-                sortedNotesForVexFlow.push(note);
-                lastAbsoluteSemitone = note.absoluteSemitone; // Update for the next iteration
+                note.absoluteSemitone = currentNoteAbsoluteSemitone;
+                orderedNotesForVexFlow.push(note);
+                lastAbsoluteSemitonePlaced = note.absoluteSemitone; // Update for the next iteration
             });
 
-            // Final sort by absolute semitone for VexFlow rendering (ascending)
-            sortedNotesForVexFlow.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
+            // Final sort by absolute semitone for VexFlow rendering (ascending order, lowest to highest)
+            orderedNotesForVexFlow.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
 
-            const finalStaveNoteKeys = [];
-            const finalStaveNoteAccidentals = [];
-
-            sortedNotesForVexFlow.forEach(noteObj => {
+            orderedNotesForVexFlow.forEach(noteObj => {
                 const match = noteObj.originalString.match(/^([A-G])(.*)$/i);
                 if (!match) {
                     console.warn(`Could not parse note string for VexFlow: ${noteObj.originalString}`);
@@ -1538,7 +1552,8 @@
             });
 
             if (finalStaveNoteKeys.length === 0) {
-                return; // No valid notes to draw
+                console.log("drawMusicalStaff: finalStaveNoteKeys is empty after processing notes, returning early.");
+                return; // No valid notes to draw after all processing
             }
 
             const chordStaveNote = new StaveNote({
@@ -1546,11 +1561,19 @@
                 duration: "w"
             });
 
-            finalStaveNoteAccidentals.forEach((accidental, index) => {
-                if (accidental) {
-                    chordStaveNote.addAccidental(index, new Accidental(accidental));
-                }
-            });
+            if (Array.isArray(finalStaveNoteAccidentals)) { // Defensive check
+                finalStaveNoteAccidentals.forEach((accidental, index) => {
+                    if (accidental) {
+                        if (chordStaveNote) { // Defensive check
+                            chordStaveNote.addAccidental(index, new Accidental(accidental));
+                        } else {
+                            console.error("chordStaveNote is not defined when trying to add accidental.");
+                        }
+                    }
+                });
+            } else {
+                console.error("finalStaveNoteAccidentals is not an array!");
+            }
 
             const voice = new Voice({ num_beats: 4, beat_value: 4 });
             voice.addTickables([chordStaveNote]);
