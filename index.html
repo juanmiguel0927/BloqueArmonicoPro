@@ -9,204 +9,204 @@
     <!-- VexFlow para la notación musical -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js"></script>
     <style>
-        /* HTML and Body adjustments to prevent scrolling */
+        /* Estilos generales para asegurar que el cuerpo y los elementos principales se adapten */
         html, body {
-            height: 100%; /* HTML and body take full viewport height */
+            height: 100%; /* HTML y body toman la altura completa del viewport */
             margin: 0;
             padding: 0;
-            /* Allow vertical scrolling on the body if content overflows */
-            overflow-y: auto;
-            overflow-x: hidden; /* Hide horizontal overflow */
-            display: flex; /* Make body a flex container */
-            flex-direction: column; /* Stack child elements vertically */
-            align-items: center; /* Center content horizontally */
+            overflow-y: auto; /* Permite desplazamiento vertical si el contenido excede la altura */
+            overflow-x: hidden; /* Oculta el desbordamiento horizontal */
+            display: flex; /* Hace que el body sea un contenedor flex */
+            flex-direction: column; /* Apila los elementos hijos verticalmente */
+            align-items: center; /* Centra el contenido horizontalmente */
             box-sizing: border-box;
-        }
-
-        /* Base styles for body and container */
-        body {
-            padding: 10px; /* Increased padding for the body for 100% zoom */
-            padding-bottom: 30px; /* Increased padding to ensure bottom content is visible */
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Light grayish blue background */
-            color: #334155; /* Darker text color */
+            font-family: 'Inter', sans-serif; /* Usar Inter como fuente base */
+            background-color: #f0f4f8; /* Fondo azul grisáceo claro */
+            color: #334155; /* Color de texto más oscuro */
             line-height: 1.6;
-            font-size: 17px; /* Base font size for 100% zoom */
+            font-size: 17px; /* Tamaño de fuente base para zoom 100% */
         }
 
+        body {
+            padding: 10px; /* Padding general */
+            padding-bottom: 30px; /* Espacio extra en la parte inferior para evitar que el contenido sea cortado por la barra de desplazamiento */
+        }
+
+        /* Contenedor principal de la aplicación */
         .container {
             background-color: #ffffff;
-            padding: 30px; /* Increased general padding */
-            padding-bottom: 35px; /* Increased bottom padding for the button */
+            padding: 30px; /* Padding general */
+            padding-bottom: 35px; /* Padding inferior para el botón */
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            max-width: 800px; /* Increased max-width */
-            width: 95%; /* Wider for better responsiveness */
+            max-width: 800px; /* Ancho máximo para pantallas grandes */
+            width: 95%; /* Ocupa casi todo el ancho disponible */
             box-sizing: border-box;
             border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            gap: 20px; /* Increased spacing between sections */
-            overflow-y: auto; /* Allow the container itself to scroll if content overflows */
-            margin-top: 10px; /* Add some top margin to ensure header is visible */
-            margin-bottom: 20px; /* Increased bottom margin to prevent cutting off */
+            gap: 20px; /* Espaciado entre secciones */
+            overflow-y: auto; /* Permite que el contenedor se desplace si el contenido se desborda */
+            margin-top: 10px; /* Margen superior para visibilidad del encabezado */
+            margin-bottom: 20px; /* Margen inferior para evitar recortes */
         }
 
-        /* Headings */
+        /* Encabezados */
         h1 {
             color: #1e3a8a;
             text-align: center;
-            margin-bottom: 15px; /* Increased margin */
-            font-size: 2.4em; /* Increased font size */
+            margin-bottom: 15px;
+            font-size: 2.4em;
             font-weight: 700;
         }
         h2 {
             color: #2563eb;
-            margin-top: 10px; /* Increased margin */
-            margin-bottom: 12px; /* Increased margin */
-            font-size: 1.8em; /* Increased font size */
+            margin-top: 10px;
+            margin-bottom: 12px;
+            font-size: 1.8em;
             text-align: center;
         }
 
-        /* Container for question and staff (side-by-side) */
+        /* Contenedor para la pregunta y el pentagrama (lado a lado en desktop, apilado en móvil) */
         #displaySection {
             display: flex;
-            flex-direction: row; /* Arrange children horizontally */
-            justify-content: center; /* Center content blocks horizontally */
-            align-items: flex-start; /* Align items to the start (top) */
-            gap: 40px; /* Increased space between grid and staff */
-            margin-bottom: 25px; /* Increased space below this section */
-            flex-wrap: wrap; /* Allow elements to wrap on smaller screens */
-            flex-grow: 1; /* Allow this section to grow */
-            min-height: 0; /* Allow shrinking */
+            flex-direction: row; /* Por defecto, horizontal */
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            margin-bottom: 25px;
+            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas más pequeñas */
+            flex-grow: 1;
+            min-height: 0;
         }
 
-        /* Question display area */
+        /* Área de la pregunta (cuadrícula de notas) */
         #questionArea {
             background-color: #eff6ff;
-            padding: 20px; /* Increased padding */
+            padding: 20px;
             border-radius: 10px;
             color: #1e40af;
             text-align: center;
-            min-height: 90px; /* Increased min-height */
+            min-height: 90px;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center content horizontally within questionArea */
-            justify-content: center; /* Center content vertically within questionArea */
+            align-items: center;
+            justify-content: center;
             border: 1px solid #dbeafe;
-            gap: 10px; /* Increased spacing */
-            flex: 1; /* Allows it to grow, but respects max-width */
-            max-width: 320px; /* Increased max-width for the grid on large screens */
-            min-width: 220px; /* Increased min-width to prevent squashing */
-            height: fit-content; /* Adjust height to content */
+            gap: 10px;
+            flex: 1; /* Permite que crezca */
+            max-width: 320px; /* Ancho máximo para la cuadrícula */
+            min-width: 220px; /* Ancho mínimo para evitar que se aplaste */
+            height: fit-content;
         }
         #questionArea p {
             margin: 0;
-            font-size: 1.6em; /* Increased font size for question text */
+            font-size: 1.6em;
             font-weight: 600;
         }
 
-        /* Notes grid styles (for the question grid) */
+        /* Estilos de la cuadrícula de notas (para la pregunta) */
         .notes-grid {
             display: grid;
-            grid-template-columns: 1fr; /* Single column for vertical layout */
-            grid-template-rows: repeat(4, 1fr); /* Make the 4 rows equal height */
-            gap: 4px; /* Slightly increased spacing between cells */
-            width: 90%; /* Adjusted width to be more fluid */
-            max-width: 200px; /* Fixed max-width for vertical display */
-            margin: 20px auto; /* Center grid horizontally and add vertical margin */
-            border: 2px solid #64748b; /* Outer border for the grid */
-            border-radius: 5px; /* Slightly rounded corners for the grid container */
-            overflow: hidden; /* Ensures clean inner borders */
-            height: auto; /* Allow it to grow/shrink */
-            max-height: 280px; /* Set a max height */
-            flex-grow: 1; /* Allow it to grow within #questionArea */
-            min-height: 0; /* Allow it to shrink */
+            grid-template-columns: 1fr; /* Una sola columna para diseño vertical */
+            grid-template-rows: repeat(4, 1fr); /* 4 filas de igual altura */
+            gap: 4px;
+            width: 90%; /* Ancho más fluido */
+            max-width: 200px; /* Ancho máximo fijo para la visualización vertical */
+            margin: 20px auto;
+            border: 2px solid #64748b;
+            border-radius: 5px;
+            overflow: hidden;
+            height: auto;
+            max-height: 280px;
+            flex-grow: 1;
+            min-height: 0;
         }
 
         .grid-cell {
             background-color: #ffffff;
-            border: 1px solid #94a3b8; /* Inner cell borders */
-            padding: 15px 12px; /* Adjusted padding to accommodate label and note */
+            border: 1px solid #94a3b8;
+            padding: 15px 12px;
             display: flex;
-            justify-content: space-between; /* Space between label and note */
+            justify-content: space-between;
             align-items: center;
-            font-size: 1.3em; /* Base font size for grid cells */
+            font-size: 1.3em;
             font-weight: 700;
             color: #334155;
-            box-sizing: border-box; /* Include padding and border in total width and height */
+            box-sizing: border-box;
         }
 
         .interval-label {
-            font-size: 1em; /* Increased font size for interval label */
-            color: #64748b; /* Lighter color for the label */
-            font-weight: normal; /* Normal weight for the label */
+            font-size: 1em;
+            color: #64748b;
+            font-weight: normal;
         }
 
         .note-display {
-            font-size: 1.8em; /* Increased font size for the note */
+            font-size: 1.8em;
             font-weight: 700;
             color: #334155;
         }
 
         .note-display.highlighted {
-            background-color: #facc15; /* Yellow background for highlighted note */
-            color: #334155; /* Darker text for contrast */
-            padding: 4px 8px; /* Small padding for highlight effect */
-            border-radius: 4px; /* Rounded corners for highlight */
+            background-color: #facc15;
+            color: #334155;
+            padding: 4px 8px;
+            border-radius: 4px;
         }
 
-        /* Input section - Note selection */
+        /* Sección de entrada - Selección de notas */
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Increased spacing */
-            margin-bottom: 25px; /* Adjusted bottom margin */
-            flex-grow: 1; /* Allow this section to grow */
-            min-height: 0; /* Allow shrinking */
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-grow: 1;
+            min-height: 0;
         }
         label {
             display: block;
-            margin-bottom: 5px; /* Increased margin */
+            margin-bottom: 5px;
             font-weight: 600;
             color: #475569;
-            font-size: 1.2em; /* Increased font size */
+            font-size: 1.2em;
         }
 
-        /* Note building controls */
+        /* Controles de construcción de notas */
         .note-building-controls {
             display: flex;
-            gap: 12px; /* Increased spacing */
-            margin-bottom: 12px; /* Increased margin */
-            flex-wrap: wrap; /* Allows wrapping on smaller screens */
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap; /* Permite el ajuste de línea en pantallas pequeñas */
             justify-content: center;
         }
         .natural-note-buttons, .accidental-buttons {
             display: grid;
-            gap: 5px; /* Increased spacing for buttons */
-            flex: 1; /* Allows them to grow */
-            min-width: 150px; /* Increased min-width */
+            gap: 5px;
+            flex: 1; /* Permite que crezcan */
+            min-width: 150px;
         }
         .natural-note-buttons {
-            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); /* Adjusted minmax for larger buttons */
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
         }
         .accidental-buttons {
-            grid-template-columns: repeat(2, 1fr); /* 2 columns for accidentals */
-            max-width: 100px; /* Increased max-width for accidental buttons */
+            grid-template-columns: repeat(2, 1fr); /* 2 columnas para accidentales */
+            max-width: 100px;
         }
 
         .note-button {
-            background-color: #e2e8f0; /* Light gray */
+            background-color: #e2e8f0;
             color: #475569;
-            padding: 10px 0; /* Increased padding for larger buttons */
+            padding: 10px 0;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 0.9em; /* Increased font size */
+            font-size: 0.9em;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
             user-select: none;
-            min-width: 40px; /* Increased min-width */
+            min-width: 40px;
+            touch-action: manipulation; /* Mejora la respuesta táctil */
         }
         .note-button:hover {
             background-color: #d1d9e2;
@@ -216,7 +216,7 @@
             transform: translateY(0);
         }
         .note-button.selected {
-            background-color: #2563eb; /* Blue for selected */
+            background-color: #2563eb;
             color: white;
             border-color: #1e40af;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
@@ -228,44 +228,48 @@
             color: #94a3b8;
         }
 
-
-        /* Display of selected notes (final answer list) */
+        /* Visualización de notas seleccionadas (lista de respuesta final) */
         #selectedNotesDisplay {
             background-color: #eff6ff;
-            padding: 15px; /* Increased padding */
+            padding: 15px;
             border-radius: 8px;
-            min-height: 50px; /* Increased min-height */
+            min-height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2em; /* Increased font size */
+            font-size: 1.2em;
             color: #1e40af;
             border: 1px solid #dbeafe;
             font-weight: 500;
-            margin-bottom: 15px; /* Increased margin */
+            margin-bottom: 15px;
+            text-align: center; /* Asegura que el texto esté centrado */
         }
         #selectedNotesDisplay strong {
             color: #1d4ed8;
         }
 
-        /* Main action button group */
+        /* Grupo de botones de acción principal */
         .action-buttons-group {
             display: flex;
-            gap: 15px; /* Increased spacing */
+            gap: 15px;
             justify-content: center;
-            margin-top: auto; /* Pushes button group to the bottom */
-            padding-top: 20px; /* Adds some padding above the buttons */
-            margin-bottom: 15px; /* Added margin to ensure buttons are not cut off */
+            margin-top: auto; /* Empuja el grupo de botones hacia abajo */
+            padding-top: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap; /* Permite que los botones se envuelvan */
         }
         .action-buttons-group button {
-            padding: 15px 30px; /* Increased padding */
+            flex: 1 1 auto; /* Permite que los botones se expandan y contraigan */
+            min-width: 140px; /* Ancho mínimo para que sean tocables */
+            padding: 15px 30px;
             border: none;
             border-radius: 8px;
-            font-size: 1.2em; /* Increased font size */
+            font-size: 1.2em;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            touch-action: manipulation; /* Mejora la respuesta táctil */
         }
         .action-buttons-group button:hover {
             transform: translateY(-2px);
@@ -277,7 +281,7 @@
         }
 
         #confirmAnswerButton {
-            background-color: #22c55e; /* Green */
+            background-color: #22c55e;
             color: white;
         }
         #confirmAnswerButton:hover {
@@ -285,7 +289,7 @@
         }
 
         #clearAllSelectionButton {
-            background-color: #f59e0b; /* Orange */
+            background-color: #f59e0b;
             color: white;
         }
         #clearAllSelectionButton:hover {
@@ -293,23 +297,22 @@
         }
 
         #changeQuestionButton {
-            background-color: #64748b; /* Gray */
+            background-color: #64748b;
             color: white;
         }
         #changeQuestionButton:hover {
             background-color: #475569;
         }
 
-
-        /* Common modal styles (for feedback and evaluation) */
+        /* Estilos comunes de modal (para retroalimentación y evaluación) */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.4); /* Slightly less opaque for background visibility */
-            display: none; /* Hidden by default */
+            background-color: rgba(0, 0, 0, 0.4);
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -318,47 +321,47 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
         .modal-overlay.visible {
-            display: flex; /* Show when visible */
+            display: flex;
             opacity: 1;
             visibility: visible;
         }
         .modal-content {
             background-color: #ffffff;
-            padding: 30px; /* Increased padding */
+            padding: 30px;
             border-radius: 12px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-            max-width: 400px; /* Reduced max-width for a more compact modal */
+            max-width: 400px;
             width: 90%;
             text-align: center;
             transform: translateY(-20px);
             transition: transform 0.3s ease;
-            margin-top: -100px; /* Move modal higher to reveal staff below */
+            margin-top: -100px; /* Mueve el modal más arriba para revelar el pentagrama debajo */
         }
         .modal-overlay.visible .modal-content {
             transform: translateY(0);
         }
         .modal-content h3 {
             color: #1e3a8a;
-            font-size: 1.8em; /* Increased font size */
-            margin-bottom: 20px; /* Increased margin */
+            font-size: 1.8em;
+            margin-bottom: 20px;
         }
         .modal-content p {
             color: #475569;
-            margin-bottom: 12px; /* Increased margin */
+            margin-bottom: 12px;
             font-size: 1.1em;
         }
         .modal-content ul {
             list-style: none;
             padding: 0;
-            margin-bottom: 20px; /* Increased margin */
+            margin-bottom: 20px;
             text-align: left;
             color: #334155;
         }
         .modal-content ul li {
             background-color: #eff6ff;
-            padding: 10px 15px; /* Increased padding */
+            padding: 10px 15px;
             border-radius: 8px;
-            margin-bottom: 8px; /* Increased margin */
+            margin-bottom: 8px;
             border: 1px solid #dbeafe;
             font-size: 1.05em;
         }
@@ -368,18 +371,22 @@
         .modal-content .modal-buttons {
             display: flex;
             justify-content: center;
-            gap: 12px; /* Increased spacing */
-            margin-top: 20px; /* Increased margin */
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Permite que los botones del modal se envuelvan */
         }
         .modal-content .modal-buttons button {
-            padding: 12px 25px; /* Increased padding */
+            flex: 1 1 auto; /* Permite que los botones se expandan */
+            min-width: 120px; /* Ancho mínimo para botones de modal */
+            padding: 12px 25px;
             border: none;
             border-radius: 8px;
-            font-size: 1.1em; /* Increased font size */
+            font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            touch-action: manipulation; /* Mejora la respuesta táctil */
         }
         .modal-content .modal-buttons button:hover {
             transform: translateY(-2px);
@@ -390,88 +397,87 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         #continueTrainingButton {
-            background-color: #3b82f6; /* Blue */
+            background-color: #3b82f6;
             color: white;
         }
         #continueTrainingButton:hover {
             background-color: #2563eb;
         }
         #endSessionButton {
-            background-color: #ef4444; /* Red */
+            background-color: #ef4444;
             color: white;
         }
         #endSessionButton:hover {
             background-color: #dc2626;
         }
 
-        /* Specific feedback modal content styles (uses modal-content base) */
+        /* Estilos específicos del contenido del modal de retroalimentación */
         #feedbackModalContent.correct {
-            background-color: #dcfce7; /* Light green */
-            color: #15803d; /* Dark green */
+            background-color: #dcfce7;
+            color: #15803d;
             border: 1px solid #15803d;
         }
         #feedbackModalContent.incorrect {
-            background-color: #fee2e2; /* Light red */
-            color: #b91c1c; /* Dark red */
+            background-color: #fee2e2;
+            color: #b91c1c;
             border: 1px solid #b91c1c;
         }
         #feedbackModalContent p {
             margin: 8px 0;
-            font-size: 1.2em; /* Increased font size */
+            font-size: 1.2em;
         }
         #feedbackModalContent strong {
-            font-size: 1.3em; /* Increased font size */
+            font-size: 1.3em;
         }
         #feedbackModalContent span {
-            font-size: 1.1em; /* Increased font size */
+            font-size: 1.1em;
         }
 
-
-        /* Final message display */
+        /* Visualización del mensaje final */
         #finalMessageDisplay {
-            background-color: #d1fae5; /* Light green for success */
-            padding: 30px; /* Increased padding */
+            background-color: #d1fae5;
+            padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            max-width: 650px; /* Increased max-width */
+            max-width: 650px;
             width: 100%;
             text-align: center;
-            display: none; /* Hidden by default */
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 200px; /* Increased min-height */
+            min-height: 200px;
             border: 1px solid #6ee7b7;
             color: #065f46;
         }
         #finalMessageDisplay h3 {
             color: #047857;
-            font-size: 2em; /* Increased font size */
-            margin-bottom: 12px; /* Increased margin */
+            font-size: 2em;
+            margin-bottom: 12px;
         }
         #finalMessageDisplay p {
-            font-size: 1.1em; /* Increased font size */
-            margin-bottom: 10px; /* Increased margin */
+            font-size: 1.1em;
+            margin-bottom: 10px;
         }
         #finalMessageDisplay .results-summary {
             font-weight: bold;
-            font-size: 1.2em; /* Increased font size */
-            margin-top: 20px; /* Increased margin */
+            font-size: 1.2em;
+            margin-top: 20px;
         }
         #finalMessageDisplay .email-info {
             font-style: italic;
             color: #064e3b;
-            margin-top: 12px; /* Increased margin */
+            margin-top: 12px;
         }
 
-        /* Welcome modal styles */
+        /* Estilos del modal de bienvenida */
         #welcomeModalOverlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Darker background for welcome modal */
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro para el modal de bienvenida */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -487,10 +493,10 @@
         }
         #welcomeModalContent {
             background-color: #ffffff;
-            padding: 40px; /* Generous padding */
+            padding: 40px;
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-            max-width: 550px; /* Increased max-width */
+            max-width: 550px;
             width: 90%;
             text-align: center;
             transform: translateY(-30px);
@@ -500,26 +506,27 @@
             transform: translateY(0);
         }
         #welcomeModalContent h2 {
-            font-size: 3em; /* Increased font size */
+            font-size: 3em;
             color: #1e3a8a;
             margin-bottom: 25px;
         }
         #welcomeModalContent p {
-            font-size: 1.3em; /* Increased font size */
+            font-size: 1.3em;
             color: #475569;
             margin-bottom: 35px;
         }
         #welcomeModalContent button {
-            padding: 18px 35px; /* Increased padding */
+            padding: 18px 35px;
             background-color: #2563eb;
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 1.3em; /* Increased font size */
+            font-size: 1.3em;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
             box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            touch-action: manipulation; /* Mejora la respuesta táctil */
         }
         #welcomeModalContent button:hover {
             background-color: #1e40af;
@@ -529,49 +536,49 @@
             transform: translateY(0);
         }
 
-        /* Musical staff area styles */
+        /* Área del pentagrama musical */
         #staffArea {
-            margin-top: 0; /* Adjusted for the new displaySection */
+            margin-top: 0;
             text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%; /* Takes full available width */
-            flex: 2; /* Allows staff area to take more space */
-            max-width: 550px; /* Max-width for staff on large screens */
-            min-width: 300px; /* Min-width for staff on smaller screens */
-            height: fit-content; /* Adjust height to content */
-            padding: 10px; /* Added padding to staff area */
-            box-sizing: border-box; /* Include padding in width/height */
+            width: 100%; /* Ocupa todo el ancho disponible */
+            flex: 2; /* Permite que el área del pentagrama ocupe más espacio */
+            max-width: 550px; /* Ancho máximo para el pentagrama en pantallas grandes */
+            min-width: 300px; /* Ancho mínimo para el pentagrama en pantallas pequeñas */
+            height: fit-content;
+            padding: 10px;
+            box-sizing: border-box;
         }
         #musicalStaffCanvas {
             background-color: #ffffff;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            width: 100%; /* Adjust canvas width to container */
-            max-width: 550px; /* Max-width for desktop */
-            height: auto; /* Allow it to grow/shrink */
-            max-height: 180px; /* Set a max height to prevent it from getting too tall */
-            flex-grow: 1; /* Allow it to grow within #staffArea */
-            min-height: 0; /* Allow it to shrink */
+            width: 100%; /* Ajusta el ancho del canvas al contenedor */
+            max-width: 550px; /* Ancho máximo para desktop */
+            height: auto; /* Permite que crezca/se encoja */
+            max-height: 180px; /* Establece una altura máxima para evitar que sea demasiado alto */
+            flex-grow: 1;
+            min-height: 0;
             box-sizing: border-box;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
+        /* Media Queries para ajustes específicos en pantallas más pequeñas */
+        @media (max-width: 768px) { /* Para tablets y celulares en orientación horizontal */
             body {
-                padding: 5px; /* Less padding for very small screens */
-                padding-bottom: 20px; /* Adjusted padding for mobile bottom */
-                font-size: 15px; /* Smaller base font size for mobile */
+                padding: 5px;
+                padding-bottom: 20px;
+                font-size: 15px;
             }
             .container {
-                padding: 15px; /* Adjusted padding for mobile */
-                padding-bottom: 20px; /* Adjusted padding for mobile */
+                padding: 15px;
+                padding-bottom: 20px;
                 border-radius: 8px;
-                width: 99%; /* Wider on small screens */
-                gap: 10px; /* Reduced gap for mobile */
-                margin-bottom: 15px; /* Adjusted bottom margin for mobile */
+                width: 99%;
+                gap: 10px;
+                margin-bottom: 15px;
             }
             h1 {
                 font-size: 2em;
@@ -579,45 +586,45 @@
             h2 {
                 font-size: 1.4em;
             }
-            /* On small screens, stack display section vertically */
+            /* En pantallas pequeñas, apila la sección de visualización verticalmente */
             #displaySection {
-                flex-direction: column; /* Stack elements vertically */
-                align-items: center; /* Center stacked elements */
-                gap: 20px; /* Smaller spacing when stacked */
+                flex-direction: column; /* Apila elementos verticalmente */
+                align-items: center; /* Centra los elementos apilados */
+                gap: 20px;
             }
             #questionArea {
-                max-width: 95%; /* Take more width when stacked */
-                width: auto; /* Allow content to dictate width, respecting max-width */
-                flex: 0 0 auto; /* Prevent stretching */
-                padding: 15px; /* Reduced padding for mobile */
+                max-width: 95%; /* Ocupa más ancho cuando está apilado */
+                width: auto;
+                flex: 0 0 auto;
+                padding: 15px;
             }
             #staffArea {
-                max-width: 95%; /* Take more width when stacked */
-                min-width: unset; /* Remove min-width when stacked */
-                width: auto; /* Allow content to dictate width, respecting max-width */
-                flex: 0 0 auto; /* Prevent stretching */
-                padding: 15px; /* Reduced padding for mobile */
+                max-width: 95%;
+                min-width: unset;
+                width: auto;
+                flex: 0 0 auto;
+                padding: 15px;
             }
             .note-building-controls {
-                flex-direction: column; /* Stack natural and accidental buttons */
+                flex-direction: column; /* Apila los botones de notas naturales y accidentales */
                 gap: 10px;
             }
             .natural-note-buttons, .accidental-buttons {
-                min-width: unset; /* Remove min-width for full flexibility */
+                min-width: unset;
                 width: 100%;
             }
             .accidental-buttons {
-                grid-template-columns: repeat(4, 1fr); /* 4 columns for accidentals on small screens */
-                max-width: unset; /* Remove max-width */
+                grid-template-columns: repeat(4, 1fr); /* 4 columnas para accidentales en pantallas pequeñas */
+                max-width: unset;
             }
             .note-button {
                 font-size: 0.85em;
                 padding: 8px 0;
             }
             .action-buttons-group {
-                flex-direction: column; /* Stack confirm/next buttons */
+                flex-direction: column; /* Apila los botones de confirmar/siguiente */
                 gap: 10px;
-                margin-bottom: 10px; /* Adjusted margin for mobile */
+                margin-bottom: 10px;
             }
             .action-buttons-group button {
                 width: 100%;
@@ -626,20 +633,20 @@
                 font-size: 1.3em;
             }
             .notes-grid {
-                width: 170px; /* Fixed width for mobile to prevent cutting */
-                max-width: 170px; /* Fixed max-width for consistency */
-                height: auto; /* Allow it to grow/shrink */
-                max-height: 240px; /* Set a max height */
+                width: 170px; /* Ancho fijo para móvil para evitar recortes */
+                max-width: 170px; /* Ancho máximo fijo para consistencia */
+                height: auto;
+                max-height: 240px;
             }
             .grid-cell {
-                padding: 12px 10px; /* Reduced padding for smaller cells */
-                font-size: 1.2em; /* Adjusted font size for mobile cells */
+                padding: 12px 10px;
+                font-size: 1.2em;
             }
             .interval-label {
-                font-size: 0.9em; /* Adjusted for mobile */
+                font-size: 0.9em;
             }
             .note-display {
-                font-size: 1.6em; /* Adjusted for mobile */
+                font-size: 1.6em;
             }
             #selectedNotesDisplay {
                 font-size: 1em;
@@ -666,10 +673,10 @@
                 font-size: 1.2em;
             }
             #musicalStaffCanvas {
-                width: 100%; /* Ensure canvas takes full width of its parent */
-                height: auto; /* Allow it to grow/shrink */
-                max-width: 280px; /* Smaller max width for staff on mobile */
-                max-height: 160px; /* Smaller max height for staff on mobile */
+                width: 100%;
+                height: auto;
+                max-width: 280px; /* Ancho máximo más pequeño para el pentagrama en móvil */
+                max-height: 160px; /* Altura máxima más pequeña para el pentagrama en móvil */
             }
         }
     </style>
@@ -1672,7 +1679,7 @@
 
             currentOrderedLabelsForDisplay = []; // Labels for the grid (e.g., "1", "6", "5", "3")
             currentCorrectNotes = []; // Actual notes for the answer (e.g., "C", "A", "G", "E")
-            currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing
+            currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing.
             
             baseVoicingLabels.forEach(label => {
                 let semitonesToRoot;
