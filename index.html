@@ -6,200 +6,204 @@
     <title>Bloque Armónico Pro: Herramienta de Entrenamiento</title>
     <!-- Tone.js para la reproducción de audio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <!-- VexFlow para la notación musical -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js"></script>
     <style>
-        /* Ajustes de HTML y Body para evitar el desplazamiento */
+        /* HTML and Body adjustments to prevent scrolling */
         html, body {
-            height: 100%; /* El html y el body ocupan toda la altura del viewport */
+            height: 100%; /* HTML and body take full viewport height */
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Oculta cualquier contenido que se desborde para evitar el desplazamiento */
-            display: flex; /* Convierte el body en un contenedor flex */
-            flex-direction: column; /* Apila los elementos hijos verticalmente */
-            justify-content: center; /* Centra el contenido verticalmente */
-            align-items: center; /* Centra el contenido horizontalmente */
+            overflow: hidden; /* Hide any overflowing content to prevent scrolling */
+            display: flex; /* Make body a flex container */
+            flex-direction: column; /* Stack child elements vertically */
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
             box-sizing: border-box;
         }
 
-        /* Estilos base para el cuerpo y el contenedor */
+        /* Base styles for body and container */
         body {
-            padding: 5px; /* Relleno mínimo para el body */
+            padding: 10px; /* Increased padding for the body for 100% zoom */
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Fondo azul gris claro */
-            color: #334155; /* Color de texto más oscuro */
+            background-color: #f0f4f8; /* Light grayish blue background */
+            color: #334155; /* Darker text color */
             line-height: 1.6;
+            font-size: 17px; /* Base font size for 100% zoom */
         }
 
         .container {
             background-color: #ffffff;
-            padding: 15px; /* Relleno general reducido */
-            padding-bottom: 20px; /* Relleno inferior reducido para el botón */
+            padding: 30px; /* Increased general padding */
+            padding-bottom: 35px; /* Increased bottom padding for the button */
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            max-width: 650px;
-            width: 98%; /* Mayor ancho para mejor responsividad */
+            max-width: 800px; /* Increased max-width */
+            width: 95%; /* Wider for better responsiveness */
             box-sizing: border-box;
             border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Espaciado ajustado entre secciones */
-            flex-grow: 1; /* Permite que el contenedor crezca y ocupe el espacio disponible */
-            max-height: 99vh; /* Limita la altura para evitar que se desborde del body */
+            gap: 20px; /* Increased spacing between sections */
+            flex-grow: 1; /* Allows the container to grow and take available space */
+            max-height: 98vh; /* Limits height to prevent overflow from body */
         }
 
-        /* Encabezados */
+        /* Headings */
         h1 {
             color: #1e3a8a;
             text-align: center;
-            margin-bottom: 8px; /* Margen reducido */
-            font-size: 1.8em; /* Fuente ligeramente más pequeña */
+            margin-bottom: 15px; /* Increased margin */
+            font-size: 2.4em; /* Increased font size */
             font-weight: 700;
         }
         h2 {
             color: #2563eb;
-            margin-top: 5px; /* Margen reducido */
-            margin-bottom: 8px; /* Margen reducido */
-            font-size: 1.3em; /* Fuente ligeramente más pequeña */
+            margin-top: 10px; /* Increased margin */
+            margin-bottom: 12px; /* Increased margin */
+            font-size: 1.8em; /* Increased font size */
             text-align: center;
         }
 
-        /* Contenedor para la pregunta y la partitura (lado a lado) */
+        /* Container for question and staff (side-by-side) */
         #displaySection {
             display: flex;
-            flex-direction: row; /* Organiza los hijos horizontalmente */
-            justify-content: center; /* Centra los bloques de contenido horizontalmente */
-            align-items: flex-start; /* Alinea los elementos al inicio (arriba) */
-            gap: 20px; /* Espacio entre la cuadrícula y la partitura */
-            margin-bottom: 15px; /* Espacio debajo de esta sección */
-            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas más pequeñas */
+            flex-direction: row; /* Arrange children horizontally */
+            justify-content: center; /* Center content blocks horizontally */
+            align-items: flex-start; /* Align items to the start (top) */
+            gap: 40px; /* Increased space between grid and staff */
+            margin-bottom: 25px; /* Increased space below this section */
+            flex-wrap: wrap; /* Allow elements to wrap on smaller screens */
             flex-grow: 1; /* Allow this section to grow */
             min-height: 0; /* Allow shrinking */
         }
 
-        /* Área de visualización de la pregunta */
+        /* Question display area */
         #questionArea {
             background-color: #eff6ff;
-            padding: 10px; /* Relleno reducido */
+            padding: 20px; /* Increased padding */
             border-radius: 10px;
             color: #1e40af;
             text-align: center;
-            min-height: 60px; /* Altura mínima reducida */
+            min-height: 90px; /* Increased min-height */
             display: flex;
             flex-direction: column;
-            align-items: center; /* Centra el contenido horizontalmente dentro de questionArea */
-            justify-content: center; /* Centra el contenido verticalmente dentro de questionArea */
+            align-items: center; /* Center content horizontally within questionArea */
+            justify-content: center; /* Center content vertically within questionArea */
             border: 1px solid #dbeafe;
-            gap: 6px; /* Espaciado reducido */
-            flex: 1; /* Permite que crezca, pero respeta el max-width */
-            max-width: 250px; /* Ancho máximo para la cuadrícula en pantallas grandes */
-            min-width: 180px; /* Ancho mínimo para evitar que se aplaste */
+            gap: 10px; /* Increased spacing */
+            flex: 1; /* Allows it to grow, but respects max-width */
+            max-width: 320px; /* Increased max-width for the grid on large screens */
+            min-width: 220px; /* Increased min-width to prevent squashing */
             height: fit-content; /* Adjust height to content */
         }
         #questionArea p {
             margin: 0;
-            font-size: 1.3em; /* Fuente ligeramente más pequeña para el texto de la pregunta */
+            font-size: 1.6em; /* Increased font size for question text */
             font-weight: 600;
         }
 
-        /* Estilos de la cuadrícula de notas (para la cuadrícula de la pregunta) */
+        /* Notes grid styles (for the question grid) */
         .notes-grid {
             display: grid;
-            grid-template-columns: 1fr; /* Una sola columna para el diseño vertical */
-            grid-template-rows: repeat(4, 1fr); /* Hace que las 4 filas tengan la misma altura */
-            gap: 2px; /* Espaciado aún más pequeño entre celdas */
-            width: 160px; /* Ancho ajustado para ser más compacto */
-            max-width: 160px; /* Ancho fijo para la visualización vertical */
-            margin: 10px auto; /* Centra la cuadrícula horizontalmente y añade margen vertical */
-            border: 2px solid #64748b; /* Borde exterior para la cuadrícula */
-            border-radius: 5px; /* Esquinas ligeramente redondeadas para el contenedor de la cuadrícula */
-            overflow: hidden; /* Asegura que los bordes internos sean limpios */
+            grid-template-columns: 1fr; /* Single column for vertical layout */
+            grid-template-rows: repeat(4, 1fr); /* Make the 4 rows equal height */
+            gap: 4px; /* Slightly increased spacing between cells */
+            width: 200px; /* Adjusted width to be more compact */
+            max-width: 200px; /* Fixed width for vertical display */
+            margin: 20px auto; /* Center grid horizontally and add vertical margin */
+            border: 2px solid #64748b; /* Outer border for the grid */
+            border-radius: 5px; /* Slightly rounded corners for the grid container */
+            overflow: hidden; /* Ensures clean inner borders */
             height: auto; /* Allow it to grow/shrink */
-            max-height: 226px; /* Set a max height */
+            max-height: 280px; /* Set a max height */
             flex-grow: 1; /* Allow it to grow within #questionArea */
             min-height: 0; /* Allow it to shrink */
         }
 
         .grid-cell {
             background-color: #ffffff;
-            border: 1px solid #94a3b8; /* Bordes de celda internos */
-            padding: 10px 8px; /* Relleno ajustado para acomodar la etiqueta y la nota */
+            border: 1px solid #94a3b8; /* Inner cell borders */
+            padding: 15px 12px; /* Adjusted padding to accommodate label and note */
             display: flex;
-            justify-content: space-between; /* Espacio entre la etiqueta y la nota */
+            justify-content: space-between; /* Space between label and note */
             align-items: center;
-            font-size: 1.1em; /* Tamaño de fuente base para las celdas de la cuadrícula */
+            font-size: 1.3em; /* Base font size for grid cells */
             font-weight: 700;
             color: #334155;
-            box-sizing: border-box; /* Incluye el relleno y el borde en el ancho y alto total del elemento */
+            box-sizing: border-box; /* Include padding and border in total width and height */
         }
 
         .interval-label {
-            font-size: 0.8em; /* Fuente más pequeña para la etiqueta del intervalo */
-            color: #64748b; /* Color más claro para la etiqueta */
-            font-weight: normal; /* Peso normal para la etiqueta */
+            font-size: 1em; /* Increased font size for interval label */
+            color: #64748b; /* Lighter color for the label */
+            font-weight: normal; /* Normal weight for the label */
         }
 
         .note-display {
-            font-size: 1.4em; /* Fuente más grande para la nota */
+            font-size: 1.8em; /* Increased font size for the note */
             font-weight: 700;
             color: #334155;
         }
 
         .note-display.highlighted {
-            background-color: #facc15; /* Fondo amarillo para la nota resaltada */
-            color: #334155; /* Texto más oscuro para contraste */
-            padding: 2px 5px; /* Pequeño relleno para el efecto de resaltado */
-            border-radius: 4px; /* Esquinas redondeadas para el resaltado */
+            background-color: #facc15; /* Yellow background for highlighted note */
+            color: #334155; /* Darker text for contrast */
+            padding: 4px 8px; /* Small padding for highlight effect */
+            border-radius: 4px; /* Rounded corners for highlight */
         }
 
-        /* Sección de entrada - Selección de notas */
+        /* Input section - Note selection */
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 6px; /* Espaciado reducido */
-            margin-bottom: 15px; /* Margen inferior ajustado */
+            gap: 10px; /* Increased spacing */
+            margin-bottom: 25px; /* Adjusted bottom margin */
             flex-grow: 1; /* Allow this section to grow */
             min-height: 0; /* Allow shrinking */
         }
         label {
             display: block;
-            margin-bottom: 2px; /* Margen reducido */
+            margin-bottom: 5px; /* Increased margin */
             font-weight: 600;
             color: #475569;
+            font-size: 1.2em; /* Increased font size */
         }
 
-        /* Controles de construcción de notas */
+        /* Note building controls */
         .note-building-controls {
             display: flex;
-            gap: 8px; /* Espaciado reducido */
-            margin-bottom: 8px; /* Margen reducido */
-            flex-wrap: wrap; /* Permite el ajuste en pantallas más pequeñas */
+            gap: 12px; /* Increased spacing */
+            margin-bottom: 12px; /* Increased margin */
+            flex-wrap: wrap; /* Allows wrapping on smaller screens */
             justify-content: center;
         }
         .natural-note-buttons, .accidental-buttons {
             display: grid;
-            gap: 3px; /* Espaciado reducido para los botones */
-            flex: 1; /* Permite que crezcan */
-            min-width: 110px; /* Ancho mínimo reducido */
+            gap: 5px; /* Increased spacing for buttons */
+            flex: 1; /* Allows them to grow */
+            min-width: 150px; /* Increased min-width */
         }
         .natural-note-buttons {
-            grid-template-columns: repeat(auto-fit, minmax(30px, 1fr)); /* minmax ajustado para botones más pequeños */
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); /* Adjusted minmax for larger buttons */
         }
         .accidental-buttons {
-            grid-template-columns: repeat(2, 1fr); /* 2 columnas para accidentales */
-            max-width: 80px; /* Ancho máximo reducido para botones accidentales */
+            grid-template-columns: repeat(2, 1fr); /* 2 columns for accidentals */
+            max-width: 100px; /* Increased max-width for accidental buttons */
         }
 
         .note-button {
-            background-color: #e2e8f0; /* Gris claro */
+            background-color: #e2e8f0; /* Light gray */
             color: #475569;
-            padding: 6px 0; /* Relleno reducido para botones más pequeños */
+            padding: 10px 0; /* Increased padding for larger buttons */
             border: 1px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 0.7em; /* Tamaño de fuente aún más reducido */
+            font-size: 0.9em; /* Increased font size */
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
             user-select: none;
-            min-width: 30px; /* Ancho mínimo ajustado */
+            min-width: 40px; /* Increased min-width */
         }
         .note-button:hover {
             background-color: #d1d9e2;
@@ -209,7 +213,7 @@
             transform: translateY(0);
         }
         .note-button.selected {
-            background-color: #2563eb; /* Azul para seleccionado */
+            background-color: #2563eb; /* Blue for selected */
             color: white;
             border-color: #1e40af;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
@@ -222,38 +226,38 @@
         }
 
 
-        /* Visualización de las notas seleccionadas (lista de respuesta final) */
+        /* Display of selected notes (final answer list) */
         #selectedNotesDisplay {
             background-color: #eff6ff;
-            padding: 10px; /* Relleno reducido */
+            padding: 15px; /* Increased padding */
             border-radius: 8px;
-            min-height: 30px; /* Altura mínima reducida */
+            min-height: 50px; /* Increased min-height */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1em; /* Tamaño de fuente reducido */
+            font-size: 1.2em; /* Increased font size */
             color: #1e40af;
             border: 1px solid #dbeafe;
             font-weight: 500;
-            margin-bottom: 8px; /* Margen reducido */
+            margin-bottom: 15px; /* Increased margin */
         }
         #selectedNotesDisplay strong {
             color: #1d4ed8;
         }
 
-        /* Grupo de botones de acción principal */
+        /* Main action button group */
         .action-buttons-group {
             display: flex;
-            gap: 10px; /* Espaciado reducido */
+            gap: 15px; /* Increased spacing */
             justify-content: center;
-            margin-top: auto; /* Empuja el grupo de botones hacia abajo */
-            padding-top: 10px; /* Añade algo de relleno encima de los botones */
+            margin-top: auto; /* Pushes button group to the bottom */
+            padding-top: 20px; /* Adds some padding above the buttons */
         }
         .action-buttons-group button {
-            padding: 10px 20px; /* Relleno reducido */
+            padding: 15px 30px; /* Increased padding */
             border: none;
             border-radius: 8px;
-            font-size: 1em; /* Tamaño de fuente reducido */
+            font-size: 1.2em; /* Increased font size */
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
@@ -269,7 +273,7 @@
         }
 
         #confirmAnswerButton {
-            background-color: #22c55e; /* Verde */
+            background-color: #22c55e; /* Green */
             color: white;
         }
         #confirmAnswerButton:hover {
@@ -277,7 +281,7 @@
         }
 
         #clearAllSelectionButton {
-            background-color: #f59e0b; /* Naranja */
+            background-color: #f59e0b; /* Orange */
             color: white;
         }
         #clearAllSelectionButton:hover {
@@ -285,7 +289,7 @@
         }
 
         #changeQuestionButton {
-            background-color: #64748b; /* Gris */
+            background-color: #64748b; /* Gray */
             color: white;
         }
         #changeQuestionButton:hover {
@@ -293,7 +297,7 @@
         }
 
 
-        /* Estilos de modal comunes (para feedback y evaluación) */
+        /* Common modal styles (for feedback and evaluation) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -301,7 +305,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
-            display: none; /* Oculto por defecto */
+            display: none; /* Hidden by default */
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -310,16 +314,16 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
         .modal-overlay.visible {
-            display: flex; /* Mostrar cuando es visible */
+            display: flex; /* Show when visible */
             opacity: 1;
             visibility: visible;
         }
         .modal-content {
             background-color: #ffffff;
-            padding: 25px; /* Relleno reducido */
+            padding: 30px; /* Increased padding */
             border-radius: 12px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-            max-width: 450px; /* Ancho máximo reducido */
+            max-width: 500px; /* Increased max-width */
             width: 90%;
             text-align: center;
             transform: translateY(-20px);
@@ -330,26 +334,28 @@
         }
         .modal-content h3 {
             color: #1e3a8a;
-            font-size: 1.6em; /* Tamaño de fuente reducido */
-            margin-bottom: 15px; /* Margen reducido */
+            font-size: 1.8em; /* Increased font size */
+            margin-bottom: 20px; /* Increased margin */
         }
         .modal-content p {
             color: #475569;
-            margin-bottom: 10px; /* Margen reducido */
+            margin-bottom: 12px; /* Increased margin */
+            font-size: 1.1em;
         }
         .modal-content ul {
             list-style: none;
             padding: 0;
-            margin-bottom: 15px; /* Margen reducido */
+            margin-bottom: 20px; /* Increased margin */
             text-align: left;
             color: #334155;
         }
         .modal-content ul li {
             background-color: #eff6ff;
-            padding: 8px 12px; /* Relleno reducido */
+            padding: 10px 15px; /* Increased padding */
             border-radius: 8px;
-            margin-bottom: 6px; /* Margen reducido */
+            margin-bottom: 8px; /* Increased margin */
             border: 1px solid #dbeafe;
+            font-size: 1.05em;
         }
         .modal-content ul li strong {
             color: #2563eb;
@@ -357,14 +363,14 @@
         .modal-content .modal-buttons {
             display: flex;
             justify-content: center;
-            gap: 10px; /* Espaciado reducido */
-            margin-top: 15px; /* Margen reducido */
+            gap: 12px; /* Increased spacing */
+            margin-top: 20px; /* Increased margin */
         }
         .modal-content .modal-buttons button {
-            padding: 10px 20px; /* Relleno reducido */
+            padding: 12px 25px; /* Increased padding */
             border: none;
             border-radius: 8px;
-            font-size: 1em; /* Tamaño de fuente reducido */
+            font-size: 1.1em; /* Increased font size */
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
@@ -378,89 +384,89 @@
             transform: translateY(0);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        #continueTrainingButton { /* Renamed */
-            background-color: #3b82f6; /* Azul */
+        #continueTrainingButton {
+            background-color: #3b82f6; /* Blue */
             color: white;
         }
-        #continueTrainingButton:hover { /* Renamed */
+        #continueTrainingButton:hover {
             background-color: #2563eb;
         }
-        #endSessionButton { /* Renamed */
-            background-color: #ef4444; /* Rojo */
+        #endSessionButton {
+            background-color: #ef4444; /* Red */
             color: white;
         }
-        #endSessionButton:hover { /* Renamed */
+        #endSessionButton:hover {
             background-color: #dc2626;
         }
 
-        /* Estilos específicos del contenido del modal de feedback (usa la base de modal-content) */
+        /* Specific feedback modal content styles (uses modal-content base) */
         #feedbackModalContent.correct {
-            background-color: #dcfce7; /* Verde claro */
-            color: #15803d; /* Verde oscuro */
+            background-color: #dcfce7; /* Light green */
+            color: #15803d; /* Dark green */
             border: 1px solid #15803d;
         }
         #feedbackModalContent.incorrect {
-            background-color: #fee2e2; /* Rojo claro */
-            color: #b91c1c; /* Rojo oscuro */
+            background-color: #fee2e2; /* Light red */
+            color: #b91c1c; /* Dark red */
             border: 1px solid #b91c1c;
         }
         #feedbackModalContent p {
-            margin: 5px 0;
-            font-size: 1.1em; /* Tamaño de fuente reducido */
+            margin: 8px 0;
+            font-size: 1.2em; /* Increased font size */
         }
         #feedbackModalContent strong {
-            font-size: 1.2em; /* Tamaño de fuente reducido */
+            font-size: 1.3em; /* Increased font size */
         }
         #feedbackModalContent span {
-            font-size: 1em; /* Tamaño de fuente reducido */
+            font-size: 1.1em; /* Increased font size */
         }
 
 
-        /* Visualización del mensaje final */
+        /* Final message display */
         #finalMessageDisplay {
-            background-color: #d1fae5; /* Verde claro para el éxito */
-            padding: 25px; /* Relleno reducido */
+            background-color: #d1fae5; /* Light green for success */
+            padding: 30px; /* Increased padding */
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            max-width: 600px;
+            max-width: 650px; /* Increased max-width */
             width: 100%;
             text-align: center;
-            display: none; /* Oculto por defecto */
+            display: none; /* Hidden by default */
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 180px; /* Altura mínima reducida */
+            min-height: 200px; /* Increased min-height */
             border: 1px solid #6ee7b7;
             color: #065f46;
         }
         #finalMessageDisplay h3 {
             color: #047857;
-            font-size: 1.8em; /* Tamaño de fuente reducido */
-            margin-bottom: 10px; /* Margen reducido */
+            font-size: 2em; /* Increased font size */
+            margin-bottom: 12px; /* Increased margin */
         }
         #finalMessageDisplay p {
-            font-size: 1em; /* Tamaño de fuente reducido */
-            margin-bottom: 8px; /* Margen reducido */
+            font-size: 1.1em; /* Increased font size */
+            margin-bottom: 10px; /* Increased margin */
         }
         #finalMessageDisplay .results-summary {
             font-weight: bold;
-            font-size: 1.1em; /* Tamaño de fuente reducido */
-            margin-top: 15px; /* Margen reducido */
+            font-size: 1.2em; /* Increased font size */
+            margin-top: 20px; /* Increased margin */
         }
         #finalMessageDisplay .email-info {
             font-style: italic;
             color: #064e3b;
-            margin-top: 10px; /* Margen reducido */
+            margin-top: 12px; /* Increased margin */
         }
 
-        /* Estilos para el modal de bienvenida */
+        /* Welcome modal styles */
         #welcomeModalOverlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro para el modal de bienvenida */
+            background-color: rgba(0, 0, 0, 0.7); /* Darker background for welcome modal */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -476,10 +482,10 @@
         }
         #welcomeModalContent {
             background-color: #ffffff;
-            padding: 30px; /* Relleno generoso */
+            padding: 40px; /* Generous padding */
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-            max-width: 500px;
+            max-width: 550px; /* Increased max-width */
             width: 90%;
             text-align: center;
             transform: translateY(-30px);
@@ -489,22 +495,22 @@
             transform: translateY(0);
         }
         #welcomeModalContent h2 {
-            font-size: 2.5em;
+            font-size: 3em; /* Increased font size */
             color: #1e3a8a;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         #welcomeModalContent p {
-            font-size: 1.2em;
+            font-size: 1.3em; /* Increased font size */
             color: #475569;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
         }
         #welcomeModalContent button {
-            padding: 15px 30px;
+            padding: 18px 35px; /* Increased padding */
             background-color: #2563eb;
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 1.2em;
+            font-size: 1.3em; /* Increased font size */
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
@@ -518,107 +524,111 @@
             transform: translateY(0);
         }
 
-        /* Estilos para el área de la partitura */
+        /* Musical staff area styles */
         #staffArea {
-            margin-top: 0; /* Ajustado para el nuevo displaySection */
+            margin-top: 0; /* Adjusted for the new displaySection */
             text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%; /* Ocupa todo el ancho disponible */
-            overflow-x: auto; /* Permite desplazamiento si la partitura es muy ancha */
-            flex: 2; /* Permite que el área de la partitura tome más espacio */
-            max-width: 500px; /* Ancho máximo para la partitura en pantallas grandes */
-            min-width: 280px; /* Ancho mínimo para la partitura en pantallas más pequeñas */
+            width: 100%; /* Takes full available width */
+            flex: 2; /* Allows staff area to take more space */
+            max-width: 550px; /* Max-width for staff on large screens */
+            min-width: 300px; /* Min-width for staff on smaller screens */
             height: fit-content; /* Adjust height to content */
+            padding: 10px; /* Added padding to staff area */
+            box-sizing: border-box; /* Include padding in width/height */
         }
         #musicalStaffCanvas {
             background-color: #ffffff;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            width: 100%; /* Ajusta el ancho del canvas al contenedor */
-            max-width: 500px; /* Ancho máximo para escritorio */
+            width: 100%; /* Adjust canvas width to container */
+            max-width: 550px; /* Max-width for desktop */
             height: auto; /* Allow it to grow/shrink */
-            max-height: 150px; /* Set a max height to prevent it from getting too tall */
+            max-height: 180px; /* Set a max height to prevent it from getting too tall */
             flex-grow: 1; /* Allow it to grow within #staffArea */
             min-height: 0; /* Allow it to shrink */
             box-sizing: border-box;
         }
 
-        /* Ajustes responsivos */
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             body {
-                padding: 3px; /* Aún menos relleno para pantallas muy pequeñas */
+                padding: 5px; /* Less padding for very small screens */
+                font-size: 15px; /* Smaller base font size for mobile */
             }
             .container {
-                padding: 10px; /* Relleno ajustado para móvil */
-                padding-bottom: 15px; /* Relleno ajustado para móvil */
+                padding: 15px; /* Adjusted padding for mobile */
+                padding-bottom: 20px; /* Adjusted padding for mobile */
                 border-radius: 8px;
-                width: 99%; /* Mayor ancho en pantallas pequeñas */
-                max-height: 99.5vh; /* Altura máxima para móvil */
+                width: 99%; /* Wider on small screens */
+                max-height: 99.5vh; /* Max height for mobile */
+                gap: 10px; /* Reduced gap for mobile */
             }
             h1 {
-                font-size: 1.5em;
+                font-size: 2em;
             }
             h2 {
-                font-size: 1.1em;
+                font-size: 1.4em;
             }
-            /* En pantallas pequeñas, apilar verticalmente la sección de display */
+            /* On small screens, stack display section vertically */
             #displaySection {
-                flex-direction: column; /* Apila los elementos verticalmente */
-                align-items: center; /* Centra los elementos apilados */
-                gap: 10px; /* Espaciado más pequeño cuando están apilados */
+                flex-direction: column; /* Stack elements vertically */
+                align-items: center; /* Center stacked elements */
+                gap: 20px; /* Smaller spacing when stacked */
             }
             #questionArea, #staffArea {
-                max-width: 95%; /* Toma más ancho cuando está apilado */
-                min-width: unset; /* Elimina el ancho mínimo cuando está apilado */
-                width: 100%; /* Asegura que tomen todo el ancho disponible */
+                max-width: 95%; /* Take more width when stacked */
+                min-width: unset; /* Remove min-width when stacked */
+                width: 100%; /* Ensure they take full available width */
+                padding: 15px; /* Reduced padding for mobile */
             }
             .note-building-controls {
-                flex-direction: column; /* Apila los botones naturales y accidentales */
-                gap: 6px;
+                flex-direction: column; /* Stack natural and accidental buttons */
+                gap: 10px;
             }
             .natural-note-buttons, .accidental-buttons {
-                min-width: unset; /* Elimina el ancho mínimo para permitir total flexibilidad */
+                min-width: unset; /* Remove min-width for full flexibility */
                 width: 100%;
             }
             .accidental-buttons {
-                grid-template-columns: repeat(4, 1fr); /* 4 columnas para accidentales en pantallas pequeñas */
-                max-width: unset; /* Elimina el ancho máximo */
+                grid-template-columns: repeat(4, 1fr); /* 4 columns for accidentals on small screens */
+                max-width: unset; /* Remove max-width */
             }
             .note-button {
-                font-size: 0.7em;
-                padding: 5px 0;
+                font-size: 0.85em;
+                padding: 8px 0;
             }
             .action-buttons-group {
-                flex-direction: column; /* Apila los botones de verificación/siguiente */
-                gap: 6px;
+                flex-direction: column; /* Stack confirm/next buttons */
+                gap: 10px;
             }
             .action-buttons-group button {
                 width: 100%;
             }
             #questionArea p {
-                font-size: 1.1em;
+                font-size: 1.3em;
             }
             .notes-grid {
-                width: 140px; /* Slightly smaller width for mobile */
-                max-width: 140px; /* Fixed max-width for consistency */
+                width: 170px; /* Slightly smaller width for mobile */
+                max-width: 170px; /* Fixed max-width for consistency */
                 height: auto; /* Allow it to grow/shrink */
-                max-height: 200px; /* Set a max height */
+                max-height: 240px; /* Set a max height */
             }
             .grid-cell {
-                padding: 8px 6px; /* Reduced padding for smaller cells */
-                font-size: 1em; /* Adjusted font size for mobile cells */
+                padding: 12px 10px; /* Reduced padding for smaller cells */
+                font-size: 1.2em; /* Adjusted font size for mobile cells */
             }
             .interval-label {
-                font-size: 0.75em; /* Adjusted for mobile */
+                font-size: 0.9em; /* Adjusted for mobile */
             }
             .note-display {
-                font-size: 1.3em; /* Adjusted for mobile */
+                font-size: 1.6em; /* Adjusted for mobile */
             }
-            #selectedNotesDisplay, #currentBuildingNoteDisplay {
-                font-size: 0.8em;
+            #selectedNotesDisplay {
+                font-size: 1em;
             }
             .modal-content .modal-buttons {
                 flex-direction: column;
@@ -627,29 +637,29 @@
                 width: 100%;
             }
             #feedbackModalContent p {
-                font-size: 0.8em;
+                font-size: 1em;
             }
             #feedbackModalContent strong {
-                font-size: 0.9em;
+                font-size: 1.1em;
             }
             #feedbackModalContent span {
-                font-size: 0.8em;
+                font-size: 1em;
             }
             #welcomeModalContent h2 {
-                font-size: 1.8em;
+                font-size: 2.2em;
             }
             #welcomeModalContent p {
-                font-size: 1em;
+                font-size: 1.2em;
             }
             #musicalStaffCanvas {
                 height: auto; /* Allow it to grow/shrink */
-                max-height: 120px; /* Smaller max height for staff on mobile */
+                max-height: 160px; /* Smaller max height for staff on mobile */
             }
         }
     </style>
 </head>
 <body>
-    <!-- Modal de Bienvenida -->
+    <!-- Welcome Modal -->
     <div id="welcomeModalOverlay" class="modal-overlay">
         <div id="welcomeModalContent" class="modal-content">
             <h2>Bienvenido a Bloque Armónico Pro</h2>
@@ -660,13 +670,12 @@
     </div>
 
     <div class="container" id="mainAppContainer" style="display: none;">
-        <!-- Texto de la pregunta movido arriba -->
+        <!-- Question text moved to the top -->
         <h2>Ejercicio:</h2>
         <p id="chordQuestionText" style="text-align: center; font-size: 1.3em; font-weight: 600; color: #1e40af; margin-bottom: 10px;">Cargando ejercicio...</p>
 
-        <div id="displaySection"> <!-- Contenedor para la cuadrícula y la partitura (lado a lado) -->
+        <div id="displaySection"> <!-- Container for grid and staff (side-by-side) -->
             <div id="questionArea">
-                <!-- REMOVED: <button id="playChordButton" style="margin-top: 5px; padding: 8px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Reproducir Acorde</button> -->
                 <div class="notes-grid">
                     <div class="grid-cell" id="gridCell0">
                         <span class="interval-label"></span>
@@ -687,7 +696,7 @@
                 </div>
             </div>
 
-            <!-- Área para la partitura musical -->
+            <!-- Musical staff area -->
             <div id="staffArea">
                 <canvas id="musicalStaffCanvas"></canvas>
             </div>
@@ -697,10 +706,10 @@
             <label>Selecciona las 4 notas del acorde:</label>
             <div class="note-building-controls">
                 <div id="naturalNoteButtons" class="natural-note-buttons">
-                    <!-- Los botones de notas naturales se generarán aquí -->
+                    <!-- Natural note buttons will be generated here -->
                 </div>
                 <div id="accidentalButtons" class="accidental-buttons">
-                    <!-- Los botones de accidentales se generarán aquí -->
+                    <!-- Accidental buttons will be generated here -->
                 </div>
             </div>
 
@@ -710,7 +719,7 @@
             </div>
         </div>
 
-        <!-- Botones de acción -->
+        <!-- Action buttons -->
         <div class="action-buttons-group">
             <button id="confirmAnswerButton">Confirmar</button>
             <button id="clearAllSelectionButton">Borrar</button>
@@ -718,21 +727,21 @@
         </div>
     </div>
 
-    <!-- Modal de Feedback -->
+    <!-- Feedback Modal -->
     <div id="feedbackModalOverlay" class="modal-overlay">
         <div id="feedbackModalContent" class="modal-content">
-            <!-- El mensaje de feedback se insertará aquí -->
+            <!-- Feedback message will be inserted here -->
         </div>
     </div>
 
-    <!-- Modal de Evaluación -->
+    <!-- Evaluation Modal -->
     <div id="evaluationModalOverlay" class="modal-overlay">
         <div class="modal-content">
             <h3>Resultados de la Evaluación</h3>
             <p id="evaluationSummary"></p>
             <p>Áreas a trabajar:</p>
             <ul id="adviceList">
-                <!-- Los elementos de consejo se insertarán aquí -->
+                <!-- Advice elements will be inserted here -->
             </ul>
             <div class="modal-buttons">
                 <button id="continueTrainingButton">Continuar Entrenamiento</button>
@@ -741,7 +750,7 @@
         </div>
     </div>
 
-    <!-- Visualización del mensaje final (después de terminar la sesión) -->
+    <!-- Final message display (after ending session) -->
     <div id="finalMessageDisplay">
         <h3>Entrenamiento Finalizado</h3>
         <p>¡Gracias por practicar!</p>
@@ -751,9 +760,9 @@
     </div>
 
     <script type="module">
-        console.log("Script principal cargado y comenzando ejecución."); // Mensaje para depuración
+        console.log("Main script loaded and starting execution."); // Debug message
 
-        // Importar módulos de VexFlow desde la ruta ESM
+        // Import VexFlow modules from ESM path
         import { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
 
         // Canonical notes (for internal calculations, using sharps)
@@ -777,6 +786,14 @@
             "CBB": 10 // Cbb is Bb (A#)
         };
 
+        // Map natural letter to its semitone value (C=0, D=2, E=4, F=5, G=7, A=9, B=11)
+        const naturalLetterSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+        // Map number (0-6) to letter (C-B)
+        const numberToLetterMap = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        // Map letter to number (C=0, D=1, ..., B=6)
+        const letterToNumberMap = { 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6 };
+
+
         // Notes for the natural note buttons
         const naturalNotes = ["C", "D", "E", "F", "G", "A", "B"];
         // Notes for the accidental buttons
@@ -793,15 +810,14 @@
             "maj7": {
                 name: "Mayor Séptima (maj7)",
                 intervals: [ // Base intervals for the chord
-                    { semitones: 0, name: "fundamental", label: "1" },
-                    { semitones: 4, name: "tercera", label: "3" },
-                    { semitones: 7, name: "quinta", label: "5" },
-                    { semitones: 11, name: "séptima", label: "7" },
-                    { semitones: 2, name: "novena", label: "9" }, // Major 9th
-                    { semitones: 6, name: "onceava aumentada", label: "#11" } // #11 tension
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 4, name: "tercera", label: "3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 },
+                    { semitones: 11, name: "séptima", label: "7", degreeOffset: 6 },
+                    { semitones: 2, name: "novena", label: "9", degreeOffset: 1 },
+                    { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }
                 ],
                 // Defines the labels of the 4 notes in the voicing, in descending order from the lead voice
-                // These are the *default* rules, subject to exceptions like maj7-fundamental-6
                 voicing_rules: {
                     "1": ["1", "7", "5", "3"],
                     "3": ["3", "1", "7", "5"],
@@ -814,12 +830,12 @@
             "m7": {
                 name: "Menor Séptima (m7)",
                 intervals: [
-                    { semitones: 0, name: "fundamental", label: "1" },
-                    { semitones: 3, name: "tercera", label: "b3" },
-                    { semitones: 7, name: "quinta", label: "5" },
-                    { semitones: 10, name: "séptima", label: "b7" },
-                    { semitones: 2, name: "novena", label: "9" }, // Major 9th
-                    { semitones: 5, name: "onceava", label: "11" } // Perfect 4th from root
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 },
+                    { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
+                    { semitones: 2, name: "novena", label: "9", degreeOffset: 1 },
+                    { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 }
                 ],
                 voicing_rules: {
                     "1": ["1", "b7", "5", "b3"],
@@ -833,16 +849,16 @@
             "7": { // Dominant 7th chord
                 name: "Dominante Séptima (7)",
                 intervals: [
-                    { semitones: 0, name: "fundamental", label: "1" },
-                    { semitones: 4, name: "tercera", label: "3" },
-                    { semitones: 7, name: "quinta", label: "5" },
-                    { semitones: 10, name: "séptima", label: "b7" },
-                    { semitones: 2, name: "novena", label: "9" },
-                    { semitones: 1, name: "novena menor", label: "b9" },
-                    { semitones: 3, name: "novena aumentada", label: "#9" },
-                    { semitones: 6, name: "onceava aumentada", label: "#11" },
-                    { semitones: 9, name: "trecena", label: "13" },
-                    { semitones: 5, name: "onceava", label: "11" } // Perfect 4th from root
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 4, name: "tercera", label: "3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 },
+                    { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
+                    { semitones: 2, name: "novena", label: "9", degreeOffset: 1 },
+                    { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 },
+                    { semitones: 3, name: "novena aumentada", label: "#9", degreeOffset: 1 },
+                    { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 },
+                    { semitones: 9, name: "trecena", label: "13", degreeOffset: 5 },
+                    { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 }
                 ],
                 voicing_rules: {
                     "1": ["1", "b7", "5", "3"],
@@ -860,12 +876,12 @@
             "m7b5": {
                 name: "Menor Séptima con 5ta Disminuida (m7b5)",
                 intervals: [
-                    { semitones: 0, name: "fundamental", label: "1" },
-                    { semitones: 3, name: "tercera", label: "b3" },
-                    { semitones: 6, name: "quinta", label: "b5" },
-                    { semitones: 10, name: "séptima", label: "b7" },
-                    { semitones: 5, name: "onceava", label: "11" }, // Perfect 4th from root
-                    { semitones: 1, name: "novena menor", label: "b9" } // b9 tension
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
+                    { semitones: 6, name: "quinta", label: "b5", degreeOffset: 4 },
+                    { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
+                    { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 },
+                    { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 }
                 ],
                 voicing_rules: {
                     "1": ["1", "b7", "b5", "b3"],
@@ -873,17 +889,16 @@
                     "b5": ["b5", "b3", "1", "b7"],
                     "b7": ["b7", "b5", "b3", "1"],
                     "b9": ["b9", "b7", "b5", "b3"], // b9 replaces 1
-                    // For m7b5 with 11th lead, the rule is 11, b3, b7, b5 (omits root, not 5th, as previously confirmed)
-                    "11": ["11", "b3", "b7", "b5"]
+                    "11": ["11", "b3", "b7", "b5"] // 11 replaces 5, order: Tension, b3, b7, b5 (User's specific rule for m7b5)
                 }
             },
             "dim7": {
                 name: "Disminuido Séptima (°7)",
                 intervals: [
-                    { semitones: 0, name: "fundamental", label: "1" },
-                    { semitones: 3, name: "tercera", label: "b3" },
-                    { semitones: 6, name: "quinta", label: "b5" },
-                    { semitones: 9, name: "séptima", label: "bb7" }
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
+                    { semitones: 6, name: "quinta", label: "b5", degreeOffset: 4 },
+                    { semitones: 9, name: "séptima", label: "bb7", degreeOffset: 6 }
                 ],
                 voicing_rules: {
                     "1": ["1", "bb7", "b5", "b3"],
@@ -894,16 +909,14 @@
             }
         };
 
-        let currentCorrectNotes = []; // Stores the correct notes for the current exercise (canonical form)
-        let currentChordRoot = ''; // Stores the root of the current chord for feedback (canonical form)
+        let currentCorrectNotes = []; // Stores the correct notes for the current exercise (technically correct spelling)
+        let currentChordRoot = ''; // Stores the root of the current chord for feedback (original spelling)
         let currentChordTypeKey = ''; // Stores the key (e.g., "maj7") of the current chord
         let currentGivenIntervalName = ''; // Stores the name (e.g., "fundamental") of the given interval
         let currentGivenLabel = ''; // Stores the label (e.g., "1", "b3", "11") of the given interval
         let currentGivenNote = ''; // Stores the actual note that was given (e.g., "C#")
         let currentOrderedLabelsForDisplay = []; // Stores the labels for the grid in the specific order of the current exercise
-        // currentActualChordIntervals will store the {label, semitones} objects of the expected final voicing.
-        // It is built in generateComplexExercise.
-        let currentActualChordIntervals = [];
+        let currentActualChordIntervals = []; // Stores {label, semitones} for the expected final voicing.
 
         // Training Evaluation Variables
         let exercisesCompletedCount = 0; // Exercises completed in the current batch
@@ -934,7 +947,6 @@
         const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
         const accidentalButtonsContainer = document.getElementById('accidentalButtons');
         const selectedNotesDisplay = document.getElementById('selectedNotesDisplay');
-        // REMOVED: const playChordButton = document.getElementById('playChordButton'); // Audio playback button
         const musicalStaffCanvas = document.getElementById('musicalStaffCanvas'); // Canvas for musical staff
 
         // Main Action Buttons
@@ -962,13 +974,14 @@
         // Feedback duration in milliseconds
         const FEEDBACK_DURATION = 3000; // 3 seconds
 
-        // Global Tone.js synth instance
+        // Global Tone.js synth instance (kept for potential future use, but not used for playback)
         let synth;
         let audioContextStarted = false;
 
         /**
          * Initializes the Tone.js audio context.
          * Called on "Start" button click to comply with browser autoplay policy.
+         * Note: Actual playback logic has been removed as per user request.
          */
         async function startAudioContext() {
             console.log("Attempting to start AudioContext...");
@@ -978,24 +991,14 @@
                     Tone.context.lookAhead = 0.0; // Reduce lookAhead for lower latency
                     console.log("AudioContext started successfully! LookAhead set to 0.0.");
                     audioContextStarted = true;
-                    // Initialize the synthesizer with piano-like envelope
+                    // Initialize the synthesizer (even if not used for playback, it sets up the audio context)
                     synth = new Tone.PolySynth(Tone.Synth, {
-                        oscillator: {
-                            type: "triangle" // A slightly brighter wave for piano-like sound
-                        },
-                        envelope: {
-                            attack: 0.005,  // Very fast attack for percussive hit
-                            decay: 0.2,     // Fast decay
-                            sustain: 0.1,   // Low sustain
-                            release: 0.5    // Moderate release
-                        }
+                        oscillator: { type: "triangle" },
+                        envelope: { attack: 0.005, decay: 0.2, sustain: 0.1, release: 0.5 }
                     }).toDestination();
-                    // REMOVED: playChordButton.disabled = false; // Enable playback button once synth is ready
                     console.log("Synth initialized.");
                 } catch (e) {
                     console.error("Error al iniciar AudioContext:", e);
-                    // REMOVED: playChordButton.disabled = true; // Ensure button remains disabled
-                    // Inform the user that audio could not be started
                     showCustomMessage("Error de Audio", "No se pudo iniciar el audio. Por favor, asegúrate de que tu navegador lo permita.", "error");
                 }
             } else {
@@ -1064,38 +1067,49 @@
         }
 
         /**
+         * Determines the "technically correct" enharmonic spelling for a note based on its interval context.
+         * @param {string} rootNoteString - The original spelling of the chord's root (e.g., "Db", "C#").
+         * @param {number} absoluteTargetSemitone - The absolute semitone value (0-11) of the note to be spelled.
+         * @param {string} intervalLabel - The label of the interval this note represents (e.g., "b3", "5", "#11").
+         * @returns {string} The technically correct enharmonic spelling (e.g., "Eb", "Gb", "F#").
+         */
+        function getCorrectEnharmonicSpelling(rootNoteString, absoluteTargetSemitone, intervalLabel) {
+            const rootLetter = rootNoteString.charAt(0).toUpperCase();
+            const rootLetterNum = letterToNumberMap[rootLetter];
+
+            // Find the interval definition to get the base degree offset
+            const chordType = chordStructures[currentChordTypeKey];
+            const intervalDef = chordType.intervals.find(int => int.label === intervalLabel);
+
+            if (!intervalDef || intervalDef.degreeOffset === undefined) {
+                console.warn(`Could not find degreeOffset for interval label ${intervalLabel}. Falling back to canonical.`);
+                return canonicalNotes[absoluteTargetSemitone];
+            }
+
+            const targetLetterNum = (rootLetterNum + intervalDef.degreeOffset) % 7;
+            const targetBaseLetter = numberToLetterMap[targetLetterNum];
+            const targetBaseSemitone = naturalLetterSemitone[targetBaseLetter];
+
+            // Calculate the difference in semitones from the natural target letter to the actual target semitone
+            let accidentalSemitoneDiff = (absoluteTargetSemitone - targetBaseSemitone + 12) % 12;
+
+            let accidental = '';
+            if (accidentalSemitoneDiff === 1) accidental = '#';
+            else if (accidentalSemitoneDiff === 2) accidental = '##';
+            else if (accidentalSemitoneDiff === 11) accidental = 'b';
+            else if (accidentalSemitoneDiff === 10) accidental = 'bb';
+
+            return `${targetBaseLetter}${accidental}`;
+        }
+
+
+        /**
          * Updates the display of selected notes (final answer list) and button visibility.
          */
         function updateSelectedNotesDisplay() {
-            let displayNotesArray = new Array(4).fill(''); // Array to hold notes for display
-
-            if (selectedUserNotes.length > 0 && currentOrderedLabelsForDisplay.length === 4) {
-                const correctNotesByLabel = {};
-                const actualRootSemitone = noteToSemitoneMap[normalizeNote(currentChordRoot)]; // Normalize root here
-                console.log("updateSelectedNotesDisplay: currentChordRoot", currentChordRoot, "Normalized Root Semitone:", actualRootSemitone);
-
-
-                // currentActualChordIntervals is already built with the specific voicing rule applied
-                // It contains the 4 labels and their relative semitones to the root for the expected answer
-                currentActualChordIntervals.forEach(int => {
-                    const noteSemitone = (actualRootSemitone + int.semitones + 12) % 12;
-                    correctNotesByLabel[int.label] = canonicalNotes[noteSemitone];
-                });
-
-                // Iterate through ordered labels and try to match user's notes
-                currentOrderedLabelsForDisplay.forEach((label, index) => {
-                    const canonicalCorrectNoteForThisLabel = correctNotesByLabel[label];
-                    const matchingUserNote = selectedUserNotes.find(userNote => normalizeNote(userNote) === canonicalCorrectNoteForThisLabel);
-                    if (matchingUserNote) {
-                        displayNotesArray[index] = matchingUserNote;
-                    }
-                });
-            }
-
             if (selectedUserNotes.length === 0) {
                 selectedNotesDisplay.innerHTML = 'Notas seleccionadas: Ninguna';
             } else {
-                // Filter out empty strings before joining for cleaner display if fewer than 4 notes are selected
                 selectedNotesDisplay.innerHTML = `Notas seleccionadas: <strong>${selectedUserNotes.join(', ')}</strong>`; // Display raw user notes
             }
 
@@ -1175,6 +1189,8 @@
 
         /**
          * Toggles a note in the selectedUserNotes array.
+         * Note: This function no longer updates the musical staff directly.
+         * The staff is only updated on checkAnswer() or generateComplexExercise().
          * @param {string} note - The note string (e.g., "C", "C#", "Db").
          */
         function toggleNoteInAnswer(note) {
@@ -1194,13 +1210,7 @@
                 }
             }
             updateSelectedNotesDisplay();
-            // Always include the currentGivenNote in the staff display if it's not already in selectedUserNotes
-            // This ensures the given note is always present as the highest voice.
-            let notesForStaffDisplay = [...selectedUserNotes];
-            if (currentGivenNote && !notesForStaffDisplay.some(n => normalizeNote(n) === normalizeNote(currentGivenNote))) {
-                notesForStaffDisplay.push(currentGivenNote);
-            }
-            drawMusicalStaff(notesForStaffDisplay); // Update staff immediately with user's selected notes
+            // Removed: drawMusicalStaff(notesForStaffDisplay);
         }
 
         /**
@@ -1291,7 +1301,7 @@
 
 
         /**
-         * Limpia todas las notas seleccionadas en la lista de respuesta final.
+         * Clears all selected notes in the final answer list.
          */
         function clearSelection() {
             selectedUserNotes = [];
@@ -1307,7 +1317,7 @@
         }
 
         /**
-         * Genera los botones de notas naturales y accidentales.
+         * Generates the natural and accidental note buttons.
          */
         function generateNoteButtons() {
             naturalNoteButtonsContainer.innerHTML = '';
@@ -1332,109 +1342,10 @@
         }
 
         /**
-         * Plays the current correct chord as a descending arpeggio followed by a simultaneous chord.
-         */
-        async function playChord() {
-            console.log("playChord: Checking audioContextStarted:", audioContextStarted);
-            if (!audioContextStarted) {
-                console.warn("playChord: AudioContext not started. Attempting to start before playing.");
-                await startAudioContext();
-                if (!audioContextStarted) { // Check again after attempting to start
-                    console.error("playChord: Failed to start AudioContext, cannot play chord.");
-                    return;
-                }
-            }
-
-            if (!synth) {
-                console.warn("playChord: Synth not initialized. Cannot play chord.");
-                return;
-            }
-
-            if (currentCorrectNotes.length === 0) {
-                console.warn("playChord: No notes to play.");
-                return;
-            }
-
-            // Create notes with semitones for sorting
-            const notesWithSemitones = currentCorrectNotes.map(noteName => {
-                const semitone = noteToSemitoneMap[noteName];
-                return { note: noteName, semitone: semitone };
-            });
-
-            // Sort notes by semitone value in descending order
-            notesWithSemitones.sort((a, b) => b.semitone - a.semitone);
-
-            const finalNotesForPlayback = [];
-            let currentOctaveForPlayback;
-
-            // Determine the starting octave for the highest note (notesWithSemitones[0])
-            // The highest note (first in sorted array) should be in C5-C6 range.
-            // If it's C, it should be C6. Otherwise, it should be in octave 5.
-            if (notesWithSemitones[0].note === "C") {
-                currentOctaveForPlayback = 6; // Start C as C6
-            } else {
-                currentOctaveForPlayback = 5; // Start other notes in octave 5
-            }
-
-            let lastSemitoneForPlayback = notesWithSemitones[0].semitone; // Semitone of the highest note
-
-            notesWithSemitones.forEach((noteObj, index) => {
-                // If the current note's semitone is higher than the last one (in a descending sequence),
-                // it means we've wrapped around to a lower octave.
-                // Example: G (semitone 7), then C (semitone 0). C is lower, so it should be in a lower octave.
-                // If the sequence is G, E, C, A:
-                // G (octave 5)
-                // E (semitone 4) < G (semitone 7), so E is in octave 5
-                // C (semitone 0) < E (semitone 4), so C is in octave 5
-                // A (semitone 9) > C (semitone 0), so A is in octave 4
-                if (noteObj.semitone > lastSemitoneForPlayback) {
-                    currentOctaveForPlayback--;
-                }
-                finalNotesForPlayback.push(`${noteObj.note}${currentOctaveForPlayback}`);
-                lastSemitoneForPlayback = noteObj.semitone;
-            });
-
-            console.log("playChord: Notes to play with octaves (sorted by voicing):", finalNotesForPlayback);
-
-            // --- Descending Arpeggio ---
-            const arpeggioNoteDuration = "8n"; // Duration of each note in arpeggio (e.g., 8th note)
-            const arpeggioDelayBetweenNotes = 0.2; // Reduced from 0.45s to 0.2s
-
-            let arpeggioStartTime = Tone.now();
-            console.log("playChord: Arpeggio start time:", arpeggioStartTime);
-            for (let i = 0; i < finalNotesForPlayback.length; i++) {
-                // Schedule each note with a delay
-                const noteToPlay = finalNotesForPlayback[i];
-                Tone.Transport.scheduleOnce((time) => {
-                    console.log(`playChord: Triggering arpeggio note ${noteToPlay} at ${time}`);
-                    synth.triggerAttackRelease(noteToPlay, arpeggioNoteDuration, time);
-                }, arpeggioStartTime + (i * arpeggioDelayBetweenNotes));
-            }
-
-            // --- Simultaneous Chord after Arpeggio ---
-            // Calculate when the arpeggio finishes to start the chord
-            const chordStartTime = arpeggioStartTime + (finalNotesForPlayback.length * arpeggioDelayBetweenNotes) + 0.1; // Reduced pause
-            const chordDuration = "0.7s"; // Reduced from 1s to 0.7s
-            console.log("playChord: Chord start time:", chordStartTime);
-
-            Tone.Transport.scheduleOnce((time) => {
-                console.log(`playChord: Triggering chord ${finalNotesForPlayback.join(', ')} at ${time}`);
-                synth.triggerAttackRelease(finalNotesForPlayback, chordDuration, time);
-            }, chordStartTime);
-
-            // Start Tone.js Transport if not already running
-            if (Tone.Transport.state !== "started") {
-                Tone.Transport.start();
-                console.log("playChord: Tone.Transport started.");
-            } else {
-                console.log("playChord: Tone.Transport already started.");
-            }
-        }
-
-        /**
          * Draws the musical staff with the given notes as a whole note chord, always in treble clef.
          * The `currentGivenNote` will be positioned as the highest voice within G4-G5 range.
-         * Other notes in `notesToDisplayRaw` will be placed below it, in closest descending order.
+         * Other notes in `notesToDisplayRaw` will be placed below it, in closest descending order,
+         * ensuring a closed voicing within an octave range.
          * @param {string[]} notesToDisplayRaw - Array of notes to be displayed (e.g., user's selected notes).
          */
         function drawMusicalStaff(notesToDisplayRaw) {
@@ -1443,11 +1354,11 @@
             const context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Resize canvas based on container and screen size (already good)
+            // Resize canvas based on container and screen size
             const containerWidth = canvas.parentElement.clientWidth;
-            canvas.width = Math.min(containerWidth, 500);
-            canvas.height = 150; // Keep a reasonable height for the staff
-            if (window.innerWidth <= 768) { canvas.width = Math.min(containerWidth, 300); canvas.height = 120; }
+            canvas.width = Math.min(containerWidth, 550); // Adjusted max-width
+            canvas.height = 180; // Adjusted height
+            if (window.innerWidth <= 768) { canvas.width = Math.min(containerWidth, 300); canvas.height = 140; } // Adjusted for mobile
 
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
             renderer.resize(canvas.width, canvas.height);
@@ -1456,11 +1367,10 @@
             stave.addClef("treble").addTimeSignature("4/4"); // Always treble clef
             stave.setContext(ctx).draw();
 
-            // Declare these variables at the top of the function
             const finalStaveNoteKeys = [];
             const finalStaveNoteAccidentals = [];
-            console.log("drawMusicalStaff: finalStaveNoteKeys declared:", finalStaveNoteKeys); // Add this log
-            console.log("drawMusicalStaff: finalStaveNoteAccidentals declared:", finalStaveNoteAccidentals); // Add this log
+            console.log("drawMusicalStaff: finalStaveNoteKeys declared:", finalStaveNoteKeys);
+            console.log("drawMusicalStaff: finalStaveNoteAccidentals declared:", finalStaveNoteAccidentals);
 
             // Collect all unique notes that need to be on the staff, including the given note
             let allNotesForStaff = new Set();
@@ -1483,56 +1393,118 @@
                 };
             });
 
-            let orderedNotesForVexFlow = []; // This will hold notes in descending order of absolute semitone for calculation
+            let orderedNotesForVexFlow = []; // This will hold notes in ascending order of absolute semitone for VexFlow
             let highestNoteObj;
 
             // 1. Identify the highest note (currentGivenNote) and place it in the G4-G5 range
             highestNoteObj = processedNotes.find(n => normalizeNote(n.originalString) === normalizeNote(currentGivenNote));
 
             if (!highestNoteObj) {
-                // Fallback: If currentGivenNote is not found (e.g., initial load before question, or user removed it from selection),
-                // take the note with the highest semitone from the currently processed notes and make it the highest.
-                // This ensures something is always placed at the top if notes are present.
+                // Fallback: If currentGivenNote is not found, take the highest semitone from available notes
                 processedNotes.sort((a, b) => b.semitone - a.semitone);
                 highestNoteObj = processedNotes[0];
             }
 
             // Calculate octave for the highest note to be in G4-G5 range (MIDI 67-79)
-            // G4 is MIDI 67, G5 is MIDI 79.
-            // Semitones from C: C=0, C#=1, D=2, D#=3, E=4, F=5, F#=6, G=7, G#=8, A=9, A#=10, B=11
             const semitoneOfHighest = highestNoteObj.semitone;
             let targetOctaveForHighest;
 
-            // If semitone is G (7), A (9), B (11), place in octave 4 (G4, A4, B4)
-            if (semitoneOfHighest >= noteToSemitoneMap["G"]) {
+            // G4 is MIDI 67, G5 is MIDI 79.
+            // Semitones from C: C=0, C#=1, D=2, D#=3, E=4, F=5, F#=6, G=7, G#=8, A=9, A#=10, B=11
+            // If the note is G, G#, A, A#, B (semitones 7-11), place it in octave 4.
+            // If the note is C, C#, D, D#, E, F, F# (semitones 0-6), place it in octave 5.
+            if (semitoneOfHighest >= naturalLetterSemitone['G']) { // G is semitone 7
                 targetOctaveForHighest = 4;
-            } else { // C, C#, D, D#, E, F, F# (semitones 0-6), place in octave 5 (C5, D5, E5, F5, F#5)
+            } else {
                 targetOctaveForHighest = 5;
             }
             highestNoteObj.absoluteSemitone = semitoneOfHighest + (targetOctaveForHighest * 12);
             orderedNotesForVexFlow.push(highestNoteObj);
 
-            // 2. Place other notes below the highest, ensuring closest descending order
-            let remainingNotes = processedNotes.filter(n => n !== highestNoteObj); // Filter by object reference
-            // Sort remaining notes by their semitone value (0-11) for consistent processing order
-            remainingNotes.sort((a, b) => b.semitone - a.semitone);
+            // 2. Place other notes below the highest, ensuring closest descending order and closed voicing
+            // Get the canonical forms of all *correct* notes to check for "closed voicing"
+            const allCorrectCanonicalNotes = currentCorrectNotes.map(n => normalizeNote(n));
+
+            // Create a temporary set of notes already placed (by their canonical form)
+            let placedCanonicalNotes = new Set([normalizeNote(highestNoteObj.originalString)]);
 
             let lastAbsoluteSemitonePlaced = highestNoteObj.absoluteSemitone;
 
-            remainingNotes.forEach(note => {
-                let currentNoteAbsoluteSemitone = note.semitone + (Math.floor(lastAbsoluteSemitonePlaced / 12) * 12);
+            // Iterate to find the remaining 3 notes
+            for (let i = 0; i < 3; i++) {
+                let foundNextNote = false;
+                // Search downwards for the next closest note
+                for (let semitoneDown = 1; semitoneDown <= 12; semitoneDown++) { // Check up to an octave below
+                    let candidateAbsoluteSemitone = lastAbsoluteSemitonePlaced - semitoneDown;
+                    let candidateSemitone = (candidateAbsoluteSemitone % 12 + 12) % 12; // Normalize to 0-11
 
-                // Adjust downwards until it's strictly below the last placed note
-                while (currentNoteAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
-                    currentNoteAbsoluteSemitone -= 12; // Move down an octave
+                    const candidateCanonicalNote = canonicalNotes[candidateSemitone];
+
+                    // Check if this candidate is one of the *correct* chord notes and hasn't been placed yet
+                    if (allCorrectCanonicalNotes.includes(candidateCanonicalNote) && !placedCanonicalNotes.has(candidateCanonicalNote)) {
+                        // Ensure no *other* correct chord notes exist between lastPlaced and current candidate
+                        let isClosedVoicing = true;
+                        for (let k = 1; k < semitoneDown; k++) {
+                            let intermediateSemitone = (lastAbsoluteSemitonePlaced - k) % 12;
+                            if (intermediateSemitone < 0) intermediateSemitone += 12; // Ensure positive modulo
+                            if (allCorrectCanonicalNotes.includes(canonicalNotes[intermediateSemitone])) {
+                                isClosedVoicing = false;
+                                break;
+                            }
+                        }
+
+                        if (isClosedVoicing) {
+                            // Find the original spelling from notesToDisplayRaw that matches this canonical note
+                            const originalSpelling = notesToDisplayRaw.find(rawNote => normalizeNote(rawNote) === candidateCanonicalNote);
+
+                            if (originalSpelling) {
+                                orderedNotesForVexFlow.push({
+                                    originalString: originalSpelling,
+                                    semitone: candidateSemitone,
+                                    absoluteSemitone: candidateAbsoluteSemitone
+                                });
+                                placedCanonicalNotes.add(candidateCanonicalNote); // Mark as placed
+                                lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone;
+                                foundNextNote = true;
+                                break; // Found the next note, move to find the next voice
+                            }
+                        }
+                    }
                 }
-                note.absoluteSemitone = currentNoteAbsoluteSemitone;
-                orderedNotesForVexFlow.push(note);
-                lastAbsoluteSemitonePlaced = note.absoluteSemitone; // Update for the next iteration
-            });
+                // Fallback if a note wasn't found in the immediate closed voicing search (shouldn't happen with correct logic)
+                if (!foundNextNote && orderedNotesForVexFlow.length < 4) {
+                    console.warn("drawMusicalStaff: Could not find a strictly closed voicing note. Falling back to simple descending.");
+                    // Find the highest remaining canonical note and place it an octave down from the highest placed note
+                    const remainingCanonical = allCorrectCanonicalNotes.filter(n => !placedCanonicalNotes.has(n));
+                    if (remainingCanonical.length > 0) {
+                        // Sort remaining by semitone and pick the highest one that is not yet placed
+                        remainingCanonical.sort((a, b) => noteToSemitoneMap[a] - noteToSemitoneMap[b]);
+                        const nextHighestRemainingCanonical = remainingCanonical[remainingCanonical.length - 1];
+                        const nextHighestRemainingSemitone = noteToSemitoneMap[nextHighestRemainingCanonical];
+
+                        let candidateAbsoluteSemitone = lastAbsoluteSemitonePlaced - 12; // Start an octave below
+                        // Adjust to match the semitone, ensuring it's below the last placed note
+                        while ((candidateAbsoluteSemitone % 12 + 12) % 12 !== nextHighestRemainingSemitone || candidateAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
+                            candidateAbsoluteSemitone -= 1; // Move down by semitone until match and below
+                        }
+
+                        const originalSpelling = notesToDisplayRaw.find(rawNote => normalizeNote(rawNote) === nextHighestRemainingCanonical);
+                        if (originalSpelling) {
+                            orderedNotesForVexFlow.push({
+                                originalString: originalSpelling,
+                                semitone: nextHighestRemainingSemitone,
+                                absoluteSemitone: candidateAbsoluteSemitone
+                            });
+                            placedCanonicalNotes.add(nextHighestRemainingCanonical);
+                            lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone;
+                        }
+                    }
+                }
+            }
 
             // Final sort by absolute semitone for VexFlow rendering (ascending order, lowest to highest)
             orderedNotesForVexFlow.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
+            console.log("drawMusicalStaff: Ordered notes for VexFlow (absolute semitones):", orderedNotesForVexFlow);
 
             orderedNotesForVexFlow.forEach(noteObj => {
                 const match = noteObj.originalString.match(/^([A-G])(.*)$/i);
@@ -1585,7 +1557,7 @@
          * Generates a complex chord exercise with a visual grid.
          */
         function generateComplexExercise() { // Renamed function
-            console.log("generateComplexExercise: Starting new exercise generation."); // Mensaje para depuración
+            console.log("generateComplexExercise: Starting new exercise generation."); // Debug message
             // 1. Choose a random chord type
             const chordTypes = Object.keys(chordStructures);
             const randomChordTypeKey = chordTypes[Math.floor(Math.random() * chordTypes.length)];
@@ -1625,7 +1597,8 @@
             // 4. Calculate the actual root note of the chord
             // The root is 'givenNote' minus the 'givenInterval' semitones
             const actualRootSemitone = (noteToSemitoneMap[normalizeNote(currentGivenNote)] - givenInterval.semitones + 12) % 12; // Normalize givenNote here
-            currentChordRoot = canonicalNotes[actualRootSemitone];
+            // Store the root in its original spelling from notesForQuestionRoot if possible, otherwise canonical
+            currentChordRoot = notesForQuestionRoot.find(note => normalizeNote(note) === canonicalNotes[actualRootSemitone]) || canonicalNotes[actualRootSemitone];
             console.log("generateComplexExercise: Raíz calculada del acorde:", currentChordRoot);
 
             // Create a map of *all* base intervals for quick lookup (original semitones)
@@ -1667,13 +1640,15 @@
                     return;
                 }
 
-                const actualNoteSemitone = (actualRootSemitone + semitonesToRoot + 12) % 12; // +12 to handle negative results
-                currentCorrectNotes.push(canonicalNotes[actualNoteSemitone]);
+                const actualNoteSemitone = (noteToSemitoneMap[normalizeNote(currentChordRoot)] + semitonesToRoot + 12) % 12; // +12 to handle negative results
+                // Use getCorrectEnharmonicSpelling for the display note
+                const correctSpelling = getCorrectEnharmonicSpelling(currentChordRoot, actualNoteSemitone, displayLabel);
+                currentCorrectNotes.push(correctSpelling);
                 currentOrderedLabelsForDisplay.push(displayLabel); // Use the potentially modified displayLabel for the grid
                 currentActualChordIntervals.push({ label: displayLabel, semitones: semitonesToRoot }); // Store for updateSelectedNotesDisplay
             });
             console.log("generateComplexExercise: currentOrderedLabelsForDisplay (grid labels):", currentOrderedLabelsForDisplay);
-            console.log("generateComplexExercise: currentCorrectNotes (expected correct notes):", currentCorrectNotes);
+            console.log("generateComplexExercise: currentCorrectNotes (expected correct notes with correct spelling):", currentCorrectNotes);
             console.log("generateComplexExercise: currentActualChordIntervals (for display matching):", currentActualChordIntervals);
 
 
@@ -1723,7 +1698,6 @@
             confirmAnswerButton.disabled = true;
             clearAllSelectionButton.disabled = true;
             changeQuestionButton.disabled = true;
-            // REMOVED: playChordButton.disabled = true; // Disable playback button
 
             // Visually disable all note buttons
             document.querySelectorAll('.note-button').forEach(button => {
@@ -1745,7 +1719,6 @@
             console.log("enableTrainingInteraction: Enabling training interaction.");
             // Button visibility/disabled state is handled by updateSelectedNotesDisplay based on selectedUserNotes.length
             updateSelectedNotesDisplay();
-            // REMOVED: playChordButton.disabled = !audioContextStarted; // Enable if audio context is active
 
             // Add event listeners back
             naturalNoteButtonsContainer.addEventListener('click', handleNaturalNoteClick);
@@ -1773,7 +1746,7 @@
         /**
          * Checks the user's answer.
          */
-        async function checkAnswer() { // Made async to await playChord
+        async function checkAnswer() {
             console.log("checkAnswer: Starting answer check.");
             const userNotesNormalized = selectedUserNotes.map(note => normalizeNote(note));
             console.log("checkAnswer: Notas del usuario (normalizadas):", userNotesNormalized);
@@ -1794,8 +1767,8 @@
 
                 if (isCorrect) {
                     feedbackHtml = `<p>¡Correcto! 🎉</p><p>La fundamental es <strong>${currentChordRoot}</strong>. Las notas son: <strong>${currentCorrectNotes.join(', ')}</strong></p>`;
-                    console.log("checkAnswer: Answer is correct. Playing chord.");
-                    await playChord(); // Play chord if correct
+                    console.log("checkAnswer: Answer is correct. Displaying correct chord on staff.");
+                    drawMusicalStaff(currentCorrectNotes); // Display correct notes on staff
                 } else {
                     // Detailed incorrect feedback
                     feedbackHtml = `<p>Incorrecto. Inténtalo de nuevo.</p>`;
@@ -1812,7 +1785,8 @@
                     });
                     feedbackHtml += `</p>`;
                     feedbackHtml += `<p>Las notas correctas son: <strong>${currentCorrectNotes.join(', ')}</strong></p>`;
-                    console.log("checkAnswer: Answer is incorrect.");
+                    console.log("checkAnswer: Answer is incorrect. Reverting staff to only given note.");
+                    drawMusicalStaff([currentGivenNote]); // Revert staff to only the given note
                 }
             } else {
                 feedbackHtml = `<p>Por favor, selecciona exactamente 4 notas.</p>`;
@@ -1959,7 +1933,6 @@
         changeQuestionButton.addEventListener('click', handleChangeQuestion);
         continueTrainingButton.addEventListener('click', continueTraining); // Renamed
         endSessionButton.addEventListener('click', endSession); // Renamed
-        // REMOVED: playChordButton.addEventListener('click', playChord); // Event listener for audio playback button
 
         startButton.addEventListener('click', async () => {
             console.log("startButton: Clicked. Hiding welcome modal and initializing application.");
@@ -1994,7 +1967,6 @@
             console.log("window.onload: Window loaded. Initializing welcome modal.");
             welcomeModalOverlay.classList.add('visible'); // Show welcome modal immediately
             mainAppContainer.style.display = 'none'; // Ensure main app is hidden initially
-            // REMOVED: playChordButton.disabled = true; // Disable playback button until audio is ready
             console.log("window.onload: Welcome modal displayed, main app hidden.");
         };
     </script>
