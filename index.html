@@ -63,6 +63,17 @@
             text-align: center;
         }
 
+        /* Contenedor para la pregunta y la partitura (lado a lado) */
+        #displaySection {
+            display: flex;
+            flex-direction: row; /* Organiza los hijos horizontalmente */
+            justify-content: center; /* Centra los bloques de contenido horizontalmente */
+            align-items: flex-start; /* Alinea los elementos al inicio (arriba) */
+            gap: 20px; /* Espacio entre la cuadrícula y la partitura */
+            margin-bottom: 15px; /* Espacio debajo de esta sección */
+            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas más pequeñas */
+        }
+
         /* Área de visualización de la pregunta */
         #questionArea {
             background-color: #eff6ff;
@@ -73,10 +84,13 @@
             min-height: 60px; /* Altura mínima reducida */
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            align-items: center; /* Centra el contenido horizontalmente dentro de questionArea */
+            justify-content: center; /* Centra el contenido verticalmente dentro de questionArea */
             border: 1px solid #dbeafe;
             gap: 6px; /* Espaciado reducido */
+            flex: 1; /* Permite que crezca, pero respeta el max-width */
+            max-width: 250px; /* Ancho máximo para la cuadrícula en pantallas grandes */
+            min-width: 180px; /* Ancho mínimo para evitar que se aplaste */
         }
         #questionArea p {
             margin: 0;
@@ -92,7 +106,7 @@
             gap: 2px; /* Espaciado aún más pequeño entre celdas */
             width: 160px; /* Ancho ajustado para ser más compacto */
             max-width: 160px; /* Ancho fijo para la visualización vertical */
-            margin: 0 auto; /* Centra la cuadrícula */
+            margin: 10px auto; /* Centra la cuadrícula horizontalmente y añade margen vertical */
             border: 2px solid #64748b; /* Borde exterior para la cuadrícula */
             border-radius: 5px; /* Esquinas ligeramente redondeadas para el contenedor de la cuadrícula */
             overflow: hidden; /* Asegura que los bordes internos sean limpios */
@@ -499,13 +513,16 @@
 
         /* Estilos para el área de la partitura */
         #staffArea {
-            margin-top: 15px;
+            margin-top: 0; /* Ajustado para el nuevo displaySection */
             text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%; /* Ocupa todo el ancho disponible */
             overflow-x: auto; /* Permite desplazamiento si la partitura es muy ancha */
+            flex: 2; /* Permite que el área de la partitura tome más espacio */
+            max-width: 500px; /* Ancho máximo para la partitura en pantallas grandes */
+            min-width: 280px; /* Ancho mínimo para la partitura en pantallas más pequeñas */
         }
         #musicalStaffCanvas {
             background-color: #ffffff;
@@ -535,6 +552,17 @@
             }
             h2 {
                 font-size: 1.1em;
+            }
+            /* En pantallas pequeñas, apilar verticalmente la sección de display */
+            #displaySection {
+                flex-direction: column; /* Apila los elementos verticalmente */
+                align-items: center; /* Centra los elementos apilados */
+                gap: 10px; /* Espaciado más pequeño cuando están apilados */
+            }
+            #questionArea, #staffArea {
+                max-width: 95%; /* Toma más ancho cuando está apilado */
+                min-width: unset; /* Elimina el ancho mínimo cuando está apilado */
+                width: 100%; /* Asegura que tomen todo el ancho disponible */
             }
             .note-building-controls {
                 flex-direction: column; /* Apila los botones naturales y accidentales */
@@ -620,26 +648,33 @@
 
     <div class="container" id="mainAppContainer" style="display: none;">
         <h2>Ejercicio:</h2>
-        <div id="questionArea">
-            <p id="chordQuestionText">Cargando ejercicio...</p>
-            <button id="playChordButton" style="margin-top: 5px; padding: 8px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Reproducir Acorde</button>
-            <div class="notes-grid">
-                <div class="grid-cell" id="gridCell0">
-                    <span class="interval-label"></span>
-                    <span class="note-display"></span>
+        <div id="displaySection"> <!-- Nuevo contenedor para la pregunta y la partitura -->
+            <div id="questionArea">
+                <p id="chordQuestionText">Cargando ejercicio...</p>
+                <button id="playChordButton" style="margin-top: 5px; padding: 8px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Reproducir Acorde</button>
+                <div class="notes-grid">
+                    <div class="grid-cell" id="gridCell0">
+                        <span class="interval-label"></span>
+                        <span class="note-display"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell1">
+                        <span class="interval-label"></span>
+                        <span class="note-display"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell2">
+                        <span class="interval-label"></span>
+                        <span class="note-display"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell3">
+                        <span class="interval-label"></span>
+                        <span class="note-display"></span>
+                    </div>
                 </div>
-                <div class="grid-cell" id="gridCell1">
-                    <span class="interval-label"></span>
-                    <span class="note-display"></span>
-                </div>
-                <div class="grid-cell" id="gridCell2">
-                    <span class="interval-label"></span>
-                    <span class="note-display"></span>
-                </div>
-                <div class="grid-cell" id="gridCell3">
-                    <span class="interval-label"></span>
-                    <span class="note-display"></span>
-                </div>
+            </div>
+
+            <!-- Área para la partitura musical -->
+            <div id="staffArea">
+                <canvas id="musicalStaffCanvas"></canvas>
             </div>
         </div>
 
@@ -665,11 +700,6 @@
             <button id="confirmAnswerButton">Confirmar</button>
             <button id="clearAllSelectionButton">Borrar</button>
             <button id="changeQuestionButton">Cambiar Ejercicio</button>
-        </div>
-
-        <!-- Área para la partitura musical -->
-        <div id="staffArea">
-            <canvas id="musicalStaffCanvas"></canvas>
         </div>
     </div>
 
@@ -1361,7 +1391,7 @@
         }
 
         /**
-         * Draws the musical staff with the given notes.
+         * Draws the musical staff with the given notes as a whole note chord.
          * @param {string[]} notesToDisplay - Array of canonical note names (e.g., ["C", "E", "G", "B"]).
          */
         function drawMusicalStaff(notesToDisplay) {
@@ -1386,7 +1416,6 @@
                 canvas.height = 120; // Smaller height for mobile
             }
 
-
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
             renderer.resize(canvas.width, canvas.height);
             const ctx = renderer.getContext();
@@ -1397,27 +1426,33 @@
                 return { note: noteName, semitone: semitone };
             }).sort((a, b) => a.semitone - b.semitone); // Sort ascending
 
-            const vexFlowStaveNotes = [];
+            const vexFlowKeys = [];
             let currentVexFlowOctave = 4; // Start with C4 as a base octave for display
-            
-            // Determine the starting octave for the lowest note in a way that makes sense visually
+
+            // Determine the starting octave for the lowest note to ensure it fits on the staff.
+            // If the lowest note is G3 (semitone 7 in octave 3) or lower, use octave 3 as base for VexFlow.
+            // G3 absolute semitone: 7 + (3 * 12) = 43. C4 absolute semitone: 0 + (4 * 12) = 48.
             if (sortedNotesForDisplay.length > 0) {
                 const lowestNoteSemitone = sortedNotesForDisplay[0].semitone;
-                // If the lowest note is G3 (semitone 7 in octave 3) or lower, use octave 3 as base
-                // G3 absolute semitone: 7 + (3 * 12) = 43
-                if (lowestNoteSemitone + (currentVexFlowOctave * 12) < (noteToSemitoneMap["G"] + (4 * 12))) { // If lower than G4
+                if (lowestNoteSemitone + (currentVexFlowOctave * 12) < (noteToSemitoneMap["G"] + (4 * 12))) {
                     currentVexFlowOctave = 3;
                 }
             }
 
-            let prevVexFlowSemitone = -1; // To track octave changes for display
-
+            // Build the keys array for a single StaveNote representing the chord
             sortedNotesForDisplay.forEach((noteObj, index) => {
-                // Adjust octave for VexFlow to keep notes in a compact chord voicing.
-                // This logic needs to be careful to avoid jumping octaves unnecessarily
-                // and to place notes correctly within the staff.
                 let noteNameForVexFlow = noteObj.note.toLowerCase();
                 let octaveForVexFlow = currentVexFlowOctave;
+
+                // Adjust octave for stacked notes to keep the chord compact and on the staff.
+                // This is a heuristic to keep notes within a reasonable visual range (e.g., C3 to C6).
+                // For a 4-note closed voicing, they usually fit within 2 octaves.
+                // Calculate octave relative to the lowest note's octave.
+                if (index > 0) {
+                    const baseSemitone = sortedNotesForDisplay[0].semitone;
+                    const semitoneDiff = noteObj.semitone - baseSemitone;
+                    octaveForVexFlow = currentVexFlowOctave + Math.floor(semitoneDiff / 12);
+                }
 
                 // Handle enharmonic spellings for VexFlow (e.g., Db should be 'db', not 'c#')
                 // This is a heuristic; a more robust solution would involve key signatures
@@ -1443,44 +1478,36 @@
                     }
                 }
 
-                vexFlowStaveNotes.push(new StaveNote({
-                    keys: [`${noteNameForVexFlow}/${octaveForVexFlow}`],
-                    duration: "q" // Changed from "w" to "q" to fix "Too many ticks" error
-                }));
-                prevVexFlowSemitone = noteObj.semitone;
+                vexFlowKeys.push(`${noteNameForVexFlow}/${octaveForVexFlow}`);
+            });
+
+            // Create a single StaveNote for the chord with whole note duration
+            const chordStaveNote = new StaveNote({
+                keys: vexFlowKeys,
+                duration: "w" // Whole note duration
             });
 
             // Determine clef based on the range of the notes
             let clef = "treble";
-            if (vexFlowStaveNotes.length > 0) {
-                const lowestVexFlowNoteKey = vexFlowStaveNotes[0].keys[0]; // e.g., "c/4" or "g/3"
-                const [lowestNoteName, lowestNoteOctaveStr] = lowestVexFlowNoteKey.split('/');
-                const lowestNoteOctave = parseInt(lowestNoteOctaveStr);
-
-                // If the lowest note is C4 or lower, consider bass clef
-                // Middle C (C4) in VexFlow is "c/4".
-                // Notes below middle C (like B3, A3, G3) are often better in bass clef.
-                // Let's use a threshold: if the lowest note is G3 or lower, use bass clef.
-                // G3 is typically the lowest note comfortably in bass clef.
-                // Absolute semitone for G3 = 7 + (3 * 12) = 43.
-                // Absolute semitone for C4 = 0 + (4 * 12) = 48.
-                if (noteToSemitoneMap[lowestNoteName.toUpperCase()] + (lowestNoteOctave * 12) < (noteToSemitoneMap["C"] + (4 * 12))) {
+            if (sortedNotesForDisplay.length > 0) {
+                const lowestNoteSemitone = sortedNotesForDisplay[0].semitone;
+                const lowestNoteOctave = currentVexFlowOctave + Math.floor((lowestNoteSemitone - sortedNotesForDisplay[0].semitone) / 12);
+                // If the lowest note is C4 (middle C) or lower, consider bass clef
+                if (lowestNoteSemitone + (lowestNoteOctave * 12) < (noteToSemitoneMap["C"] + (4 * 12))) {
                     clef = "bass";
                 }
             }
-
 
             // Create a stave (staff)
             const stave = new Stave(10, 0, canvas.width - 20); // x, y, width
             stave.addClef(clef).addTimeSignature("4/4"); // Add determined clef, 4/4 time
             stave.setContext(ctx).draw();
 
-            // Create a voice and add notes
-            const voice = new Voice({ num_beats: 4, beat_value: 4 }); // 4/4 time (placeholder for chord)
-            voice.addTickables(vexFlowStaveNotes); // Use the notes with assigned octaves
+            // Create a voice and add the single chord note
+            const voice = new Voice({ num_beats: 4, beat_value: 4 }); // 4/4 time
+            voice.addTickables([chordStaveNote]); // Add the single chord stave note
 
             // Format and draw
-            // Adjust formatter width based on canvas width
             new Formatter().joinVoices([voice]).format([voice], canvas.width - 30);
             voice.draw(ctx, stave);
         }
@@ -1490,48 +1517,48 @@
          * Generates a complex chord exercise with a visual grid.
          */
         function generateComplexExercise() { // Renamed function
-            console.log("generateComplexExercise: Starting new exercise generation."); // Renamed log
+            console.log("generateComplexExercise: Starting new exercise generation."); // Mensaje para depuración
             // 1. Choose a random chord type
             const chordTypes = Object.keys(chordStructures);
             const randomChordTypeKey = chordTypes[Math.floor(Math.random() * chordTypes.length)];
             const selectedChordType = chordStructures[randomChordTypeKey];
             currentChordTypeKey = randomChordTypeKey;
-            console.log("generateComplexExercise: Tipo de acorde seleccionado:", currentChordTypeKey); // Renamed log
+            console.log("generateComplexExercise: Tipo de acorde seleccionado:", currentChordTypeKey);
 
             // 2. Choose a random interval to be the lead voice (from defined voicing rules)
             const possibleLeadLabels = Object.keys(selectedChordType.voicing_rules);
             if (possibleLeadLabels.length === 0) {
-                console.error(`generateComplexExercise: Error: No hay reglas de voicing definidas para el acorde ${currentChordTypeKey}.`); // Renamed log
-                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte."; // Renamed text
-                disableTrainingInteraction(); // Renamed function
+                console.error(`generateComplexExercise: Error: No hay reglas de voicing definidas para el acorde ${currentChordTypeKey}.`);
+                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                disableTrainingInteraction();
                 return;
             }
             const randomLeadLabel = possibleLeadLabels[Math.floor(Math.random() * possibleLeadLabels.length)];
             currentGivenLabel = randomLeadLabel;
-            console.log("generateComplexExercise: Etiqueta de voz principal seleccionada:", currentGivenLabel); // Renamed log
+            console.log("generateComplexExercise: Etiqueta de voz principal seleccionada:", currentGivenLabel);
 
             // Find the full interval object for the chosen lead label
             const givenInterval = selectedChordType.intervals.find(int => int.label === randomLeadLabel);
             if (!givenInterval) {
-                console.error(`generateComplexExercise: Error: No se encontró el objeto de intervalo para la etiqueta ${randomLeadLabel} en el acorde ${currentChordTypeKey}.`); // Renamed log
-                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte."; // Renamed text
-                disableTrainingInteraction(); // Renamed function
+                console.error(`generateComplexExercise: Error: No se encontró el objeto de intervalo para la etiqueta ${randomLeadLabel} en el acorde ${currentChordTypeKey}.`);
+                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                disableTrainingInteraction();
                 return;
             }
             currentGivenIntervalName = givenInterval.name;
-            console.log("generateComplexExercise: Nombre de intervalo dado:", currentGivenIntervalName); // Renamed log
+            console.log("generateComplexExercise: Nombre de intervalo dado:", currentGivenIntervalName);
 
 
             // 3. Choose a random note to be that interval (from the expanded notesForQuestionRoot array)
             const givenNoteIndex = Math.floor(Math.random() * notesForQuestionRoot.length);
             currentGivenNote = notesForQuestionRoot[givenNoteIndex];
-            console.log("generateComplexExercise: Nota dada (principal):", currentGivenNote); // Renamed log
+            console.log("generateComplexExercise: Nota dada (principal):", currentGivenNote);
 
             // 4. Calculate the actual root note of the chord
             // The root is 'givenNote' minus the 'givenInterval' semitones
             const actualRootSemitone = (noteToSemitoneMap[normalizeNote(currentGivenNote)] - givenInterval.semitones + 12) % 12; // Normalize givenNote here
             currentChordRoot = canonicalNotes[actualRootSemitone];
-            console.log("generateComplexExercise: Raíz calculada del acorde:", currentChordRoot); // Renamed log
+            console.log("generateComplexExercise: Raíz calculada del acorde:", currentChordRoot);
 
             // Create a map of *all* base intervals for quick lookup (original semitones)
             const originalIntervalsMap = {};
@@ -1542,9 +1569,9 @@
             // Determine the labels for the grid and the actual correct notes for the voicing
             const baseVoicingLabels = selectedChordType.voicing_rules[currentGivenLabel];
             if (!baseVoicingLabels) {
-                console.error(`generateComplexExercise: Error: No hay reglas de voicing para la etiqueta principal "${currentGivenLabel}" en el acorde ${currentChordTypeKey}.`); // Renamed log
-                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte."; // Renamed text
-                disableTrainingInteraction(); // Renamed function
+                console.error(`generateComplexExercise: Error: No hay reglas de voicing para la etiqueta principal "${currentGivenLabel}" en el acorde ${currentChordTypeKey}.`);
+                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                disableTrainingInteraction();
                 return;
             }
 
@@ -1560,15 +1587,15 @@
                 if (currentChordTypeKey === "maj7" && currentGivenIntervalName === "fundamental" && label === "7") {
                     semitonesToRoot = originalIntervalsMap["7"] - 2; // Major 7th (11) - 2 = Major 6th (9)
                     displayLabel = "6"; // Change the label for display
-                    console.log("generateComplexExercise: Excepción maj7 aplicada: 7ma cambiada a 6ta."); // Renamed log
+                    console.log("generateComplexExercise: Excepción maj7 aplicada: 7ma cambiada a 6ta.");
                 } else {
                     semitonesToRoot = originalIntervalsMap[label];
                 }
 
                 if (semitonesToRoot === undefined) {
-                    console.error(`generateComplexExercise: Error: La etiqueta de voicing "${label}" no se encontró en originalIntervalsMap para el acorde ${currentChordTypeKey}. Esto puede indicar una regla de voicing incorrecta o un intervalo base faltante.`); // Renamed log
-                    chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte."; // Renamed text
-                    disableTrainingInteraction(); // Renamed function
+                    console.error(`generateComplexExercise: Error: La etiqueta de voicing "${label}" no se encontró en originalIntervalsMap para el acorde ${currentChordTypeKey}. Esto puede indicar una regla de voicing incorrecta o un intervalo base faltante.`);
+                    chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                    disableTrainingInteraction();
                     return;
                 }
 
@@ -1577,9 +1604,9 @@
                 currentOrderedLabelsForDisplay.push(displayLabel); // Use the potentially modified displayLabel for the grid
                 currentActualChordIntervals.push({ label: displayLabel, semitones: semitonesToRoot }); // Store for updateSelectedNotesDisplay
             });
-            console.log("generateComplexExercise: currentOrderedLabelsForDisplay (grid labels):", currentOrderedLabelsForDisplay); // Renamed log
-            console.log("generateComplexExercise: currentCorrectNotes (expected correct notes):", currentCorrectNotes); // Renamed log
-            console.log("generateComplexExercise: currentActualChordIntervals (for display matching):", currentActualChordIntervals); // Renamed log
+            console.log("generateComplexExercise: currentOrderedLabelsForDisplay (grid labels):", currentOrderedLabelsForDisplay);
+            console.log("generateComplexExercise: currentCorrectNotes (expected correct notes):", currentCorrectNotes);
+            console.log("generateComplexExercise: currentActualChordIntervals (for display matching):", currentActualChordIntervals);
 
 
             // 6. Formulate the question text (more concise)
@@ -1609,22 +1636,22 @@
             drawMusicalStaff(currentCorrectNotes);
 
             // Clear user's selected notes and feedback message
-            console.log("generateComplexExercise: Clearing selection and feedback."); // Renamed log
+            console.log("generateComplexExercise: Clearing selection and feedback.");
             clearSelection(); // Clear all selected notes and current building note
             feedbackModalOverlay.classList.remove('visible'); // Ensure feedback modal is hidden
             feedbackModalContent.className = 'modal-content'; // Reset feedback modal classes
 
             // Ensure training elements are enabled for a new exercise
-            console.log("generateComplexExercise: Enabling training interaction."); // Renamed log
-            enableTrainingInteraction(); // Renamed function
-            console.log("generateComplexExercise: New exercise generated successfully."); // Renamed log
+            console.log("generateComplexExercise: Enabling training interaction.");
+            enableTrainingInteraction();
+            console.log("generateComplexExercise: New exercise generated successfully.");
         }
 
         /**
          * Disables all interactive elements of the training.
          */
         function disableTrainingInteraction() { // Renamed function
-            console.log("disableTrainingInteraction: Disabling training interaction."); // Renamed log
+            console.log("disableTrainingInteraction: Disabling training interaction.");
             confirmAnswerButton.disabled = true;
             clearAllSelectionButton.disabled = true;
             changeQuestionButton.disabled = true;
@@ -1636,14 +1663,14 @@
             // Remove event listeners to prevent interaction
             naturalNoteButtonsContainer.removeEventListener('click', handleNaturalNoteClick);
             accidentalButtonsContainer.removeEventListener('click', handleAccidentalClick);
-            console.log("disableTrainingInteraction: Training interaction disabled."); // Renamed log
+            console.log("disableTrainingInteraction: Training interaction disabled.");
         }
 
         /**
          * Enables all interactive elements of the training.
          */
         function enableTrainingInteraction() { // Renamed function
-            console.log("enableTrainingInteraction: Enabling training interaction."); // Renamed log
+            console.log("enableTrainingInteraction: Enabling training interaction.");
             // Button visibility/disabled state is handled by updateSelectedNotesDisplay based on selectedUserNotes.length
             updateSelectedNotesDisplay();
             playChordButton.disabled = !audioContextStarted; // Enable if audio context is active
@@ -1654,16 +1681,16 @@
 
             // Visually enable all note buttons (remove disabled class)
             document.querySelectorAll('.note-button').forEach(button => button.classList.remove('disabled'));
-            console.log("enableTrainingInteraction: Training interaction enabled."); // Renamed log
+            console.log("enableTrainingInteraction: Training interaction enabled.");
         }
 
         /**
          * Handles changing the exercise without checking the answer.
          */
         function handleChangeQuestion() { // Renamed function
-            console.log("handleChangeQuestion: Change exercise button clicked."); // Renamed log
+            console.log("handleChangeQuestion: Change exercise button clicked.");
             clearSelection(); // Clear any existing selection
-            generateComplexExercise(); // Generate a new exercise // Renamed function
+            generateComplexExercise(); // Generate a new exercise
         }
 
 
@@ -1717,10 +1744,10 @@
                 feedbackModalContent.classList.add('incorrect');
                 feedbackModalContent.innerHTML = feedbackHtml;
                 feedbackModalOverlay.classList.add('visible'); // Show feedback modal
-                disableTrainingInteraction(); // Disable interaction // Renamed function
+                disableTrainingInteraction(); // Disable interaction
                 setTimeout(() => {
                     feedbackModalOverlay.classList.remove('visible'); // Hide feedback modal
-                    enableTrainingInteraction(); // Re-enable interaction // Renamed function
+                    enableTrainingInteraction(); // Re-enable interaction
                 }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
                 console.log("checkAnswer: Not 4 notes selected. Showing feedback and returning.");
                 return; // Exit function if selection is not 4 notes
@@ -1742,9 +1769,9 @@
                 totalCorrectAnswers++; // Increment total correct for overall score
             }
 
-            console.log("checkAnswer: Ejercicios respondidos (batch):", exercisesCompletedCount); // Renamed log
-            console.log("checkAnswer: Total ejercicios (general):", totalExercisesAttempted); // Renamed log
-            console.log("checkAnswer: Datos de sesión del entrenamiento:", trainingSessionData); // Renamed log
+            console.log("checkAnswer: Ejercicios respondidos (batch):", exercisesCompletedCount);
+            console.log("checkAnswer: Total ejercicios (general):", totalExercisesAttempted);
+            console.log("checkAnswer: Datos de sesión del entrenamiento:", trainingSessionData);
 
             feedbackModalContent.className = 'modal-content'; // Reset classes
             feedbackModalContent.classList.add(isCorrect ? 'correct' : 'incorrect');
@@ -1752,7 +1779,7 @@
             feedbackModalOverlay.classList.add('visible'); // Show feedback modal
 
             // Disable interaction while feedback/evaluation is displayed
-            disableTrainingInteraction(); // Renamed function
+            disableTrainingInteraction();
 
             // Check if it's time for an evaluation
             if (exercisesCompletedCount % EXERCISES_PER_EVALUATION === 0) { // Renamed constant
@@ -1764,10 +1791,10 @@
                 }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
             } else {
                 // If not evaluation, just show feedback for a short time and advance
-                console.log("checkAnswer: Not evaluation time. Showing feedback and generating new exercise."); // Renamed log
+                console.log("checkAnswer: Not evaluation time. Showing feedback and generating new exercise.");
                 setTimeout(() => {
                     feedbackModalOverlay.classList.remove('visible'); // Hide feedback modal
-                    generateComplexExercise(); // Generate a new exercise // Renamed function
+                    generateComplexExercise(); // Generate a new exercise
                 }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
             }
         }
@@ -1817,18 +1844,18 @@
          * Continues the training after evaluation.
          */
         function continueTraining() { // Renamed function
-            console.log("continueTraining: Continuing training."); // Renamed log
+            console.log("continueTraining: Continuing training.");
             exercisesCompletedCount = 0; // Reset batch counter // Renamed variable
             trainingSessionData = {}; // Reset performance data for the new batch // Renamed variable
             evaluationModalOverlay.classList.remove('visible');
-            generateComplexExercise(); // Generate a new exercise to start the next batch // Renamed function
+            generateComplexExercise(); // Generate a new exercise to start the next batch
         }
 
         /**
          * Ends the training and displays final results.
          */
         function endSession() { // Renamed function
-            console.log("endSession: Ending training session."); // Renamed log
+            console.log("endSession: Ending training session.");
             evaluationModalOverlay.classList.remove('visible');
             mainAppContainer.style.display = 'none'; // Hide the main app UI // Renamed variable
 
@@ -1847,7 +1874,7 @@
             mailtoLink.href = `mailto:?subject=${subject}&body=${body}`;
 
             finalMessageDisplay.style.display = 'flex'; // Show the final message
-            console.log("endSession: Final message displayed."); // Renamed log
+            console.log("endSession: Final message displayed.");
         }
 
         // Event Listeners
@@ -1871,17 +1898,17 @@
             try {
                 console.log("startButton: Initializing application components...");
                 generateNoteButtons(); // Generate note buttons
-                generateComplexExercise(); // This includes drawing staff and updating displays // Renamed function
+                generateComplexExercise(); // This includes drawing staff and updating displays
                 console.log("startButton: Application components initialized successfully.");
                 
                 // Ensure interaction is enabled after everything is loaded
-                enableTrainingInteraction(); // Renamed function
+                enableTrainingInteraction();
                 console.log("startButton: All setup complete. Application interaction enabled.");
 
             } catch (error) {
                 console.error("startButton: Error during application setup:", error);
                 chordQuestionTextDiv.innerHTML = "¡Error al cargar la aplicación! Revisa la consola del navegador.";
-                disableTrainingInteraction(); // Ensure training is disabled on error // Renamed function
+                disableTrainingInteraction(); // Ensure training is disabled on error
                 showCustomMessage("Error de Carga", "Hubo un problema al inicializar la aplicación. Por favor, revisa la consola del navegador para más detalles.", "error");
             }
         });
@@ -1895,8 +1922,5 @@
             console.log("window.onload: Welcome modal displayed, main app hidden, play button disabled.");
         };
     </script>
-</head>
-<body>
-    <!-- The HTML body content goes here, as defined above -->
 </body>
 </html>
