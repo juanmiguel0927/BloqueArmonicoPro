@@ -696,6 +696,20 @@
             box-sizing: border-box;
         }
 
+        /* New styles for date, time, and duration */
+        .session-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 0.95em;
+            color: #475569;
+            text-align: center;
+        }
+        .session-info span {
+            font-weight: 500;
+        }
+
         /* Media Queries para ajustes específicos en pantallas más pequeñas */
         @media (max-width: 768px) { /* Para tablets y celulares en orientación horizontal */
             body {
@@ -952,6 +966,11 @@
                 </div>
             </div>
             <p class="results-summary" id="finalResultsSummary"></p> <!-- Moved to end -->
+            <div class="session-info">
+                <span id="sessionDateDisplay"></span>
+                <span id="sessionTimeDisplay"></span>
+                <span id="sessionDurationDisplay"></span>
+            </div>
         </div>
     </div>
 
@@ -1129,6 +1148,10 @@
         let activeNaturalNote = ''; // e.g., "C", "D"
         let activeAccidental = ''; // e.g., "#", "b", "##", "bb" or ""
 
+        // Session timing variables
+        let sessionStartTime = 0; // Timestamp when the session starts
+        let sessionEndTime = 0; // Timestamp when the session ends
+
         // DOM elements
         const welcomeModalOverlay = document.getElementById('welcomeModalOverlay'); // New welcome modal
         const startButton = document.getElementById('startButton'); // Button inside welcome modal
@@ -1172,6 +1195,9 @@
         const totalExercisesDisplay = document.getElementById('totalExercisesDisplay'); // New stat display
         const correctAnswersDisplay = document.getElementById('correctAnswersDisplay'); // New stat display
         const overallAccuracyDisplay = document.getElementById('overallAccuracyDisplay'); // New stat display
+        const sessionDateDisplay = document.getElementById('sessionDateDisplay'); // New: Session date display
+        const sessionTimeDisplay = document.getElementById('sessionTimeDisplay'); // New: Session time display
+        const sessionDurationDisplay = document.getElementById('sessionDurationDisplay'); // New: Session duration display
 
         // Feedback duration in milliseconds
         const FEEDBACK_DURATION = 3000; // 3 seconds
@@ -2142,12 +2168,33 @@
             evaluationModalOverlay.classList.remove('visible');
             mainAppContainer.style.display = 'none'; // Hide the main app UI // Renamed variable
 
-            const overallPercentage = totalExercisesAttempted > 0 ? ((totalCorrectAnswers / totalExercisesAttempted) * 100).toFixed(0) : 0; // Renamed variable
+            sessionEndTime = Date.now(); // Record session end time
+            const durationMs = sessionEndTime - sessionStartTime;
+
+            // Format duration
+            const hours = Math.floor(durationMs / (1000 * 60 * 60));
+            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
+
+            const formattedDuration = `${hours}h ${minutes}m ${seconds}s`;
+
+            // Get current date and time
+            const now = new Date();
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const formattedDate = now.toLocaleDateString('es-ES', dateOptions);
+            const formattedTime = now.toLocaleTimeString('es-ES', timeOptions);
 
             // Update the new stat display elements
             totalExercisesDisplay.textContent = totalExercisesAttempted;
             correctAnswersDisplay.textContent = totalCorrectAnswers;
+            const overallPercentage = totalExercisesAttempted > 0 ? ((totalCorrectAnswers / totalExercisesAttempted) * 100).toFixed(0) : 0; // Renamed variable
             overallAccuracyDisplay.textContent = `${overallPercentage}%`;
+
+            // Update session info displays
+            sessionDateDisplay.textContent = `Fecha: ${formattedDate}`;
+            sessionTimeDisplay.textContent = `Hora: ${formattedTime}`;
+            sessionDurationDisplay.textContent = `Duración de la práctica: ${formattedDuration}`;
 
             // Update the summary text, now optionally including the user's name
             const userName = userNameInput.value.trim();
@@ -2249,6 +2296,7 @@
             console.log("startButton: Clicked. Hiding welcome modal and initializing application.");
             welcomeModalOverlay.classList.remove('visible'); // Hide welcome modal
             mainAppContainer.style.display = 'flex'; // Show main app container
+            sessionStartTime = Date.now(); // Record session start time
 
             // Start audio context immediately on user gesture
             await startAudioContext();
