@@ -6,690 +6,10 @@
     <title>Bloque Armónico Pro: Herramienta de Entrenamiento</title>
     <!-- Tone.js para la reproducción de audio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
-    <!-- VexFlow para la notación musical (usando CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js"></script>
-    <style>
-        /* Ajustes de HTML y Body para evitar el desplazamiento */
-        html, body {
-            height: 100%; /* El html y el body ocupan toda la altura del viewport */
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Oculta cualquier contenido que se desborde para evitar el desplazamiento */
-            display: flex; /* Convierte el body en un contenedor flex */
-            flex-direction: column; /* Apila los elementos hijos verticalmente */
-            justify-content: center; /* Centra el contenido verticalmente */
-            align-items: center; /* Centra el contenido horizontalmente */
-            box-sizing: border-box;
-        }
-
-        /* Estilos base para el cuerpo y el contenedor */
-        body {
-            padding: 5px; /* Relleno mínimo para el body */
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Fondo azul gris claro */
-            color: #334155; /* Color de texto más oscuro */
-            line-height: 1.6;
-        }
-
-        .container {
-            background-color: #ffffff;
-            padding: 15px; /* Relleno general reducido */
-            padding-bottom: 20px; /* Relleno inferior reducido para el botón */
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            max-width: 650px;
-            width: 98%; /* Mayor ancho para mejor responsividad */
-            box-sizing: border-box;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px; /* Espaciado reducido entre secciones */
-            flex-grow: 1; /* Permite que el contenedor crezca y ocupe el espacio disponible */
-            max-height: 99vh; /* Limita la altura para evitar que se desborde del body */
-            overflow-y: auto; /* Permite el desplazamiento interno si el contenido excede la altura máxima */
-        }
-
-        /* Encabezados */
-        h1 {
-            color: #1e3a8a;
-            text-align: center;
-            margin-bottom: 8px; /* Margen reducido */
-            font-size: 1.8em; /* Fuente ligeramente más pequeña */
-            font-weight: 700;
-        }
-        h2 {
-            color: #2563eb;
-            margin-top: 5px; /* Margen reducido */
-            margin-bottom: 8px; /* Margen reducido */
-            font-size: 1.3em; /* Fuente ligeramente más pequeña */
-            text-align: center;
-        }
-
-        /* Área de visualización de la pregunta */
-        #questionArea {
-            background-color: #eff6ff;
-            padding: 10px; /* Relleno reducido */
-            border-radius: 10px;
-            color: #1e40af;
-            text-align: center;
-            min-height: 60px; /* Altura mínima reducida */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #dbeafe;
-            gap: 6px; /* Espaciado reducido */
-        }
-        #questionArea p {
-            margin: 0;
-            font-size: 1.3em; /* Fuente ligeramente más pequeña para el texto de la pregunta */
-            font-weight: 600;
-        }
-
-        /* Estilos de la cuadrícula de notas (para la cuadrícula de la pregunta) */
-        .notes-grid {
-            display: grid;
-            grid-template-columns: 1fr; /* Una sola columna para el diseño vertical */
-            grid-template-rows: repeat(4, 1fr); /* Hace que las 4 filas tengan la misma altura */
-            gap: 2px; /* Espaciado aún más pequeño entre celdas */
-            width: 160px; /* Ancho ajustado para ser más compacto */
-            max-width: 160px; /* Ancho fijo para la visualización vertical */
-            margin: 0 auto; /* Centra la cuadrícula */
-            border: 2px solid #64748b; /* Borde exterior para la cuadrícula */
-            border-radius: 5px; /* Esquinas ligeramente redondeadas para el contenedor de la cuadrícula */
-            overflow: hidden; /* Asegura que los bordes internos sean limpios */
-            height: 226px; /* Altura fija ajustada para 4 celdas + 3 gaps (55*4 + 2*3 = 220 + 6 = 226) */
-        }
-
-        .grid-cell {
-            background-color: #ffffff;
-            border: 1px solid #94a3b8; /* Bordes de celda internos */
-            padding: 10px 8px; /* Relleno ajustado para acomodar la etiqueta y la nota */
-            display: flex;
-            justify-content: space-between; /* Espacio entre la etiqueta y la nota */
-            align-items: center;
-            font-size: 1.1em; /* Tamaño de fuente base para las celdas de la cuadrícula */
-            font-weight: 700;
-            color: #334155;
-            box-sizing: border-box; /* Incluye el relleno y el borde en el ancho y alto total del elemento */
-        }
-
-        .interval-label {
-            font-size: 0.8em; /* Fuente más pequeña para la etiqueta del intervalo */
-            color: #64748b; /* Color más claro para la etiqueta */
-            font-weight: normal; /* Peso normal para la etiqueta */
-        }
-
-        .note-display {
-            font-size: 1.4em; /* Fuente más grande para la nota */
-            font-weight: 700;
-            color: #334155;
-        }
-
-        .note-display.highlighted {
-            background-color: #facc15; /* Fondo amarillo para la nota resaltada */
-            color: #334155; /* Texto más oscuro para contraste */
-            padding: 2px 5px; /* Pequeño relleno para el efecto de resaltado */
-            border-radius: 4px; /* Esquinas redondeadas para el resaltado */
-        }
-
-        /* Sección de entrada - Selección de notas */
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px; /* Espaciado reducido */
-            margin-bottom: 15px; /* Margen inferior ajustado */
-        }
-        label {
-            display: block;
-            margin-bottom: 2px; /* Margen reducido */
-            font-weight: 600;
-            color: #475569;
-        }
-
-        /* Controles de construcción de notas */
-        .note-building-controls {
-            display: flex;
-            gap: 8px; /* Espaciado reducido */
-            margin-bottom: 8px; /* Margen reducido */
-            flex-wrap: wrap; /* Permite el ajuste en pantallas más pequeñas */
-            justify-content: center;
-        }
-        .natural-note-buttons, .accidental-buttons {
-            display: grid;
-            gap: 3px; /* Espaciado reducido para los botones */
-            flex: 1; /* Permite que crezcan */
-            min-width: 110px; /* Ancho mínimo reducido */
-        }
-        .natural-note-buttons {
-            grid-template-columns: repeat(auto-fit, minmax(30px, 1fr)); /* minmax ajustado para botones más pequeños */
-        }
-        .accidental-buttons {
-            grid-template-columns: repeat(2, 1fr); /* 2 columnas para accidentales */
-            max-width: 80px; /* Ancho máximo reducido para botones accidentales */
-        }
-
-        .note-button {
-            background-color: #e2e8f0; /* Gris claro */
-            color: #475569;
-            padding: 6px 0; /* Relleno reducido para botones más pequeños */
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 0.7em; /* Tamaño de fuente aún más reducido */
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            user-select: none;
-            min-width: 30px; /* Ancho mínimo ajustado */
-        }
-        .note-button:hover {
-            background-color: #d1d9e2;
-            transform: translateY(-1px);
-        }
-        .note-button:active {
-            transform: translateY(0);
-        }
-        .note-button.selected {
-            background-color: #2563eb; /* Azul para seleccionado */
-            color: white;
-            border-color: #1e40af;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .note-button.disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            background-color: #f1f5f9;
-            color: #94a3b8;
-        }
-
-
-        /* Visualización de las notas seleccionadas (lista de respuesta final) */
-        #selectedNotesDisplay {
-            background-color: #eff6ff;
-            padding: 10px; /* Relleno reducido */
-            border-radius: 8px;
-            min-height: 30px; /* Altura mínima reducida */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1em; /* Tamaño de fuente reducido */
-            color: #1e40af;
-            border: 1px solid #dbeafe;
-            font-weight: 500;
-            margin-bottom: 8px; /* Margen reducido */
-        }
-        #selectedNotesDisplay strong {
-            color: #1d4ed8;
-        }
-
-        /* Grupo de botones de acción principal */
-        .action-buttons-group {
-            display: flex;
-            gap: 10px; /* Espaciado reducido */
-            justify-content: center;
-            margin-top: auto; /* Empuja el grupo de botones hacia abajo */
-            padding-top: 10px; /* Añade algo de relleno encima de los botones */
-        }
-        .action-buttons-group button {
-            padding: 10px 20px; /* Relleno reducido */
-            border: none;
-            border-radius: 8px;
-            font-size: 1em; /* Tamaño de fuente reducido */
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .action-buttons-group button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
-        }
-        .action-buttons-group button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        #confirmAnswerButton {
-            background-color: #22c55e; /* Verde */
-            color: white;
-        }
-        #confirmAnswerButton:hover {
-            background-color: #16a34a;
-        }
-
-        #clearAllSelectionButton {
-            background-color: #f59e0b; /* Naranja */
-            color: white;
-        }
-        #clearAllSelectionButton:hover {
-            background-color: #d97706;
-        }
-
-        #changeQuestionButton {
-            background-color: #64748b; /* Gris */
-            color: white;
-        }
-        #changeQuestionButton:hover {
-            background-color: #475569;
-        }
-
-
-        /* Estilos de modal comunes (para feedback y evaluación) */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none; /* Oculto por defecto */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .modal-overlay.visible {
-            display: flex; /* Mostrar cuando es visible */
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background-color: #ffffff;
-            padding: 25px; /* Relleno reducido */
-            border-radius: 12px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-            max-width: 450px; /* Ancho máximo reducido */
-            width: 90%;
-            text-align: center;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
-        }
-        .modal-overlay.visible .modal-content {
-            transform: translateY(0);
-        }
-        .modal-content h3 {
-            color: #1e3a8a;
-            font-size: 1.6em; /* Tamaño de fuente reducido */
-            margin-bottom: 15px; /* Margen reducido */
-        }
-        .modal-content p {
-            color: #475569;
-            margin-bottom: 10px; /* Margen reducido */
-        }
-        .modal-content ul {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 15px; /* Margen reducido */
-            text-align: left;
-            color: #334155;
-        }
-        .modal-content ul li {
-            background-color: #eff6ff;
-            padding: 8px 12px; /* Relleno reducido */
-            border-radius: 8px;
-            margin-bottom: 6px; /* Margen reducido */
-            border: 1px solid #dbeafe;
-        }
-        .modal-content ul li strong {
-            color: #2563eb;
-        }
-        .modal-content .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px; /* Espaciado reducido */
-            margin-top: 15px; /* Margen reducido */
-        }
-        .modal-content .modal-buttons button {
-            padding: 10px 20px; /* Relleno reducido */
-            border: none;
-            border-radius: 8px;
-            font-size: 1em; /* Tamaño de fuente reducido */
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .modal-content .modal-buttons button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
-        }
-        .modal-content .modal-buttons button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        #continueQuizButton {
-            background-color: #3b82f6; /* Azul */
-            color: white;
-        }
-        #continueQuizButton:hover {
-            background-color: #2563eb;
-        }
-        #endQuizButton {
-            background-color: #ef4444; /* Rojo */
-            color: white;
-        }
-        #endQuizButton:hover {
-            background-color: #dc2626;
-        }
-
-        /* Estilos específicos del contenido del modal de feedback (usa la base de modal-content) */
-        #feedbackModalContent.correct {
-            background-color: #dcfce7; /* Verde claro */
-            color: #15803d; /* Verde oscuro */
-            border: 1px solid #15803d;
-        }
-        #feedbackModalContent.incorrect {
-            background-color: #fee2e2; /* Rojo claro */
-            color: #b91c1c; /* Rojo oscuro */
-            border: 1px solid #b91c1c;
-        }
-        #feedbackModalContent p {
-            margin: 5px 0;
-            font-size: 1.1em; /* Tamaño de fuente reducido */
-        }
-        #feedbackModalContent strong {
-            font-size: 1.2em; /* Tamaño de fuente reducido */
-        }
-        #feedbackModalContent span {
-            font-size: 1em; /* Tamaño de fuente reducido */
-        }
-
-
-        /* Visualización del mensaje final */
-        #finalMessageDisplay {
-            background-color: #d1fae5; /* Verde claro para el éxito */
-            padding: 25px; /* Relleno reducido */
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-            display: none; /* Oculto por defecto */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 180px; /* Altura mínima reducida */
-            border: 1px solid #6ee7b7;
-            color: #065f46;
-        }
-        #finalMessageDisplay h3 {
-            color: #047857;
-            font-size: 1.8em; /* Tamaño de fuente reducido */
-            margin-bottom: 10px; /* Margen reducido */
-        }
-        #finalMessageDisplay p {
-            font-size: 1em; /* Tamaño de fuente reducido */
-            margin-bottom: 8px; /* Margen reducido */
-        }
-        #finalMessageDisplay .results-summary {
-            font-weight: bold;
-            font-size: 1.1em; /* Tamaño de fuente reducido */
-            margin-top: 15px; /* Margen reducido */
-        }
-        #finalMessageDisplay .email-info {
-            font-style: italic;
-            color: #064e3b;
-            margin-top: 10px; /* Margen reducido */
-        }
-
-        /* Estilos para la pantalla de inicio */
-        #introScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #e2e8f0; /* Un color suave para la intro */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1001; /* Asegura que esté por encima de todo */
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        #introScreen h2 {
-            font-size: 2.2em;
-            color: #1e3a8a;
-            margin-bottom: 15px;
-        }
-        #introScreen p {
-            font-size: 1.2em;
-            color: #475569;
-            margin-bottom: 25px;
-        }
-        #introScreen button {
-            padding: 12px 25px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        #introScreen button:hover {
-            background-color: #1e40af;
-            transform: translateY(-2px);
-        }
-        #introScreen button:active {
-            transform: translateY(0);
-        }
-
-        /* Estilos para el área de la partitura */
-        #staffArea {
-            margin-top: 15px;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%; /* Ocupa todo el ancho disponible */
-            overflow-x: auto; /* Permite desplazamiento si la partitura es muy ancha */
-        }
-        #musicalStaffCanvas {
-            background-color: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            width: 100%; /* Ajusta el ancho del canvas al contenedor */
-            max-width: 500px; /* Ancho máximo para escritorio */
-            height: 150px; /* Altura fija para el pentagrama */
-            box-sizing: border-box;
-        }
-
-        /* Ajustes responsivos */
-        @media (max-width: 768px) {
-            body {
-                padding: 3px; /* Aún menos relleno para pantallas muy pequeñas */
-            }
-            .container {
-                padding: 10px; /* Relleno ajustado para móvil */
-                padding-bottom: 15px; /* Relleno ajustado para móvil */
-                border-radius: 8px;
-                width: 99%; /* Mayor ancho en pantallas pequeñas */
-                max-height: 99.5vh; /* Altura máxima para móvil */
-            }
-            h1 {
-                font-size: 1.5em;
-            }
-            h2 {
-                font-size: 1.1em;
-            }
-            .note-building-controls {
-                flex-direction: column; /* Apila los botones naturales y accidentales */
-                gap: 6px;
-            }
-            .natural-note-buttons, .accidental-buttons {
-                min-width: unset; /* Elimina el ancho mínimo para permitir total flexibilidad */
-                width: 100%;
-            }
-            .accidental-buttons {
-                grid-template-columns: repeat(4, 1fr); /* 4 columnas para accidentales en pantallas pequeñas */
-                max-width: unset; /* Elimina el ancho máximo */
-            }
-            .note-button {
-                font-size: 0.7em;
-                padding: 5px 0;
-            }
-            .action-buttons-group {
-                flex-direction: column; /* Apila los botones de verificación/siguiente */
-                gap: 6px;
-            }
-            .action-buttons-group button {
-                width: 100%;
-            }
-            #questionArea p {
-                font-size: 1.1em;
-            }
-            .notes-grid {
-                width: 140px; /* Slightly smaller width for mobile */
-                max-width: 140px; /* Fixed max-width for consistency */
-                height: 200px; /* Adjusted height for 4 cells (approx 48.5px each + 6px gap) */
-            }
-            .grid-cell {
-                padding: 8px 6px; /* Reduced padding for smaller cells */
-                font-size: 1em; /* Adjusted font size for mobile cells */
-            }
-            .interval-label {
-                font-size: 0.75em; /* Adjusted for mobile */
-            }
-            .note-display {
-                font-size: 1.3em; /* Adjusted for mobile */
-            }
-            #selectedNotesDisplay, #currentBuildingNoteDisplay {
-                font-size: 0.8em;
-            }
-            .modal-content .modal-buttons {
-                flex-direction: column;
-            }
-            .modal-content .modal-buttons button {
-                width: 100%;
-            }
-            #feedbackModalContent p {
-                font-size: 0.8em;
-            }
-            #feedbackModalContent strong {
-                font-size: 0.9em;
-            }
-            #feedbackModalContent span {
-                font-size: 0.8em;
-            }
-            #introScreen h2 {
-                font-size: 1.8em;
-            }
-            #introScreen p {
-                font-size: 1em;
-            }
-            #musicalStaffCanvas {
-                height: 120px; /* Slightly smaller height for staff on mobile */
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Pantalla de Inicio -->
-    <div id="introScreen">
-        <h2>Bienvenido a Bloque Armónico Pro</h2>
-        <p>Herramienta para desarrollar la técnica de armonización en bloques cerrados 4-way closed.</p>
-        <p>Realizado por Juan Miguel Rios Redondo</p>
-        <button id="startButton">Comenzar</button>
-    </div>
-
-    <div class="container" id="quizContainer" style="display: none;">
-        <h2>Pregunta:</h2>
-        <div id="questionArea">
-            <p id="chordQuestionText">Cargando pregunta...</p>
-            <button id="playChordButton" style="margin-top: 5px; padding: 8px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Reproducir Acorde</button>
-            <div class="notes-grid">
-                <div class="grid-cell" id="gridCell0">
-                    <span class="interval-label"></span>
-                    <span class="note-display"></span>
-                </div>
-                <div class="grid-cell" id="gridCell1">
-                    <span class="interval-label"></span>
-                    <span class="note-display"></span>
-                </div>
-                <div class="grid-cell" id="gridCell2">
-                    <span class="interval-label"></span>
-                    <span class="note-display"></span>
-                </div>
-                <div class="grid-cell" id="gridCell3">
-                    <span class="interval-label"></span>
-                    <span class="note-display"></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="input-group">
-            <label>Selecciona las 4 notas del acorde:</label>
-            <div class="note-building-controls">
-                <div id="naturalNoteButtons" class="natural-note-buttons">
-                    <!-- Los botones de notas naturales se generarán aquí -->
-                </div>
-                <div id="accidentalButtons" class="accidental-buttons">
-                    <!-- Los botones de accidentales se generarán aquí -->
-                </div>
-            </div>
-
-            <label style="margin-top: 20px;">Notas de tu Respuesta (máx. 4):</label>
-            <div id="selectedNotesDisplay">
-                Notas seleccionadas: Ninguna
-            </div>
-        </div>
-
-        <!-- Botones de acción -->
-        <div class="action-buttons-group">
-            <button id="confirmAnswerButton">Confirmar</button>
-            <button id="clearAllSelectionButton">Borrar</button>
-            <button id="changeQuestionButton">Cambiar Pregunta</button>
-        </div>
-
-        <!-- Área para la partitura musical -->
-        <div id="staffArea">
-            <canvas id="musicalStaffCanvas"></canvas>
-        </div>
-    </div>
-
-    <!-- Modal de Feedback -->
-    <div id="feedbackModalOverlay" class="modal-overlay">
-        <div id="feedbackModalContent" class="modal-content">
-            <!-- El mensaje de feedback se insertará aquí -->
-        </div>
-    </div>
-
-    <!-- Modal de Evaluación -->
-    <div id="evaluationModalOverlay" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Resultados de la Evaluación</h3>
-            <p id="evaluationSummary"></p>
-            <p>Áreas a trabajar:</p>
-            <ul id="adviceList">
-                <!-- Los elementos de consejo se insertarán aquí -->
-            </ul>
-            <div class="modal-buttons">
-                <button id="continueQuizButton">Continuar Quiz</button>
-                <button id="endQuizButton">Terminar Quiz</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Visualización del mensaje final (después de terminar el quiz) -->
-    <div id="finalMessageDisplay">
-        <h3>Quiz Finalizado</h3>
-        <p>¡Gracias por practicar!</p>
-        <p class="results-summary" id="finalResultsSummary"></p>
-        <p class="email-info">En una aplicación real, estos resultados serían enviados a tu correo electrónico para que puedas revisarlos más tarde.</p>
-        <p class="email-info">Para enviar un correo de prueba con tus resultados, haz clic <a id="mailtoLink" href="#" target="_blank">aquí</a>.</p>
-    </div>
-
+    <!-- VexFlow para la notación musical (usando CDN con la ruta ESM correcta) -->
     <script type="module">
-        // Importar módulos de VexFlow
-        import { Renderer, Stave, StaveNote, Voice, Formatter } from "https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js";
+        // Importar módulos de VexFlow desde la ruta ESM
+        import { Renderer, Stave, StaveNote, Voice, Formatter } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
 
         // Canonical notes (for internal calculations, using sharps)
         const canonicalNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -1167,7 +487,7 @@
             if (activeAccidental !== '') {
                 attemptToggleCombinedNote();
             } else {
-                // If no accidental is active, just update button visuals
+                // If no natural note is active, just update button visuals
                 updateButtonSelectionVisuals();
             }
         }
@@ -1379,32 +699,29 @@
 
             const vexFlowStaveNotes = [];
             let currentVexFlowOctave = 4; // Start with C4 as a base octave for display
-            let prevVexFlowSemitone = -1; // To track octave changes for display
-
+            
             // Determine the starting octave for the lowest note in a way that makes sense visually
-            // For a 4-part chord, it's usually within 2 octaves.
-            // If the chord notes are very low (e.g., all below middle C), we might start lower.
-            // Let's assume the lowest note of the chord is in octave 4, and adjust if needed.
             if (sortedNotesForDisplay.length > 0) {
-                // If the lowest note's semitone (0-11) is G (7) or higher, it might be better to start in octave 3
-                // to keep the chord within a more central staff range.
-                if (sortedNotesForDisplay[0].semitone >= noteToSemitoneMap["G"]) {
+                const lowestNoteSemitone = sortedNotesForDisplay[0].semitone;
+                // If the lowest note is G3 (semitone 7 in octave 3) or lower, use octave 3 as base
+                // G3 absolute semitone: 7 + (3 * 12) = 43
+                if (lowestNoteSemitone + (currentVexFlowOctave * 12) < (noteToSemitoneMap["G"] + (4 * 12))) { // If lower than G4
                     currentVexFlowOctave = 3;
                 }
             }
 
+            let prevVexFlowSemitone = -1; // To track octave changes for display
 
             sortedNotesForDisplay.forEach((noteObj, index) => {
-                // Determine the correct octave for VexFlow based on the previous note
-                // and keeping the notes in a compact chord voicing.
+                // Adjust octave for VexFlow to keep notes in a compact chord voicing.
+                // This logic needs to be careful to avoid jumping octaves unnecessarily
+                // and to place notes correctly within the staff.
                 let noteNameForVexFlow = noteObj.note.toLowerCase();
                 let octaveForVexFlow = currentVexFlowOctave;
 
                 // Handle enharmonic spellings for VexFlow (e.g., Db should be 'db', not 'c#')
-                // This requires converting the canonical note back to its common flat spelling if applicable
+                // This is a heuristic; a more robust solution would involve key signatures
                 if (noteObj.note === "C#") {
-                    // Check if the original given note or chord root used Db
-                    // This is a heuristic; a more robust solution would involve key signatures
                     if (currentGivenNote.toUpperCase().includes("DB") || currentChordRoot.toUpperCase().includes("DB")) {
                         noteNameForVexFlow = "db";
                     }
@@ -1430,28 +747,25 @@
                     keys: [`${noteNameForVexFlow}/${octaveForVexFlow}`],
                     duration: "w" // Whole note for chords
                 }));
+                prevVexFlowSemitone = noteObj.semitone;
             });
 
             // Determine clef based on the range of the notes
             let clef = "treble";
-            if (sortedNotesForDisplay.length > 0) {
-                const lowestNoteSemitone = sortedNotesForDisplay[0].semitone;
-                // If the lowest note is below middle C (C4 semitone 0 in octave 4)
-                // We'll use a threshold of F3 (semitone 5 in octave 3) to switch to bass clef
-                // F3 absolute semitone: 5 + (3 * 12) = 41
-                // C4 absolute semitone: 0 + (4 * 12) = 48
-                const lowestAbsoluteSemitone = lowestNoteSemitone + (currentVexFlowOctave * 12);
-                if (lowestAbsoluteSemitone < (noteToSemitoneMap["G"] + (4 * 12))) { // If lower than G4
-                     clef = "bass";
-                     // If bass clef, adjust starting octave to make it look good
-                     if (lowestAbsoluteSemitone < (noteToSemitoneMap["C"] + (3 * 12))) { // If lower than C3
-                         // This is a rough adjustment, might need more fine-tuning based on actual notes
-                         // For example, if it's C2, it will be c/2.
-                         // VexFlow notes are typically c/4 for middle C.
-                         // If we are in bass clef and the lowest note is below C3, we need to adjust the octave down.
-                         // This part is tricky without a full note-to-VexFlow-key mapping.
-                         // For now, let's just ensure the clef is correct.
-                     }
+            if (vexFlowStaveNotes.length > 0) {
+                const lowestVexFlowNoteKey = vexFlowStaveNotes[0].keys[0]; // e.g., "c/4" or "g/3"
+                const [lowestNoteName, lowestNoteOctaveStr] = lowestVexFlowNoteKey.split('/');
+                const lowestNoteOctave = parseInt(lowestNoteOctaveStr);
+
+                // If the lowest note is C4 or lower, consider bass clef
+                // Middle C (C4) in VexFlow is "c/4".
+                // Notes below middle C (like B3, A3, G3) are often better in bass clef.
+                // Let's use a threshold: if the lowest note is G3 or lower, use bass clef.
+                // G3 is typically the lowest note comfortably in bass clef.
+                // Absolute semitone for G3 = 7 + (3 * 12) = 43.
+                // Absolute semitone for C4 = 0 + (4 * 12) = 48.
+                if (noteToSemitoneMap[lowestNoteName.toUpperCase()] + (lowestNoteOctave * 12) < (noteToSemitoneMap["C"] + (4 * 12))) {
+                    clef = "bass";
                 }
             }
 
@@ -1845,30 +1159,31 @@
         playChordButton.addEventListener('click', playChord); // Event listener for audio playback button
 
         startButton.addEventListener('click', async () => {
-            console.log("startButton: Clicked. Hiding intro and showing quiz container.");
-            introScreen.style.display = 'none'; // Hide intro screen immediately
-            quizContainer.style.display = 'flex'; // Show quiz container immediately
-            console.log("startButton: UI transition complete.");
-
-            // Initialize the quiz elements
-            try {
-                console.log("startButton: Initializing quiz components...");
-                generateNoteButtons(); // Generate note buttons on load
-                // No need to generate virtual keyboard anymore
-                generateComplexQuestion(); // This includes drawing staff and updating displays
-                console.log("startButton: Quiz components initialized successfully.");
-            } catch (error) {
-                console.error("startButton: Error during quiz component initialization:", error);
-                chordQuestionTextDiv.innerHTML = "¡Error al cargar la aplicación! Revisa la consola del navegador.";
-                disableQuizInteraction();
-                // Show a custom message box instead of alert()
-                showCustomMessage("Error de Carga", "Hubo un problema al inicializar la aplicación. Por favor, revisa la consola del navegador para más detalles.", "error");
-            }
-
-            // Start audio context after initial UI is loaded
-            console.log("startButton: Attempting to start audio context.");
+            console.log("startButton: Clicked. Initializing UI transition and audio.");
+            introScreen.style.display = 'none'; // Hide intro screen
+            quizContainer.style.display = 'flex'; // Show quiz container
+            
+            // Start audio context immediately on user gesture
             await startAudioContext();
             console.log("startButton: Audio context start attempt completed.");
+
+            // Now initialize quiz components
+            try {
+                console.log("startButton: Initializing quiz components...");
+                generateNoteButtons(); // Generate note buttons
+                generateComplexQuestion(); // This includes drawing staff and updating displays
+                console.log("startButton: Quiz components initialized successfully.");
+                
+                // Ensure interaction is enabled after everything is loaded
+                enableQuizInteraction();
+                console.log("startButton: All setup complete. Quiz interaction enabled.");
+
+            } catch (error) {
+                console.error("startButton: Error during quiz setup:", error);
+                chordQuestionTextDiv.innerHTML = "¡Error al cargar la aplicación! Revisa la consola del navegador.";
+                disableQuizInteraction(); // Ensure quiz is disabled on error
+                showCustomMessage("Error de Carga", "Hubo un problema al inicializar la aplicación. Por favor, revisa la consola del navegador para más detalles.", "error");
+            }
         });
 
         // Show intro screen on initial load
