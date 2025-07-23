@@ -96,7 +96,7 @@
             border: 2px solid #64748b; /* Borde exterior para la cuadrícula */
             border-radius: 5px; /* Esquinas ligeramente redondeadas para el contenedor de la cuadrícula */
             overflow: hidden; /* Asegura que los bordes internos sean limpios */
-            height: 220px; /* Altura fija ajustada para 4 celdas más compactas y visibles */
+            height: 226px; /* Altura fija ajustada para 4 celdas + 3 gaps (55*4 + 2*3 = 220 + 6 = 226) */
         }
 
         .grid-cell {
@@ -797,6 +797,12 @@
         const naturalNotes = ["C", "D", "E", "F", "G", "A", "B"];
         // Notes for the accidental buttons
         const accidentals = ["#", "##", "b", "bb"];
+
+        // Pool of notes from which the "given note" in the question will be randomly selected.
+        // Includes natural notes, sharps, and common flats.
+        const notesForQuestionRoot = [
+            "C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"
+        ];
 
         // Definition of chord structures in semitones and their names, including labels for the grid
         const chordStructures = {
@@ -1537,9 +1543,9 @@
             console.log("generateComplexQuestion: Nombre de intervalo dado:", currentGivenIntervalName);
 
 
-            // 3. Choose a random note to be that interval (from canonical notes for consistency)
-            const givenNoteIndex = Math.floor(Math.random() * canonicalNotes.length);
-            currentGivenNote = canonicalNotes[givenNoteIndex];
+            // 3. Choose a random note to be that interval (from the expanded notesForQuestionRoot array)
+            const givenNoteIndex = Math.floor(Math.random() * notesForQuestionRoot.length);
+            currentGivenNote = notesForQuestionRoot[givenNoteIndex];
             console.log("generateComplexQuestion: Nota dada (principal):", currentGivenNote);
 
             // 4. Calculate the actual root note of the chord
