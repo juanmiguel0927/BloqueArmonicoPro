@@ -14,10 +14,11 @@
             height: 100%; /* HTML and body take full viewport height */
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Hide any overflowing content to prevent scrolling */
+            /* Allow vertical scrolling on the body if content overflows */
+            overflow-y: auto;
+            overflow-x: hidden; /* Hide horizontal overflow */
             display: flex; /* Make body a flex container */
             flex-direction: column; /* Stack child elements vertically */
-            justify-content: center; /* Center content vertically */
             align-items: center; /* Center content horizontally */
             box-sizing: border-box;
         }
@@ -25,6 +26,7 @@
         /* Base styles for body and container */
         body {
             padding: 10px; /* Increased padding for the body for 100% zoom */
+            padding-bottom: 30px; /* Increased padding to ensure bottom content is visible */
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8; /* Light grayish blue background */
             color: #334155; /* Darker text color */
@@ -45,8 +47,9 @@
             display: flex;
             flex-direction: column;
             gap: 20px; /* Increased spacing between sections */
-            flex-grow: 1; /* Allows the container to grow and take available space */
-            max-height: 98vh; /* Limits height to prevent overflow from body */
+            overflow-y: auto; /* Allow the container itself to scroll if content overflows */
+            margin-top: 10px; /* Add some top margin to ensure header is visible */
+            margin-bottom: 20px; /* Increased bottom margin to prevent cutting off */
         }
 
         /* Headings */
@@ -109,8 +112,8 @@
             grid-template-columns: 1fr; /* Single column for vertical layout */
             grid-template-rows: repeat(4, 1fr); /* Make the 4 rows equal height */
             gap: 4px; /* Slightly increased spacing between cells */
-            width: 200px; /* Adjusted width to be more compact */
-            max-width: 200px; /* Fixed width for vertical display */
+            width: 90%; /* Adjusted width to be more fluid */
+            max-width: 200px; /* Fixed max-width for vertical display */
             margin: 20px auto; /* Center grid horizontally and add vertical margin */
             border: 2px solid #64748b; /* Outer border for the grid */
             border-radius: 5px; /* Slightly rounded corners for the grid container */
@@ -252,6 +255,7 @@
             justify-content: center;
             margin-top: auto; /* Pushes button group to the bottom */
             padding-top: 20px; /* Adds some padding above the buttons */
+            margin-bottom: 15px; /* Added margin to ensure buttons are not cut off */
         }
         .action-buttons-group button {
             padding: 15px 30px; /* Increased padding */
@@ -304,7 +308,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.4); /* Slightly less opaque for background visibility */
             display: none; /* Hidden by default */
             justify-content: center;
             align-items: center;
@@ -323,11 +327,12 @@
             padding: 30px; /* Increased padding */
             border-radius: 12px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-            max-width: 500px; /* Increased max-width */
+            max-width: 400px; /* Reduced max-width for a more compact modal */
             width: 90%;
             text-align: center;
             transform: translateY(-20px);
             transition: transform 0.3s ease;
+            margin-top: -100px; /* Move modal higher to reveal staff below */
         }
         .modal-overlay.visible .modal-content {
             transform: translateY(0);
@@ -557,6 +562,7 @@
         @media (max-width: 768px) {
             body {
                 padding: 5px; /* Less padding for very small screens */
+                padding-bottom: 20px; /* Adjusted padding for mobile bottom */
                 font-size: 15px; /* Smaller base font size for mobile */
             }
             .container {
@@ -564,8 +570,8 @@
                 padding-bottom: 20px; /* Adjusted padding for mobile */
                 border-radius: 8px;
                 width: 99%; /* Wider on small screens */
-                max-height: 99.5vh; /* Max height for mobile */
                 gap: 10px; /* Reduced gap for mobile */
+                margin-bottom: 15px; /* Adjusted bottom margin for mobile */
             }
             h1 {
                 font-size: 2em;
@@ -579,10 +585,17 @@
                 align-items: center; /* Center stacked elements */
                 gap: 20px; /* Smaller spacing when stacked */
             }
-            #questionArea, #staffArea {
+            #questionArea {
+                max-width: 95%; /* Take more width when stacked */
+                width: auto; /* Allow content to dictate width, respecting max-width */
+                flex: 0 0 auto; /* Prevent stretching */
+                padding: 15px; /* Reduced padding for mobile */
+            }
+            #staffArea {
                 max-width: 95%; /* Take more width when stacked */
                 min-width: unset; /* Remove min-width when stacked */
-                width: 100%; /* Ensure they take full available width */
+                width: auto; /* Allow content to dictate width, respecting max-width */
+                flex: 0 0 auto; /* Prevent stretching */
                 padding: 15px; /* Reduced padding for mobile */
             }
             .note-building-controls {
@@ -604,6 +617,7 @@
             .action-buttons-group {
                 flex-direction: column; /* Stack confirm/next buttons */
                 gap: 10px;
+                margin-bottom: 10px; /* Adjusted margin for mobile */
             }
             .action-buttons-group button {
                 width: 100%;
@@ -612,7 +626,7 @@
                 font-size: 1.3em;
             }
             .notes-grid {
-                width: 170px; /* Slightly smaller width for mobile */
+                width: 170px; /* Fixed width for mobile to prevent cutting */
                 max-width: 170px; /* Fixed max-width for consistency */
                 height: auto; /* Allow it to grow/shrink */
                 max-height: 240px; /* Set a max height */
@@ -652,7 +666,9 @@
                 font-size: 1.2em;
             }
             #musicalStaffCanvas {
+                width: 100%; /* Ensure canvas takes full width of its parent */
                 height: auto; /* Allow it to grow/shrink */
+                max-width: 280px; /* Smaller max width for staff on mobile */
                 max-height: 160px; /* Smaller max height for staff on mobile */
             }
         }
@@ -1016,6 +1032,7 @@
             const modalOverlay = document.createElement('div');
             modalOverlay.classList.add('modal-overlay', 'visible');
             modalOverlay.style.zIndex = 1002; // Higher z-index than other modals
+            modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.2)'; // More transparent
 
             const modalContent = document.createElement('div');
             modalContent.classList.add('modal-content');
@@ -1035,6 +1052,10 @@
                  modalContent.style.backgroundColor = '#dcfce7';
                  modalContent.style.color = '#15803d';
                  modalContent.style.border = '1px solid #15803d';
+            } else if (type === 'warning') {
+                modalContent.style.backgroundColor = '#fffbeb';
+                modalContent.style.color = '#b45309';
+                modalContent.style.border = '1px solid #fcd34d';
             }
 
             modalOverlay.appendChild(modalContent);
@@ -1047,6 +1068,14 @@
                 modalOverlay.classList.remove('visible');
                 setTimeout(() => modalOverlay.remove(), 300); // Remove from DOM after transition
             });
+
+            // Auto-hide after a short duration for info/success/warning messages
+            if (type === 'info' || type === 'success' || type === 'warning') {
+                setTimeout(() => {
+                    modalOverlay.classList.remove('visible');
+                    setTimeout(() => modalOverlay.remove(), 300);
+                }, 1500); // 1.5 seconds for temporary messages
+            }
         }
 
 
@@ -1196,21 +1225,36 @@
         function toggleNoteInAnswer(note) {
             const normalizedNote = normalizeNote(note);
             const index = selectedUserNotes.findIndex(n => normalizeNote(n) === normalizedNote);
+            let message = '';
+            let messageType = 'info';
 
             if (index > -1) {
                 // Note found, remove it
                 selectedUserNotes.splice(index, 1);
+                message = `Nota ${note} eliminada.`;
+                messageType = 'info';
             } else {
                 // Note not found, add it if less than 4 notes are selected
                 if (selectedUserNotes.length < 4) {
                     selectedUserNotes.push(note);
+                    message = `Nota ${note} añadida.`;
+                    messageType = 'success';
                 } else {
-                    showCustomMessage("Límite de Notas", "Ya has seleccionado 4 notas. Por favor, deselecciona una antes de añadir otra.", "info");
+                    message = "Límite de 4 notas alcanzado. Deselecciona una antes de añadir otra.";
+                    messageType = 'warning';
+                    showCustomMessage("Límite de Notas", message, messageType);
                     return; // Do not update visuals if not added
                 }
             }
             updateSelectedNotesDisplay();
-            // Removed: drawMusicalStaff(notesForStaffDisplay);
+            // Call drawMusicalStaff with currentGivenNote and selectedUserNotes
+            drawMusicalStaff(selectedUserNotes); // Pass only selected notes for highlighting
+            if (message) {
+                // Only show custom message if it's not the "limit reached" one (which is already shown)
+                if (messageType !== 'warning') {
+                    showCustomMessage("Selección de Nota", message, messageType);
+                }
+            }
         }
 
         /**
@@ -1245,6 +1289,15 @@
             const clickedNote = event.target.dataset.note;
             if (!clickedNote || (event.target.classList && event.target.classList.contains('disabled'))) return; // Defensive check
 
+            // Deselect previous natural note button if different one is clicked
+            if (activeNaturalNote && activeNaturalNote !== clickedNote) {
+                const prevNaturalButton = document.querySelector(`.natural-note-buttons button[data-note="${activeNaturalNote}"]`);
+                if (prevNaturalButton) prevNaturalButton.classList.remove('selected');
+            }
+
+            // Toggle selected class for the clicked natural note button
+            event.target.classList.toggle('selected');
+
             // If a natural note is already active and the same one is clicked, it means
             // the user is trying to deselect it or finalize a selection with no accidental.
             if (activeNaturalNote === clickedNote) {
@@ -1275,6 +1328,15 @@
         function handleAccidentalClick(event) {
             const clickedAccidental = event.target.dataset.accidental;
             if (!clickedAccidental || (event.target.classList && event.target.classList.contains('disabled'))) return; // Defensive check
+
+            // Deselect previous accidental button if different one is clicked
+            if (activeAccidental && activeAccidental !== clickedAccidental) {
+                const prevAccidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${activeAccidental}"]`);
+                if (prevAccidentalButton) prevAccidentalButton.classList.remove('selected');
+            }
+
+            // Toggle selected class for the clicked accidental button
+            event.target.classList.toggle('selected');
 
             // If an accidental is already active and the same one is clicked, it means
             // the user is trying to deselect it or finalize a selection with the current natural.
@@ -1310,7 +1372,7 @@
             updateSelectedNotesDisplay(); // This will also handle button and keyboard visuals
             // When clearing selection, draw only the currentGivenNote if it exists, otherwise clear entirely
             if (currentGivenNote) {
-                drawMusicalStaff([currentGivenNote]);
+                drawMusicalStaff([]); // Clear staff, then redraw with only the given note (implicitly done by generateComplexExercise)
             } else {
                 drawMusicalStaff([]); // Clear staff if no given note
             }
@@ -1346,9 +1408,9 @@
          * The `currentGivenNote` will be positioned as the highest voice within G4-G5 range.
          * Other notes in `notesToDisplayRaw` will be placed below it, in closest descending order,
          * ensuring a closed voicing within an octave range.
-         * @param {string[]} notesToDisplayRaw - Array of notes to be displayed (e.g., user's selected notes).
+         * @param {string[]} notesToHighlight - Array of notes to be highlighted (e.g., user's selected notes).
          */
-        function drawMusicalStaff(notesToDisplayRaw) {
+        function drawMusicalStaff(notesToHighlight = []) {
             const canvas = musicalStaffCanvas;
             if (!canvas) { console.error("Canvas element not found for musical staff."); return; }
             const context = canvas.getContext('2d');
@@ -1358,7 +1420,7 @@
             const containerWidth = canvas.parentElement.clientWidth;
             canvas.width = Math.min(containerWidth, 550); // Adjusted max-width
             canvas.height = 180; // Adjusted height
-            if (window.innerWidth <= 768) { canvas.width = Math.min(containerWidth, 300); canvas.height = 140; } // Adjusted for mobile
+            if (window.innerWidth <= 768) { canvas.width = Math.min(containerWidth, 280); canvas.height = 140; }
 
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
             renderer.resize(canvas.width, canvas.height);
@@ -1369,23 +1431,20 @@
 
             const finalStaveNoteKeys = [];
             const finalStaveNoteAccidentals = [];
-            console.log("drawMusicalStaff: finalStaveNoteKeys declared:", finalStaveNoteKeys);
-            console.log("drawMusicalStaff: finalStaveNoteAccidentals declared:", finalStaveNoteAccidentals);
 
-            // Collect all unique notes that need to be on the staff, including the given note
-            let allNotesForStaff = new Set();
+            // Combine currentGivenNote and notesToHighlight for display
+            let allNotesForStaffDisplay = new Set();
             if (currentGivenNote) {
-                allNotesForStaff.add(currentGivenNote);
+                allNotesForStaffDisplay.add(currentGivenNote);
             }
-            notesToDisplayRaw.forEach(note => allNotesForStaff.add(note));
+            notesToHighlight.forEach(note => allNotesForStaffDisplay.add(note));
 
-            if (allNotesForStaff.size === 0) {
-                console.log("drawMusicalStaff: No notes for staff, returning early.");
+            if (allNotesForStaffDisplay.size === 0) {
                 return; // Draw empty staff if no notes to display
             }
 
             // Convert notes to objects with original string, semitone (0-11), and placeholder for absolute semitone
-            let processedNotes = Array.from(allNotesForStaff).map(noteString => {
+            let processedNotes = Array.from(allNotesForStaffDisplay).map(noteString => {
                 return {
                     originalString: noteString,
                     semitone: noteToSemitoneMap[normalizeNote(noteString)], // 0-11
@@ -1409,10 +1468,6 @@
             const semitoneOfHighest = highestNoteObj.semitone;
             let targetOctaveForHighest;
 
-            // G4 is MIDI 67, G5 is MIDI 79.
-            // Semitones from C: C=0, C#=1, D=2, D#=3, E=4, F=5, F#=6, G=7, G#=8, A=9, A#=10, B=11
-            // If the note is G, G#, A, A#, B (semitones 7-11), place it in octave 4.
-            // If the note is C, C#, D, D#, E, F, F# (semitones 0-6), place it in octave 5.
             if (semitoneOfHighest >= naturalLetterSemitone['G']) { // G is semitone 7
                 targetOctaveForHighest = 4;
             } else {
@@ -1455,7 +1510,7 @@
 
                         if (isClosedVoicing) {
                             // Find the original spelling from notesToDisplayRaw that matches this canonical note
-                            const originalSpelling = notesToDisplayRaw.find(rawNote => normalizeNote(rawNote) === candidateCanonicalNote);
+                            const originalSpelling = Array.from(allNotesForStaffDisplay).find(rawNote => normalizeNote(rawNote) === candidateCanonicalNote);
 
                             if (originalSpelling) {
                                 orderedNotesForVexFlow.push({
@@ -1473,13 +1528,14 @@
                 }
                 // Fallback if a note wasn't found in the immediate closed voicing search (shouldn't happen with correct logic)
                 if (!foundNextNote && orderedNotesForVexFlow.length < 4) {
-                    console.warn("drawMusicalStaff: Could not find a strictly closed voicing note. Falling back to simple descending.");
-                    // Find the highest remaining canonical note and place it an octave down from the highest placed note
-                    const remainingCanonical = allCorrectCanonicalNotes.filter(n => !placedCanonicalNotes.has(n));
-                    if (remainingCanonical.length > 0) {
+                    // This fallback logic might need adjustment if allCorrectCanonicalNotes isn't the source
+                    // For now, it's about placing the remaining notes from allNotesForStaffDisplay
+                    const remainingNotesToPlace = Array.from(allNotesForStaffDisplay).filter(n => !placedCanonicalNotes.has(normalizeNote(n)));
+                    if (remainingNotesToPlace.length > 0) {
                         // Sort remaining by semitone and pick the highest one that is not yet placed
-                        remainingCanonical.sort((a, b) => noteToSemitoneMap[a] - noteToSemitoneMap[b]);
-                        const nextHighestRemainingCanonical = remainingCanonical[remainingCanonical.length - 1];
+                        remainingNotesToPlace.sort((a, b) => noteToSemitoneMap[normalizeNote(a)] - noteToSemitoneMap[normalizeNote(b)]);
+                        const nextHighestRemainingOriginal = remainingNotesToPlace[remainingNotesToPlace.length - 1];
+                        const nextHighestRemainingCanonical = normalizeNote(nextHighestRemainingOriginal);
                         const nextHighestRemainingSemitone = noteToSemitoneMap[nextHighestRemainingCanonical];
 
                         let candidateAbsoluteSemitone = lastAbsoluteSemitonePlaced - 12; // Start an octave below
@@ -1488,23 +1544,19 @@
                             candidateAbsoluteSemitone -= 1; // Move down by semitone until match and below
                         }
 
-                        const originalSpelling = notesToDisplayRaw.find(rawNote => normalizeNote(rawNote) === nextHighestRemainingCanonical);
-                        if (originalSpelling) {
-                            orderedNotesForVexFlow.push({
-                                originalString: originalSpelling,
-                                semitone: nextHighestRemainingSemitone,
-                                absoluteSemitone: candidateAbsoluteSemitone
-                            });
-                            placedCanonicalNotes.add(nextHighestRemainingCanonical);
-                            lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone;
-                        }
+                        orderedNotesForVexFlow.push({
+                            originalString: nextHighestRemainingOriginal,
+                            semitone: nextHighestRemainingSemitone,
+                            absoluteSemitone: candidateAbsoluteSemitone
+                        });
+                        placedCanonicalNotes.add(nextHighestRemainingCanonical);
+                        lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone;
                     }
                 }
             }
 
             // Final sort by absolute semitone for VexFlow rendering (ascending order, lowest to highest)
             orderedNotesForVexFlow.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
-            console.log("drawMusicalStaff: Ordered notes for VexFlow (absolute semitones):", orderedNotesForVexFlow);
 
             orderedNotesForVexFlow.forEach(noteObj => {
                 const match = noteObj.originalString.match(/^([A-G])(.*)$/i);
@@ -1522,7 +1574,6 @@
             });
 
             if (finalStaveNoteKeys.length === 0) {
-                console.log("drawMusicalStaff: finalStaveNoteKeys is empty after processing notes, returning early.");
                 return; // No valid notes to draw after all processing
             }
 
@@ -1531,19 +1582,22 @@
                 duration: "w"
             });
 
-            if (Array.isArray(finalStaveNoteAccidentals)) { // Defensive check
-                finalStaveNoteAccidentals.forEach((accidental, index) => {
-                    if (accidental) {
-                        if (chordStaveNote) { // Defensive check
-                            chordStaveNote.addAccidental(index, new Accidental(accidental));
-                        } else {
-                            console.error("chordStaveNote is not defined when trying to add accidental.");
-                        }
+            // Apply highlighting to selected notes
+            notesToHighlight.forEach(highlightNote => {
+                const normalizedHighlightNote = normalizeNote(highlightNote);
+                orderedNotesForVexFlow.forEach((noteObj, index) => {
+                    if (normalizeNote(noteObj.originalString) === normalizedHighlightNote) {
+                        chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" }); // Blue color
                     }
                 });
-            } else {
-                console.error("finalStaveNoteAccidentals is not an array!");
-            }
+            });
+
+            // Add accidentals
+            finalStaveNoteAccidentals.forEach((accidental, index) => {
+                if (accidental) {
+                    chordStaveNote.addAccidental(index, new Accidental(accidental));
+                }
+            });
 
             const voice = new Voice({ num_beats: 4, beat_value: 4 });
             voice.addTickables([chordStaveNote]);
@@ -1619,7 +1673,7 @@
             currentOrderedLabelsForDisplay = []; // Labels for the grid (e.g., "1", "6", "5", "3")
             currentCorrectNotes = []; // Actual notes for the answer (e.g., "C", "A", "G", "E")
             currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing
-
+            
             baseVoicingLabels.forEach(label => {
                 let semitonesToRoot;
                 let displayLabel = label; // The label that will be displayed in the grid
@@ -1676,7 +1730,7 @@
             noteDisplaySpanInFirstCell.classList.add('highlighted');
 
             // Draw staff initially with only the currentGivenNote
-            drawMusicalStaff([currentGivenNote]);
+            drawMusicalStaff([]); // Draw only the given note, no selected notes yet
 
             // Clear user's selected notes and feedback message
             console.log("generateComplexExercise: Clearing selection and feedback.");
@@ -1766,25 +1820,11 @@
                 isCorrect = userNotesNormalized.every((note, index) => note === normalizedCorrectNotes[index]);
 
                 if (isCorrect) {
-                    feedbackHtml = `<p>¡Correcto! 🎉</p><p>La fundamental es <strong>${currentChordRoot}</strong>. Las notas son: <strong>${currentCorrectNotes.join(', ')}</strong></p>`;
+                    feedbackHtml = `<p>¡Correcto! 🎉</p>`;
                     console.log("checkAnswer: Answer is correct. Displaying correct chord on staff.");
                     drawMusicalStaff(currentCorrectNotes); // Display correct notes on staff
                 } else {
-                    // Detailed incorrect feedback
                     feedbackHtml = `<p>Incorrecto. Inténtalo de nuevo.</p>`;
-                    feedbackHtml += `<p>Tus notas: `;
-                    // Display user's selected notes, highlighting correct/incorrect ones
-                    selectedUserNotes.forEach((userNote, index) => {
-                        const normalizedUserNote = normalizeNote(userNote);
-                        if (normalizedCorrectNotes.includes(normalizedUserNote)) {
-                            feedbackHtml += `<span style="color: green; font-weight: bold;">${userNote}</span>`;
-                        } else {
-                            feedbackHtml += `<span style="color: red; font-weight: bold;">${userNote}</span>`;
-                        }
-                        if (index < selectedUserNotes.length - 1) feedbackHtml += ", ";
-                    });
-                    feedbackHtml += `</p>`;
-                    feedbackHtml += `<p>Las notas correctas son: <strong>${currentCorrectNotes.join(', ')}</strong></p>`;
                     console.log("checkAnswer: Answer is incorrect. Reverting staff to only given note.");
                     drawMusicalStaff([currentGivenNote]); // Revert staff to only the given note
                 }
@@ -1972,3 +2012,4 @@
     </script>
 </body>
 </html>
+
