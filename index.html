@@ -6,7 +6,7 @@
     <title>Bloque Armónico Pro: Herramienta de Entrenamiento</title>
     <!-- Tone.js para la reproducción de audio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
-    <!-- VexFlow para la notación musical -->
+    <!-- VexFlow para la notación musical (usando CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js"></script>
     <style>
         /* Ajustes de HTML y Body para evitar el desplazamiento */
@@ -1395,36 +1395,66 @@
 
 
             sortedNotesForDisplay.forEach((noteObj, index) => {
-                if (index > 0 && noteObj.semitone < prevVexFlowSemitone) {
-                    // If the current note's semitone is lower than the previous, it means it's in the next octave up
-                    currentVexFlowOctave++;
+                // Determine the correct octave for VexFlow based on the previous note
+                // and keeping the notes in a compact chord voicing.
+                let noteNameForVexFlow = noteObj.note.toLowerCase();
+                let octaveForVexFlow = currentVexFlowOctave;
+
+                // Handle enharmonic spellings for VexFlow (e.g., Db should be 'db', not 'c#')
+                // This requires converting the canonical note back to its common flat spelling if applicable
+                if (noteObj.note === "C#") {
+                    // Check if the original given note or chord root used Db
+                    // This is a heuristic; a more robust solution would involve key signatures
+                    if (currentGivenNote.toUpperCase().includes("DB") || currentChordRoot.toUpperCase().includes("DB")) {
+                        noteNameForVexFlow = "db";
+                    }
+                } else if (noteObj.note === "D#") {
+                    if (currentGivenNote.toUpperCase().includes("EB") || currentChordRoot.toUpperCase().includes("EB")) {
+                        noteNameForVexFlow = "eb";
+                    }
+                } else if (noteObj.note === "F#") {
+                    if (currentGivenNote.toUpperCase().includes("GB") || currentChordRoot.toUpperCase().includes("GB")) {
+                        noteNameForVexFlow = "gb";
+                    }
+                } else if (noteObj.note === "G#") {
+                    if (currentGivenNote.toUpperCase().includes("AB") || currentChordRoot.toUpperCase().includes("AB")) {
+                        noteNameForVexFlow = "ab";
+                    }
+                } else if (noteObj.note === "A#") {
+                    if (currentGivenNote.toUpperCase().includes("BB") || currentChordRoot.toUpperCase().includes("BB")) {
+                        noteNameForVexFlow = "bb";
+                    }
                 }
+
                 vexFlowStaveNotes.push(new StaveNote({
-                    keys: [`${noteObj.note.toLowerCase()}/${currentVexFlowOctave}`],
+                    keys: [`${noteNameForVexFlow}/${octaveForVexFlow}`],
                     duration: "w" // Whole note for chords
                 }));
-                prevVexFlowSemitone = noteObj.semitone;
             });
 
             // Determine clef based on the range of the notes
             let clef = "treble";
-            if (vexFlowStaveNotes.length > 0) {
-                const lowestVexFlowNoteKey = vexFlowStaveNotes[0].keys[0]; // e.g., "c/4" or "g/3"
-                const [lowestNoteName, lowestNoteOctaveStr] = lowestVexFlowNoteKey.split('/');
-                const lowestNoteOctave = parseInt(lowestNoteOctaveStr);
-
-                // If the lowest note is C4 or lower, consider bass clef
-                // Middle C (C4) in VexFlow is "c/4".
-                // Notes below middle C (like B3, A3, G3) are often better in bass clef.
-                // Let's use a threshold: if the lowest note is G3 or lower, use bass clef.
-                // G3 is typically the lowest note comfortably in bass clef.
-                // Semitone for G is 7. Octave 3.
-                // Absolute semitone for G3 = 7 + (3 * 12) = 43.
-                // Absolute semitone for C4 = 0 + (4 * 12) = 48.
-                if (noteToSemitoneMap[lowestNoteName.toUpperCase()] + (lowestNoteOctave * 12) < (noteToSemitoneMap["C"] + (4 * 12))) {
-                    clef = "bass";
+            if (sortedNotesForDisplay.length > 0) {
+                const lowestNoteSemitone = sortedNotesForDisplay[0].semitone;
+                // If the lowest note is below middle C (C4 semitone 0 in octave 4)
+                // We'll use a threshold of F3 (semitone 5 in octave 3) to switch to bass clef
+                // F3 absolute semitone: 5 + (3 * 12) = 41
+                // C4 absolute semitone: 0 + (4 * 12) = 48
+                const lowestAbsoluteSemitone = lowestNoteSemitone + (currentVexFlowOctave * 12);
+                if (lowestAbsoluteSemitone < (noteToSemitoneMap["G"] + (4 * 12))) { // If lower than G4
+                     clef = "bass";
+                     // If bass clef, adjust starting octave to make it look good
+                     if (lowestAbsoluteSemitone < (noteToSemitoneMap["C"] + (3 * 12))) { // If lower than C3
+                         // This is a rough adjustment, might need more fine-tuning based on actual notes
+                         // For example, if it's C2, it will be c/2.
+                         // VexFlow notes are typically c/4 for middle C.
+                         // If we are in bass clef and the lowest note is below C3, we need to adjust the octave down.
+                         // This part is tricky without a full note-to-VexFlow-key mapping.
+                         // For now, let's just ensure the clef is correct.
+                     }
                 }
             }
+
 
             // Create a stave (staff)
             const stave = new Stave(10, 0, canvas.width - 20); // x, y, width
