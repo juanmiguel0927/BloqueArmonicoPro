@@ -647,10 +647,12 @@
     </div>
 
     <div class="container" id="mainAppContainer" style="display: none;">
+        <!-- Texto de la pregunta movido arriba -->
         <h2>Ejercicio:</h2>
-        <div id="displaySection"> <!-- Nuevo contenedor para la pregunta y la partitura -->
+        <p id="chordQuestionText" style="text-align: center; font-size: 1.3em; font-weight: 600; color: #1e40af; margin-bottom: 10px;">Cargando ejercicio...</p>
+
+        <div id="displaySection"> <!-- Contenedor para la cuadrícula y la partitura (lado a lado) -->
             <div id="questionArea">
-                <p id="chordQuestionText">Cargando ejercicio...</p>
                 <button id="playChordButton" style="margin-top: 5px; padding: 8px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Reproducir Acorde</button>
                 <div class="notes-grid">
                     <div class="grid-cell" id="gridCell0">
@@ -739,7 +741,7 @@
         console.log("Script principal cargado y comenzando ejecución."); // Mensaje para depuración
 
         // Importar módulos de VexFlow desde la ruta ESM
-        import { Renderer, Stave, StaveNote, Voice, Formatter } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
+        import { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
 
         // Canonical notes (for internal calculations, using sharps)
         const canonicalNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -1145,7 +1147,7 @@
                 });
             } else {
                 naturalButtons.forEach(button => button.classList.remove('disabled'));
-                accidentalButtons.forEach(button => button.classList.remove('disabled'));
+                accidentalButtons.forEach(button => accidentalButtons.classList.remove('disabled'));
             }
         }
 
@@ -1170,7 +1172,13 @@
                 }
             }
             updateSelectedNotesDisplay();
-            drawMusicalStaff(selectedUserNotes); // Update staff immediately
+            // Always include the currentGivenNote in the staff display if it's not already in selectedUserNotes
+            // This ensures the given note is always present as the highest voice.
+            let notesForStaffDisplay = [...selectedUserNotes];
+            if (currentGivenNote && !notesForStaffDisplay.some(n => normalizeNote(n) === normalizeNote(currentGivenNote))) {
+                notesForStaffDisplay.push(currentGivenNote);
+            }
+            drawMusicalStaff(notesForStaffDisplay); // Update staff immediately with user's selected notes
         }
 
         /**
@@ -1264,7 +1272,12 @@
             activeNaturalNote = ''; // Reset active selection states
             activeAccidental = '';
             updateSelectedNotesDisplay(); // This will also handle button and keyboard visuals
-            drawMusicalStaff([]); // Clear staff when selection is cleared
+            // When clearing selection, draw only the currentGivenNote if it exists, otherwise clear entirely
+            if (currentGivenNote) {
+                drawMusicalStaff([currentGivenNote]);
+            } else {
+                drawMusicalStaff([]); // Clear staff if no given note
+            }
         }
 
         /**
@@ -1318,7 +1331,7 @@
 
             // Create notes with semitones for sorting
             const notesWithSemitones = currentCorrectNotes.map(noteName => {
-                const semitone = noteToSemitoneMap[normalizeNote(noteName)];
+                const semitone = noteToSemitoneMap[noteName];
                 return { note: noteName, semitone: semitone };
             });
 
@@ -1393,122 +1406,129 @@
         }
 
         /**
-         * Draws the musical staff with the given notes as a whole note chord.
-         * @param {string[]} notesToDisplay - Array of canonical note names (e.g., ["C", "E", "G", "B"]).
+         * Draws the musical staff with the given notes as a whole note chord, always in treble clef.
+         * The `currentGivenNote` will be positioned as the highest voice within G4-G5 range.
+         * Other notes in `notesToDisplayRaw` will be placed below it.
+         * @param {string[]} notesToDisplayRaw - Array of notes to be displayed (e.g., user's selected notes).
          */
-        function drawMusicalStaff(notesToDisplay) {
+        function drawMusicalStaff(notesToDisplayRaw) {
             const canvas = musicalStaffCanvas;
-            if (!canvas) {
-                console.error("Canvas element not found for musical staff.");
-                return;
-            }
-
-            // Clear previous drawing
+            if (!canvas) { console.error("Canvas element not found for musical staff."); return; }
             const context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Set canvas dimensions (responsive)
             const containerWidth = canvas.parentElement.clientWidth;
-            canvas.width = Math.min(containerWidth, 500); // Max width 500px for desktop
-            canvas.height = 150; // Fixed height for staff on desktop
-
-            // Adjust for mobile
-            if (window.innerWidth <= 768) {
-                canvas.width = Math.min(containerWidth, 300); // Smaller max width for mobile
-                canvas.height = 120; // Smaller height for mobile
-            }
-
+            canvas.width = Math.min(containerWidth, 500);
+            canvas.height = 150;
+            if (window.innerWidth <= 768) { canvas.width = Math.min(containerWidth, 300); canvas.height = 120; }
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
             renderer.resize(canvas.width, canvas.height);
             const ctx = renderer.getContext();
-
             const stave = new Stave(10, 0, canvas.width - 20);
             stave.addClef("treble").addTimeSignature("4/4"); // Always treble clef
             stave.setContext(ctx).draw();
 
-            if (notesToDisplay.length === 0) {
-                // If no notes, just draw an empty staff and return
-                return;
+            if (notesToDisplayRaw.length === 0) {
+                return; // Draw empty staff if no notes to display
             }
 
-            // 1. Convert notes to absolute semitone values and sort them.
-            let notesWithAbsoluteSemitones = notesToDisplay.map(noteName => {
-                const semitoneInOctave = noteToSemitoneMap[normalizeNote(noteName)];
-                // Initial guess for absolute semitone (e.g., C4 = 48)
+            // Prepare notes: convert to objects with original string and semitone
+            let processedNotes = notesToDisplayRaw.map(noteString => {
                 return {
-                    originalNote: noteName,
-                    semitoneInOctave: semitoneInOctave, // 0-11
-                    absoluteSemitone: semitoneInOctave + (4 * 12) // Assume octave 4 initially
+                    originalString: noteString,
+                    semitone: noteToSemitoneMap[normalizeNote(noteString)] // 0-11
                 };
             });
 
-            // Sort by the initial guess of absolute semitone
-            notesWithAbsoluteSemitones.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
+            let vexFlowNotes = []; // To store { key: "c/4", accidental: "#" } objects
+            let highestNoteAbsoluteSemitone;
 
-            // 2. Adjust octaves for stacking: Ensure each note is higher than or equal to the previous one
-            for (let i = 1; i < notesWithAbsoluteSemitones.length; i++) {
-                while (notesWithAbsoluteSemitones[i].absoluteSemitone <= notesWithAbsoluteSemitones[i - 1].absoluteSemitone) {
-                    notesWithAbsoluteSemitones[i].absoluteSemitone += 12; // Move to the next octave
-                }
+            // 1. Determine the highest note and place it in the G4-G5 range
+            let givenNoteInDisplay = processedNotes.find(n => normalizeNote(n.originalString) === normalizeNote(currentGivenNote));
+
+            let noteToPlaceHighest;
+            if (givenNoteInDisplay) {
+                noteToPlaceHighest = givenNoteInDisplay;
+            } else {
+                // If currentGivenNote is not in the notes to display, take the highest available note
+                // Sort processedNotes temporarily to find the highest
+                let tempSorted = [...processedNotes].sort((a, b) => b.semitone - a.semitone);
+                noteToPlaceHighest = tempSorted[0];
             }
 
-            // 3. Determine the overall base octave for the chord to fit well on the staff
-            // Aim for the lowest note to be around C4 (middle C) or slightly below.
-            const lowestNoteAbsoluteSemitone = notesWithAbsoluteSemitones[0].absoluteSemitone;
-            const middleC_abs_semitone = noteToSemitoneMap["C"] + (4 * 12); // Absolute semitone for C4 (MIDI 60)
+            // Calculate octave for the highest note to be in G4-G5 range (MIDI 67-79)
+            let targetOctaveForHighest;
+            const highestSemitoneInOctave = noteToPlaceHighest.semitone;
 
-            let octaveAdjustment = 0;
-            // If the lowest note is too high (e.g., C5 or above), shift down
-            if (lowestNoteAbsoluteSemitone >= (middleC_abs_semitone + 12)) { // If lowest note is C5 or higher
-                octaveAdjustment = -1;
-            }
-            // If the lowest note is too low (e.g., G3 or below), shift up
-            // G3 absolute semitone: 7 + (3 * 12) = 43.
-            else if (lowestNoteAbsoluteSemitone < (noteToSemitoneMap["G"] + (3 * 12))) {
-                octaveAdjustment = 1;
+            // If the note is C, C#, D, D#, E, F, F# (semitones 0-6), target octave 5 (e.g., C5, F#5)
+            if (highestSemitoneInOctave >= noteToSemitoneMap["G"]) { // G, G#, A, A#, B (semitones 7-11)
+                targetOctaveForHighest = 4; // Place in octave 4 (e.g., G4, A4)
+            } else { // C, C#, D, D#, E, F, F# (semitones 0-6)
+                targetOctaveForHighest = 5; // Place in octave 5 (e.g., C5, D5)
             }
 
-            // Apply the overall octave adjustment to all notes
-            notesWithAbsoluteSemitones.forEach(note => {
-                note.absoluteSemitone += (octaveAdjustment * 12);
+            highestNoteAbsoluteSemitone = highestSemitoneInOctave + (targetOctaveForHighest * 12);
+
+            // Add the highest note to vexFlowNotes
+            vexFlowNotes.push({
+                originalString: noteToPlaceHighest.originalString,
+                semitone: noteToPlaceHighest.semitone,
+                absoluteSemitone: highestNoteAbsoluteSemitone
             });
 
 
-            const vexFlowKeys = [];
-            notesWithAbsoluteSemitones.forEach(noteObj => {
-                let noteNameForVexFlow = noteObj.originalNote.toLowerCase();
-                const octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12); // Calculate final octave
+            // 2. Add other notes below the highest note
+            let remainingNotes = processedNotes.filter(n => normalizeNote(n.originalString) !== normalizeNote(noteToPlaceHighest.originalString));
+            remainingNotes.sort((a, b) => b.semitone - a.semitone); // Sort descending for processing
 
-                // Handle enharmonic spellings for VexFlow (e.g., Db should be 'db', not 'c#')
-                if (noteObj.originalNote === "C#") {
-                    if (currentGivenNote.toUpperCase().includes("DB") || currentChordRoot.toUpperCase().includes("DB")) {
-                        noteNameForVexFlow = "db";
-                    }
-                } else if (noteObj.originalNote === "D#") {
-                    if (currentGivenNote.toUpperCase().includes("EB") || currentChordRoot.toUpperCase().includes("EB")) {
-                        noteNameForVexFlow = "eb";
-                    }
-                } else if (noteObj.originalNote === "F#") {
-                    if (currentGivenNote.toUpperCase().includes("GB") || currentChordRoot.toUpperCase().includes("GB")) {
-                        noteNameForVexFlow = "gb";
-                    }
-                } else if (noteObj.originalNote === "G#") {
-                    if (currentGivenNote.toUpperCase().includes("AB") || currentChordRoot.toUpperCase().includes("AB")) {
-                        noteNameForVexFlow = "ab";
-                    }
-                } else if (noteObj.originalNote === "A#") {
-                    if (currentGivenNote.toUpperCase().includes("BB") || currentChordRoot.toUpperCase().includes("BB")) {
-                        noteNameForVexFlow = "bb";
-                    }
+            let lastAbsoluteSemitoneAdded = highestNoteAbsoluteSemitone;
+
+            remainingNotes.forEach(note => {
+                let currentNoteAbsoluteSemitone = note.semitone + (Math.floor(lastAbsoluteSemitoneAdded / 12) * 12);
+
+                // Adjust octave downwards until it's strictly below the last added note
+                while (currentNoteAbsoluteSemitone >= lastAbsoluteSemitoneAdded) {
+                    currentNoteAbsoluteSemitone -= 12; // Move down an octave
                 }
+                vexFlowNotes.push({
+                    originalString: note.originalString,
+                    semitone: note.semitone,
+                    absoluteSemitone: currentNoteAbsoluteSemitone
+                });
+                lastAbsoluteSemitoneAdded = currentNoteAbsoluteSemitone;
+            });
 
-                vexFlowKeys.push(`${noteNameForVexFlow}/${octaveForVexFlow}`);
+            // Final sort by absolute semitone for VexFlow rendering (ascending order for StaveNote keys)
+            vexFlowNotes.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
+
+            const staveNoteKeys = [];
+            const staveNoteAccidentals = [];
+
+            vexFlowNotes.forEach(noteObj => {
+                const match = noteObj.originalString.match(/^([A-G])(.*)$/i);
+                if (!match) {
+                    console.warn(`Could not parse note string for VexFlow: ${noteObj.originalString}`);
+                    return; // Skip invalid notes
+                }
+                let baseNoteLetter = match[1].toLowerCase(); // e.g., 'c', 'd'
+                let accidentalSymbol = match[2]; // e.g., '#', 'b', '##', 'bb', or ''
+
+                const octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12);
+
+                staveNoteKeys.push(`${baseNoteLetter}/${octaveForVexFlow}`);
+                staveNoteAccidentals.push(accidentalSymbol || null); // Store null if no accidental
             });
 
             // Create a single StaveNote for the chord with whole note duration
             const chordStaveNote = new StaveNote({
-                keys: vexFlowKeys,
+                keys: staveNoteKeys,
                 duration: "w" // Whole note duration
+            });
+
+            // Add accidentals to the StaveNote
+            staveNoteAccidentals.forEach((accidental, index) => {
+                if (accidental) {
+                    chordStaveNote.addAccidental(index, new Accidental(accidental));
+                }
             });
 
             const voice = new Voice({ num_beats: 4, beat_value: 4 }); // 4/4 time
@@ -1639,8 +1659,8 @@
             noteDisplaySpanInFirstCell.textContent = currentGivenNote;
             noteDisplaySpanInFirstCell.classList.add('highlighted');
 
-            // Clear staff initially, it will be drawn as user selects notes
-            drawMusicalStaff([]);
+            // Draw staff initially with only the currentGivenNote
+            drawMusicalStaff([currentGivenNote]);
 
             // Clear user's selected notes and feedback message
             console.log("generateComplexExercise: Clearing selection and feedback.");
