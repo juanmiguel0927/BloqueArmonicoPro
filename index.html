@@ -1,1 +1,890 @@
-<html><head><meta content="text/html; charset=UTF-8" http-equiv="content-type"><style type="text/css"> @import url(https://themes.googleusercontent.com/fonts/css?kit=kbffV7V9BIH3Ot2AQ2LQRA);</style></head><body class="doc-content" style="background-color:#ffffff;max-width:468pt;padding:72pt 72pt 72pt 72pt"><p style="padding:0;margin:0;color:#000000;font-size:11pt;font-family:&quot;Arial&quot;;line-height:1.0;text-align:left"><span style="color:#000000;font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:&quot;Courier&quot;;font-style:normal">&lt;!DOCTYPE html&gt;<br>&lt;html lang=&quot;es&quot;&gt;<br>&lt;head&gt;<br> &nbsp; &nbsp;&lt;meta charset=&quot;UTF-8&quot;&gt;<br> &nbsp; &nbsp;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;<br> &nbsp; &nbsp;&lt;title&gt;Explorador de Teor&iacute;a Neo-Riemanniana&lt;/title&gt;<br> &nbsp; &nbsp;&lt;script src=&quot;https://cdn.tailwindcss.com&quot;&gt;&lt;/script&gt;<br> &nbsp; &nbsp;&lt;style&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp;body {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;font-family: &#39;Inter&#39;, sans-serif;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;background-color: #f0f4f8; /* Light blue-gray background */<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;color: #334155; /* Darker text */<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.container {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;max-width: 900px;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;margin: 2rem auto;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;padding: 1.5rem;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;background-color: #ffffff;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;border-radius: 1rem;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.btn {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;@apply px-4 py-2 rounded-lg font-semibold transition-all duration-200 cursor-pointer;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.btn-primary {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;@apply bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform hover:scale-105;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.btn-secondary {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;@apply bg-gray-200 text-gray-800 hover:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 shadow-md transform hover:scale-105;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;/* Style for active operation button */<br> &nbsp; &nbsp; &nbsp; &nbsp;.btn-secondary.active-op-btn {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;@apply bg-yellow-400 text-gray-900 border-2 border-yellow-600 shadow-xl transform scale-105;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;/* Style for the operations box */<br> &nbsp; &nbsp; &nbsp; &nbsp;#operationsBox {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;/* New style for the active operations box */<br> &nbsp; &nbsp; &nbsp; &nbsp;#operationsBox.operations-box-active {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 10px 20px -5px rgba(59, 130, 246, 0.3); /* Blue glow/shadow */<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;border-color: #3b82f6; /* Brighter border */<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;.chord-display {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;@apply bg-blue-100 p-4 rounded-lg text-center my-4 border border-blue-200;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.history-item {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;@apply bg-gray-50 p-2 rounded-md mb-2 text-sm border border-gray-100;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.explanation-box {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;@apply bg-green-50 p-4 rounded-lg text-sm my-4 border border-green-100;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;/* Custom styles for the circular visualization */<br> &nbsp; &nbsp; &nbsp; &nbsp;.circle-container {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;position: relative;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;width: 300px;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;height: 300px;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;margin: 0 auto;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;border: 2px solid #cbd5e1;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;border-radius: 50%;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;display: flex;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;justify-content: center;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;align-items: center;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;background-color: #f8fafc; /* Lighter background for the circle */<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.chord-node {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;position: absolute;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;width: 60px;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;height: 30px;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;background-color: #e2e8f0;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;border: 1px solid #94a3b8;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;border-radius: 0.5rem;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;display: flex;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;justify-content: center;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;align-items: center;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;font-size: 0.75rem;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;font-weight: bold;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;color: #475569;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;cursor: pointer;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;transition: all 0.2s ease-in-out, box-shadow 0.3s ease;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;box-shadow: 0 2px 4px rgba(0,0,0,0.1);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.chord-node.active {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;background-color: #3b82f6;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;color: white;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;border-color: #1d4ed8;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.4), 0 3px 7px -3px rgba(59, 130, 246, 0.3);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;animation: pulse 1.5s infinite alternate; /* Subtle pulse effect */<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;@keyframes pulse {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;0% { transform: scale(1); }<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;100% { transform: scale(1.03); }<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;.arrow {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;position: absolute;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;stroke: #94a3b8; /* Lighter grey for default arrows */<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;stroke-width: 2;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;fill: none;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;marker-end: url(#arrowhead);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.arrow-active {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;stroke: #3b82f6;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;stroke-width: 3;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;#arrowhead {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;fill: #94a3b8;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;.arrow-active #arrowhead {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;fill: #3b82f6;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;/* Responsive adjustments */<br> &nbsp; &nbsp; &nbsp; &nbsp;@media (max-width: 640px) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;.container {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;margin: 1rem;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;padding: 1rem;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;.chord-node {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;width: 50px;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;height: 25px;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;font-size: 0.65rem;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;.circle-container {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;width: 250px;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;height: 250px;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;.btn {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;padding: 0.6rem 1rem;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;font-size: 0.875rem;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp;&lt;/style&gt;<br>&lt;/head&gt;<br>&lt;body class=&quot;p-4&quot;&gt;<br> &nbsp; &nbsp;&lt;div class=&quot;container&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp;&lt;h1 class=&quot;text-3xl font-bold text-center mb-6 text-blue-700&quot;&gt;Explorador de Teor&iacute;a Neo-Riemanniana&lt;/h1&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp;&lt;p class=&quot;text-gray-700 mb-6 text-center&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Bienvenido a este entorno interactivo para explorar las operaciones de la Teor&iacute;a Neo-Riemanniana.<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Selecciona un acorde inicial y aplica las operaciones para ver c&oacute;mo transforman las tr&iacute;adas y c&oacute;mo se relacionan en el espacio tonal crom&aacute;tico.<br> &nbsp; &nbsp; &nbsp; &nbsp;&lt;/p&gt;<br><br> &nbsp; &nbsp; &nbsp; &nbsp;&lt;div class=&quot;flex flex-col md:flex-row gap-6&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div class=&quot;md:w-1/2&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div class=&quot;mb-4 p-4 bg-gray-50 rounded-lg shadow-inner&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;label for=&quot;startChord&quot; class=&quot;block text-gray-700 text-sm font-bold mb-2&quot;&gt;Selecciona un acorde inicial:&lt;/label&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;select id=&quot;startChord&quot; class=&quot;shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;!-- Options will be populated by JS --&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/select&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;button id=&quot;resetButton&quot; class=&quot;btn btn-primary w-full mt-3&quot;&gt;Reiniciar&lt;/button&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div class=&quot;chord-display&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;h2 class=&quot;text-xl font-bold mb-2 text-blue-800&quot;&gt;Acorde Actual: &lt;span id=&quot;currentChordName&quot;&gt;C Mayor&lt;/span&gt;&lt;/h2&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;p class=&quot;text-lg text-gray-700&quot;&gt;Notas: &lt;span id=&quot;currentChordNotes&quot;&gt;C, E, G&lt;/span&gt;&lt;/p&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div id=&quot;operationsBox&quot; class=&quot;mb-4 p-4 bg-blue-50 rounded-lg shadow-inner border border-blue-100&quot;&gt; &lt;!-- Colored box for operations --&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;h3 class=&quot;text-lg font-semibold mb-3 text-gray-800&quot;&gt;Operaciones:&lt;/h3&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div class=&quot;grid grid-cols-2 sm:grid-cols-3 gap-3&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;button id=&quot;opL&quot; class=&quot;btn btn-secondary&quot; data-op=&quot;L&quot;&gt;L (Leittonechel)&lt;/button&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;button id=&quot;opP&quot; class=&quot;btn btn-secondary&quot; data-op=&quot;P&quot;&gt;P (Parallel)&lt;/button&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;button id=&quot;opR&quot; class=&quot;btn btn-secondary&quot; data-op=&quot;R&quot;&gt;R (Relative)&lt;/button&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;button id=&quot;opN&quot; class=&quot;btn btn-secondary&quot; data-op=&quot;N&quot;&gt;N (Next Related)&lt;/button&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;button id=&quot;opH&quot; class=&quot;btn btn-secondary&quot; data-op=&quot;H&quot;&gt;H (Hexatonic Pole)&lt;/button&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;button id=&quot;opS&quot; class=&quot;btn btn-secondary&quot; data-op=&quot;S&quot;&gt;S (Slide)&lt;/button&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div class=&quot;explanation-box&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;h3 class=&quot;text-lg font-semibold mb-2 text-green-800&quot;&gt;Explicaci&oacute;n de la Operaci&oacute;n:&lt;/h3&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;p id=&quot;operationExplanation&quot; class=&quot;text-gray-800&quot;&gt;Selecciona una operaci&oacute;n para ver su descripci&oacute;n.&lt;/p&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div class=&quot;p-4 bg-gray-50 rounded-lg shadow-inner&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;h3 class=&quot;text-lg font-semibold mb-3 text-gray-800&quot;&gt;Historial de Transformaciones:&lt;/h3&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div id=&quot;historyLog&quot; class=&quot;max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-2 bg-white&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;!-- History items will be added here --&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;!-- New UI Section for Set Relationships --&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div class=&quot;p-4 bg-gray-50 rounded-lg shadow-inner mt-6&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;h3 class=&quot;text-lg font-semibold mb-3 text-gray-800&quot;&gt;Relaci&oacute;n entre Conjuntos:&lt;/h3&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div id=&quot;setRelationships&quot; class=&quot;bg-white p-3 rounded-lg border border-gray-200&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;p class=&quot;mb-2&quot;&gt;&lt;strong class=&quot;text-blue-700&quot;&gt;Ciclo Hexat&oacute;nico Actual:&lt;/strong&gt; &lt;span id=&quot;currentHexatonicCycle&quot;&gt;&lt;/span&gt;&lt;/p&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div id=&quot;hexatonicCycleMembers&quot; class=&quot;flex flex-wrap gap-2 text-sm&quot;&gt;&lt;/div&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;p class=&quot;mt-4 mb-2&quot;&gt;&lt;strong class=&quot;text-green-700&quot;&gt;Regi&oacute;n de Weitzmann Actual:&lt;/strong&gt; &lt;span id=&quot;currentWeitzmannRegion&quot;&gt;&lt;/span&gt;&lt;/p&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div id=&quot;weitzmannRegionMembers&quot; class=&quot;flex flex-wrap gap-2 text-sm&quot;&gt;&lt;/div&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;p class=&quot;mt-4 mb-2&quot;&gt;&lt;strong class=&quot;text-purple-700&quot;&gt;Acordes Compartidos:&lt;/strong&gt;&lt;/p&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div id=&quot;sharedChords&quot; class=&quot;flex flex-wrap gap-2 text-sm&quot;&gt;&lt;/div&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div class=&quot;md:w-1/2 flex flex-col items-center justify-center p-4&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;h3 class=&quot;text-lg font-semibold mb-3 text-gray-800&quot;&gt;Visualizaci&oacute;n (Ciclo Hexat&oacute;nico):&lt;/h3&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;div id=&quot;hexatonicCircle&quot; class=&quot;circle-container&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;svg width=&quot;100%&quot; height=&quot;100%&quot; viewBox=&quot;0 0 300 300&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;defs&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;marker id=&quot;arrowhead&quot; markerWidth=&quot;10&quot; markerHeight=&quot;7&quot; refX=&quot;0&quot; refY=&quot;3.5&quot; orient=&quot;auto&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;polygon points=&quot;0 0, 10 3.5, 0 7&quot; /&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/marker&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/defs&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;!-- Nodes will be added dynamically --&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/svg&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;p class=&quot;text-sm text-gray-600 mt-2 text-center&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Esta visualizaci&oacute;n muestra un ciclo hexat&oacute;nico. El acorde activo se resaltar&aacute;.<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Las operaciones R, N y S pueden llevarte a un ciclo diferente.<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/p&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp;&lt;/div&gt;<br> &nbsp; &nbsp;&lt;/div&gt;<br><br> &nbsp; &nbsp;&lt;script&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp;// Mapping from pitch class number to note name (using sharps as primary)<br> &nbsp; &nbsp; &nbsp; &nbsp;const pitchClasses = [&quot;C&quot;, &quot;C#&quot;, &quot;D&quot;, &quot;D#&quot;, &quot;E&quot;, &quot;F&quot;, &quot;F#&quot;, &quot;G&quot;, &quot;G#&quot;, &quot;A&quot;, &quot;A#&quot;, &quot;B&quot;];<br> &nbsp; &nbsp; &nbsp; &nbsp;<br> &nbsp; &nbsp; &nbsp; &nbsp;// Mapping from note name to pitch class number (handles both sharps and flats)<br> &nbsp; &nbsp; &nbsp; &nbsp;const noteToPitchClass = {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;C&quot;: 0, &quot;C#&quot;: 1, &quot;Db&quot;: 1, &quot;D&quot;: 2, &quot;D#&quot;: 3, &quot;Eb&quot;: 3, &quot;E&quot;: 4, &quot;F&quot;: 5, &quot;F#&quot;: 6, &quot;Gb&quot;: 6, &quot;G&quot;: 7, &quot;G#&quot;: 8, &quot;Ab&quot;: 8, &quot;A&quot;: 9, &quot;A#&quot;: 10, &quot;Bb&quot;: 10, &quot;B&quot;: 11<br> &nbsp; &nbsp; &nbsp; &nbsp;};<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Function to normalize a pitch class (keep it within 0-11)<br> &nbsp; &nbsp; &nbsp; &nbsp;function normalizePitch(pc) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return (pc % 12 + 12) % 12;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Triad class<br> &nbsp; &nbsp; &nbsp; &nbsp;class Triad {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;constructor(root, type) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;this.root = root; // Note name (e.g., &quot;C&quot;, &quot;C#&quot;, &quot;Db&quot;)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;this.type = type; // &quot;major&quot; or &quot;minor&quot;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;this.pitchClasses = this.calculatePitchClasses();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;this.name = `${root} ${type === &#39;major&#39; ? &#39;Mayor&#39; : &#39;menor&#39;}`;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;calculatePitchClasses() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const rootPc = noteToPitchClass[this.root];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let thirdPc, fifthPc;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (this.type === &quot;major&quot;) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;thirdPc = normalizePitch(rootPc + 4); // Major third<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;fifthPc = normalizePitch(rootPc + 7); // Perfect fifth<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else { // minor<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;thirdPc = normalizePitch(rootPc + 3); // Minor third<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;fifthPc = normalizePitch(rootPc + 7); // Perfect fifth<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return [rootPc, thirdPc, fifthPc];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getNotes() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const notes = [];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Root note (always use the triad&#39;s root name as is)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;notes.push(this.root);<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const thirdPc = this.pitchClasses[1];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const fifthPc = this.pitchClasses[2];<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Helper to get the correct enharmonic spelling based on the root of the triad<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const getCorrectSpelling = (pc, rootNote) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Default to sharp spelling from pitchClasses array<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let noteName = pitchClasses[pc];<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Special cases for C# Major (E#) and F# Major (B#)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (rootNote === &quot;C#&quot; &amp;&amp; pc === 5) return &quot;E#&quot;; // F -&gt; E#<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (rootNote === &quot;F#&quot; &amp;&amp; pc === 0) return &quot;B#&quot;; // C -&gt; B#<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// If the root is a flat, or if it&#39;s a natural root that commonly leads to flat spellings (like G, C, F),<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// prefer flat spellings for other notes.<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (rootNote.includes(&quot;b&quot;) || [&quot;G&quot;, &quot;C&quot;, &quot;F&quot;].includes(rootNote)) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (pc === 1) return &quot;Db&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (pc === 3) return &quot;Eb&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (pc === 6) return &quot;Gb&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (pc === 8) return &quot;Ab&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (pc === 10) return &quot;Bb&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Otherwise (sharp or other natural roots), prefer sharp spellings.<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (pc === 1) return &quot;C#&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (pc === 3) return &quot;D#&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (pc === 6) return &quot;F#&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (pc === 8) return &quot;G#&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (pc === 10) return &quot;A#&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return noteName;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;};<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;notes.push(getCorrectSpelling(thirdPc, this.root));<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;notes.push(getCorrectSpelling(fifthPc, this.root));<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return notes;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Checks if two triads are the same (same root and type)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;isEqual(otherTriad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return this.root === otherTriad.root &amp;&amp; this.type === otherTriad.type;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Checks if two triads have the same pitch classes (enharmonic equivalence)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hasSamePitchClasses(otherTriad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const sortedThis = [...this.pitchClasses].sort();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const sortedOther = [...otherTriad.pitchClasses].sort();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return sortedThis.every((pc, i) =&gt; pc === sortedOther[i]);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Define all 12 unique root names using sharps as primary for the dropdown,<br> &nbsp; &nbsp; &nbsp; &nbsp;// but include common flat spellings for internal Triad creation if needed.<br> &nbsp; &nbsp; &nbsp; &nbsp;const allPossibleRootNames = [&quot;C&quot;, &quot;C#&quot;, &quot;Db&quot;, &quot;D&quot;, &quot;D#&quot;, &quot;Eb&quot;, &quot;E&quot;, &quot;F&quot;, &quot;F#&quot;, &quot;Gb&quot;, &quot;G&quot;, &quot;G#&quot;, &quot;Ab&quot;, &quot;A&quot;, &quot;A#&quot;, &quot;Bb&quot;, &quot;B&quot;];<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// All possible major and minor triads (24 total) generated from allPossibleRootNames<br> &nbsp; &nbsp; &nbsp; &nbsp;const allTriads = [];<br> &nbsp; &nbsp; &nbsp; &nbsp;allPossibleRootNames.forEach(root =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Only create triad if the root name maps to a valid pitch class<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (noteToPitchClass[root] !== undefined) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;allTriads.push(new Triad(root, &quot;major&quot;));<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;allTriads.push(new Triad(root, &quot;minor&quot;));<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Helper to get a Triad object by name<br> &nbsp; &nbsp; &nbsp; &nbsp;function getTriadByName(name) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return allTriads.find(t =&gt; t.name === name);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// --- Neo-Riemannian Operations (re-defined for clarity and to ensure consistency) ---<br> &nbsp; &nbsp; &nbsp; &nbsp;// L (Leittonechel - Leading-tone exchange)<br> &nbsp; &nbsp; &nbsp; &nbsp;function opL(triad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const [r, t, f] = triad.pitchClasses;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let newPcs, newType;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.type === &quot;major&quot;) { // C Mayor (0,4,7) -&gt; E menor (4,7,11)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [t, f, normalizePitch(r + 11)];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;minor&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else { // C menor (0,3,7) -&gt; Ab Mayor (8,0,3)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [normalizePitch(f + 1), r, t];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;major&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return findTriadByPitchClasses(newPcs, newType);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// P (Parallel)<br> &nbsp; &nbsp; &nbsp; &nbsp;function opP(triad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const [r, t, f] = triad.pitchClasses;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let newPcs, newType;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.type === &quot;major&quot;) { // C Mayor (0,4,7) -&gt; C menor (0,3,7)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [r, normalizePitch(t - 1), f];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;minor&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else { // C menor (0,3,7) -&gt; C Mayor (0,4,7)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [r, normalizePitch(t + 1), f];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;major&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return findTriadByPitchClasses(newPcs, newType);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// R (Relative)<br> &nbsp; &nbsp; &nbsp; &nbsp;function opR(triad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const [r, t, f] = triad.pitchClasses;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let newPcs, newType;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.type === &quot;major&quot;) { // C Mayor (0,4,7) -&gt; A menor (9,0,4)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [normalizePitch(r + 9), r, t];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;minor&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else { // C menor (0,3,7) -&gt; Eb Mayor (3,7,10)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [normalizePitch(r + 3), f, normalizePitch(t + 7)];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;major&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return findTriadByPitchClasses(newPcs, newType);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// N (Next Related - Nebenverwandt)<br> &nbsp; &nbsp; &nbsp; &nbsp;function opN(triad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const [r, t, f] = triad.pitchClasses;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let newPcs, newType;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.type === &quot;major&quot;) { // C Mayor (0,4,7) -&gt; F menor (5,8,0)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [normalizePitch(r + 5), normalizePitch(t + 4), r];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;minor&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else { // C menor (0,3,7) -&gt; G Mayor (7,11,2)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [f, normalizePitch(r + 2), normalizePitch(t + 8)];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;major&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return findTriadByPitchClasses(newPcs, newType);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// H (Hexatonic Pole) - equivalent to PLP or LPL<br> &nbsp; &nbsp; &nbsp; &nbsp;function opH(triad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let result = opP(triad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;result = opL(result);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;result = opP(result);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return result;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// S (Slide)<br> &nbsp; &nbsp; &nbsp; &nbsp;function opS(triad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const [r, t, f] = triad.pitchClasses;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let newPcs, newType;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.type === &quot;major&quot;) { // C Mayor (0,4,7) -&gt; C# menor (1,4,8)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [normalizePitch(r + 1), t, normalizePitch(f + 1)];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;minor&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else { // C# menor (1,4,8) -&gt; C Mayor (0,4,7)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newPcs = [normalizePitch(r - 1), t, normalizePitch(f - 1)];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;newType = &quot;major&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return findTriadByPitchClasses(newPcs, newType);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Corrected Pre-defined Hexatonic Cycles (dynamically generated for accuracy)<br> &nbsp; &nbsp; &nbsp; &nbsp;// Each cycle contains 3 major and 3 minor triads.<br> &nbsp; &nbsp; &nbsp; &nbsp;const hexatonicCycles = [<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ name: &quot;Ciclo I (C/E/G#)&quot;, members: [] }, // Will be populated dynamically<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ name: &quot;Ciclo II (C#/F/A)&quot;, members: [] },<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ name: &quot;Ciclo III (D/F#/Bb)&quot;, members: [] },<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ name: &quot;Ciclo IV (D#/G/B)&quot;, members: [] }<br> &nbsp; &nbsp; &nbsp; &nbsp;];<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Function to generate and populate a single hexatonic cycle<br> &nbsp; &nbsp; &nbsp; &nbsp;function generateAndPopulateHexatonicCycle(startMajorTriad, cycleIndex) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const cycle = [];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let current = startMajorTriad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;for (let i = 0; i &lt; 6; i++) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;cycle.push(current);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (i % 2 === 0) { // Apply L<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;current = opL(current);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else { // Apply P<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;current = opP(current);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hexatonicCycles[cycleIndex].members = cycle.filter(Boolean); // Ensure no nulls<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Populate hexatonic cycles after allTriads and operations are defined<br> &nbsp; &nbsp; &nbsp; &nbsp;// Ensure these starting triads exist in allTriads.<br> &nbsp; &nbsp; &nbsp; &nbsp;generateAndPopulateHexatonicCycle(getTriadByName(&quot;C Mayor&quot;), 0); // C-E-G# system<br> &nbsp; &nbsp; &nbsp; &nbsp;generateAndPopulateHexatonicCycle(getTriadByName(&quot;C# Mayor&quot;), 1); // C#-F-A system<br> &nbsp; &nbsp; &nbsp; &nbsp;generateAndPopulateHexatonicCycle(getTriadByName(&quot;D Mayor&quot;), 2); // D-F#-Bb system<br> &nbsp; &nbsp; &nbsp; &nbsp;generateAndPopulateHexatonicCycle(getTriadByName(&quot;D# Mayor&quot;), 3); // D#-G-B system<br><br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Pre-defined Weitzmann Regions (based on augmented triads C-E-G#, C#-F-A, D-F#-Bb, D#-G-B)<br> &nbsp; &nbsp; &nbsp; &nbsp;// Each region contains 3 major and 3 minor triads whose roots form an augmented triad.<br> &nbsp; &nbsp; &nbsp; &nbsp;const weitzmannRegions = [<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ name: &quot;Regi&oacute;n de C-E-G#&quot;, members: [<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;C Mayor&quot;), getTriadByName(&quot;C menor&quot;),<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;E Mayor&quot;), getTriadByName(&quot;E menor&quot;),<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;G# Mayor&quot;), getTriadByName(&quot;G# menor&quot;)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;].filter(Boolean)},<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ name: &quot;Regi&oacute;n de C#-F-A&quot;, members: [<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;C# Mayor&quot;), getTriadByName(&quot;C# menor&quot;),<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;F Mayor&quot;), getTriadByName(&quot;F menor&quot;),<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;A Mayor&quot;), getTriadByName(&quot;A menor&quot;)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;].filter(Boolean)},<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ name: &quot;Regi&oacute;n de D-F#-Bb&quot;, members: [<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;D Mayor&quot;), getTriadByName(&quot;D menor&quot;),<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;F# Mayor&quot;), getTriadByName(&quot;F# menor&quot;),<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;Bb Mayor&quot;), getTriadByName(&quot;Bb menor&quot;)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;].filter(Boolean)},<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ name: &quot;Regi&oacute;n de D#-G-B&quot;, members: [<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;D# Mayor&quot;), getTriadByName(&quot;D# menor&quot;),<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;G Mayor&quot;), getTriadByName(&quot;G menor&quot;),<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;getTriadByName(&quot;B Mayor&quot;), getTriadByName(&quot;B menor&quot;)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;].filter(Boolean)}<br> &nbsp; &nbsp; &nbsp; &nbsp;];<br><br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Global state<br> &nbsp; &nbsp; &nbsp; &nbsp;let currentTriad;<br> &nbsp; &nbsp; &nbsp; &nbsp;let history = [];<br> &nbsp; &nbsp; &nbsp; &nbsp;let hexatonicCycleChords = []; // Chords for the current hexatonic cycle visualization<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// DOM Elements<br> &nbsp; &nbsp; &nbsp; &nbsp;const startChordSelect = document.getElementById(&quot;startChord&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const resetButton = document.getElementById(&quot;resetButton&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const currentChordName = document.getElementById(&quot;currentChordName&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const currentChordNotes = document.getElementById(&quot;currentChordNotes&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const operationExplanation = document.getElementById(&quot;operationExplanation&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const historyLog = document.getElementById(&quot;historyLog&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const hexatonicCircleSvg = document.querySelector(&quot;#hexatonicCircle svg&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const operationButtons = document.querySelectorAll(&#39;.grid button&#39;); // All operation buttons<br> &nbsp; &nbsp; &nbsp; &nbsp;const operationsBox = document.getElementById(&#39;operationsBox&#39;); // The container for operation buttons<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// DOM elements for new Set Relationships section<br> &nbsp; &nbsp; &nbsp; &nbsp;const currentHexatonicCycleSpan = document.getElementById(&quot;currentHexatonicCycle&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const hexatonicCycleMembersDiv = document.getElementById(&quot;hexatonicCycleMembers&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const currentWeitzmannRegionSpan = document.getElementById(&quot;currentWeitzmannRegion&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const weitzmannRegionMembersDiv = document.getElementById(&quot;weitzmannRegionMembers&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp;const sharedChordsDiv = document.getElementById(&quot;sharedChords&quot;);<br><br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Populate initial chord options<br> &nbsp; &nbsp; &nbsp; &nbsp;function populateStartChordSelect() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Define a preferred order for enharmonic roots in the dropdown<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// This list ensures each pitch class is represented once, prioritizing common spellings.<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const canonicalRootNames = [<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&quot;C&quot;, &quot;Db&quot;, &quot;D&quot;, &quot;Eb&quot;, &quot;E&quot;, &quot;F&quot;, &quot;F#&quot;, &quot;G&quot;, &quot;Ab&quot;, &quot;A&quot;, &quot;Bb&quot;, &quot;B&quot;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const uniqueTriadsForDropdown = [];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Create a temporary map to store triads by their canonical root name<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const canonicalTriadsMap = new Map(); // Map: canonicalRootName -&gt; { major: Triad, minor: Triad }<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;allTriads.forEach(triad =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let canonicalRoot = triad.root;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Determine canonical root name for enharmonic equivalents<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Prioritize flat spellings for Db, Eb, Ab, Bb<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.root === &quot;C#&quot;) canonicalRoot = &quot;Db&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (triad.root === &quot;D#&quot;) canonicalRoot = &quot;Eb&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (triad.root === &quot;Gb&quot;) canonicalRoot = &quot;F#&quot;; // F# is generally preferred over Gb<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (triad.root === &quot;G#&quot;) canonicalRoot = &quot;Ab&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;else if (triad.root === &quot;A#&quot;) canonicalRoot = &quot;Bb&quot;;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (!canonicalTriadsMap.has(canonicalRoot)) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;canonicalTriadsMap.set(canonicalRoot, { major: null, minor: null });<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.type === &quot;major&quot;) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;canonicalTriadsMap.get(canonicalRoot).major = triad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;canonicalTriadsMap.get(canonicalRoot).minor = triad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Populate uniqueTriadsForDropdown based on preferredRootOrder<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;canonicalRootNames.forEach(rootName =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (canonicalTriadsMap.has(rootName)) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const triadPair = canonicalTriadsMap.get(rootName);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triadPair.major) uniqueTriadsForDropdown.push(triadPair.major);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triadPair.minor) uniqueTriadsForDropdown.push(triadPair.minor);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Sort uniqueTriadsForDropdown by name for a consistent dropdown order<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const sortedTriads = [...uniqueTriadsForDropdown].sort((a, b) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const rootOrderMap = new Map();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;canonicalRootNames.forEach((root, index) =&gt; rootOrderMap.set(root, index));<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Get the canonical root for sorting purposes<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const getCanonicalRootForSort = (rootName) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (rootName === &quot;C#&quot;) return &quot;Db&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (rootName === &quot;D#&quot;) return &quot;Eb&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (rootName === &quot;Gb&quot;) return &quot;F#&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (rootName === &quot;G#&quot;) return &quot;Ab&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (rootName === &quot;A#&quot;) return &quot;Bb&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return rootName;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;};<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const indexA = rootOrderMap.get(getCanonicalRootForSort(a.root));<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const indexB = rootOrderMap.get(getCanonicalRootForSort(b.root));<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (indexA === indexB) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return a.type.localeCompare(b.type);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return indexA - indexB;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;sortedTriads.forEach(triad =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const option = document.createElement(&quot;option&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;option.value = triad.name;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;option.textContent = triad.name;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;startChordSelect.appendChild(option);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Set default to C Mayor<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;startChordSelect.value = &quot;C Mayor&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Initialize or reset the application state<br> &nbsp; &nbsp; &nbsp; &nbsp;function initializeApp() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const selectedTriadName = startChordSelect.value;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentTriad = allTriads.find(t =&gt; t.name === selectedTriadName);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;history = [];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateUI();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateHexatonicCircleVisualization(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;displayOperationExplanation(&#39;&#39;); // Clear explanation on reset<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;removeActiveOperationHighlight(); // Clear any highlighted operation button<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;removeOperationsBoxHighlight(); // Clear operations box highlight<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Update the UI with current triad information<br> &nbsp; &nbsp; &nbsp; &nbsp;function updateUI() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentChordName.textContent = currentTriad.name;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const notes = currentTriad.getNotes();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Display notes explicitly as Root, Third, Fifth<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentChordNotes.innerHTML = `Ra&iacute;z: &lt;span class=&quot;font-bold&quot;&gt;${notes[0]}&lt;/span&gt;, Tercera: &lt;span class=&quot;font-bold&quot;&gt;${notes[1]}&lt;/span&gt;, Quinta: &lt;span class=&quot;font-bold&quot;&gt;${notes[2]}&lt;/span&gt;`;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateHistoryLog();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;highlightHexatonicNode(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateSetRelationshipsDisplay(); // Call new function to update set relationships<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Add an entry to the history log<br> &nbsp; &nbsp; &nbsp; &nbsp;function addHistoryEntry(operationName, oldTriad, newTriad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const entry = {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;operation: operationName,<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;from: oldTriad.name,<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;to: newTriad.name,<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;timestamp: new Date().toLocaleTimeString()<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;};<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;history.push(entry);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;historyLog.scrollTop = historyLog.scrollHeight; // Scroll to bottom<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Render the history log<br> &nbsp; &nbsp; &nbsp; &nbsp;function updateHistoryLog() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;historyLog.innerHTML = &quot;&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (history.length === 0) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;historyLog.innerHTML = &quot;&lt;p class=&#39;text-gray-500&#39;&gt;No hay transformaciones a&uacute;n.&lt;/p&gt;&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;history.forEach(entry =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const div = document.createElement(&quot;div&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;div.className = &quot;history-item&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;div.textContent = `${entry.timestamp}: ${entry.from} --(${entry.operation})--&gt; ${entry.to}`;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;historyLog.appendChild(div);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Helper to find a triad by its pitch classes (for operations that might generate new note names)<br> &nbsp; &nbsp; &nbsp; &nbsp;function findTriadByPitchClasses(pcs, type) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const sortedPcs = [...pcs].sort();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;for (const triad of allTriads) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const sortedTriadPcs = [...triad.pitchClasses].sort();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.type === type &amp;&amp; sortedPcs.every((pc, i) =&gt; pc === sortedTriadPcs[i])) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return triad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return null;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// --- Set Relationship Functions ---<br> &nbsp; &nbsp; &nbsp; &nbsp;function getHexatonicCycleForTriad(triad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;for (const cycle of hexatonicCycles) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// CRITICAL FIX: Use hasSamePitchClasses for membership check<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (cycle.members.some(member =&gt; member.hasSamePitchClasses(triad) &amp;&amp; member.type === triad.type)) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return cycle;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return null;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;function getWeitzmannRegionForTriad(triad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;for (const region of weitzmannRegions) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// CRITICAL FIX: Use hasSamePitchClasses for membership check<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (region.members.some(member =&gt; member.hasSamePitchClasses(triad) &amp;&amp; member.type === triad.type)) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return region;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return null;<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;function updateSetRelationshipsDisplay() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const hexCycle = getHexatonicCycleForTriad(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const weitzRegion = getWeitzmannRegionForTriad(currentTriad);<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (hexCycle) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentHexatonicCycleSpan.textContent = hexCycle.name;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hexatonicCycleMembersDiv.innerHTML = hexCycle.members.map(t =&gt; `&lt;span class=&quot;bg-blue-100 text-blue-800 px-2 py-1 rounded-md&quot;&gt;${t.name}&lt;/span&gt;`).join(&#39;&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentHexatonicCycleSpan.textContent = &quot;No encontrado&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hexatonicCycleMembersDiv.innerHTML = &quot;&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (weitzRegion) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentWeitzmannRegionSpan.textContent = weitzRegion.name;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;weitzmannRegionMembersDiv.innerHTML = weitzRegion.members.map(t =&gt; `&lt;span class=&quot;bg-green-100 text-green-800 px-2 py-1 rounded-md&quot;&gt;${t.name}&lt;/span&gt;`).join(&#39;&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentWeitzmannRegionSpan.textContent = &quot;No encontrado&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;weitzmannRegionMembersDiv.innerHTML = &quot;&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Find shared chords<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (hexCycle &amp;&amp; weitzRegion) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const shared = hexCycle.members.filter(hexMember =&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;weitzRegion.members.some(weitzMember =&gt; weitzMember.hasSamePitchClasses(hexMember) &amp;&amp; weitzMember.type === hexMember.type)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;sharedChordsDiv.innerHTML = shared.map(t =&gt; `&lt;span class=&quot;bg-purple-100 text-purple-800 px-2 py-1 rounded-md&quot;&gt;${t.name}&lt;/span&gt;`).join(&#39;&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;sharedChordsDiv.innerHTML = &quot;&lt;p class=&#39;text-gray-500&#39;&gt;No hay conjuntos para comparar.&lt;/p&gt;&quot;;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br><br> &nbsp; &nbsp; &nbsp; &nbsp;// --- Hexatonic Cycle Visualization (corrected logic) ---<br> &nbsp; &nbsp; &nbsp; &nbsp;function updateHexatonicCircleVisualization(activeTriad) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hexatonicCircleSvg.innerHTML = `&lt;defs&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;marker id=&quot;arrowhead&quot; markerWidth=&quot;10&quot; markerHeight=&quot;7&quot; refX=&quot;0&quot; refY=&quot;3.5&quot; orient=&quot;auto&quot;&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;polygon points=&quot;0 0, 10 3.5, 0 7&quot; /&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/marker&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/defs&gt;`; // Clear previous nodes/arrows<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const foundCycle = getHexatonicCycleForTriad(activeTriad);<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (!foundCycle) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hexatonicCircleSvg.innerHTML = `&lt;text x=&quot;50%&quot; y=&quot;50%&quot; text-anchor=&quot;middle&quot; fill=&quot;#64748b&quot; class=&quot;text-xs&quot;&gt;El acorde actual no est&aacute; en el ciclo hexat&oacute;nico visualizado.&lt;/text&gt;`;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hexatonicCycleChords = []; // Clear the cycle chords<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Directly use the members of the found cycle for visualization<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hexatonicCycleChords = foundCycle.members;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const centerX = 150;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const centerY = 150;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const radius = 120;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const nodeWidth = 60;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const nodeHeight = 30;<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hexatonicCycleChords.forEach((triad, index) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const angle = (index * (360 / hexatonicCycleChords.length) - 90) * Math.PI / 180; // -90 to start at top<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const x = centerX + radius * Math.cos(angle);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const y = centerY + radius * Math.sin(angle);<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const node = document.createElementNS(&quot;http://www.w3.org/2000/svg&quot;, &quot;foreignObject&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;node.setAttribute(&quot;x&quot;, x - nodeWidth / 2);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;node.setAttribute(&quot;y&quot;, y - nodeHeight / 2);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;node.setAttribute(&quot;width&quot;, nodeWidth);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;node.setAttribute(&quot;height&quot;, nodeHeight);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;node.classList.add(&quot;chord-node&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Use hasSamePitchClasses for highlighting in visualization<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.hasSamePitchClasses(activeTriad) &amp;&amp; triad.type === activeTriad.type) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;node.classList.add(&quot;active&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;node.innerHTML = `&lt;div class=&quot;w-full h-full flex items-center justify-center&quot;&gt;${triad.name}&lt;/div&gt;`;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;hexatonicCircleSvg.appendChild(node);<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;node.addEventListener(&#39;click&#39;, () =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// When clicking a node, use its exact root and type to set currentTriad<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Find the triad by its name to ensure we get the canonical object<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentTriad = getTriadByName(triad.name);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;history = [];<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateUI();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateHexatonicCircleVisualization(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;displayOperationExplanation(&#39;&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;removeActiveOperationHighlight();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;removeOperationsBoxHighlight();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const nextIndex = (index + 1) % hexatonicCycleChords.length;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const nextTriad = hexatonicCycleChords[nextIndex];<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const nextAngle = (nextIndex * (360 / hexatonicCycleChords.length) - 90) * Math.PI / 180;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const nextX = centerX + radius * Math.cos(nextAngle);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const nextY = centerY + radius * Math.sin(nextAngle);<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;let isArrowActive = false;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Determine if the operation between current and next is L or P for active arrow<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// This logic is based on the predefined cycle order (L then P)<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (triad.hasSamePitchClasses(activeTriad) &amp;&amp; triad.type === activeTriad.type) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const expectedNextByL = opL(triad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const expectedNextByP = opP(triad);<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (expectedNextByL &amp;&amp; expectedNextByL.hasSamePitchClasses(nextTriad) &amp;&amp; expectedNextByL.type === nextTriad.type) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;isArrowActive = true;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} else if (expectedNextByP &amp;&amp; expectedNextByP.hasSamePitchClasses(nextTriad) &amp;&amp; expectedNextByP.type === nextTriad.type) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;isArrowActive = true;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;drawArrow(hexatonicCircleSvg, x, y, nextX, nextY, nodeWidth / 2, isArrowActive);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;function drawArrow(svg, x1, y1, x2, y2, offset, isActive = false) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const angle = Math.atan2(y2 - y1, x2 - x1);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const startX = x1 + offset * Math.cos(angle);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const startY = y1 + offset * Math.sin(angle);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const endX = x2 - offset * Math.cos(angle);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const endY = y2 - offset * Math.sin(angle);<br><br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const path = document.createElementNS(&quot;http://www.w3.org/2000/svg&quot;, &quot;path&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;path.setAttribute(&quot;d&quot;, `M ${startX} ${startY} L ${endX} ${endY}`);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;path.setAttribute(&quot;class&quot;, `arrow ${isActive ? &#39;arrow-active&#39; : &#39;&#39;}`);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;svg.appendChild(path);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;function highlightHexatonicNode(triadToHighlight) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;document.querySelectorAll(&#39;.chord-node&#39;).forEach(node =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;node.classList.remove(&#39;active&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;// Use hasSamePitchClasses for finding the node to highlight<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const index = hexatonicCycleChords.findIndex(t =&gt; t.hasSamePitchClasses(triadToHighlight) &amp;&amp; t.type === triadToHighlight.type);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (index !== -1) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const nodeElement = hexatonicCircleSvg.children[index + 1]; // +1 because of &lt;defs&gt;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (nodeElement) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;nodeElement.classList.add(&#39;active&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Function to highlight the active operation button<br> &nbsp; &nbsp; &nbsp; &nbsp;function highlightActiveOperation(opCode) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;removeActiveOperationHighlight(); // First, remove any existing highlight<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const button = document.querySelector(`[data-op=&quot;${opCode}&quot;]`);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (button) {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;button.classList.add(&#39;active-op-btn&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;highlightOperationsBox(); // Highlight the operations box<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Function to remove all active operation button highlights<br> &nbsp; &nbsp; &nbsp; &nbsp;function removeActiveOperationHighlight() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;operationButtons.forEach(button =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;button.classList.remove(&#39;active-op-btn&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;});<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Function to highlight the operations box<br> &nbsp; &nbsp; &nbsp; &nbsp;function highlightOperationsBox() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;operationsBox.classList.add(&#39;operations-box-active&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Function to remove operations box highlight<br> &nbsp; &nbsp; &nbsp; &nbsp;function removeOperationsBoxHighlight() {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;operationsBox.classList.remove(&#39;operations-box-active&#39;);<br> &nbsp; &nbsp; &nbsp; &nbsp;}<br><br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Event Listeners<br> &nbsp; &nbsp; &nbsp; &nbsp;resetButton.addEventListener(&quot;click&quot;, initializeApp);<br><br> &nbsp; &nbsp; &nbsp; &nbsp;document.getElementById(&quot;opL&quot;).addEventListener(&quot;click&quot;, (event) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const oldTriad = currentTriad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentTriad = opL(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;addHistoryEntry(&quot;L&quot;, oldTriad, currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateUI();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;displayOperationExplanation(&quot;L&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateHexatonicCircleVisualization(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;highlightActiveOperation(event.target.dataset.op);<br> &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp;document.getElementById(&quot;opP&quot;).addEventListener(&quot;click&quot;, (event) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const oldTriad = currentTriad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentTriad = opP(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;addHistoryEntry(&quot;P&quot;, oldTriad, currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateUI();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;displayOperationExplanation(&quot;P&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateHexatonicCircleVisualization(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;highlightActiveOperation(event.target.dataset.op);<br> &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp;document.getElementById(&quot;opR&quot;).addEventListener(&quot;click&quot;, (event) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const oldTriad = currentTriad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentTriad = opR(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;addHistoryEntry(&quot;R&quot;, oldTriad, currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateUI();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;displayOperationExplanation(&quot;R&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateHexatonicCircleVisualization(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;highlightActiveOperation(event.target.dataset.op);<br> &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp;document.getElementById(&quot;opN&quot;).addEventListener(&quot;click&quot;, (event) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const oldTriad = currentTriad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentTriad = opN(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;addHistoryEntry(&quot;N&quot;, oldTriad, currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateUI();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;displayOperationExplanation(&quot;N&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateHexatonicCircleVisualization(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;highlightActiveOperation(event.target.dataset.op);<br> &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp;document.getElementById(&quot;opH&quot;).addEventListener(&quot;click&quot;, (event) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const oldTriad = currentTriad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentTriad = opH(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;addHistoryEntry(&quot;H&quot;, oldTriad, currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateUI();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;displayOperationExplanation(&quot;H&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateHexatonicCircleVisualization(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;highlightActiveOperation(event.target.dataset.op);<br> &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp;document.getElementById(&quot;opS&quot;).addEventListener(&quot;click&quot;, (event) =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;const oldTriad = currentTriad;<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;currentTriad = opS(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;addHistoryEntry(&quot;S&quot;, oldTriad, currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateUI();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;displayOperationExplanation(&quot;S&quot;);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;updateHexatonicCircleVisualization(currentTriad);<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;highlightActiveOperation(event.target.dataset.op);<br> &nbsp; &nbsp; &nbsp; &nbsp;});<br><br> &nbsp; &nbsp; &nbsp; &nbsp;// Initial setup on page load<br> &nbsp; &nbsp; &nbsp; &nbsp;window.onload = () =&gt; {<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;populateStartChordSelect();<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;initializeApp();<br> &nbsp; &nbsp; &nbsp; &nbsp;};<br> &nbsp; &nbsp;&lt;/script&gt;<br>&lt;/body&gt;<br>&lt;/html&gt;<br></span></p></body></html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador de Teoría Neo-Riemanniana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            color: #334155; /* Darker text */
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn {
+            @apply px-4 py-2 rounded-lg font-semibold transition-all duration-200 cursor-pointer;
+        }
+        .btn-primary {
+            @apply bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform hover:scale-105;
+        }
+        .btn-secondary {
+            @apply bg-gray-200 text-gray-800 hover:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 shadow-md transform hover:scale-105;
+        }
+        /* Style for active operation button */
+        .btn-secondary.active-op-btn {
+            @apply bg-yellow-400 text-gray-900 border-2 border-yellow-600 shadow-xl transform scale-105;
+        }
+
+        /* Style for the operations box */
+        #operationsBox {
+            transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+        /* New style for the active operations box */
+        #operationsBox.operations-box-active {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 10px 20px -5px rgba(59, 130, 246, 0.3); /* Blue glow/shadow */
+            border-color: #3b82f6; /* Brighter border */
+        }
+
+        .chord-display {
+            @apply bg-blue-100 p-4 rounded-lg text-center my-4 border border-blue-200;
+        }
+        .history-item {
+            @apply bg-gray-50 p-2 rounded-md mb-2 text-sm border border-gray-100;
+        }
+        .explanation-box {
+            @apply bg-green-50 p-4 rounded-lg text-sm my-4 border border-green-100;
+        }
+        /* Custom styles for the circular visualization */
+        .circle-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8fafc; /* Lighter background for the circle */
+        }
+        .chord-node {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background-color: #e2e8f0;
+            border: 1px solid #94a3b8;
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out, box-shadow 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chord-node.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #1d4ed8;
+            box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.4), 0 3px 7px -3px rgba(59, 130, 246, 0.3);
+            animation: pulse 1.5s infinite alternate; /* Subtle pulse effect */
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); }
+        }
+
+        .arrow {
+            position: absolute;
+            stroke: #94a3b8; /* Lighter grey for default arrows */
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        .arrow-active {
+            stroke: #3b82f6;
+            stroke-width: 3;
+        }
+        #arrowhead {
+            fill: #94a3b8;
+        }
+        .arrow-active #arrowhead {
+            fill: #3b82f6;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            .chord-node {
+                width: 50px;
+                height: 25px;
+                font-size: 0.65rem;
+            }
+            .circle-container {
+                width: 250px;
+                height: 250px;
+            }
+            .btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center mb-6 text-blue-700">Explorador de Teoría Neo-Riemanniana</h1>
+        <p class="text-gray-700 mb-6 text-center">
+            Bienvenido a este entorno interactivo para explorar las operaciones de la Teoría Neo-Riemanniana.
+            Selecciona un acorde inicial y aplica las operaciones para ver cómo transforman las tríadas y cómo se relacionan en el espacio tonal cromático.
+        </p>
+
+        <div class="flex flex-col md:flex-row gap-6">
+            <div class="md:w-1/2">
+                <div class="mb-4 p-4 bg-gray-50 rounded-lg shadow-inner">
+                    <label for="startChord" class="block text-gray-700 text-sm font-bold mb-2">Selecciona un acorde inicial:</label>
+                    <select id="startChord" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                        <!-- Options will be populated by JS -->
+                    </select>
+                    <button id="resetButton" class="btn btn-primary w-full mt-3">Reiniciar</button>
+                </div>
+
+                <div class="chord-display">
+                    <h2 class="text-xl font-bold mb-2 text-blue-800">Acorde Actual: <span id="currentChordName">C Mayor</span></h2>
+                    <p class="text-lg text-gray-700">Notas: <span id="currentChordNotes">C, E, G</span></p>
+                </div>
+
+                <div id="operationsBox" class="mb-4 p-4 bg-blue-50 rounded-lg shadow-inner border border-blue-100"> <!-- Colored box for operations -->
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Operaciones:</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <button id="opL" class="btn btn-secondary" data-op="L">L (Leittonechel)</button>
+                        <button id="opP" class="btn btn-secondary" data-op="P">P (Parallel)</button>
+                        <button id="opR" class="btn btn-secondary" data-op="R">R (Relative)</button>
+                        <button id="opN" class="btn btn-secondary" data-op="N">N (Next Related)</button>
+                        <button id="opH" class="btn btn-secondary" data-op="H">H (Hexatonic Pole)</button>
+                        <button id="opS" class="btn btn-secondary" data-op="S">S (Slide)</button>
+                    </div>
+                </div>
+
+                <div class="explanation-box">
+                    <h3 class="text-lg font-semibold mb-2 text-green-800">Explicación de la Operación:</h3>
+                    <p id="operationExplanation" class="text-gray-800">Selecciona una operación para ver su descripción.</p>
+                </div>
+
+                <div class="p-4 bg-gray-50 rounded-lg shadow-inner">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Historial de Transformaciones:</h3>
+                    <div id="historyLog" class="max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-2 bg-white">
+                        <!-- History items will be added here -->
+                    </div>
+                </div>
+
+                <!-- New UI Section for Set Relationships -->
+                <div class="p-4 bg-gray-50 rounded-lg shadow-inner mt-6">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Relación entre Conjuntos:</h3>
+                    <div id="setRelationships" class="bg-white p-3 rounded-lg border border-gray-200">
+                        <p class="mb-2"><strong class="text-blue-700">Ciclo Hexatónico Actual:</strong> <span id="currentHexatonicCycle"></span></p>
+                        <div id="hexatonicCycleMembers" class="flex flex-wrap gap-2 text-sm"></div>
+                        <p class="mt-4 mb-2"><strong class="text-green-700">Región de Weitzmann Actual:</strong> <span id="currentWeitzmannRegion"></span></p>
+                        <div id="weitzmannRegionMembers" class="flex flex-wrap gap-2 text-sm"></div>
+                        <p class="mt-4 mb-2"><strong class="text-purple-700">Acordes Compartidos:</strong></p>
+                        <div id="sharedChords" class="flex flex-wrap gap-2 text-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:w-1/2 flex flex-col items-center justify-center p-4">
+                <h3 class="text-lg font-semibold mb-3 text-gray-800">Visualización (Ciclo Hexatónico):</h3>
+                <div id="hexatonicCircle" class="circle-container">
+                    <svg width="100%" height="100%" viewBox="0 0 300 300">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" />
+                            </marker>
+                        </defs>
+                        <!-- Nodes will be added dynamically -->
+                    </svg>
+                </div>
+                <p class="text-sm text-gray-600 mt-2 text-center">
+                    Esta visualización muestra un ciclo hexatónico. El acorde activo se resaltará.
+                    Las operaciones R, N y S pueden llevarte a un ciclo diferente.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mapping from pitch class number to note name (using sharps as primary)
+        const pitchClasses = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        
+        // Mapping from note name to pitch class number (handles both sharps and flats)
+        const noteToPitchClass = {
+            "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11
+        };
+
+        // Function to normalize a pitch class (keep it within 0-11)
+        function normalizePitch(pc) {
+            return (pc % 12 + 12) % 12;
+        }
+
+        // Triad class
+        class Triad {
+            constructor(root, type) {
+                this.root = root; // Note name (e.g., "C", "C#", "Db")
+                this.type = type; // "major" or "minor"
+                this.pitchClasses = this.calculatePitchClasses();
+                this.name = `${root} ${type === 'major' ? 'Mayor' : 'menor'}`;
+            }
+
+            calculatePitchClasses() {
+                const rootPc = noteToPitchClass[this.root];
+                let thirdPc, fifthPc;
+
+                if (this.type === "major") {
+                    thirdPc = normalizePitch(rootPc + 4); // Major third
+                    fifthPc = normalizePitch(rootPc + 7); // Perfect fifth
+                } else { // minor
+                    thirdPc = normalizePitch(rootPc + 3); // Minor third
+                    fifthPc = normalizePitch(rootPc + 7); // Perfect fifth
+                }
+                return [rootPc, thirdPc, fifthPc];
+            }
+
+            getNotes() {
+                const notes = [];
+                
+                // Root note (always use the triad's root name as is)
+                notes.push(this.root);
+
+                const thirdPc = this.pitchClasses[1];
+                const fifthPc = this.pitchClasses[2];
+
+                // Helper to get the correct enharmonic spelling based on the root of the triad
+                const getCorrectSpelling = (pc, rootNote) => {
+                    // Default to sharp spelling from pitchClasses array
+                    let noteName = pitchClasses[pc];
+
+                    // Special cases for C# Major (E#) and F# Major (B#)
+                    if (rootNote === "C#" && pc === 5) return "E#"; // F -> E#
+                    if (rootNote === "F#" && pc === 0) return "B#"; // C -> B#
+
+                    // If the root is a flat, or if it's a natural root that commonly leads to flat spellings (like G, C, F),
+                    // prefer flat spellings for other notes.
+                    if (rootNote.includes("b") || ["G", "C", "F"].includes(rootNote)) {
+                        if (pc === 1) return "Db";
+                        else if (pc === 3) return "Eb";
+                        else if (pc === 6) return "Gb";
+                        else if (pc === 8) return "Ab";
+                        else if (pc === 10) return "Bb";
+                    }
+                    // Otherwise (sharp or other natural roots), prefer sharp spellings.
+                    else {
+                        if (pc === 1) return "C#";
+                        else if (pc === 3) return "D#";
+                        else if (pc === 6) return "F#";
+                        else if (pc === 8) return "G#";
+                        else if (pc === 10) return "A#";
+                    }
+                    return noteName;
+                };
+
+                notes.push(getCorrectSpelling(thirdPc, this.root));
+                notes.push(getCorrectSpelling(fifthPc, this.root));
+
+                return notes;
+            }
+
+            // Checks if two triads are the same (same root and type)
+            isEqual(otherTriad) {
+                return this.root === otherTriad.root && this.type === otherTriad.type;
+            }
+
+            // Checks if two triads have the same pitch classes (enharmonic equivalence)
+            hasSamePitchClasses(otherTriad) {
+                const sortedThis = [...this.pitchClasses].sort();
+                const sortedOther = [...otherTriad.pitchClasses].sort();
+                return sortedThis.every((pc, i) => pc === sortedOther[i]);
+            }
+        }
+
+        // Define all 12 unique root names using sharps as primary for the dropdown,
+        // but include common flat spellings for internal Triad creation if needed.
+        const allPossibleRootNames = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"];
+
+        // All possible major and minor triads (24 total) generated from allPossibleRootNames
+        const allTriads = [];
+        allPossibleRootNames.forEach(root => {
+            // Only create triad if the root name maps to a valid pitch class
+            if (noteToPitchClass[root] !== undefined) {
+                allTriads.push(new Triad(root, "major"));
+                allTriads.push(new Triad(root, "minor"));
+            }
+        });
+
+        // Helper to get a Triad object by name
+        function getTriadByName(name) {
+            return allTriads.find(t => t.name === name);
+        }
+
+        // --- Neo-Riemannian Operations (re-defined for clarity and to ensure consistency) ---
+        // L (Leittonechel - Leading-tone exchange)
+        function opL(triad) {
+            const [r, t, f] = triad.pitchClasses;
+            let newPcs, newType;
+            if (triad.type === "major") { // C Mayor (0,4,7) -> E menor (4,7,11)
+                newPcs = [t, f, normalizePitch(r + 11)];
+                newType = "minor";
+            } else { // C menor (0,3,7) -> Ab Mayor (8,0,3)
+                newPcs = [normalizePitch(f + 1), r, t];
+                newType = "major";
+            }
+            return findTriadByPitchClasses(newPcs, newType);
+        }
+
+        // P (Parallel)
+        function opP(triad) {
+            const [r, t, f] = triad.pitchClasses;
+            let newPcs, newType;
+            if (triad.type === "major") { // C Mayor (0,4,7) -> C menor (0,3,7)
+                newPcs = [r, normalizePitch(t - 1), f];
+                newType = "minor";
+            } else { // C menor (0,3,7) -> C Mayor (0,4,7)
+                newPcs = [r, normalizePitch(t + 1), f];
+                newType = "major";
+            }
+            return findTriadByPitchClasses(newPcs, newType);
+        }
+
+        // R (Relative)
+        function opR(triad) {
+            const [r, t, f] = triad.pitchClasses;
+            let newPcs, newType;
+            if (triad.type === "major") { // C Mayor (0,4,7) -> A menor (9,0,4)
+                newPcs = [normalizePitch(r + 9), r, t];
+                newType = "minor";
+            } else { // C menor (0,3,7) -> Eb Mayor (3,7,10)
+                newPcs = [normalizePitch(r + 3), f, normalizePitch(t + 7)];
+                newType = "major";
+            }
+            return findTriadByPitchClasses(newPcs, newType);
+        }
+
+        // N (Next Related - Nebenverwandt)
+        function opN(triad) {
+            const [r, t, f] = triad.pitchClasses;
+            let newPcs, newType;
+            if (triad.type === "major") { // C Mayor (0,4,7) -> F menor (5,8,0)
+                newPcs = [normalizePitch(r + 5), normalizePitch(t + 4), r];
+                newType = "minor";
+            } else { // C menor (0,3,7) -> G Mayor (7,11,2)
+                newPcs = [f, normalizePitch(r + 2), normalizePitch(t + 8)];
+                newType = "major";
+            }
+            return findTriadByPitchClasses(newPcs, newType);
+        }
+
+        // H (Hexatonic Pole) - equivalent to PLP or LPL
+        function opH(triad) {
+            let result = opP(triad);
+            result = opL(result);
+            result = opP(result);
+            return result;
+        }
+
+        // S (Slide)
+        function opS(triad) {
+            const [r, t, f] = triad.pitchClasses;
+            let newPcs, newType;
+            if (triad.type === "major") { // C Mayor (0,4,7) -> C# menor (1,4,8)
+                newPcs = [normalizePitch(r + 1), t, normalizePitch(f + 1)];
+                newType = "minor";
+            } else { // C# menor (1,4,8) -> C Mayor (0,4,7)
+                newPcs = [normalizePitch(r - 1), t, normalizePitch(f - 1)];
+                newType = "major";
+            }
+            return findTriadByPitchClasses(newPcs, newType);
+        }
+
+
+        // Corrected Pre-defined Hexatonic Cycles (dynamically generated for accuracy)
+        // Each cycle contains 3 major and 3 minor triads.
+        const hexatonicCycles = [
+            { name: "Ciclo I (C/E/G#)", members: [] }, // Will be populated dynamically
+            { name: "Ciclo II (C#/F/A)", members: [] },
+            { name: "Ciclo III (D/F#/Bb)", members: [] },
+            { name: "Ciclo IV (D#/G/B)", members: [] }
+        ];
+
+        // Function to generate and populate a single hexatonic cycle
+        function generateAndPopulateHexatonicCycle(startMajorTriad, cycleIndex) {
+            const cycle = [];
+            let current = startMajorTriad;
+            for (let i = 0; i < 6; i++) {
+                cycle.push(current);
+                if (i % 2 === 0) { // Apply L
+                    current = opL(current);
+                } else { // Apply P
+                    current = opP(current);
+                }
+            }
+            hexatonicCycles[cycleIndex].members = cycle.filter(Boolean); // Ensure no nulls
+        }
+
+        // Populate hexatonic cycles after allTriads and operations are defined
+        // Ensure these starting triads exist in allTriads.
+        generateAndPopulateHexatonicCycle(getTriadByName("C Mayor"), 0); // C-E-G# system
+        generateAndPopulateHexatonicCycle(getTriadByName("C# Mayor"), 1); // C#-F-A system
+        generateAndPopulateHexatonicCycle(getTriadByName("D Mayor"), 2); // D-F#-Bb system
+        generateAndPopulateHexatonicCycle(getTriadByName("D# Mayor"), 3); // D#-G-B system
+
+
+        // Pre-defined Weitzmann Regions (based on augmented triads C-E-G#, C#-F-A, D-F#-Bb, D#-G-B)
+        // Each region contains 3 major and 3 minor triads whose roots form an augmented triad.
+        const weitzmannRegions = [
+            { name: "Región de C-E-G#", members: [
+                getTriadByName("C Mayor"), getTriadByName("C menor"),
+                getTriadByName("E Mayor"), getTriadByName("E menor"),
+                getTriadByName("G# Mayor"), getTriadByName("G# menor")
+            ].filter(Boolean)},
+            { name: "Región de C#-F-A", members: [
+                getTriadByName("C# Mayor"), getTriadByName("C# menor"),
+                getTriadByName("F Mayor"), getTriadByName("F menor"),
+                getTriadByName("A Mayor"), getTriadByName("A menor")
+            ].filter(Boolean)},
+            { name: "Región de D-F#-Bb", members: [
+                getTriadByName("D Mayor"), getTriadByName("D menor"),
+                getTriadByName("F# Mayor"), getTriadByName("F# menor"),
+                getTriadByName("Bb Mayor"), getTriadByName("Bb menor")
+            ].filter(Boolean)},
+            { name: "Región de D#-G-B", members: [
+                getTriadByName("D# Mayor"), getTriadByName("D# menor"),
+                getTriadByName("G Mayor"), getTriadByName("G menor"),
+                getTriadByName("B Mayor"), getTriadByName("B menor")
+            ].filter(Boolean)}
+        ];
+
+
+        // Global state
+        let currentTriad;
+        let history = [];
+        let hexatonicCycleChords = []; // Chords for the current hexatonic cycle visualization
+
+        // DOM Elements
+        const startChordSelect = document.getElementById("startChord");
+        const resetButton = document.getElementById("resetButton");
+        const currentChordName = document.getElementById("currentChordName");
+        const currentChordNotes = document.getElementById("currentChordNotes");
+        const operationExplanation = document.getElementById("operationExplanation");
+        const historyLog = document.getElementById("historyLog");
+        const hexatonicCircleSvg = document.querySelector("#hexatonicCircle svg");
+        const operationButtons = document.querySelectorAll('.grid button'); // All operation buttons
+        const operationsBox = document.getElementById('operationsBox'); // The container for operation buttons
+
+        // DOM elements for new Set Relationships section
+        const currentHexatonicCycleSpan = document.getElementById("currentHexatonicCycle");
+        const hexatonicCycleMembersDiv = document.getElementById("hexatonicCycleMembers");
+        const currentWeitzmannRegionSpan = document.getElementById("currentWeitzmannRegion");
+        const weitzmannRegionMembersDiv = document.getElementById("weitzmannRegionMembers");
+        const sharedChordsDiv = document.getElementById("sharedChords");
+
+
+        // Populate initial chord options
+        function populateStartChordSelect() {
+            // Define a preferred order for enharmonic roots in the dropdown
+            // This list ensures each pitch class is represented once, prioritizing common spellings.
+            const canonicalRootNames = [
+                "C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"
+            ];
+            
+            const uniqueTriadsForDropdown = [];
+            
+            // Create a temporary map to store triads by their canonical root name
+            const canonicalTriadsMap = new Map(); // Map: canonicalRootName -> { major: Triad, minor: Triad }
+
+            allTriads.forEach(triad => {
+                let canonicalRoot = triad.root;
+                // Determine canonical root name for enharmonic equivalents
+                // Prioritize flat spellings for Db, Eb, Ab, Bb
+                if (triad.root === "C#") canonicalRoot = "Db";
+                else if (triad.root === "D#") canonicalRoot = "Eb";
+                else if (triad.root === "Gb") canonicalRoot = "F#"; // F# is generally preferred over Gb
+                else if (triad.root === "G#") canonicalRoot = "Ab";
+                else if (triad.root === "A#") canonicalRoot = "Bb";
+
+                if (!canonicalTriadsMap.has(canonicalRoot)) {
+                    canonicalTriadsMap.set(canonicalRoot, { major: null, minor: null });
+                }
+                if (triad.type === "major") {
+                    canonicalTriadsMap.get(canonicalRoot).major = triad;
+                } else {
+                    canonicalTriadsMap.get(canonicalRoot).minor = triad;
+                }
+            });
+
+            // Populate uniqueTriadsForDropdown based on preferredRootOrder
+            canonicalRootNames.forEach(rootName => {
+                if (canonicalTriadsMap.has(rootName)) {
+                    const triadPair = canonicalTriadsMap.get(rootName);
+                    if (triadPair.major) uniqueTriadsForDropdown.push(triadPair.major);
+                    if (triadPair.minor) uniqueTriadsForDropdown.push(triadPair.minor);
+                }
+            });
+
+            // Sort uniqueTriadsForDropdown by name for a consistent dropdown order
+            const sortedTriads = [...uniqueTriadsForDropdown].sort((a, b) => {
+                const rootOrderMap = new Map();
+                canonicalRootNames.forEach((root, index) => rootOrderMap.set(root, index));
+
+                // Get the canonical root for sorting purposes
+                const getCanonicalRootForSort = (rootName) => {
+                    if (rootName === "C#") return "Db";
+                    if (rootName === "D#") return "Eb";
+                    if (rootName === "Gb") return "F#";
+                    if (rootName === "G#") return "Ab";
+                    if (rootName === "A#") return "Bb";
+                    return rootName;
+                };
+
+                const indexA = rootOrderMap.get(getCanonicalRootForSort(a.root));
+                const indexB = rootOrderMap.get(getCanonicalRootForSort(b.root));
+
+                if (indexA === indexB) {
+                    return a.type.localeCompare(b.type);
+                }
+                return indexA - indexB;
+            });
+
+            sortedTriads.forEach(triad => {
+                const option = document.createElement("option");
+                option.value = triad.name;
+                option.textContent = triad.name;
+                startChordSelect.appendChild(option);
+            });
+            // Set default to C Mayor
+            startChordSelect.value = "C Mayor";
+        }
+
+        // Initialize or reset the application state
+        function initializeApp() {
+            const selectedTriadName = startChordSelect.value;
+            currentTriad = allTriads.find(t => t.name === selectedTriadName);
+            history = [];
+            updateUI();
+            updateHexatonicCircleVisualization(currentTriad);
+            displayOperationExplanation(''); // Clear explanation on reset
+            removeActiveOperationHighlight(); // Clear any highlighted operation button
+            removeOperationsBoxHighlight(); // Clear operations box highlight
+        }
+
+        // Update the UI with current triad information
+        function updateUI() {
+            currentChordName.textContent = currentTriad.name;
+            const notes = currentTriad.getNotes();
+            // Display notes explicitly as Root, Third, Fifth
+            currentChordNotes.innerHTML = `Raíz: <span class="font-bold">${notes[0]}</span>, Tercera: <span class="font-bold">${notes[1]}</span>, Quinta: <span class="font-bold">${notes[2]}</span>`;
+            updateHistoryLog();
+            highlightHexatonicNode(currentTriad);
+            updateSetRelationshipsDisplay(); // Call new function to update set relationships
+        }
+
+        // Add an entry to the history log
+        function addHistoryEntry(operationName, oldTriad, newTriad) {
+            const entry = {
+                operation: operationName,
+                from: oldTriad.name,
+                to: newTriad.name,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            history.push(entry);
+            historyLog.scrollTop = historyLog.scrollHeight; // Scroll to bottom
+        }
+
+        // Render the history log
+        function updateHistoryLog() {
+            historyLog.innerHTML = "";
+            if (history.length === 0) {
+                historyLog.innerHTML = "<p class='text-gray-500'>No hay transformaciones aún.</p>";
+                return;
+            }
+            history.forEach(entry => {
+                const div = document.createElement("div");
+                div.className = "history-item";
+                div.textContent = `${entry.timestamp}: ${entry.from} --(${entry.operation})--> ${entry.to}`;
+                historyLog.appendChild(div);
+            });
+        }
+
+        // Helper to find a triad by its pitch classes (for operations that might generate new note names)
+        function findTriadByPitchClasses(pcs, type) {
+            const sortedPcs = [...pcs].sort();
+            for (const triad of allTriads) {
+                const sortedTriadPcs = [...triad.pitchClasses].sort();
+                if (triad.type === type && sortedPcs.every((pc, i) => pc === sortedTriadPcs[i])) {
+                    return triad;
+                }
+            }
+            return null;
+        }
+
+        // --- Set Relationship Functions ---
+        function getHexatonicCycleForTriad(triad) {
+            for (const cycle of hexatonicCycles) {
+                // CRITICAL FIX: Use hasSamePitchClasses for membership check
+                if (cycle.members.some(member => member.hasSamePitchClasses(triad) && member.type === triad.type)) {
+                    return cycle;
+                }
+            }
+            return null;
+        }
+
+        function getWeitzmannRegionForTriad(triad) {
+            for (const region of weitzmannRegions) {
+                // CRITICAL FIX: Use hasSamePitchClasses for membership check
+                if (region.members.some(member => member.hasSamePitchClasses(triad) && member.type === triad.type)) {
+                    return region;
+                }
+            }
+            return null;
+        }
+
+        function updateSetRelationshipsDisplay() {
+            const hexCycle = getHexatonicCycleForTriad(currentTriad);
+            const weitzRegion = getWeitzmannRegionForTriad(currentTriad);
+
+            if (hexCycle) {
+                currentHexatonicCycleSpan.textContent = hexCycle.name;
+                hexatonicCycleMembersDiv.innerHTML = hexCycle.members.map(t => `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md">${t.name}</span>`).join('');
+            } else {
+                currentHexatonicCycleSpan.textContent = "No encontrado";
+                hexatonicCycleMembersDiv.innerHTML = "";
+            }
+
+            if (weitzRegion) {
+                currentWeitzmannRegionSpan.textContent = weitzRegion.name;
+                weitzmannRegionMembersDiv.innerHTML = weitzRegion.members.map(t => `<span class="bg-green-100 text-green-800 px-2 py-1 rounded-md">${t.name}</span>`).join('');
+            } else {
+                currentWeitzmannRegionSpan.textContent = "No encontrado";
+                weitzmannRegionMembersDiv.innerHTML = "";
+            }
+
+            // Find shared chords
+            if (hexCycle && weitzRegion) {
+                const shared = hexCycle.members.filter(hexMember =>
+                    weitzRegion.members.some(weitzMember => weitzMember.hasSamePitchClasses(hexMember) && weitzMember.type === hexMember.type)
+                );
+                sharedChordsDiv.innerHTML = shared.map(t => `<span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-md">${t.name}</span>`).join('');
+            } else {
+                sharedChordsDiv.innerHTML = "<p class='text-gray-500'>No hay conjuntos para comparar.</p>";
+            }
+        }
+
+
+        // --- Hexatonic Cycle Visualization (corrected logic) ---
+        function updateHexatonicCircleVisualization(activeTriad) {
+            hexatonicCircleSvg.innerHTML = `<defs>
+                                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                                    <polygon points="0 0, 10 3.5, 0 7" />
+                                                </marker>
+                                            </defs>`; // Clear previous nodes/arrows
+
+            const foundCycle = getHexatonicCycleForTriad(activeTriad);
+
+            if (!foundCycle) {
+                hexatonicCircleSvg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" fill="#64748b" class="text-xs">El acorde actual no está en el ciclo hexatónico visualizado.</text>`;
+                hexatonicCycleChords = []; // Clear the cycle chords
+                return;
+            }
+
+            // Directly use the members of the found cycle for visualization
+            hexatonicCycleChords = foundCycle.members;
+
+            const centerX = 150;
+            const centerY = 150;
+            const radius = 120;
+            const nodeWidth = 60;
+            const nodeHeight = 30;
+
+            hexatonicCycleChords.forEach((triad, index) => {
+                const angle = (index * (360 / hexatonicCycleChords.length) - 90) * Math.PI / 180; // -90 to start at top
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                const node = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+                node.setAttribute("x", x - nodeWidth / 2);
+                node.setAttribute("y", y - nodeHeight / 2);
+                node.setAttribute("width", nodeWidth);
+                node.setAttribute("height", nodeHeight);
+                node.classList.add("chord-node");
+                // Use hasSamePitchClasses for highlighting in visualization
+                if (triad.hasSamePitchClasses(activeTriad) && triad.type === activeTriad.type) {
+                    node.classList.add("active");
+                }
+                node.innerHTML = `<div class="w-full h-full flex items-center justify-center">${triad.name}</div>`;
+                hexatonicCircleSvg.appendChild(node);
+
+                node.addEventListener('click', () => {
+                    // When clicking a node, use its exact root and type to set currentTriad
+                    // Find the triad by its name to ensure we get the canonical object
+                    currentTriad = getTriadByName(triad.name);
+                    history = [];
+                    updateUI();
+                    updateHexatonicCircleVisualization(currentTriad);
+                    displayOperationExplanation('');
+                    removeActiveOperationHighlight();
+                    removeOperationsBoxHighlight();
+                });
+
+                const nextIndex = (index + 1) % hexatonicCycleChords.length;
+                const nextTriad = hexatonicCycleChords[nextIndex];
+
+                const nextAngle = (nextIndex * (360 / hexatonicCycleChords.length) - 90) * Math.PI / 180;
+                const nextX = centerX + radius * Math.cos(nextAngle);
+                const nextY = centerY + radius * Math.sin(nextAngle);
+
+                let isArrowActive = false;
+                // Determine if the operation between current and next is L or P for active arrow
+                // This logic is based on the predefined cycle order (L then P)
+                if (triad.hasSamePitchClasses(activeTriad) && triad.type === activeTriad.type) {
+                    const expectedNextByL = opL(triad);
+                    const expectedNextByP = opP(triad);
+
+                    if (expectedNextByL && expectedNextByL.hasSamePitchClasses(nextTriad) && expectedNextByL.type === nextTriad.type) {
+                        isArrowActive = true;
+                    } else if (expectedNextByP && expectedNextByP.hasSamePitchClasses(nextTriad) && expectedNextByP.type === nextTriad.type) {
+                        isArrowActive = true;
+                    }
+                }
+
+                drawArrow(hexatonicCircleSvg, x, y, nextX, nextY, nodeWidth / 2, isArrowActive);
+            });
+        }
+
+        function drawArrow(svg, x1, y1, x2, y2, offset, isActive = false) {
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const startX = x1 + offset * Math.cos(angle);
+            const startY = y1 + offset * Math.sin(angle);
+            const endX = x2 - offset * Math.cos(angle);
+            const endY = y2 - offset * Math.sin(angle);
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", `M ${startX} ${startY} L ${endX} ${endY}`);
+            path.setAttribute("class", `arrow ${isActive ? 'arrow-active' : ''}`);
+            svg.appendChild(path);
+        }
+
+        function highlightHexatonicNode(triadToHighlight) {
+            document.querySelectorAll('.chord-node').forEach(node => {
+                node.classList.remove('active');
+            });
+            // Use hasSamePitchClasses for finding the node to highlight
+            const index = hexatonicCycleChords.findIndex(t => t.hasSamePitchClasses(triadToHighlight) && t.type === triadToHighlight.type);
+            if (index !== -1) {
+                const nodeElement = hexatonicCircleSvg.children[index + 1]; // +1 because of <defs>
+                if (nodeElement) {
+                    nodeElement.classList.add('active');
+                }
+            }
+        }
+
+        // Function to highlight the active operation button
+        function highlightActiveOperation(opCode) {
+            removeActiveOperationHighlight(); // First, remove any existing highlight
+            const button = document.querySelector(`[data-op="${opCode}"]`);
+            if (button) {
+                button.classList.add('active-op-btn');
+            }
+            highlightOperationsBox(); // Highlight the operations box
+        }
+
+        // Function to remove all active operation button highlights
+        function removeActiveOperationHighlight() {
+            operationButtons.forEach(button => {
+                button.classList.remove('active-op-btn');
+            });
+        }
+
+        // Function to highlight the operations box
+        function highlightOperationsBox() {
+            operationsBox.classList.add('operations-box-active');
+        }
+
+        // Function to remove operations box highlight
+        function removeOperationsBoxHighlight() {
+            operationsBox.classList.remove('operations-box-active');
+        }
+
+
+        // Event Listeners
+        resetButton.addEventListener("click", initializeApp);
+
+        document.getElementById("opL").addEventListener("click", (event) => {
+            const oldTriad = currentTriad;
+            currentTriad = opL(currentTriad);
+            addHistoryEntry("L", oldTriad, currentTriad);
+            updateUI();
+            displayOperationExplanation("L");
+            updateHexatonicCircleVisualization(currentTriad);
+            highlightActiveOperation(event.target.dataset.op);
+        });
+
+        document.getElementById("opP").addEventListener("click", (event) => {
+            const oldTriad = currentTriad;
+            currentTriad = opP(currentTriad);
+            addHistoryEntry("P", oldTriad, currentTriad);
+            updateUI();
+            displayOperationExplanation("P");
+            updateHexatonicCircleVisualization(currentTriad);
+            highlightActiveOperation(event.target.dataset.op);
+        });
+
+        document.getElementById("opR").addEventListener("click", (event) => {
+            const oldTriad = currentTriad;
+            currentTriad = opR(currentTriad);
+            addHistoryEntry("R", oldTriad, currentTriad);
+            updateUI();
+            displayOperationExplanation("R");
+            updateHexatonicCircleVisualization(currentTriad);
+            highlightActiveOperation(event.target.dataset.op);
+        });
+
+        document.getElementById("opN").addEventListener("click", (event) => {
+            const oldTriad = currentTriad;
+            currentTriad = opN(currentTriad);
+            addHistoryEntry("N", oldTriad, currentTriad);
+            updateUI();
+            displayOperationExplanation("N");
+            updateHexatonicCircleVisualization(currentTriad);
+            highlightActiveOperation(event.target.dataset.op);
+        });
+
+        document.getElementById("opH").addEventListener("click", (event) => {
+            const oldTriad = currentTriad;
+            currentTriad = opH(currentTriad);
+            addHistoryEntry("H", oldTriad, currentTriad);
+            updateUI();
+            displayOperationExplanation("H");
+            updateHexatonicCircleVisualization(currentTriad);
+            highlightActiveOperation(event.target.dataset.op);
+        });
+
+        document.getElementById("opS").addEventListener("click", (event) => {
+            const oldTriad = currentTriad;
+            currentTriad = opS(currentTriad);
+            addHistoryEntry("S", oldTriad, currentTriad);
+            updateUI();
+            displayOperationExplanation("S");
+            updateHexatonicCircleVisualization(currentTriad);
+            highlightActiveOperation(event.target.dataset.op);
+        });
+
+        // Initial setup on page load
+        window.onload = () => {
+            populateStartChordSelect();
+            initializeApp();
+        };
+    </script>
+</body>
+</html>
+
