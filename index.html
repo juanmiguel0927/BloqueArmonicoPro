@@ -3,886 +3,2331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Explorador de Teoría Neo-Riemanniana</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Bloque Armónico Pro: Herramienta de Entrenamiento</title>
+    <!-- Tone.js para la reproducción de audio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <!-- VexFlow para la notación musical -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js"></script>
+    <!-- html2canvas para capturar la pantalla como imagen -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jsPDF para generar PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* Estilos generales para asegurar que el cuerpo y los elementos principales se adapten */
+        html, body {
+            height: 100%; /* HTML y body toman la altura completa del viewport */
+            margin: 0;
+            padding: 0;
+            overflow-y: auto; /* Permite desplazamiento vertical si el contenido excede la altura */
+            overflow-x: hidden; /* Oculta el desbordamiento horizontal */
+            display: flex; /* Hace que el body sea un contenedor flex */
+            flex-direction: column; /* Apila los elementos hijos verticalmente */
+            align-items: center; /* Centra el contenido horizontalmente */
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif; /* Usar Inter como fuente base */
+            background-color: #e0f2f7; /* Fondo azul suave para estimular la calma y el aprendizaje */
+            color: #334155; /* Color de texto más oscuro */
+            line-height: 1.6;
+            font-size: 18px; /* Tamaño de fuente base ligeramente aumentado para mejor legibilidad */
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Light blue-gray background */
-            color: #334155; /* Darker text */
+            padding: 10px; /* Padding general */
+            padding-bottom: 30px; /* Espacio extra en la parte inferior para evitar que el contenido sea cortado por la barra de desplazamiento */
         }
+
+        /* Contenedor principal de la aplicación */
         .container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 1.5rem;
+            background-color: #ffffff; /* Fondo blanco para el contenedor principal */
+            padding: 30px; /* Padding general */
+            padding-bottom: 35px; /* Padding inferior para el botón */
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 800px; /* Ancho máximo para pantallas grandes */
+            width: 95%; /* Ocupa casi todo el ancho disponible */
+            box-sizing: border-box;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Espaciado entre secciones */
+            overflow-y: auto; /* Permite que el contenedor se desplace si el contenido se desborda */
+            margin-top: 10px; /* Margen superior para visibilidad del encabezado */
+            margin-bottom: 20px; /* Margen inferior para evitar recortes */
+        }
+
+        /* La pregunta principal ahora ocupa la posición del h2 */
+        #chordQuestionText {
+            color: #2563eb; /* Color del h2 anterior (azul) */
+            text-align: center;
+            font-size: 1.8em; /* Tamaño del h2 anterior */
+            font-weight: 600;
+            margin-top: 10px; /* Ajustado para subir la pregunta */
+            margin-bottom: 8px; /* Reducido para acercar la pregunta al cuadro */
+        }
+
+        /* Contenedor para la pregunta y el pentagrama (lado a lado en desktop, apilado en móvil) */
+        #displaySection {
+            display: flex;
+            flex-direction: row; /* Por defecto, horizontal */
+            justify-content: center;
+            align-items: flex-start;
+            gap: 5px; /* Reducido para que estén "casi pegadas" */
+            margin-bottom: 25px;
+            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas más pequeñas */
+            flex-grow: 1;
+            min-height: 0;
+            width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
+        }
+
+        /* Área de la pregunta (cuadrícula de notas) */
+        #questionArea {
+            background-color: #e6f7ff; /* Azul muy claro para el área de la pregunta */
+            padding: 20px;
+            border-radius: 10px;
+            color: #1e40af;
+            text-align: center;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #dbeafe;
+            gap: 10px;
+            flex: 0 0 250px; /* Ancho fijo para la cuadrícula en desktop */
+            max-width: 250px; /* Ancho máximo para la cuadrícula */
+            height: fit-content;
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+        #questionArea p {
+            margin: 0;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+
+        /* Estilos de la cuadrícula de notas (para la pregunta) */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Una sola columna para diseño vertical */
+            grid-template-rows: repeat(4, 1fr); /* 4 filas de igual altura */
+            gap: 4px;
+            width: 100%; /* Ocupa el 100% del #questionArea */
+            max-width: 200px; /* Ancho máximo fijo para la visualización vertical */
+            margin: 20px auto;
+            border: 2px solid #64748b;
+            border-radius: 5px;
+            overflow: hidden;
+            height: auto;
+            max-height: 280px;
+            flex-grow: 1;
+            min-height: 0;
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+
+        .grid-cell {
             background-color: #ffffff;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .btn {
-            @apply px-4 py-2 rounded-lg font-semibold transition-all duration-200 cursor-pointer;
-        }
-        .btn-primary {
-            @apply bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-lg transform hover:scale-105;
-        }
-        .btn-secondary {
-            @apply bg-gray-200 text-gray-800 hover:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 shadow-md transform hover:scale-105;
-        }
-        /* Style for active operation button */
-        .btn-secondary.active-op-btn {
-            @apply bg-yellow-400 text-gray-900 border-2 border-yellow-600 shadow-xl transform scale-105;
-        }
-
-        /* Style for the operations box */
-        #operationsBox {
-            transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
-        }
-        /* New style for the active operations box */
-        #operationsBox.operations-box-active {
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 10px 20px -5px rgba(59, 130, 246, 0.3); /* Blue glow/shadow */
-            border-color: #3b82f6; /* Brighter border */
-        }
-
-        .chord-display {
-            @apply bg-blue-100 p-4 rounded-lg text-center my-4 border border-blue-200;
-        }
-        .history-item {
-            @apply bg-gray-50 p-2 rounded-md mb-2 text-sm border border-gray-100;
-        }
-        .explanation-box {
-            @apply bg-green-50 p-4 rounded-lg text-sm my-4 border border-green-100;
-        }
-        /* Custom styles for the circular visualization */
-        .circle-container {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            margin: 0 auto;
-            border: 2px solid #cbd5e1;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f8fafc; /* Lighter background for the circle */
-        }
-        .chord-node {
-            position: absolute;
-            width: 60px;
-            height: 30px;
-            background-color: #e2e8f0;
             border: 1px solid #94a3b8;
-            border-radius: 0.5rem;
+            padding: 15px 12px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            font-size: 0.75rem;
-            font-weight: bold;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #334155;
+            box-sizing: border-box;
+        }
+
+        .interval-label {
+            font-size: 1em;
+            color: #64748b;
+            font-weight: normal;
+        }
+
+        .note-display {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .note-display.highlighted {
+            background-color: #facc15; /* Amarillo para resaltar la nota dada */
+            color: #334155;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* Sección de entrada - Selección de notas */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-grow: 1;
+            min-height: 0;
+            width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
             color: #475569;
+            font-size: 1.2em;
+        }
+
+        /* Controles de construcción de notas */
+        .note-building-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap; /* Permite el ajuste de línea en pantallas pequeñas */
+            justify-content: center;
+            width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
+        }
+        .natural-note-buttons, .accidental-buttons {
+            display: grid;
+            gap: 5px;
+            flex: 1; /* Permite que crezcan */
+            min-width: 150px;
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+        .natural-note-buttons {
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+        }
+        .accidental-buttons {
+            grid-template-columns: repeat(2, 1fr); /* 2 columnas para accidentales */
+            max-width: 100px;
+        }
+
+        .note-button {
+            background-color: #f0f2f5; /* Gris claro */
+            color: #475569;
+            padding: 12px 0; /* Aumentado para mejor tacto en móvil */
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1em; /* Aumentado para mejor legibilidad */
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease-in-out, box-shadow 0.3s ease;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            user-select: none;
+            min-width: 44px; /* Tamaño mínimo de toque recomendado */
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+        .note-button:hover {
+            background-color: #e2e4e7;
+            transform: translateY(-1px);
+        }
+        .note-button:active {
+            transform: translateY(0);
+        }
+        .note-button.selected {
+            background-color: #007bff; /* Azul primario para seleccionado */
+            color: white;
+            border-color: #0056b3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .note-button.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f1f5f9;
+            color: #94a3b8;
+        }
+
+        /* Visualización de notas seleccionadas (lista de respuesta final) */
+        #selectedNotesDisplay {
+            background-color: #e6f7ff; /* Azul muy claro */
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: #1e40af;
+            border: 1px solid #dbeafe;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-align: center; /* Asegura que el texto esté centrado */
+            width: 100%; /* Ocupa el 100% del contenedor padre */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+        #selectedNotesDisplay strong {
+            color: #0056b3; /* Azul más oscuro */
+        }
+
+        /* Grupo de botones de acción principal */
+        .action-buttons-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: auto; /* Empuja el grupo de botones hacia abajo */
+            padding-top: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap; /* Permite que los botones se envuelvan */
+            width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
+        }
+        .action-buttons-group button {
+            flex: 1 1 auto; /* Permite que los botones se expandan y contraigan */
+            min-width: 140px; /* Ancho mínimo para que sean tocables */
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+        .action-buttons-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+        .action-buttons-group button:active {
+            transform: translateY(0);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .chord-node.active {
+
+        #confirmAnswerButton {
+            background-color: #28a745; /* Verde para confirmar */
+            color: white;
+        }
+        #confirmAnswerButton:hover {
+            background-color: #218838;
+        }
+
+        #clearAllSelectionButton {
+            background-color: #ffc107; /* Naranja para borrar */
+            color: white;
+        }
+        #clearAllSelectionButton:hover {
+            background-color: #e0a800;
+        }
+
+        #changeQuestionButton {
+            background-color: #6c757d; /* Gris azulado para cambiar ejercicio */
+            color: white;
+        }
+        #changeQuestionButton:hover {
+            background-color: #5a6268;
+        }
+
+        /* Estilos comunes de modal (para retroalimentación y evaluación) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.visible {
+            display: flex;
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            margin-top: -100px; /* Mueve el modal más arriba para revelar el pentagrama debajo */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+        .modal-overlay.visible .modal-content {
+            transform: translateY(0);
+        }
+        .modal-content h3 {
+            color: #1e3a8a;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        .modal-content p {
+            color: #475569;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+        .modal-content ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+            text-align: left;
+            color: #334155;
+        }
+        .modal-content ul li {
+            background-color: #eff6ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #dbeafe;
+            font-size: 1.05em;
+        }
+        .modal-content ul li strong {
+            color: #2563eb;
+        }
+        .modal-content .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Permite que los botones del modal se envuelvan */
+        }
+        .modal-content .modal-buttons button {
+            flex: 1 1 auto; /* Permite que los botones se expandan */
+            min-width: 120px; /* Ancho mínimo para botones de modal */
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+        .modal-content .modal-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+        .modal-content .modal-buttons button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #continueTrainingButton {
             background-color: #3b82f6;
             color: white;
-            border-color: #1d4ed8;
-            box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.4), 0 3px 7px -3px rgba(59, 130, 246, 0.3);
-            animation: pulse 1.5s infinite alternate; /* Subtle pulse effect */
         }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.03); }
+        #continueTrainingButton:hover {
+            background-color: #2563eb;
         }
-
-        .arrow {
-            position: absolute;
-            stroke: #94a3b8; /* Lighter grey for default arrows */
-            stroke-width: 2;
-            fill: none;
-            marker-end: url(#arrowhead);
+        #endSessionButton {
+            background-color: #ef4444;
+            color: white;
         }
-        .arrow-active {
-            stroke: #3b82f6;
-            stroke-width: 3;
-        }
-        #arrowhead {
-            fill: #94a3b8;
-        }
-        .arrow-active #arrowhead {
-            fill: #3b82f6;
+        #endSessionButton:hover {
+            background-color: #dc2626;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 640px) {
+        /* Estilos específicos del contenido del modal de retroalimentación */
+        #feedbackModalContent.correct {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #15803d;
+        }
+        #feedbackModalContent.incorrect {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #b91c1c;
+        }
+        #feedbackModalContent p {
+            margin: 8px 0;
+            font-size: 1.2em;
+        }
+        #feedbackModalContent strong {
+            font-size: 1.3em;
+        }
+        #feedbackModalContent span {
+            font-size: 1.1em;
+        }
+
+        /* Visualización del mensaje final */
+        #finalMessageDisplay {
+            background-color: #e0f7fa; /* Fondo azul claro para la sección final */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 650px;
+            width: 100%;
+            text-align: center;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            /* REMOVED: justify-content: center; */ /* Removido para que el contenido empiece desde arriba */
+            min-height: 200px;
+            border: 1px solid #a7d9f5; /* Borde azul claro */
+            color: #004d40; /* Texto verde oscuro */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+            overflow-y: auto; /* Permite el desplazamiento vertical si el contenido excede la altura */
+        }
+
+        /* Contenido a capturar para foto/PDF */
+        #resultsContentToCapture {
+            width: 100%;
+            padding: 15px;
+            background-color: #e0f7fa; /* Un color ligeramente diferente para el área de captura */
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            display: flex; /* Use flexbox for internal layout */
+            flex-direction: column;
+            align-items: center;
+            gap: 15px; /* Spacing between elements inside capture area */
+        }
+
+        /* Removed h3 styling as it's no longer present */
+        /* #finalMessageDisplay h3 {
+            color: #00796b;
+            font-size: 2em;
+            margin-bottom: 12px;
+        } */
+
+        /* New styles for dynamic stats display */
+        .final-stats-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 15px; /* Spacing between stat boxes */
+        }
+
+        .stat-box {
+            background-color: #ffffff; /* Fondo blanco para las cajas de estadísticas */
+            border: 1px solid #b2dfdb; /* Borde verde azulado claro */
+            border-radius: 10px;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 150px; /* Minimum width for each stat box */
+            flex: 1; /* Allow boxes to grow and shrink */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #00796b; /* Verde azulado oscuro */
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #004d40; /* Verde muy oscuro */
+        }
+
+        /* Existing styles for user name input and save options */
+        .user-name-input-group {
+            margin-top: 0px; /* Adjusted margin-top to place it at the top */
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%; /* Ensure it takes full width within capture area */
+        }
+        .user-name-input-group label {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #00796b; /* Verde azulado oscuro */
+        }
+        .user-name-input-group input[type="text"] {
+            padding: 10px 15px;
+            border: 1px solid #b2dfdb; /* Borde verde azulado claro */
+            border-radius: 8px;
+            font-size: 1em;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .user-name-input-group input[type="text"]:focus {
+            outline: none;
+            border-color: #009688; /* Verde más brillante al enfocar */
+            box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.3);
+        }
+
+        .save-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 0px; /* Adjusted margin-top to place it at the top */
+            margin-bottom: 20px; /* Added margin-bottom for spacing */
+            flex-wrap: wrap;
+            width: 100%; /* Ensure it takes full width within capture area */
+        }
+        .save-options button {
+            flex: 1 1 auto; /* Allow buttons to expand */
+            min-width: 120px; /* Minimum width for buttons */
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            touch-action: manipulation;
+            box-sizing: border-box;
+        }
+        .save-options button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+        .save-options button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #saveAsPhotoButton {
+            background-color: #4CAF50; /* Verde más intenso */
+            color: white;
+        }
+        #saveAsPhotoButton:hover {
+            background-color: #45a049;
+        }
+
+        #saveAsPdfButton {
+            background-color: #2196F3; /* Azul más intenso */
+            color: white;
+        }
+        #saveAsPdfButton:hover {
+            background-color: #1976D2;
+        }
+
+        /* Estilos del modal de bienvenida */
+        #welcomeModalOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro para el modal de bienvenida */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #welcomeModalOverlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #welcomeModalContent {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            max-width: 550px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(-30px);
+            transition: transform 0.3s ease;
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+        #welcomeModalOverlay.visible #welcomeModalContent {
+            transform: translateY(0);
+        }
+        #welcomeModalContent h2 {
+            font-size: 3em;
+            color: #1e3a8a;
+            margin-bottom: 25px;
+        }
+        #welcomeModalContent p {
+            font-size: 1.3em;
+            color: #475569;
+            margin-bottom: 35px;
+        }
+        #welcomeModalContent button {
+            padding: 18px 35px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+            box-sizing: border-box; /* Incluir padding y border en el ancho */
+        }
+        #welcomeModalContent button:hover {
+            background-color: #1e40af;
+            transform: translateY(-3px);
+        }
+        #welcomeModalContent button:active {
+            transform: translateY(0);
+        }
+
+        /* Área del pentagrama musical */
+        #staffArea {
+            margin-top: 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%; /* Ocupa todo el ancho disponible */
+            flex: 1; /* Permite que el área del pentagrama ocupe el espacio restante */
+            max-width: 550px; /* Ancho máximo para el pentagrama en pantallas grandes */
+            min-width: 300px; /* Ancho mínimo para el pentagrama en pantallas pequeñas */
+            height: fit-content;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #musicalStaffCanvas {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 100%; /* Ajusta el ancho del canvas al contenedor */
+            max-width: 550px; /* Ancho máximo para desktop */
+            height: auto; /* Permite que crezca/se encoja */
+            max-height: 180px; /* Establece una altura máxima para evitar que sea demasiado alto */
+            flex-grow: 1;
+            min-height: 0;
+            box-sizing: border-box;
+        }
+
+        /* New styles for date, time, and duration */
+        .session-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 0.95em;
+            color: #475569;
+            text-align: center;
+        }
+        .session-info span {
+            font-weight: 500;
+        }
+
+        /* Media Queries para ajustes específicos en pantallas más pequeñas */
+        @media (max-width: 768px) { /* Para tablets y celulares en orientación horizontal */
+            body {
+                padding: 5px; /* Menos padding para pantallas muy pequeñas */
+                padding-bottom: 20px;
+                font-size: 16px; /* Ajuste de fuente base para móviles */
+            }
             .container {
-                margin: 1rem;
-                padding: 1rem;
+                padding: 15px;
+                padding-bottom: 20px;
+                border-radius: 8px;
+                width: 99%;
+                gap: 10px;
+                margin-bottom: 15px;
             }
-            .chord-node {
-                width: 50px;
-                height: 25px;
-                font-size: 0.65rem;
+            h1 {
+                font-size: 2em;
             }
-            .circle-container {
-                width: 250px;
-                height: 250px;
+            /* Ajuste para la pregunta principal en móvil */
+            #chordQuestionText {
+                font-size: 1.5em; /* Ligeramente más grande */
+                margin-top: 0px; /* Subido aún más */
+                margin-bottom: 5px; /* Más cerca del cuadro */
             }
-            .btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.875rem;
+            /* En pantallas pequeñas, apila la sección de visualización verticalmente */
+            #displaySection {
+                flex-direction: column; /* Apila elementos verticalmente */
+                align-items: center; /* Centra los elementos apilados */
+                gap: 15px; /* Espacio entre el cuadro de notas y el pentagrama */
+            }
+            #questionArea {
+                max-width: 160px; /* Ancho más pequeño para el cuadro de notas */
+                width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
+                flex: 0 0 auto; /* Evita el estiramiento */
+                padding: 10px; /* Padding reducido */
+                min-width: unset; /* Elimina min-width para mayor flexibilidad */
+            }
+            #staffArea {
+                max-width: 180px; /* Ancho máximo aún más pequeño para la partitura */
+                min-width: unset; /* Elimina min-width cuando está apilado */
+                width: 100%; /* Asegura que ocupe el 100% del contenedor padre */
+                flex: 0 0 auto;
+                padding: 15px;
+            }
+            .note-building-controls {
+                flex-direction: column; /* Apila los botones de notas naturales y accidentales */
+                gap: 10px;
+            }
+            .natural-note-buttons, .accidental-buttons {
+                min-width: unset;
+                width: 100%;
+            }
+            .accidental-buttons {
+                grid-template-columns: repeat(4, 1fr); /* 4 columnas para accidentales en pantallas pequeñas */
+                max-width: unset;
+            }
+            .note-button {
+                font-size: 0.95em; /* Aumentado para mejor legibilidad */
+                padding: 10px 0; /* Aumentado para mejor tacto */
+            }
+            .action-buttons-group {
+                flex-direction: column; /* Apila los botones de confirmar/siguiente */
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            .action-buttons-group button {
+                width: 100%;
+                font-size: 1.1em; /* Ligeramente más pequeño para caber */
+                padding: 12px 20px; /* Ajustado para móviles */
+            }
+            #questionArea p {
+                font-size: 1.4em; /* Aumentado para mejor legibilidad */
+            }
+            .notes-grid {
+                width: 100%; /* Ocupa el 100% del #questionArea en móvil */
+                max-width: 150px; /* Ancho máximo más pequeño para la cuadrícula */
+                height: auto;
+                max-height: 200px; /* Altura máxima para asegurar que los 4 cuadros se vean */
+            }
+            .grid-cell {
+                padding: 8px 6px; /* Padding más pequeño */
+                font-size: 1.1em; /* Tamaño de fuente más pequeño */
+            }
+            .interval-label {
+                font-size: 0.9em; /* Mantiene el tamaño relativo */
+            }
+            .note-display {
+                font-size: 1.4em; /* Tamaño de fuente más pequeño */
+            }
+            #selectedNotesDisplay {
+                font-size: 1.1em; /* Ligeramente más grande */
+            }
+            .modal-content .modal-buttons {
+                flex-direction: column;
+            }
+            .modal-content .modal-buttons button {
+                width: 100%;
+            }
+            #feedbackModalContent p {
+                font-size: 1.1em;
+            }
+            #feedbackModalContent strong {
+                font-size: 1.2em;
+            }
+            #feedbackModalContent span {
+                font-size: 1.1em;
+            }
+            #welcomeModalContent h2 {
+                font-size: 2.5em; /* Ligeramente más grande */
+            }
+            #welcomeModalContent p {
+                font-size: 1.2em;
+            }
+            #welcomeModalContent button {
+                font-size: 1.2em; /* Ligeramente más pequeño para caber */
+                padding: 15px 30px; /* Ajustado para móviles */
+            }
+            #musicalStaffCanvas {
+                width: 100%; /* Asegura que el canvas tome el ancho completo de su padre */
+                height: auto;
+                max-width: 180px; /* Ancho máximo aún más pequeño para el pentagrama en móvil */
+                max-height: 160px; /* Altura máxima más pequeña para el pentagrama en móvil */
+            }
+
+            /* Mobile adjustments for the final stats container */
+            .final-stats-container {
+                flex-direction: column; /* Stack stat boxes vertically on mobile */
+                gap: 10px;
+            }
+            .stat-box {
+                width: 100%; /* Full width on mobile */
+                max-width: 250px; /* Limit max width for readability */
+            }
+            .save-options button {
+                width: 100%; /* Full width for save buttons on mobile */
             }
         }
     </style>
 </head>
-<body class="p-4">
-    <div class="container">
-        <h1 class="text-3xl font-bold text-center mb-6 text-blue-700">Explorador de Teoría Neo-Riemanniana</h1>
-        <p class="text-gray-700 mb-6 text-center">
-            Bienvenido a este entorno interactivo para explorar las operaciones de la Teoría Neo-Riemanniana.
-            Selecciona un acorde inicial y aplica las operaciones para ver cómo transforman las tríadas y cómo se relacionan en el espacio tonal cromático.
-        </p>
+<body>
+    <!-- Welcome Modal -->
+    <div id="welcomeModalOverlay" class="modal-overlay">
+        <div id="welcomeModalContent" class="modal-content">
+            <h2>Bienvenido a Bloque Armónico Pro</h2>
+            <p>Herramienta para desarrollar la técnica de armonización en bloques cerrados 4-way closed.</p>
+            <p>Realizado por Juan Miguel Rios Redondo</p>
+            <button id="startButton">Comenzar Entrenamiento</button>
+        </div>
+    </div>
 
-        <div class="flex flex-col md:flex-row gap-6">
-            <div class="md:w-1/2">
-                <div class="mb-4 p-4 bg-gray-50 rounded-lg shadow-inner">
-                    <label for="startChord" class="block text-gray-700 text-sm font-bold mb-2">Selecciona un acorde inicial:</label>
-                    <select id="startChord" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
-                        <!-- Options will be populated by JS -->
-                    </select>
-                    <button id="resetButton" class="btn btn-primary w-full mt-3">Reiniciar</button>
-                </div>
+    <div class="container" id="mainAppContainer" style="display: none;">
+        <!-- Question text now at the top, replacing the "Ejercicio:" heading -->
+        <p id="chordQuestionText" style="text-align: center; font-size: 1.3em; font-weight: 600; color: #1e40af; margin-bottom: 10px;">Cargando ejercicio...</p>
 
-                <div class="chord-display">
-                    <h2 class="text-xl font-bold mb-2 text-blue-800">Acorde Actual: <span id="currentChordName">C Mayor</span></h2>
-                    <p class="text-lg text-gray-700">Notas: <span id="currentChordNotes">C, E, G</span></p>
-                </div>
-
-                <div id="operationsBox" class="mb-4 p-4 bg-blue-50 rounded-lg shadow-inner border border-blue-100"> <!-- Colored box for operations -->
-                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Operaciones:</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <button id="opL" class="btn btn-secondary" data-op="L">L (Leittonechel)</button>
-                        <button id="opP" class="btn btn-secondary" data-op="P">P (Parallel)</button>
-                        <button id="opR" class="btn btn-secondary" data-op="R">R (Relative)</button>
-                        <button id="opN" class="btn btn-secondary" data-op="N">N (Next Related)</button>
-                        <button id="opH" class="btn btn-secondary" data-op="H">H (Hexatonic Pole)</button>
-                        <button id="opS" class="btn btn-secondary" data-op="S">S (Slide)</button>
+        <div id="displaySection"> <!-- Container for grid and staff (side-by-side) -->
+            <div id="questionArea">
+                <div class="notes-grid">
+                    <div class="grid-cell" id="gridCell0">
+                        <span class="interval-label"></span>
+                        <span class="note-display"></span>
                     </div>
-                </div>
-
-                <div class="explanation-box">
-                    <h3 class="text-lg font-semibold mb-2 text-green-800">Explicación de la Operación:</h3>
-                    <p id="operationExplanation" class="text-gray-800">Selecciona una operación para ver su descripción.</p>
-                </div>
-
-                <div class="p-4 bg-gray-50 rounded-lg shadow-inner">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Historial de Transformaciones:</h3>
-                    <div id="historyLog" class="max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-2 bg-white">
-                        <!-- History items will be added here -->
+                    <div class="grid-cell" id="gridCell1">
+                        <span class="interval-label"></span>
+                        <span class="note-display"></span>
                     </div>
-                </div>
-
-                <!-- New UI Section for Set Relationships -->
-                <div class="p-4 bg-gray-50 rounded-lg shadow-inner mt-6">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Relación entre Conjuntos:</h3>
-                    <div id="setRelationships" class="bg-white p-3 rounded-lg border border-gray-200">
-                        <p class="mb-2"><strong class="text-blue-700">Ciclo Hexatónico Actual:</strong> <span id="currentHexatonicCycle"></span></p>
-                        <div id="hexatonicCycleMembers" class="flex flex-wrap gap-2 text-sm"></div>
-                        <p class="mt-4 mb-2"><strong class="text-green-700">Región de Weitzmann Actual:</strong> <span id="currentWeitzmannRegion"></span></p>
-                        <div id="weitzmannRegionMembers" class="flex flex-wrap gap-2 text-sm"></div>
-                        <p class="mt-4 mb-2"><strong class="text-purple-700">Acordes Compartidos:</strong></p>
-                        <div id="sharedChords" class="flex flex-wrap gap-2 text-sm"></div>
+                    <div class="grid-cell" id="gridCell2">
+                        <span class="interval-label"></span>
+                        <span class="note-display"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell3">
+                        <span class="interval-label"></span>
+                        <span class="note-display"></span>
                     </div>
                 </div>
             </div>
 
-            <div class="md:w-1/2 flex flex-col items-center justify-center p-4">
-                <h3 class="text-lg font-semibold mb-3 text-gray-800">Visualización (Ciclo Hexatónico):</h3>
-                <div id="hexatonicCircle" class="circle-container">
-                    <svg width="100%" height="100%" viewBox="0 0 300 300">
-                        <defs>
-                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-                                <polygon points="0 0, 10 3.5, 0 7" />
-                            </marker>
-                        </defs>
-                        <!-- Nodes will be added dynamically -->
-                    </svg>
+            <!-- Musical staff area -->
+            <div id="staffArea">
+                <canvas id="musicalStaffCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="note-building-controls">
+                <div id="naturalNoteButtons" class="natural-note-buttons">
+                    <!-- Natural note buttons will be generated here -->
                 </div>
-                <p class="text-sm text-gray-600 mt-2 text-center">
-                    Esta visualización muestra un ciclo hexatónico. El acorde activo se resaltará.
-                    Las operaciones R, N y S pueden llevarte a un ciclo diferente.
-                </p>
+                <div id="accidentalButtons" class="accidental-buttons">
+                    <!-- Accidental buttons will be generated here -->
+                </div>
+            </div>
+
+            <div id="selectedNotesDisplay">
+                Notas seleccionadas: Ninguna
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-buttons-group">
+            <button id="confirmAnswerButton">Confirmar</button>
+            <button id="clearAllSelectionButton">Borrar</button>
+            <button id="changeQuestionButton">Cambiar Ejercicio</button>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModalOverlay" class="modal-overlay">
+        <div id="feedbackModalContent" class="modal-content">
+            <!-- Feedback message will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Evaluation Modal -->
+    <div id="evaluationModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Resultados de la Evaluación</h3>
+            <p id="evaluationSummary"></p>
+            <p>Áreas a trabajar:</p>
+            <ul id="adviceList">
+                <!-- Advice elements will be inserted here -->
+            </ul>
+            <div class="modal-buttons">
+                <button id="continueTrainingButton">Continuar Entrenamiento</button>
+                <button id="endSessionButton">Terminar Sesión</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Mapping from pitch class number to note name (using sharps as primary)
-        const pitchClasses = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-        
-        // Mapping from note name to pitch class number (handles both sharps and flats)
-        const noteToPitchClass = {
-            "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11
+    <!-- Final message display (after ending session) -->
+    <div id="finalMessageDisplay">
+        <div id="resultsContentToCapture"> <!-- New wrapper div for content to be captured -->
+            <!-- Removed h3 "Entrenamiento Finalizado" -->
+            
+            <div class="user-name-input-group"> <!-- Moved to top -->
+                <label for="userNameInput">Tu Nombre:</label>
+                <input type="text" id="userNameInput" placeholder="Introduce tu nombre aquí">
+            </div>
+            <div class="save-options"> <!-- Moved to top -->
+                <button id="saveAsPhotoButton">Guardar como Foto (PNG)</button>
+                <button id="saveAsPdfButton">Guardar como PDF</button>
+            </div>
+            <div class="final-stats-container"> <!-- Moved up -->
+                <div class="stat-box">
+                    <span class="stat-label">Ejercicios Intentados</span>
+                    <span class="stat-value" id="totalExercisesDisplay">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Respuestas Correctas</span>
+                    <span class="stat-value" id="correctAnswersDisplay">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Precisión Total</span>
+                    <span class="stat-value" id="overallAccuracyDisplay">0%</span>
+                </div>
+            </div>
+            <p class="results-summary" id="finalResultsSummary"></p> <!-- Moved to end -->
+            <div class="session-info">
+                <span id="sessionDateDisplay"></span>
+                <span id="sessionTimeDisplay"></span>
+                <span id="sessionDurationDisplay"></span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        console.log("Main script loaded and starting execution."); // Debug message
+
+        // Import VexFlow modules from ESM path
+        import { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
+
+        // Canonical notes (for internal calculations, using sharps)
+        const canonicalNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+        // Mapping from various note spellings (including enharmonics) to their semitone value from C
+        const noteToSemitoneMap = {
+            "C": 0, "C#": 1, "DB": 1, "C##": 2, // C## is D
+            "D": 2, "D#": 3, "EB": 3, "D##": 4, // D## is E
+            "E": 4, "E#": 5, "FB": 4, // E# is F, Fb is E
+            "F": 5, "F#": 6, "GB": 6, "F##": 7, // F## is G
+            "G": 7, "G#": 8, "AB": 8, "G##": 9, // G## is A
+            "A": 9, "A#": 10, "BB": 10, "A##": 11, // A## is B
+            "B": 11, "B#": 0, "CB": 11, // B# is C, Cb is B
+            "DBB": 0, // Dbb is C
+            "EBB": 2, // Ebb is D
+            "FBB": 3, // Fbb is Eb (D#)
+            "GBB": 5, // Gbb is F
+            "ABB": 7, // Abb is G
+            "BBB": 9, // Bbb is A
+            "CBB": 10 // Cbb is Bb (A#)
         };
 
-        // Function to normalize a pitch class (keep it within 0-11)
-        function normalizePitch(pc) {
-            return (pc % 12 + 12) % 12;
-        }
-
-        // Triad class
-        class Triad {
-            constructor(root, type) {
-                this.root = root; // Note name (e.g., "C", "C#", "Db")
-                this.type = type; // "major" or "minor"
-                this.pitchClasses = this.calculatePitchClasses();
-                this.name = `${root} ${type === 'major' ? 'Mayor' : 'menor'}`;
-            }
-
-            calculatePitchClasses() {
-                const rootPc = noteToPitchClass[this.root];
-                let thirdPc, fifthPc;
-
-                if (this.type === "major") {
-                    thirdPc = normalizePitch(rootPc + 4); // Major third
-                    fifthPc = normalizePitch(rootPc + 7); // Perfect fifth
-                } else { // minor
-                    thirdPc = normalizePitch(rootPc + 3); // Minor third
-                    fifthPc = normalizePitch(rootPc + 7); // Perfect fifth
-                }
-                return [rootPc, thirdPc, fifthPc];
-            }
-
-            getNotes() {
-                const notes = [];
-                
-                // Root note (always use the triad's root name as is)
-                notes.push(this.root);
-
-                const thirdPc = this.pitchClasses[1];
-                const fifthPc = this.pitchClasses[2];
-
-                // Helper to get the correct enharmonic spelling based on the root of the triad
-                const getCorrectSpelling = (pc, rootNote) => {
-                    // Default to sharp spelling from pitchClasses array
-                    let noteName = pitchClasses[pc];
-
-                    // Special cases for C# Major (E#) and F# Major (B#)
-                    if (rootNote === "C#" && pc === 5) return "E#"; // F -> E#
-                    if (rootNote === "F#" && pc === 0) return "B#"; // C -> B#
-
-                    // If the root is a flat, or if it's a natural root that commonly leads to flat spellings (like G, C, F),
-                    // prefer flat spellings for other notes.
-                    if (rootNote.includes("b") || ["G", "C", "F"].includes(rootNote)) {
-                        if (pc === 1) return "Db";
-                        else if (pc === 3) return "Eb";
-                        else if (pc === 6) return "Gb";
-                        else if (pc === 8) return "Ab";
-                        else if (pc === 10) return "Bb";
-                    }
-                    // Otherwise (sharp or other natural roots), prefer sharp spellings.
-                    else {
-                        if (pc === 1) return "C#";
-                        else if (pc === 3) return "D#";
-                        else if (pc === 6) return "F#";
-                        else if (pc === 8) return "G#";
-                        else if (pc === 10) return "A#";
-                    }
-                    return noteName;
-                };
-
-                notes.push(getCorrectSpelling(thirdPc, this.root));
-                notes.push(getCorrectSpelling(fifthPc, this.root));
-
-                return notes;
-            }
-
-            // Checks if two triads are the same (same root and type)
-            isEqual(otherTriad) {
-                return this.root === otherTriad.root && this.type === otherTriad.type;
-            }
-
-            // Checks if two triads have the same pitch classes (enharmonic equivalence)
-            hasSamePitchClasses(otherTriad) {
-                const sortedThis = [...this.pitchClasses].sort();
-                const sortedOther = [...otherTriad.pitchClasses].sort();
-                return sortedThis.every((pc, i) => pc === sortedOther[i]);
-            }
-        }
-
-        // Define all 12 unique root names using sharps as primary for the dropdown,
-        // but include common flat spellings for internal Triad creation if needed.
-        const allPossibleRootNames = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"];
-
-        // All possible major and minor triads (24 total) generated from allPossibleRootNames
-        const allTriads = [];
-        allPossibleRootNames.forEach(root => {
-            // Only create triad if the root name maps to a valid pitch class
-            if (noteToPitchClass[root] !== undefined) {
-                allTriads.push(new Triad(root, "major"));
-                allTriads.push(new Triad(root, "minor"));
-            }
-        });
-
-        // Helper to get a Triad object by name
-        function getTriadByName(name) {
-            return allTriads.find(t => t.name === name);
-        }
-
-        // --- Neo-Riemannian Operations (re-defined for clarity and to ensure consistency) ---
-        // L (Leittonechel - Leading-tone exchange)
-        function opL(triad) {
-            const [r, t, f] = triad.pitchClasses;
-            let newPcs, newType;
-            if (triad.type === "major") { // C Mayor (0,4,7) -> E menor (4,7,11)
-                newPcs = [t, f, normalizePitch(r + 11)];
-                newType = "minor";
-            } else { // C menor (0,3,7) -> Ab Mayor (8,0,3)
-                newPcs = [normalizePitch(f + 1), r, t];
-                newType = "major";
-            }
-            return findTriadByPitchClasses(newPcs, newType);
-        }
-
-        // P (Parallel)
-        function opP(triad) {
-            const [r, t, f] = triad.pitchClasses;
-            let newPcs, newType;
-            if (triad.type === "major") { // C Mayor (0,4,7) -> C menor (0,3,7)
-                newPcs = [r, normalizePitch(t - 1), f];
-                newType = "minor";
-            } else { // C menor (0,3,7) -> C Mayor (0,4,7)
-                newPcs = [r, normalizePitch(t + 1), f];
-                newType = "major";
-            }
-            return findTriadByPitchClasses(newPcs, newType);
-        }
-
-        // R (Relative)
-        function opR(triad) {
-            const [r, t, f] = triad.pitchClasses;
-            let newPcs, newType;
-            if (triad.type === "major") { // C Mayor (0,4,7) -> A menor (9,0,4)
-                newPcs = [normalizePitch(r + 9), r, t];
-                newType = "minor";
-            } else { // C menor (0,3,7) -> Eb Mayor (3,7,10)
-                newPcs = [normalizePitch(r + 3), f, normalizePitch(t + 7)];
-                newType = "major";
-            }
-            return findTriadByPitchClasses(newPcs, newType);
-        }
-
-        // N (Next Related - Nebenverwandt)
-        function opN(triad) {
-            const [r, t, f] = triad.pitchClasses;
-            let newPcs, newType;
-            if (triad.type === "major") { // C Mayor (0,4,7) -> F menor (5,8,0)
-                newPcs = [normalizePitch(r + 5), normalizePitch(t + 4), r];
-                newType = "minor";
-            } else { // C menor (0,3,7) -> G Mayor (7,11,2)
-                newPcs = [f, normalizePitch(r + 2), normalizePitch(t + 8)];
-                newType = "major";
-            }
-            return findTriadByPitchClasses(newPcs, newType);
-        }
-
-        // H (Hexatonic Pole) - equivalent to PLP or LPL
-        function opH(triad) {
-            let result = opP(triad);
-            result = opL(result);
-            result = opP(result);
-            return result;
-        }
-
-        // S (Slide)
-        function opS(triad) {
-            const [r, t, f] = triad.pitchClasses;
-            let newPcs, newType;
-            if (triad.type === "major") { // C Mayor (0,4,7) -> C# menor (1,4,8)
-                newPcs = [normalizePitch(r + 1), t, normalizePitch(f + 1)];
-                newType = "minor";
-            } else { // C# menor (1,4,8) -> C Mayor (0,4,7)
-                newPcs = [normalizePitch(r - 1), t, normalizePitch(f - 1)];
-                newType = "major";
-            }
-            return findTriadByPitchClasses(newPcs, newType);
-        }
+        // Map natural letter to its semitone value (C=0, D=2, E=4, F=5, G=7, A=9, B=11)
+        const naturalLetterSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+        // Map number (0-6) to letter (C-B)
+        const numberToLetterMap = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        // Map letter to number (C=0, D=1, ..., B=6)
+        const letterToNumberMap = { 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6 };
 
 
-        // Corrected Pre-defined Hexatonic Cycles (dynamically generated for accuracy)
-        // Each cycle contains 3 major and 3 minor triads.
-        const hexatonicCycles = [
-            { name: "Ciclo I (C/E/G#)", members: [] }, // Will be populated dynamically
-            { name: "Ciclo II (C#/F/A)", members: [] },
-            { name: "Ciclo III (D/F#/Bb)", members: [] },
-            { name: "Ciclo IV (D#/G/B)", members: [] }
+        // Notes for the natural note buttons
+        const naturalNotes = ["C", "D", "E", "F", "G", "A", "B"];
+        // Notes for the accidental buttons
+        const accidentals = ["#", "##", "b", "bb"];
+
+        // Pool of notes from which the "given note" in the question will be randomly selected.
+        // Includes natural notes, sharps, and common flats.
+        const notesForQuestionRoot = [
+            "C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"
         ];
 
-        // Function to generate and populate a single hexatonic cycle
-        function generateAndPopulateHexatonicCycle(startMajorTriad, cycleIndex) {
-            const cycle = [];
-            let current = startMajorTriad;
-            for (let i = 0; i < 6; i++) {
-                cycle.push(current);
-                if (i % 2 === 0) { // Apply L
-                    current = opL(current);
-                } else { // Apply P
-                    current = opP(current);
+        // Definition of chord structures in semitones and their names, including labels for the grid
+        const chordStructures = {
+            "maj7": {
+                name: "Mayor Séptima (maj7)",
+                intervals: [ // Base intervals for the chord
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 4, name: "tercera", label: "3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 },
+                    { semitones: 11, name: "séptima", label: "7", degreeOffset: 6 },
+                    { semitones: 2, name: "novena", label: "9", degreeOffset: 1 },
+                    { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }
+                ],
+                // Defines the labels of the 4 notes in the voicing, in descending order from the lead voice
+                voicing_rules: {
+                    "1": ["1", "7", "5", "3"],
+                    "3": ["3", "1", "7", "5"],
+                    "5": ["5", "3", "1", "7"],
+                    "7": ["7", "5", "3", "1"],
+                    "9": ["9", "7", "5", "3"], // 9 replaces 1
+                    "#11": ["#11", "3", "1", "7"] // #11 replaces 5, order: Tension, 3, 1, 7
+                }
+            },
+            "m7": {
+                name: "Menor Séptima (m7)",
+                intervals: [
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 },
+                    { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
+                    { semitones: 2, name: "novena", label: "9", degreeOffset: 1 },
+                    { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 }
+                ],
+                voicing_rules: {
+                    "1": ["1", "b7", "5", "b3"],
+                    "b3": ["b3", "1", "b7", "5"],
+                    "5": ["5", "b3", "1", "b7"],
+                    "b7": ["b7", "b5", "b3", "1"],
+                    "9": ["9", "b7", "5", "b3"], // 9 replaces 1
+                    "11": ["11", "b3", "1", "b7"] // 11 replaces 5, order: Tension, b3, 1, b7
+                }
+            },
+            "7": { // Dominant 7th chord
+                name: "Dominante Séptima (7)",
+                intervals: [
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 4, name: "tercera", label: "3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 },
+                    { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
+                    { semitones: 2, name: "novena", label: "9", degreeOffset: 1 },
+                    { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 },
+                    { semitones: 3, name: "novena aumentada", label: "#9", degreeOffset: 1 },
+                    { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 },
+                    { semitones: 9, name: "trecena", label: "13", degreeOffset: 5 },
+                    { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 }
+                ],
+                voicing_rules: {
+                    "1": ["1", "b7", "5", "3"],
+                    "3": ["3", "1", "b7", "5"],
+                    "5": ["5", "3", "1", "b7"],
+                    "b7": ["b7", "5", "3", "1"],
+                    "9": ["9", "b7", "5", "3"], // 9 replaces 1
+                    "b9": ["b9", "b7", "5", "3"], // b9 replaces 1
+                    "#9": ["#9", "b7", "5", "3"], // #9 replaces 1
+                    "11": ["11", "1", "b7", "5"], // 11 replaces 3, order: Tension, 1, b7, 5 (User's specific rule for 7 chord)
+                    "#11": ["#11", "3", "1", "b7"], // #11 replaces 5, order: Tension, 3, 1, b7 (User's specific rule for #11 in 7 chord)
+                    "13": ["13", "3", "1", "b7"] // 13 replaces 5, order: Tension, 3, 1, 7 (User's specific rule for 13)
+                }
+            },
+            "m7b5": {
+                name: "Menor Séptima con 5ta Disminuida (m7b5)",
+                intervals: [
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
+                    { semitones: 6, name: "quinta", label: "b5", degreeOffset: 4 },
+                    { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
+                    { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 },
+                    { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 }
+                ],
+                voicing_rules: {
+                    "1": ["1", "b7", "b5", "b3"],
+                    "b3": ["b3", "1", "b7", "b5"],
+                    "b5": ["b5", "b3", "1", "b7"],
+                    "b7": ["b7", "b5", "b3", "1"],
+                    "b9": ["b9", "b7", "b5", "b3"], // b9 replaces 1
+                    "11": ["11", "b3", "b7", "b5"] // 11 replaces 5, order: Tension, b3, b7, b5 (User's specific rule for m7b5)
+                }
+            },
+            "dim7": {
+                name: "Disminuido Séptima (°7)",
+                intervals: [
+                    { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
+                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
+                    { semitones: 6, name: "quinta", label: "b5", degreeOffset: 4 },
+                    { semitones: 9, name: "séptima", label: "bb7", degreeOffset: 6 }
+                ],
+                voicing_rules: {
+                    "1": ["1", "bb7", "b5", "b3"],
+                    "b3": ["b3", "1", "bb7", "b5"],
+                    "b5": ["b5", "b3", "1", "bb7"],
+                    "bb7": ["bb7", "b5", "b3", "1"]
                 }
             }
-            hexatonicCycles[cycleIndex].members = cycle.filter(Boolean); // Ensure no nulls
+        };
+
+        let currentCorrectNotes = []; // Stores the correct notes for the current exercise (technically correct spelling)
+        let currentChordRoot = ''; // Stores the root of the current chord for feedback (original spelling)
+        let currentChordTypeKey = ''; // Stores the key (e.g., "maj7") of the current chord
+        let currentGivenIntervalName = ''; // Stores the name (e.g., "fundamental") of the given interval
+        let currentGivenLabel = ''; // Stores the label (e.g., "1", "b3", "11") of the given interval
+        let currentGivenNote = ''; // Stores the actual note that was given (e.g., "C#")
+        let currentOrderedLabelsForDisplay = []; // Stores the labels for the grid in the specific order of the current exercise
+        let currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing.
+
+        // Training Evaluation Variables
+        let exercisesCompletedCount = 0; // Exercises completed in the current batch
+        let totalExercisesAttempted = 0; // Total exercises attempted across all batches
+        let totalCorrectAnswers = 0; // Total correct answers across all batches
+        const EXERCISES_PER_EVALUATION = 5; // Renamed constant
+        // Stores performance data for the current evaluation batch: { 'chordType_intervalName': { correct: N, total: M } }
+        let trainingSessionData = {}; // Renamed variable
+
+        // User selected notes for the final answer list
+        let selectedUserNotes = [];
+
+        // New state for the current natural and accidental buttons clicked
+        let activeNaturalNote = ''; // e.g., "C", "D"
+        let activeAccidental = ''; // e.g., "#", "b", "##", "bb" or ""
+
+        // Session timing variables
+        let sessionStartTime = 0; // Timestamp when the session starts
+        let sessionEndTime = 0; // Timestamp when the session ends
+
+        // DOM elements
+        const welcomeModalOverlay = document.getElementById('welcomeModalOverlay'); // New welcome modal
+        const startButton = document.getElementById('startButton'); // Button inside welcome modal
+        const mainAppContainer = document.getElementById('mainAppContainer'); // Main application container (renamed)
+        const chordQuestionTextDiv = document.getElementById('chordQuestionText');
+        const gridCells = [
+            document.getElementById('gridCell0'),
+            document.getElementById('gridCell1'),
+            document.getElementById('gridCell2'),
+            document.getElementById('gridCell3')
+        ];
+        const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
+        const accidentalButtonsContainer = document.getElementById('accidentalButtons');
+        const selectedNotesDisplay = document.getElementById('selectedNotesDisplay');
+        const musicalStaffCanvas = document.getElementById('musicalStaffCanvas'); // Canvas for musical staff
+
+        // Main Action Buttons
+        const confirmAnswerButton = document.getElementById('confirmAnswerButton');
+        const clearAllSelectionButton = document.getElementById('clearAllSelectionButton');
+        const changeQuestionButton = document.getElementById('changeQuestionButton');
+
+
+        // Feedback Modal Elements
+        const feedbackModalOverlay = document.getElementById('feedbackModalOverlay');
+        const feedbackModalContent = document.getElementById('feedbackModalContent');
+
+        // Evaluation Modal Elements
+        const evaluationModalOverlay = document.getElementById('evaluationModalOverlay');
+        const evaluationSummary = document.getElementById('evaluationSummary');
+        const adviceList = document.getElementById('adviceList');
+        const continueTrainingButton = document.getElementById('continueTrainingButton'); // Renamed
+        const endSessionButton = document.getElementById('endSessionButton'); // Renamed
+
+        // Final Message Elements
+        const finalMessageDisplay = document.getElementById('finalMessageDisplay');
+        const finalResultsSummary = document.getElementById('finalResultsSummary');
+        const userNameInput = document.getElementById('userNameInput'); // New: User name input
+        const saveAsPhotoButton = document.getElementById('saveAsPhotoButton'); // New: Save as photo button
+        const saveAsPdfButton = document.getElementById('saveAsPdfButton'); // New: Save as PDF button
+        const resultsContentToCapture = document.getElementById('resultsContentToCapture'); // New: Div to capture
+        const totalExercisesDisplay = document.getElementById('totalExercisesDisplay'); // New stat display
+        const correctAnswersDisplay = document.getElementById('correctAnswersDisplay'); // New stat display
+        const overallAccuracyDisplay = document.getElementById('overallAccuracyDisplay'); // New stat display
+        const sessionDateDisplay = document.getElementById('sessionDateDisplay'); // New: Session date display
+        const sessionTimeDisplay = document.getElementById('sessionTimeDisplay'); // New: Session time display
+        const sessionDurationDisplay = document.getElementById('sessionDurationDisplay'); // New: Session duration display
+
+        // Feedback duration in milliseconds
+        const FEEDBACK_DURATION = 3000; // 3 seconds
+
+        // Global Tone.js synth instance (kept for potential future use, but not used for playback)
+        let synth;
+        let audioContextStarted = false;
+
+        /**
+         * Initializes the Tone.js audio context.
+         * Called on "Start" button click to comply with browser autoplay policy.
+         * Note: Actual playback logic has been removed as per user request.
+         */
+        async function startAudioContext() {
+            console.log("Attempting to start AudioContext...");
+            if (!audioContextStarted) {
+                try {
+                    await Tone.start();
+                    Tone.context.lookAhead = 0.0; // Reduce lookAhead for lower latency
+                    console.log("AudioContext started successfully! LookAhead set to 0.0.");
+                    audioContextStarted = true;
+                    // Initialize the synthesizer (even if not used for playback, it sets up the audio context)
+                    synth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: "triangle" },
+                        envelope: { attack: 0.005, decay: 0.2, sustain: 0.1, release: 0.5 }
+                    }).toDestination();
+                    console.log("Synth initialized.");
+                } catch (e) {
+                    console.error("Error al iniciar AudioContext:", e);
+                    showCustomMessage("Error de Audio", "No se pudo iniciar el audio. Por favor, asegúrate de que tu navegador lo permita.", "error");
+                }
+            } else {
+                console.log("AudioContext already started.");
+            }
         }
 
-        // Populate hexatonic cycles after allTriads and operations are defined
-        // Ensure these starting triads exist in allTriads.
-        generateAndPopulateHexatonicCycle(getTriadByName("C Mayor"), 0); // C-E-G# system
-        generateAndPopulateHexatonicCycle(getTriadByName("C# Mayor"), 1); // C#-F-A system
-        generateAndPopulateHexatonicCycle(getTriadByName("D Mayor"), 2); // D-F#-Bb system
-        generateAndPopulateHexatonicCycle(getTriadByName("D# Mayor"), 3); // D#-G-B system
+        /**
+         * Shows a custom message box (replaces alert()).
+         * @param {string} title - Title of the message.
+         * @param {string} message - Content of the message.
+         * @param {string} type - 'info', 'success', 'error', 'warning' for styling.
+         */
+        function showCustomMessage(title, message, type = 'info') {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.classList.add('modal-overlay', 'visible');
+            modalOverlay.style.zIndex = 1002; // Higher z-index than other modals
+            modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.2)'; // More transparent
+
+            const modalContent = document.createElement('div');
+            modalContent.classList.add('modal-content');
+            modalContent.innerHTML = `
+                <h3>${title}</h3>
+                <p>${message}</p>
+                <div class="modal-buttons">
+                    <button id="customMessageCloseButton">Cerrar</button>
+                </div>
+            `;
+            // Apply type-specific styling
+            if (type === 'error') {
+                modalContent.style.backgroundColor = '#fee2e2';
+                modalContent.style.color = '#b91c1c';
+                modalContent.style.border = '1px solid #b91c1c';
+            } else if (type === 'success') {
+                 modalContent.style.backgroundColor = '#dcfce7';
+                 modalContent.style.color = '#15803d';
+                 modalContent.style.border = '1px solid #15803d';
+            } else if (type === 'warning') {
+                modalContent.style.backgroundColor = '#fffbeb';
+                modalContent.style.color = '#b45309';
+                modalContent.style.border = '1px solid #fcd34d';
+            }
+
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+
+            const closeButton = document.getElementById('customMessageCloseButton');
+            closeButton.style.backgroundColor = '#64748b'; // Grey button
+            closeButton.style.color = 'white';
+            closeButton.addEventListener('click', () => {
+                modalOverlay.classList.remove('visible');
+                setTimeout(() => modalOverlay.remove(), 300); // Remove from DOM after transition
+            });
+
+            // Auto-hide after a short duration for info/success/warning messages
+            if (type === 'info' || type === 'success' || type === 'warning') {
+                setTimeout(() => {
+                    modalOverlay.classList.remove('visible');
+                    setTimeout(() => modalOverlay.remove(), 300);
+                }, 1500); // 1.5 seconds for temporary messages
+            }
+        }
 
 
-        // Pre-defined Weitzmann Regions (based on augmented triads C-E-G#, C#-F-A, D-F#-Bb, D#-G-B)
-        // Each region contains 3 major and 3 minor triads whose roots form an augmented triad.
-        const weitzmannRegions = [
-            { name: "Región de C-E-G#", members: [
-                getTriadByName("C Mayor"), getTriadByName("C menor"),
-                getTriadByName("E Mayor"), getTriadByName("E menor"),
-                getTriadByName("G# Mayor"), getTriadByName("G# menor")
-            ].filter(Boolean)},
-            { name: "Región de C#-F-A", members: [
-                getTriadByName("C# Mayor"), getTriadByName("C# menor"),
-                getTriadByName("F Mayor"), getTriadByName("F menor"),
-                getTriadByName("A Mayor"), getTriadByName("A menor")
-            ].filter(Boolean)},
-            { name: "Región de D-F#-Bb", members: [
-                getTriadByName("D Mayor"), getTriadByName("D menor"),
-                getTriadByName("F# Mayor"), getTriadByName("F# menor"),
-                getTriadByName("Bb Mayor"), getTriadByName("Bb menor")
-            ].filter(Boolean)},
-            { name: "Región de D#-G-B", members: [
-                getTriadByName("D# Mayor"), getTriadByName("D# menor"),
-                getTriadByName("G Mayor"), getTriadByName("G menor"),
-                getTriadByName("B Mayor"), getTriadByName("B menor")
-            ].filter(Boolean)}
-        ];
+        /**
+         * Normalizes a note to its canonical sharp representation for internal comparison.
+         * Uses noteToSemitoneMap for comprehensive enharmonic handling.
+         * @param {string} note - The note to normalize (e.g., "C#", "Db").
+         * @returns {string} The normalized note (e.g., "C#", "D").
+         */
+        function normalizeNote(note) {
+            const upperNote = note.trim().toUpperCase();
+            const semitone = noteToSemitoneMap[upperNote];
+            if (semitone !== undefined) {
+                return canonicalNotes[semitone];
+            }
+            console.warn(`Unrecognized note for normalization: ${note}`);
+            return upperNote; // Fallback for unrecognized notes
+        }
+
+        /**
+         * Determines the "technically correct" enharmonic spelling for a note based on its interval context.
+         * @param {string} rootNoteString - The original spelling of the chord's root (e.g., "Db", "C#").
+         * @param {number} absoluteTargetSemitone - The absolute semitone value (0-11) of the note to be spelled.
+         * @param {string} intervalLabel - The label of the interval this note represents (e.g., "b3", "5", "#11").
+         * @returns {string} The technically correct enharmonic spelling (e.g., "Eb", "Gb", "F#").
+         */
+        function getCorrectEnharmonicSpelling(rootNoteString, absoluteTargetSemitone, intervalLabel) {
+            const rootLetter = rootNoteString.charAt(0).toUpperCase();
+            const rootLetterNum = letterToNumberMap[rootLetter];
+
+            // Find the interval definition to get the base degree offset
+            const chordType = chordStructures[currentChordTypeKey];
+            const intervalDef = chordType.intervals.find(int => int.label === intervalLabel);
+
+            if (!intervalDef || intervalDef.degreeOffset === undefined) {
+                console.warn(`Could not find degreeOffset for interval label ${intervalLabel}. Falling back to canonical.`);
+                return canonicalNotes[absoluteTargetSemitone];
+            }
+
+            const targetLetterNum = (rootLetterNum + intervalDef.degreeOffset) % 7;
+            const targetBaseLetter = numberToLetterMap[targetLetterNum];
+            const targetBaseSemitone = naturalLetterSemitone[targetBaseLetter];
+
+            // Calculate the difference in semitones from the natural target letter to the actual target semitone
+            let accidentalSemitoneDiff = (absoluteTargetSemitone - targetBaseSemitone + 12) % 12;
+
+            let accidental = '';
+            if (accidentalSemitoneDiff === 1) accidental = '#';
+            else if (accidentalSemitoneDiff === 2) accidental = '##';
+            else if (accidentalSemitoneDiff === 11) accidental = 'b';
+            else if (accidentalSemitoneDiff === 10) accidental = 'bb';
+
+            return `${targetBaseLetter}${accidental}`;
+        }
 
 
-        // Global state
-        let currentTriad;
-        let history = [];
-        let hexatonicCycleChords = []; // Chords for the current hexatonic cycle visualization
+        /**
+         * Updates the display of selected notes (final answer list) and button visibility.
+         */
+        function updateSelectedNotesDisplay() {
+            if (selectedUserNotes.length === 0) {
+                selectedNotesDisplay.innerHTML = 'Notas seleccionadas: Ninguna';
+            } else {
+                selectedNotesDisplay.innerHTML = `Notas seleccionadas: <strong>${selectedUserNotes.join(', ')}</strong>`; // Display raw user notes
+            }
 
-        // DOM Elements
-        const startChordSelect = document.getElementById("startChord");
-        const resetButton = document.getElementById("resetButton");
-        const currentChordName = document.getElementById("currentChordName");
-        const currentChordNotes = document.getElementById("currentChordNotes");
-        const operationExplanation = document.getElementById("operationExplanation");
-        const historyLog = document.getElementById("historyLog");
-        const hexatonicCircleSvg = document.querySelector("#hexatonicCircle svg");
-        const operationButtons = document.querySelectorAll('.grid button'); // All operation buttons
-        const operationsBox = document.getElementById('operationsBox'); // The container for operation buttons
+            // Control visibility/disabled state of action buttons
+            confirmAnswerButton.style.display = selectedUserNotes.length === 4 ? 'block' : 'none';
+            confirmAnswerButton.disabled = selectedUserNotes.length !== 4;
 
-        // DOM elements for new Set Relationships section
-        const currentHexatonicCycleSpan = document.getElementById("currentHexatonicCycle");
-        const hexatonicCycleMembersDiv = document.getElementById("hexatonicCycleMembers");
-        const currentWeitzmannRegionSpan = document.getElementById("currentWeitzmannRegion");
-        const weitzmannRegionMembersDiv = document.getElementById("weitzmannRegionMembers");
-        const sharedChordsDiv = document.getElementById("sharedChords");
+            clearAllSelectionButton.style.display = selectedUserNotes.length > 0 ? 'block' : 'none';
+            clearAllSelectionButton.disabled = selectedUserNotes.length === 0;
 
+            changeQuestionButton.style.display = 'block'; // Always visible
+            changeQuestionButton.disabled = false; // Always enabled (unless training is generally disabled)
 
-        // Populate initial chord options
-        function populateStartChordSelect() {
-            // Define a preferred order for enharmonic roots in the dropdown
-            // This list ensures each pitch class is represented once, prioritizing common spellings.
-            const canonicalRootNames = [
-                "C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"
-            ];
-            
-            const uniqueTriadsForDropdown = [];
-            
-            // Create a temporary map to store triads by their canonical root name
-            const canonicalTriadsMap = new Map(); // Map: canonicalRootName -> { major: Triad, minor: Triad }
+            // Update button selection visual state
+            updateButtonSelectionVisuals();
+        }
 
-            allTriads.forEach(triad => {
-                let canonicalRoot = triad.root;
-                // Determine canonical root name for enharmonic equivalents
-                // Prioritize flat spellings for Db, Eb, Ab, Bb
-                if (triad.root === "C#") canonicalRoot = "Db";
-                else if (triad.root === "D#") canonicalRoot = "Eb";
-                else if (triad.root === "Gb") canonicalRoot = "F#"; // F# is generally preferred over Gb
-                else if (triad.root === "G#") canonicalRoot = "Ab";
-                else if (triad.root === "A#") canonicalRoot = "Bb";
-
-                if (!canonicalTriadsMap.has(canonicalRoot)) {
-                    canonicalTriadsMap.set(canonicalRoot, { major: null, minor: null });
+        /**
+         * Updates the visual state of the natural and accidental buttons based on selectedUserNotes.
+         */
+        function updateButtonSelectionVisuals() {
+            // Remove all 'selected' classes first
+            document.querySelectorAll('.note-button').forEach(button => {
+                if (button && button.classList) { // Defensive check
+                    button.classList.remove('selected');
                 }
-                if (triad.type === "major") {
-                    canonicalTriadsMap.get(canonicalRoot).major = triad;
+            });
+
+            // Apply 'selected' class to buttons that form part of selected notes
+            selectedUserNotes.forEach(userNote => {
+                const naturalPart = userNote.match(/[A-G]/i)[0];
+                const accidentalPart = userNote.replace(naturalPart, '');
+
+                // Select natural button
+                const naturalButton = document.querySelector(`.natural-note-buttons button[data-note="${naturalPart}"]`);
+                if (naturalButton && naturalButton.classList) { // Defensive check
+                    naturalButton.classList.add('selected');
+                }
+
+                // Select accidental button if present
+                if (accidentalPart) {
+                    const accidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${accidentalPart}"]`);
+                    if (accidentalButton && accidentalButton.classList) { // Defensive check
+                        accidentalButton.classList.add('selected');
+                    }
+                }
+            });
+
+            // Disable note selection buttons if 4 notes are already selected
+            const naturalButtons = naturalNoteButtonsContainer.querySelectorAll('.note-button');
+            const accidentalButtons = accidentalButtonsContainer.querySelectorAll('.note-button');
+
+            if (selectedUserNotes.length >= 4) {
+                naturalButtons.forEach(button => {
+                    if (button && button.classList && !button.classList.contains('selected')) { // Defensive check
+                        button.classList.add('disabled');
+                    }
+                });
+                accidentalButtons.forEach(button => {
+                    if (button && button.classList && !button.classList.contains('selected')) { // Defensive check
+                        button.classList.add('disabled');
+                    }
+                });
+            } else {
+                naturalButtons.forEach(button => {
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('disabled');
+                    }
+                });
+                accidentalButtons.forEach(button => {
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('disabled');
+                    }
+                });
+            }
+        }
+
+        /**
+         * Toggles a note in the selectedUserNotes array.
+         * Note: This function no longer updates the musical staff directly.
+         * The staff is only updated on checkAnswer() or generateComplexExercise().
+         * @param {string} note - The note string (e.g., "C", "C#", "Db").
+         */
+        function toggleNoteInAnswer(note) {
+            const normalizedNote = normalizeNote(note);
+            const index = selectedUserNotes.findIndex(n => normalizeNote(n) === normalizedNote);
+            let message = '';
+            let messageType = 'info';
+
+            if (index > -1) {
+                // Note found, remove it
+                selectedUserNotes.splice(index, 1);
+                message = `Nota ${note} eliminada.`;
+                messageType = 'info';
+            } else {
+                // Note not found, add it if less than 4 notes are selected
+                if (selectedUserNotes.length < 4) {
+                    selectedUserNotes.push(note);
+                    message = `Nota ${note} añadida.`;
+                    messageType = 'success';
                 } else {
-                    canonicalTriadsMap.get(canonicalRoot).minor = triad;
+                    message = "Límite de 4 notas alcanzado. Deselecciona una antes de añadir otra.";
+                    messageType = 'warning';
+                    showCustomMessage("Límite de Notas", message, messageType);
+                    return; // Do not update visuals if not added
                 }
-            });
-
-            // Populate uniqueTriadsForDropdown based on preferredRootOrder
-            canonicalRootNames.forEach(rootName => {
-                if (canonicalTriadsMap.has(rootName)) {
-                    const triadPair = canonicalTriadsMap.get(rootName);
-                    if (triadPair.major) uniqueTriadsForDropdown.push(triadPair.major);
-                    if (triadPair.minor) uniqueTriadsForDropdown.push(triadPair.minor);
+            }
+            updateSelectedNotesDisplay();
+            // Call drawMusicalStaff with currentGivenNote and selectedUserNotes
+            drawMusicalStaff(selectedUserNotes); // Pass only selected notes for highlighting
+            if (message) {
+                // Only show custom message if it's not the "limit reached" one (which is already shown)
+                if (messageType !== 'warning') {
+                    showCustomMessage("Selección de Nota", message, messageType);
                 }
+            }
+        }
+
+        /**
+         * Attempts to combine active natural and accidental notes and toggle them in the answer.
+         */
+        function attemptToggleCombinedNote() {
+            if (activeNaturalNote !== '') {
+                const fullNote = `${activeNaturalNote}${activeAccidental}`;
+                toggleNoteInAnswer(fullNote);
+                // Reset active selections after attempting to toggle
+                activeNaturalNote = '';
+                activeAccidental = '';
+                // Deselect natural and accidental buttons visually
+                document.querySelectorAll('.natural-note-buttons .note-button.selected').forEach(button => {
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('selected');
+                    }
+                });
+                document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => {
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('selected');
+                    }
+                });
+            }
+        }
+
+        /**
+         * Handles click on a natural note button.
+         * @param {Event} event - The click event.
+         */
+        function handleNaturalNoteClick(event) {
+            const clickedNote = event.target.dataset.note;
+            if (!clickedNote || (event.target.classList && event.target.classList.contains('disabled'))) return; // Defensive check
+
+            // Deselect previous natural note button if different one is clicked
+            if (activeNaturalNote && activeNaturalNote !== clickedNote) {
+                const prevNaturalButton = document.querySelector(`.natural-note-buttons button[data-note="${activeNaturalNote}"]`);
+                if (prevNaturalButton) prevNaturalButton.classList.remove('selected');
+            }
+
+            // Toggle selected class for the clicked natural note button
+            event.target.classList.toggle('selected');
+
+            // If a natural note is already active and the same one is clicked, it means
+            // the user is trying to deselect it or finalize a selection with no accidental.
+            if (activeNaturalNote === clickedNote) {
+                if (activeAccidental === '') { // If no accidental is active, toggle the natural note itself
+                    toggleNoteInAnswer(clickedNote);
+                }
+                // In any case, reset activeNaturalNote
+                activeNaturalNote = '';
+            } else {
+                // Set the new active natural note
+                activeNaturalNote = clickedNote;
+            }
+
+            // If an accidental is already active, attempt to toggle the combined note
+            if (activeAccidental !== '') {
+                attemptToggleCombinedNote();
+            } else {
+                // If no natural note is active, just update button visuals
+                updateButtonSelectionVisuals();
+            }
+        }
+
+
+        /**
+         * Handles click on an accidental button.
+         * @param {Event} event - The click event.
+         */
+        function handleAccidentalClick(event) {
+            const clickedAccidental = event.target.dataset.accidental;
+            if (!clickedAccidental || (event.target.classList && event.target.classList.contains('disabled'))) return; // Defensive check
+
+            // Deselect previous accidental button if different one is clicked
+            if (activeAccidental && activeAccidental !== clickedAccidental) {
+                const prevAccidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${activeAccidental}"]`);
+                if (prevAccidentalButton) prevAccidentalButton.classList.remove('selected');
+            }
+
+            // Toggle selected class for the clicked accidental button
+            event.target.classList.toggle('selected');
+
+            // If an accidental is already active and the same one is clicked, it means
+            // the user is trying to deselect it or finalize a selection with the current natural.
+            if (activeAccidental === clickedAccidental) {
+                if (activeNaturalNote === '') { // If no natural is active, this click is ambiguous, do nothing or show message
+                    showCustomMessage("Selección", "Por favor, selecciona primero una nota natural (C, D, E, F, G, A, B).", "info");
+                    return;
+                }
+                // In any case, reset activeAccidental
+                activeAccidental = '';
+            } else {
+                // Set the new active accidental
+                activeAccidental = clickedAccidental;
+            }
+
+            // If a natural note is already active, attempt to toggle the combined note
+            if (activeNaturalNote !== '') {
+                attemptToggleCombinedNote();
+            } else {
+                // If no natural note is active, just update button visuals
+                updateButtonSelectionVisuals();
+            }
+        }
+
+
+        /**
+         * Clears all selected notes in the final answer list.
+         */
+        function clearSelection() {
+            selectedUserNotes = [];
+            activeNaturalNote = ''; // Reset active selection states
+            activeAccidental = '';
+            updateSelectedNotesDisplay(); // This will also handle button and keyboard visuals
+            // When clearing selection, draw only the currentGivenNote if it exists, otherwise clear entirely
+            if (currentGivenNote) {
+                drawMusicalStaff([]); // Clear staff, then redraw with only the given note (implicitly done by generateComplexExercise)
+            } else {
+                drawMusicalStaff([]); // Clear staff if no given note
+            }
+        }
+
+        /**
+         * Generates the natural and accidental note buttons.
+         */
+        function generateNoteButtons() {
+            naturalNoteButtonsContainer.innerHTML = '';
+            naturalNotes.forEach(note => {
+                const button = document.createElement('button');
+                button.textContent = note;
+                button.classList.add('note-button');
+                button.dataset.note = note;
+                naturalNoteButtonsContainer.appendChild(button);
             });
+            naturalNoteButtonsContainer.addEventListener('click', handleNaturalNoteClick);
 
-            // Sort uniqueTriadsForDropdown by name for a consistent dropdown order
-            const sortedTriads = [...uniqueTriadsForDropdown].sort((a, b) => {
-                const rootOrderMap = new Map();
-                canonicalRootNames.forEach((root, index) => rootOrderMap.set(root, index));
+            accidentalButtonsContainer.innerHTML = '';
+            accidentals.forEach(accidental => {
+                const button = document.createElement('button');
+                button.textContent = accidental;
+                button.classList.add('note-button');
+                button.dataset.accidental = accidental;
+                accidentalButtonsContainer.appendChild(button);
+            });
+            accidentalButtonsContainer.addEventListener('click', handleAccidentalClick);
+        }
 
-                // Get the canonical root for sorting purposes
-                const getCanonicalRootForSort = (rootName) => {
-                    if (rootName === "C#") return "Db";
-                    if (rootName === "D#") return "Eb";
-                    if (rootName === "Gb") return "F#";
-                    if (rootName === "G#") return "Ab";
-                    if (rootName === "A#") return "Bb";
-                    return rootName;
+        /**
+         * Draws the musical staff with the given notes as a whole note chord, always in treble clef.
+         * The `currentGivenNote` will be positioned as the highest voice within G4-G5 range.
+         * Other notes in `notesToDisplayRaw` will be placed below it, in closest descending order,
+         * ensuring a closed voicing within an octave range.
+         * @param {string[]} notesToHighlight - Array of notes to be highlighted (e.g., user's selected notes).
+         */
+        function drawMusicalStaff(notesToHighlight = []) {
+            const canvas = musicalStaffCanvas;
+            if (!canvas) { console.error("Canvas element not found for musical staff."); return; }
+            const context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Resize canvas based on container and screen size
+            const containerWidth = canvas.parentElement.clientWidth;
+            // Set canvas width to 100% of its parent, but respect max-width for larger screens
+            canvas.width = Math.min(containerWidth, 550);
+            canvas.height = 180; // Default height for desktop
+            
+            // Adjust canvas dimensions for smaller screens
+            if (window.innerWidth <= 768) {
+                canvas.width = Math.min(containerWidth, 180); // Smaller max-width for mobile
+                canvas.height = 160; // Smaller height for mobile
+            }
+
+            const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
+            // Crucial: Resize the VexFlow renderer to the actual canvas dimensions
+            renderer.resize(canvas.width, canvas.height);
+            const ctx = renderer.getContext();
+            const stave = new Stave(10, 0, canvas.width - 20);
+            stave.addClef("treble").addTimeSignature("4/4"); // Always treble clef
+            stave.setContext(ctx).draw();
+
+            const finalStaveNoteKeys = [];
+            const finalStaveNoteAccidentals = [];
+
+            // Combine currentGivenNote and notesToHighlight for display
+            let allNotesForStaffDisplay = new Set();
+            if (currentGivenNote) {
+                allNotesForStaffDisplay.add(currentGivenNote);
+            }
+            notesToHighlight.forEach(note => allNotesForStaffDisplay.add(note));
+
+            if (allNotesForStaffDisplay.size === 0) {
+                return; // Draw empty staff if no notes to display
+            }
+
+            // Convert notes to objects with original string, semitone (0-11), and placeholder for absolute semitone
+            let processedNotes = Array.from(allNotesForStaffDisplay).map(noteString => {
+                return {
+                    originalString: noteString,
+                    semitone: noteToSemitoneMap[normalizeNote(noteString)], // 0-11
+                    absoluteSemitone: 0 // Will be calculated
                 };
+            });
 
-                const indexA = rootOrderMap.get(getCanonicalRootForSort(a.root));
-                const indexB = rootOrderMap.get(getCanonicalRootForSort(b.root));
+            let orderedNotesForVexFlow = []; // This will hold notes in ascending order of absolute semitone for VexFlow
+            let highestNoteObj;
 
-                if (indexA === indexB) {
-                    return a.type.localeCompare(b.type);
+            // 1. Identify the highest note (currentGivenNote) and place it in the G4-G5 range
+            highestNoteObj = processedNotes.find(n => normalizeNote(n.originalString) === normalizeNote(currentGivenNote));
+
+            if (!highestNoteObj) {
+                // Fallback: If currentGivenNote is not found, take the highest semitone from available notes
+                processedNotes.sort((a, b) => b.semitone - a.semitone);
+                highestNoteObj = processedNotes[0];
+            }
+
+            // Calculate octave for the highest note to be in G4-G5 range (MIDI 67-79)
+            const semitoneOfHighest = highestNoteObj.semitone;
+            let targetOctaveForHighest;
+
+            if (semitoneOfHighest >= naturalLetterSemitone['G']) { // G is semitone 7
+                targetOctaveForHighest = 4;
+            } else {
+                targetOctaveForHighest = 5;
+            }
+            highestNoteObj.absoluteSemitone = semitoneOfHighest + (targetOctaveForHighest * 12);
+            orderedNotesForVexFlow.push(highestNoteObj);
+
+            // 2. Place other notes below the highest, ensuring closest descending order and closed voicing
+            // Get the canonical forms of all *correct* notes to check for "closed voicing"
+            const allCorrectCanonicalNotes = currentCorrectNotes.map(n => normalizeNote(n));
+
+            // Create a temporary set of notes already placed (by their canonical form)
+            let placedCanonicalNotes = new Set([normalizeNote(highestNoteObj.originalString)]);
+
+            let lastAbsoluteSemitonePlaced = highestNoteObj.absoluteSemitone;
+
+            // Iterate to find the remaining 3 notes
+            for (let i = 0; i < 3; i++) {
+                let foundNextNote = false;
+                // Search downwards for the next closest note
+                for (let semitoneDown = 1; semitoneDown <= 12; semitoneDown++) { // Check up to an octave below
+                    let candidateAbsoluteSemitone = lastAbsoluteSemitonePlaced - semitoneDown;
+                    let candidateSemitone = (candidateAbsoluteSemitone % 12 + 12) % 12; // Normalize to 0-11
+
+                    const candidateCanonicalNote = canonicalNotes[candidateSemitone];
+
+                    // Check if this candidate is one of the *correct* chord notes and hasn't been placed yet
+                    if (allCorrectCanonicalNotes.includes(candidateCanonicalNote) && !placedCanonicalNotes.has(candidateCanonicalNote)) {
+                        // Ensure no *other* correct chord notes exist between lastPlaced and current candidate
+                        let isClosedVoicing = true;
+                        for (let k = 1; k < semitoneDown; k++) {
+                            let intermediateSemitone = (lastAbsoluteSemitonePlaced - k) % 12;
+                            if (intermediateSemitone < 0) intermediateSemitone += 12; // Ensure positive modulo
+                            if (allCorrectCanonicalNotes.includes(canonicalNotes[intermediateSemitone])) {
+                                isClosedVoicing = false;
+                                break;
+                            }
+                        }
+
+                        if (isClosedVoicing) {
+                            // Find the original spelling from notesToDisplayRaw that matches this canonical note
+                            const originalSpelling = Array.from(allNotesForStaffDisplay).find(rawNote => normalizeNote(rawNote) === candidateCanonicalNote);
+
+                            if (originalSpelling) {
+                                orderedNotesForVexFlow.push({
+                                    originalString: originalSpelling,
+                                    semitone: candidateSemitone,
+                                    absoluteSemitone: candidateAbsoluteSemitone
+                                });
+                                placedCanonicalNotes.add(candidateCanonicalNote); // Mark as placed
+                                lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone;
+                                foundNextNote = true;
+                                break; // Found the next note, move to find the next voice
+                            }
+                        }
+                    }
                 }
-                return indexA - indexB;
+                // Fallback if a note wasn't found in the immediate closed voicing search (shouldn't happen with correct logic)
+                if (!foundNextNote && orderedNotesForVexFlow.length < 4) {
+                    // This fallback logic might need adjustment if allCorrectCanonicalNotes isn't the source
+                    // For now, it's about placing the remaining notes from allNotesForStaffDisplay
+                    const remainingNotesToPlace = Array.from(allNotesForStaffDisplay).filter(n => !placedCanonicalNotes.has(normalizeNote(n)));
+                    if (remainingNotesToPlace.length > 0) {
+                        // Sort remaining by semitone and pick the highest one that is not yet placed
+                        remainingNotesToPlace.sort((a, b) => noteToSemitoneMap[normalizeNote(a)] - noteToSemitoneMap[normalizeNote(b)]);
+                        const nextHighestRemainingOriginal = remainingNotesToPlace[remainingNotesToPlace.length - 1];
+                        const nextHighestRemainingCanonical = normalizeNote(nextHighestRemainingOriginal);
+                        const nextHighestRemainingSemitone = noteToSemitoneMap[nextHighestRemainingCanonical];
+
+                        let candidateAbsoluteSemitone = lastAbsoluteSemitonePlaced - 12; // Start an octave below
+                        // Adjust to match the semitone, ensuring it's below the last placed note
+                        while ((candidateAbsoluteSemitone % 12 + 12) % 12 !== nextHighestRemainingSemitone || candidateAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
+                            candidateAbsoluteSemitone -= 1; // Move down by semitone until match and below
+                        }
+
+                        orderedNotesForVexFlow.push({
+                            originalString: nextHighestRemainingOriginal,
+                            semitone: nextHighestRemainingSemitone,
+                            absoluteSemitone: candidateAbsoluteSemitone
+                        });
+                        placedCanonicalNotes.add(nextHighestRemainingCanonical);
+                        lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone;
+                    }
+                }
+            }
+
+            // Final sort by absolute semitone for VexFlow rendering (ascending order, lowest to highest)
+            orderedNotesForVexFlow.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
+
+            orderedNotesForVexFlow.forEach(noteObj => {
+                const match = noteObj.originalString.match(/^([A-G])(.*)$/i);
+                if (!match) {
+                    console.warn(`Could not parse note string for VexFlow: ${noteObj.originalString}`);
+                    return;
+                }
+                let baseNoteLetter = match[1].toLowerCase();
+                let accidentalSymbol = match[2];
+
+                const octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12);
+
+                finalStaveNoteKeys.push(`${baseNoteLetter}/${octaveForVexFlow}`);
+                finalStaveNoteAccidentals.push(accidentalSymbol || null);
             });
 
-            sortedTriads.forEach(triad => {
-                const option = document.createElement("option");
-                option.value = triad.name;
-                option.textContent = triad.name;
-                startChordSelect.appendChild(option);
+            if (finalStaveNoteKeys.length === 0) {
+                return; // No valid notes to draw after all processing
+            }
+
+            const chordStaveNote = new StaveNote({
+                keys: finalStaveNoteKeys,
+                duration: "w"
             });
-            // Set default to C Mayor
-            startChordSelect.value = "C Mayor";
+
+            // Apply highlighting to selected notes
+            notesToHighlight.forEach(highlightNote => {
+                const normalizedHighlightNote = normalizeNote(highlightNote);
+                orderedNotesForVexFlow.forEach((noteObj, index) => {
+                    if (normalizeNote(noteObj.originalString) === normalizedHighlightNote) {
+                        chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" }); // Blue color
+                    }
+                });
+            });
+
+            // Add accidentals
+            finalStaveNoteAccidentals.forEach((accidental, index) => {
+                if (accidental) {
+                    chordStaveNote.addAccidental(index, new Accidental(accidental));
+                }
+            });
+
+            const voice = new Voice({ num_beats: 4, beat_value: 4 });
+            voice.addTickables([chordStaveNote]);
+
+            new Formatter().joinVoices([voice]).format([voice], canvas.width - 30);
+            voice.draw(ctx, stave);
         }
 
-        // Initialize or reset the application state
-        function initializeApp() {
-            const selectedTriadName = startChordSelect.value;
-            currentTriad = allTriads.find(t => t.name === selectedTriadName);
-            history = [];
-            updateUI();
-            updateHexatonicCircleVisualization(currentTriad);
-            displayOperationExplanation(''); // Clear explanation on reset
-            removeActiveOperationHighlight(); // Clear any highlighted operation button
-            removeOperationsBoxHighlight(); // Clear operations box highlight
-        }
 
-        // Update the UI with current triad information
-        function updateUI() {
-            currentChordName.textContent = currentTriad.name;
-            const notes = currentTriad.getNotes();
-            // Display notes explicitly as Root, Third, Fifth
-            currentChordNotes.innerHTML = `Raíz: <span class="font-bold">${notes[0]}</span>, Tercera: <span class="font-bold">${notes[1]}</span>, Quinta: <span class="font-bold">${notes[2]}</span>`;
-            updateHistoryLog();
-            highlightHexatonicNode(currentTriad);
-            updateSetRelationshipsDisplay(); // Call new function to update set relationships
-        }
+        /**
+         * Generates a complex chord exercise with a visual grid.
+         */
+        function generateComplexExercise() { // Renamed function
+            console.log("generateComplexExercise: Starting new exercise generation."); // Debug message
+            // 1. Choose a random chord type
+            const chordTypes = Object.keys(chordStructures);
+            const randomChordTypeKey = chordTypes[Math.floor(Math.random() * chordTypes.length)];
+            const selectedChordType = chordStructures[randomChordTypeKey];
+            currentChordTypeKey = randomChordTypeKey;
+            console.log("generateComplexExercise: Tipo de acorde seleccionado:", currentChordTypeKey);
 
-        // Add an entry to the history log
-        function addHistoryEntry(operationName, oldTriad, newTriad) {
-            const entry = {
-                operation: operationName,
-                from: oldTriad.name,
-                to: newTriad.name,
-                timestamp: new Date().toLocaleTimeString()
-            };
-            history.push(entry);
-            historyLog.scrollTop = historyLog.scrollHeight; // Scroll to bottom
-        }
-
-        // Render the history log
-        function updateHistoryLog() {
-            historyLog.innerHTML = "";
-            if (history.length === 0) {
-                historyLog.innerHTML = "<p class='text-gray-500'>No hay transformaciones aún.</p>";
+            // 2. Choose a random interval to be the lead voice (from defined voicing rules)
+            const possibleLeadLabels = Object.keys(selectedChordType.voicing_rules);
+            if (possibleLeadLabels.length === 0) {
+                console.error(`generateComplexExercise: Error: No hay reglas de voicing definidas para el acorde ${currentChordTypeKey}.`);
+                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                disableTrainingInteraction();
                 return;
             }
-            history.forEach(entry => {
-                const div = document.createElement("div");
-                div.className = "history-item";
-                div.textContent = `${entry.timestamp}: ${entry.from} --(${entry.operation})--> ${entry.to}`;
-                historyLog.appendChild(div);
+            const randomLeadLabel = possibleLeadLabels[Math.floor(Math.random() * possibleLeadLabels.length)];
+            currentGivenLabel = randomLeadLabel;
+            console.log("generateComplexExercise: Etiqueta de voz principal seleccionada:", currentGivenLabel);
+
+            // Find the full interval object for the chosen lead label
+            const givenInterval = selectedChordType.intervals.find(int => int.label === randomLeadLabel);
+            if (!givenInterval) {
+                console.error(`generateComplexExercise: Error: No se encontró el objeto de intervalo para la etiqueta ${randomLeadLabel} en el acorde ${currentChordTypeKey}.`);
+                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                disableTrainingInteraction();
+                return;
+            }
+            currentGivenIntervalName = givenInterval.name;
+            console.log("generateComplexExercise: Nombre de intervalo dado:", currentGivenIntervalName);
+
+
+            // 3. Choose a random note to be that interval (from the expanded notesForQuestionRoot array)
+            const givenNoteIndex = Math.floor(Math.random() * notesForQuestionRoot.length);
+            currentGivenNote = notesForQuestionRoot[givenNoteIndex];
+            console.log("generateComplexExercise: Nota dada (principal):", currentGivenNote);
+
+            // 4. Calculate the actual root note of the chord
+            // The root is 'givenNote' minus the 'givenInterval' semitones
+            const actualRootSemitone = (noteToSemitoneMap[normalizeNote(currentGivenNote)] - givenInterval.semitones + 12) % 12; // Normalize givenNote here
+            // Store the root in its original spelling from notesForQuestionRoot if possible, otherwise canonical
+            currentChordRoot = notesForQuestionRoot.find(note => normalizeNote(note) === canonicalNotes[actualRootSemitone]) || canonicalNotes[actualRootSemitone];
+            console.log("generateComplexExercise: Raíz calculada del acorde:", currentChordRoot);
+
+            // Create a map of *all* base intervals for quick lookup (original semitones)
+            const originalIntervalsMap = {};
+            selectedChordType.intervals.forEach(int => {
+                originalIntervalsMap[int.label] = int.semitones;
             });
-        }
 
-        // Helper to find a triad by its pitch classes (for operations that might generate new note names)
-        function findTriadByPitchClasses(pcs, type) {
-            const sortedPcs = [...pcs].sort();
-            for (const triad of allTriads) {
-                const sortedTriadPcs = [...triad.pitchClasses].sort();
-                if (triad.type === type && sortedPcs.every((pc, i) => pc === sortedTriadPcs[i])) {
-                    return triad;
-                }
-            }
-            return null;
-        }
-
-        // --- Set Relationship Functions ---
-        function getHexatonicCycleForTriad(triad) {
-            for (const cycle of hexatonicCycles) {
-                // CRITICAL FIX: Use hasSamePitchClasses for membership check
-                if (cycle.members.some(member => member.hasSamePitchClasses(triad) && member.type === triad.type)) {
-                    return cycle;
-                }
-            }
-            return null;
-        }
-
-        function getWeitzmannRegionForTriad(triad) {
-            for (const region of weitzmannRegions) {
-                // CRITICAL FIX: Use hasSamePitchClasses for membership check
-                if (region.members.some(member => member.hasSamePitchClasses(triad) && member.type === triad.type)) {
-                    return region;
-                }
-            }
-            return null;
-        }
-
-        function updateSetRelationshipsDisplay() {
-            const hexCycle = getHexatonicCycleForTriad(currentTriad);
-            const weitzRegion = getWeitzmannRegionForTriad(currentTriad);
-
-            if (hexCycle) {
-                currentHexatonicCycleSpan.textContent = hexCycle.name;
-                hexatonicCycleMembersDiv.innerHTML = hexCycle.members.map(t => `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md">${t.name}</span>`).join('');
-            } else {
-                currentHexatonicCycleSpan.textContent = "No encontrado";
-                hexatonicCycleMembersDiv.innerHTML = "";
-            }
-
-            if (weitzRegion) {
-                currentWeitzmannRegionSpan.textContent = weitzRegion.name;
-                weitzmannRegionMembersDiv.innerHTML = weitzRegion.members.map(t => `<span class="bg-green-100 text-green-800 px-2 py-1 rounded-md">${t.name}</span>`).join('');
-            } else {
-                currentWeitzmannRegionSpan.textContent = "No encontrado";
-                weitzmannRegionMembersDiv.innerHTML = "";
-            }
-
-            // Find shared chords
-            if (hexCycle && weitzRegion) {
-                const shared = hexCycle.members.filter(hexMember =>
-                    weitzRegion.members.some(weitzMember => weitzMember.hasSamePitchClasses(hexMember) && weitzMember.type === hexMember.type)
-                );
-                sharedChordsDiv.innerHTML = shared.map(t => `<span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-md">${t.name}</span>`).join('');
-            } else {
-                sharedChordsDiv.innerHTML = "<p class='text-gray-500'>No hay conjuntos para comparar.</p>";
-            }
-        }
-
-
-        // --- Hexatonic Cycle Visualization (corrected logic) ---
-        function updateHexatonicCircleVisualization(activeTriad) {
-            hexatonicCircleSvg.innerHTML = `<defs>
-                                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-                                                    <polygon points="0 0, 10 3.5, 0 7" />
-                                                </marker>
-                                            </defs>`; // Clear previous nodes/arrows
-
-            const foundCycle = getHexatonicCycleForTriad(activeTriad);
-
-            if (!foundCycle) {
-                hexatonicCircleSvg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" fill="#64748b" class="text-xs">El acorde actual no está en el ciclo hexatónico visualizado.</text>`;
-                hexatonicCycleChords = []; // Clear the cycle chords
+            // Determine the labels for the grid and the actual correct notes for the voicing
+            const baseVoicingLabels = selectedChordType.voicing_rules[currentGivenLabel];
+            if (!baseVoicingLabels) {
+                console.error(`generateComplexExercise: Error: No hay reglas de voicing para la etiqueta principal "${currentGivenLabel}" en el acorde ${currentChordTypeKey}.`);
+                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                disableTrainingInteraction();
                 return;
             }
 
-            // Directly use the members of the found cycle for visualization
-            hexatonicCycleChords = foundCycle.members;
+            currentOrderedLabelsForDisplay = []; // Labels for the grid (e.g., "1", "6", "5", "3")
+            currentCorrectNotes = []; // Actual notes for the answer (e.g., "C", "A", "G", "E")
+            currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing.
+            
+            baseVoicingLabels.forEach(label => {
+                let semitonesToRoot;
+                let displayLabel = label; // The label that will be displayed in the grid
 
-            const centerX = 150;
-            const centerY = 150;
-            const radius = 120;
-            const nodeWidth = 60;
-            const nodeHeight = 30;
-
-            hexatonicCycleChords.forEach((triad, index) => {
-                const angle = (index * (360 / hexatonicCycleChords.length) - 90) * Math.PI / 180; // -90 to start at top
-                const x = centerX + radius * Math.cos(angle);
-                const y = centerY + radius * Math.sin(angle);
-
-                const node = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-                node.setAttribute("x", x - nodeWidth / 2);
-                node.setAttribute("y", y - nodeHeight / 2);
-                node.setAttribute("width", nodeWidth);
-                node.setAttribute("height", nodeHeight);
-                node.classList.add("chord-node");
-                // Use hasSamePitchClasses for highlighting in visualization
-                if (triad.hasSamePitchClasses(activeTriad) && triad.type === activeTriad.type) {
-                    node.classList.add("active");
+                // Apply the exception: maj7 and fundamental, 7th becomes 6th (note and label)
+                if (currentChordTypeKey === "maj7" && currentGivenIntervalName === "fundamental" && label === "7") {
+                    semitonesToRoot = originalIntervalsMap["7"] - 2; // Major 7th (11) - 2 = Major 6th (9)
+                    displayLabel = "6"; // Change the label for display
+                    console.log("generateComplexExercise: Excepción maj7 aplicada: 7ma cambiada a 6ta.");
+                } else {
+                    semitonesToRoot = originalIntervalsMap[label];
                 }
-                node.innerHTML = `<div class="w-full h-full flex items-center justify-center">${triad.name}</div>`;
-                hexatonicCircleSvg.appendChild(node);
 
-                node.addEventListener('click', () => {
-                    // When clicking a node, use its exact root and type to set currentTriad
-                    // Find the triad by its name to ensure we get the canonical object
-                    currentTriad = getTriadByName(triad.name);
-                    history = [];
-                    updateUI();
-                    updateHexatonicCircleVisualization(currentTriad);
-                    displayOperationExplanation('');
-                    removeActiveOperationHighlight();
-                    removeOperationsBoxHighlight();
+                if (semitonesToRoot === undefined) {
+                    console.error(`generateComplexExercise: Error: La etiqueta de voicing "${label}" no se encontró en originalIntervalsMap para el acorde ${currentChordTypeKey}. Esto puede indicar una regla de voicing incorrecta o un intervalo base faltante.`);
+                    chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                    disableTrainingInteraction();
+                    return;
+                }
+
+                const actualNoteSemitone = (noteToSemitoneMap[normalizeNote(currentChordRoot)] + semitonesToRoot + 12) % 12; // +12 to handle negative results
+                // Use getCorrectEnharmonicSpelling for the display note
+                const correctSpelling = getCorrectEnharmonicSpelling(currentChordRoot, actualNoteSemitone, displayLabel);
+                currentCorrectNotes.push(correctSpelling);
+                currentOrderedLabelsForDisplay.push(displayLabel); // Use the potentially modified displayLabel for the grid
+                currentActualChordIntervals.push({ label: displayLabel, semitones: semitonesToRoot }); // Store for updateSelectedNotesDisplay
+            });
+            console.log("generateComplexExercise: currentOrderedLabelsForDisplay (grid labels):", currentOrderedLabelsForDisplay);
+            console.log("generateComplexExercise: currentCorrectNotes (expected correct notes with correct spelling):", currentCorrectNotes);
+            console.log("generateComplexExercise: currentActualChordIntervals (for display matching):", currentActualChordIntervals);
+
+
+            // 6. Formulate the question text (more concise)
+            let questionText = `¿Cuáles son las notas del acorde <strong>${selectedChordType.name}</strong> si <strong>${currentGivenNote}</strong> es su <strong>${currentGivenIntervalName}</strong>?`;
+
+            chordQuestionTextDiv.innerHTML = questionText;
+
+            // 7. Populate the grid visually: labels for all, note only in the first cell, highlighted
+            gridCells.forEach((cell, index) => {
+                const intervalLabelSpan = cell.querySelector('.interval-label');
+                const noteDisplaySpan = cell.querySelector('.note-display');
+
+                // Clear previous content and highlighting
+                noteDisplaySpan.textContent = '';
+                noteDisplaySpan.classList.remove('highlighted');
+
+                // Assign the determined label to the current grid cell
+                intervalLabelSpan.textContent = currentOrderedLabelsForDisplay[index];
+            });
+
+            // Display ONLY the given note in the first cell and highlight it
+            const noteDisplaySpanInFirstCell = gridCells[0].querySelector('.note-display');
+            noteDisplaySpanInFirstCell.textContent = currentGivenNote;
+            noteDisplaySpanInFirstCell.classList.add('highlighted');
+
+            // Draw staff initially with only the currentGivenNote
+            drawMusicalStaff([]); // Draw only the given note, no selected notes yet
+
+            // Clear user's selected notes and feedback message
+            console.log("generateComplexExercise: Clearing selection and feedback.");
+            clearSelection(); // Clear all selected notes and current building note
+            feedbackModalOverlay.classList.remove('visible'); // Ensure feedback modal is hidden
+            feedbackModalContent.className = 'modal-content'; // Reset feedback modal classes
+
+            // Ensure training elements are enabled for a new exercise
+            console.log("generateComplexExercise: Enabling training interaction.");
+            enableTrainingInteraction();
+            console.log("generateComplexExercise: New exercise generated successfully.");
+        }
+
+        /**
+         * Disables all interactive elements of the training.
+         */
+        function disableTrainingInteraction() { // Renamed function
+            console.log("disableTrainingInteraction: Disabling training interaction.");
+            confirmAnswerButton.disabled = true;
+            clearAllSelectionButton.disabled = true;
+            changeQuestionButton.disabled = true;
+
+            // Visually disable all note buttons
+            document.querySelectorAll('.note-button').forEach(button => {
+                if (button && button.classList) { // Defensive check
+                    button.classList.add('disabled');
+                }
+            });
+
+            // Remove event listeners to prevent interaction
+            naturalNoteButtonsContainer.removeEventListener('click', handleNaturalNoteClick);
+            accidentalButtonsContainer.removeEventListener('click', handleAccidentalClick);
+            console.log("disableTrainingInteraction: Training interaction disabled.");
+        }
+
+        /**
+         * Enables all interactive elements of the training.
+         */
+        function enableTrainingInteraction() { // Renamed function
+            console.log("enableTrainingInteraction: Enabling training interaction.");
+            // Button visibility/disabled state is handled by updateSelectedNotesDisplay based on selectedUserNotes.length
+            updateSelectedNotesDisplay();
+
+            // Add event listeners back
+            naturalNoteButtonsContainer.addEventListener('click', handleNaturalNoteClick);
+            accidentalButtonsContainer.addEventListener('click', handleAccidentalClick);
+
+            // Visually enable all note buttons (remove disabled class)
+            document.querySelectorAll('.note-button').forEach(button => {
+                if (button && button.classList) { // Defensive check
+                    button.classList.remove('disabled');
+                }
+            });
+            console.log("enableTrainingInteraction: Training interaction enabled.");
+        }
+
+        /**
+         * Handles changing the exercise without checking the answer.
+         */
+        function handleChangeQuestion() { // Renamed function
+            console.log("handleChangeQuestion: Change exercise button clicked.");
+            clearSelection(); // Clear any existing selection
+            generateComplexExercise(); // Generate a new exercise
+        }
+
+
+        /**
+         * Checks the user's answer.
+         */
+        async function checkAnswer() {
+            console.log("checkAnswer: Starting answer check.");
+            const userNotesNormalized = selectedUserNotes.map(note => normalizeNote(note));
+            console.log("checkAnswer: Notas del usuario (normalizadas):", userNotesNormalized);
+
+            const normalizedCorrectNotes = currentCorrectNotes.map(note => normalizeNote(note));
+            console.log("checkAnswer: Notas correctas esperadas (normalizadas):", normalizedCorrectNotes);
+
+            // Sort both lists for order-independent comparison
+            userNotesNormalized.sort();
+            normalizedCorrectNotes.sort();
+
+            let isCorrect = false;
+            let feedbackHtml = '';
+
+            // Ensure exactly 4 notes are selected for a valid answer attempt
+            if (userNotesNormalized.length === 4) {
+                isCorrect = userNotesNormalized.every((note, index) => note === normalizedCorrectNotes[index]);
+
+                if (isCorrect) {
+                    feedbackHtml = `<p>¡Correcto! 🎉</p>`;
+                    console.log("checkAnswer: Answer is correct. Displaying correct chord on staff.");
+                    drawMusicalStaff(currentCorrectNotes); // Display correct notes on staff
+                } else {
+                    feedbackHtml = `<p>Incorrecto. Inténtalo de nuevo.</p>`;
+                    console.log("checkAnswer: Answer is incorrect. Reverting staff to only given note.");
+                    drawMusicalStaff([currentGivenNote]); // Revert staff to only the given note
+                }
+            } else {
+                feedbackHtml = `<p>Por favor, selecciona exactamente 4 notas.</p>`;
+                feedbackModalContent.classList.remove('correct');
+                feedbackModalContent.classList.add('incorrect');
+                feedbackModalContent.innerHTML = feedbackHtml;
+                feedbackModalOverlay.classList.add('visible'); // Show feedback modal
+                disableTrainingInteraction(); // Disable interaction
+                setTimeout(() => {
+                    feedbackModalOverlay.classList.remove('visible'); // Hide feedback modal
+                    enableTrainingInteraction(); // Re-enable interaction
+                }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
+                console.log("checkAnswer: Not 4 notes selected. Showing feedback and returning.");
+                return; // Exit function if selection is not 4 notes
+            }
+
+            // Update training session data for evaluation
+            const performanceKey = `${currentChordTypeKey}_${currentGivenIntervalName}`;
+            if (!trainingSessionData[performanceKey]) { // Renamed variable
+                trainingSessionData[performanceKey] = { correct: 0, total: 0 }; // Renamed variable
+            }
+            trainingSessionData[performanceKey].total++; // Renamed variable
+            if (isCorrect) {
+                trainingSessionData[performanceKey].correct++; // Renamed variable
+            }
+
+            exercisesCompletedCount++; // Increment total exercises completed in this batch // Renamed variable
+            totalExercisesAttempted++; // Increment total exercises for overall score // Renamed variable
+            if (isCorrect) {
+                totalCorrectAnswers++; // Increment total correct for overall score
+            }
+
+            console.log("checkAnswer: Ejercicios respondidos (batch):", exercisesCompletedCount);
+            console.log("checkAnswer: Total ejercicios (general):", totalExercisesAttempted);
+            console.log("checkAnswer: Datos de sesión del entrenamiento:", trainingSessionData);
+
+            feedbackModalContent.className = 'modal-content'; // Reset classes
+            feedbackModalContent.classList.add(isCorrect ? 'correct' : 'incorrect');
+            feedbackModalContent.innerHTML = feedbackHtml;
+            feedbackModalOverlay.classList.add('visible'); // Show feedback modal
+
+            // Disable interaction while feedback/evaluation is displayed
+            disableTrainingInteraction();
+
+            // Check if it's time for an evaluation
+            if (exercisesCompletedCount % EXERCISES_PER_EVALUATION === 0) { // Renamed constant
+                console.log("checkAnswer: ¡Es hora de la evaluación! Llamando a displayEvaluation().");
+                // Hide feedback modal, then show evaluation modal after a short delay
+                setTimeout(() => {
+                    feedbackModalOverlay.classList.remove('visible');
+                    displayEvaluation(); // This will show the evaluation modal
+                }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
+            } else {
+                // If not evaluation, just show feedback for a short time and advance
+                console.log("checkAnswer: Not evaluation time. Showing feedback and generating new exercise.");
+                setTimeout(() => {
+                    feedbackModalOverlay.classList.remove('visible'); // Hide feedback modal
+                    generateComplexExercise(); // Generate a new exercise
+                }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
+            }
+        }
+
+        /**
+         * Displays the evaluation modal with summary and advice.
+         */
+        function displayEvaluation() {
+            console.log("displayEvaluation: displayEvaluation() ha sido llamada.");
+            let batchTotalCorrect = 0;
+            let batchTotalQuestions = 0;
+            const areasToWorkOn = [];
+
+            for (const key in trainingSessionData) { // Renamed variable
+                const data = trainingSessionData[key]; // Renamed variable
+                batchTotalCorrect += data.correct;
+                batchTotalQuestions += data.total;
+
+                if (data.total > 0 && (data.correct / data.total) < 0.6) { // Threshold for "needs work"
+                    const [chordTypeKey, intervalName] = key.split('_');
+                    const chordName = chordStructures[chordTypeKey] ? chordStructures[chordTypeKey].name : chordTypeKey;
+                    areasToWorkOn.push(`Acordes ${chordName} cuando la ${intervalName} es la nota dada.`);
+                }
+            }
+
+            const batchPercentage = batchTotalQuestions > 0 ? ((batchTotalCorrect / batchTotalQuestions) * 100).toFixed(0) : 0;
+            evaluationSummary.innerHTML = `En los últimos ${EXERCISES_PER_EVALUATION} ejercicios: **${batchTotalCorrect} de ${batchTotalQuestions}** correctas (${batchPercentage}%).`; // Renamed constant and text
+
+            adviceList.innerHTML = ''; // Clear previous advice
+            if (areasToWorkOn.length > 0) {
+                areasToWorkOn.forEach(advice => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = advice;
+                    adviceList.appendChild(listItem);
+                });
+            } else {
+                const listItem = document.createElement('li');
+                    listItem.textContent = "¡Excelente trabajo en este bloque! Sigue así.";
+                    adviceList.appendChild(listItem);
+            }
+
+            evaluationModalOverlay.classList.add('visible');
+            console.log("displayEvaluation: Clase 'visible' añadida al modal de evaluación.");
+        }
+
+        /**
+         * Continues the training after evaluation.
+         */
+        function continueTraining() { // Renamed function
+            console.log("continueTraining: Continuing training.");
+            exercisesCompletedCount = 0; // Reset batch counter // Renamed variable
+            trainingSessionData = {}; // Reset performance data for the new batch // Renamed variable
+            evaluationModalOverlay.classList.remove('visible');
+            generateComplexExercise(); // Generate a new exercise to start the next batch
+        }
+
+        /**
+         * Ends the training and displays final results.
+         */
+        function endSession() { // Renamed function
+            console.log("endSession: Ending training session.");
+            evaluationModalOverlay.classList.remove('visible');
+            mainAppContainer.style.display = 'none'; // Hide the main app UI // Renamed variable
+
+            sessionEndTime = Date.now(); // Record session end time
+            const durationMs = sessionEndTime - sessionStartTime;
+
+            // Format duration
+            const hours = Math.floor(durationMs / (1000 * 60 * 60));
+            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
+
+            const formattedDuration = `${hours}h ${minutes}m ${seconds}s`;
+
+            // Get current date and time
+            const now = new Date();
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const formattedDate = now.toLocaleDateString('es-ES', dateOptions);
+            const formattedTime = now.toLocaleTimeString('es-ES', timeOptions);
+
+            // Update the new stat display elements
+            totalExercisesDisplay.textContent = totalExercisesAttempted;
+            correctAnswersDisplay.textContent = totalCorrectAnswers;
+            const overallPercentage = totalExercisesAttempted > 0 ? ((totalCorrectAnswers / totalExercisesAttempted) * 100).toFixed(0) : 0; // Renamed variable
+            overallAccuracyDisplay.textContent = `${overallPercentage}%`;
+
+            // Update session info displays
+            sessionDateDisplay.textContent = `Fecha: ${formattedDate}`;
+            sessionTimeDisplay.textContent = `Hora: ${formattedTime}`;
+            sessionDurationDisplay.textContent = `Duración de la práctica: ${formattedDuration}`;
+
+            // Update the summary text, now optionally including the user's name
+            const userName = userNameInput.value.trim();
+            let summaryText = `¡Gracias por practicar!`; // Base message
+            if (userName) {
+                summaryText = `¡Felicidades, ${userName}! ¡Gracias por practicar!`; // Personalized greeting
+            }
+            finalResultsSummary.innerHTML = summaryText;
+
+            finalMessageDisplay.style.display = 'flex'; // Show the final message
+            console.log("endSession: Final message displayed.");
+        }
+
+        /**
+         * Saves the results content as a PNG image.
+         */
+        async function saveAsPhoto() {
+            showCustomMessage("Guardando...", "Generando imagen PNG de tus resultados...", "info");
+            try {
+                const userName = userNameInput.value.trim();
+                const filename = userName ? `Resultados_Armonico_${userName}.png` : `Resultados_Armonico.png`;
+
+                // Temporarily adjust styles for better capture if needed (e.g., remove scrollbars)
+                const originalOverflow = document.body.style.overflow;
+                document.body.style.overflow = 'hidden';
+
+                const canvas = await html2canvas(resultsContentToCapture, {
+                    scale: 2, // Increase scale for better resolution
+                    useCORS: true, // Important for images if any (though not used here)
+                    logging: false // Disable html2canvas logging
                 });
 
-                const nextIndex = (index + 1) % hexatonicCycleChords.length;
-                const nextTriad = hexatonicCycleChords[nextIndex];
+                document.body.style.overflow = originalOverflow; // Restore overflow
 
-                const nextAngle = (nextIndex * (360 / hexatonicCycleChords.length) - 90) * Math.PI / 180;
-                const nextX = centerX + radius * Math.cos(nextAngle);
-                const nextY = centerY + radius * Math.sin(nextAngle);
-
-                let isArrowActive = false;
-                // Determine if the operation between current and next is L or P for active arrow
-                // This logic is based on the predefined cycle order (L then P)
-                if (triad.hasSamePitchClasses(activeTriad) && triad.type === activeTriad.type) {
-                    const expectedNextByL = opL(triad);
-                    const expectedNextByP = opP(triad);
-
-                    if (expectedNextByL && expectedNextByL.hasSamePitchClasses(nextTriad) && expectedNextByL.type === nextTriad.type) {
-                        isArrowActive = true;
-                    } else if (expectedNextByP && expectedNextByP.hasSamePitchClasses(nextTriad) && expectedNextByP.type === nextTriad.type) {
-                        isArrowActive = true;
-                    }
-                }
-
-                drawArrow(hexatonicCircleSvg, x, y, nextX, nextY, nodeWidth / 2, isArrowActive);
-            });
-        }
-
-        function drawArrow(svg, x1, y1, x2, y2, offset, isActive = false) {
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            const startX = x1 + offset * Math.cos(angle);
-            const startY = y1 + offset * Math.sin(angle);
-            const endX = x2 - offset * Math.cos(angle);
-            const endY = y2 - offset * Math.sin(angle);
-
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("d", `M ${startX} ${startY} L ${endX} ${endY}`);
-            path.setAttribute("class", `arrow ${isActive ? 'arrow-active' : ''}`);
-            svg.appendChild(path);
-        }
-
-        function highlightHexatonicNode(triadToHighlight) {
-            document.querySelectorAll('.chord-node').forEach(node => {
-                node.classList.remove('active');
-            });
-            // Use hasSamePitchClasses for finding the node to highlight
-            const index = hexatonicCycleChords.findIndex(t => t.hasSamePitchClasses(triadToHighlight) && t.type === triadToHighlight.type);
-            if (index !== -1) {
-                const nodeElement = hexatonicCircleSvg.children[index + 1]; // +1 because of <defs>
-                if (nodeElement) {
-                    nodeElement.classList.add('active');
-                }
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showCustomMessage("¡Éxito!", "Resultados guardados como PNG.", "success");
+            } catch (error) {
+                console.error("Error al guardar como foto:", error);
+                showCustomMessage("Error", "No se pudo guardar la imagen. Inténtalo de nuevo.", "error");
             }
         }
 
-        // Function to highlight the active operation button
-        function highlightActiveOperation(opCode) {
-            removeActiveOperationHighlight(); // First, remove any existing highlight
-            const button = document.querySelector(`[data-op="${opCode}"]`);
-            if (button) {
-                button.classList.add('active-op-btn');
+        /**
+         * Saves the results content as a PDF document.
+         */
+        async function saveAsPdf() {
+            showCustomMessage("Guardando...", "Generando documento PDF de tus resultados...", "info");
+            try {
+                const userName = userNameInput.value.trim();
+                const filename = userName ? `Resultados_Armonico_${userName}.pdf` : `Resultados_Armonico.pdf`;
+
+                // Temporarily adjust styles for better capture if needed
+                const originalOverflow = document.body.style.overflow;
+                document.body.style.overflow = 'hidden';
+
+                const canvas = await html2canvas(resultsContentToCapture, {
+                    scale: 2, // Increase scale for better resolution
+                    useCORS: true,
+                    logging: false
+                });
+
+                document.body.style.overflow = originalOverflow; // Restore overflow
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new window.jspdf.jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: [canvas.width, canvas.height] // Use canvas dimensions for PDF
+                });
+
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                pdf.save(filename);
+                showCustomMessage("¡Éxito!", "Resultados guardados como PDF.", "success");
+            } catch (error) {
+                console.error("Error al guardar como PDF:", error);
+                showCustomMessage("Error", "No se pudo guardar el PDF. Inténtalo de nuevo.", "error");
             }
-            highlightOperationsBox(); // Highlight the operations box
-        }
-
-        // Function to remove all active operation button highlights
-        function removeActiveOperationHighlight() {
-            operationButtons.forEach(button => {
-                button.classList.remove('active-op-btn');
-            });
-        }
-
-        // Function to highlight the operations box
-        function highlightOperationsBox() {
-            operationsBox.classList.add('operations-box-active');
-        }
-
-        // Function to remove operations box highlight
-        function removeOperationsBoxHighlight() {
-            operationsBox.classList.remove('operations-box-active');
         }
 
 
         // Event Listeners
-        resetButton.addEventListener("click", initializeApp);
+        confirmAnswerButton.addEventListener('click', checkAnswer);
+        clearAllSelectionButton.addEventListener('click', clearSelection);
+        changeQuestionButton.addEventListener('click', handleChangeQuestion);
+        continueTrainingButton.addEventListener('click', continueTraining); // Renamed
+        endSessionButton.addEventListener('click', endSession); // Renamed
 
-        document.getElementById("opL").addEventListener("click", (event) => {
-            const oldTriad = currentTriad;
-            currentTriad = opL(currentTriad);
-            addHistoryEntry("L", oldTriad, currentTriad);
-            updateUI();
-            displayOperationExplanation("L");
-            updateHexatonicCircleVisualization(currentTriad);
-            highlightActiveOperation(event.target.dataset.op);
+        // New event listeners for save buttons
+        saveAsPhotoButton.addEventListener('click', saveAsPhoto);
+        saveAsPdfButton.addEventListener('click', saveAsPdf);
+
+        startButton.addEventListener('click', async () => {
+            console.log("startButton: Clicked. Hiding welcome modal and initializing application.");
+            welcomeModalOverlay.classList.remove('visible'); // Hide welcome modal
+            mainAppContainer.style.display = 'flex'; // Show main app container
+            sessionStartTime = Date.now(); // Record session start time
+
+            // Start audio context immediately on user gesture
+            await startAudioContext();
+            console.log("startButton: Audio context start attempt completed.");
+
+            // Now initialize application components
+            try {
+                console.log("startButton: Initializing application components...");
+                generateNoteButtons(); // Generate note buttons
+                generateComplexExercise(); // This includes drawing staff and updating displays
+                console.log("startButton: Application components initialized successfully.");
+                
+                // Ensure interaction is enabled after everything is loaded
+                enableTrainingInteraction();
+                console.log("startButton: All setup complete. Application interaction enabled.");
+
+            } catch (error) {
+                console.error("startButton: Error during application setup:", error);
+                chordQuestionTextDiv.innerHTML = "¡Error al cargar la aplicación! Revisa la consola del navegador.";
+                disableTrainingInteraction(); // Ensure training is disabled on error
+                showCustomMessage("Error de Carga", "Hubo un problema al inicializar la aplicación. Por favor, revisa la consola del navegador para más detalles.", "error");
+            }
         });
 
-        document.getElementById("opP").addEventListener("click", (event) => {
-            const oldTriad = currentTriad;
-            currentTriad = opP(currentTriad);
-            addHistoryEntry("P", oldTriad, currentTriad);
-            updateUI();
-            displayOperationExplanation("P");
-            updateHexatonicCircleVisualization(currentTriad);
-            highlightActiveOperation(event.target.dataset.op);
-        });
-
-        document.getElementById("opR").addEventListener("click", (event) => {
-            const oldTriad = currentTriad;
-            currentTriad = opR(currentTriad);
-            addHistoryEntry("R", oldTriad, currentTriad);
-            updateUI();
-            displayOperationExplanation("R");
-            updateHexatonicCircleVisualization(currentTriad);
-            highlightActiveOperation(event.target.dataset.op);
-        });
-
-        document.getElementById("opN").addEventListener("click", (event) => {
-            const oldTriad = currentTriad;
-            currentTriad = opN(currentTriad);
-            addHistoryEntry("N", oldTriad, currentTriad);
-            updateUI();
-            displayOperationExplanation("N");
-            updateHexatonicCircleVisualization(currentTriad);
-            highlightActiveOperation(event.target.dataset.op);
-        });
-
-        document.getElementById("opH").addEventListener("click", (event) => {
-            const oldTriad = currentTriad;
-            currentTriad = opH(currentTriad);
-            addHistoryEntry("H", oldTriad, currentTriad);
-            updateUI();
-            displayOperationExplanation("H");
-            updateHexatonicCircleVisualization(currentTriad);
-            highlightActiveOperation(event.target.dataset.op);
-        });
-
-        document.getElementById("opS").addEventListener("click", (event) => {
-            const oldTriad = currentTriad;
-            currentTriad = opS(currentTriad);
-            addHistoryEntry("S", oldTriad, currentTriad);
-            updateUI();
-            displayOperationExplanation("S");
-            updateHexatonicCircleVisualization(currentTriad);
-            highlightActiveOperation(event.target.dataset.op);
-        });
-
-        // Initial setup on page load
-        window.onload = () => {
-            populateStartChordSelect();
-            initializeApp();
+        // Show welcome modal on initial load
+        window.onload = function() {
+            console.log("window.onload: Window loaded. Initializing welcome modal.");
+            welcomeModalOverlay.classList.add('visible'); // Show welcome modal immediately
+            mainAppContainer.style.display = 'none'; // Ensure main app is hidden initially
+            console.log("window.onload: Welcome modal displayed, main app hidden.");
         };
     </script>
 </body>
