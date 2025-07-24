@@ -53,6 +53,7 @@
             overflow-y: auto; /* Permite que el contenedor se desplace si el contenido se desborda */
             margin-top: 10px; /* Margen superior para visibilidad del encabezado */
             margin-bottom: 20px; /* Margen inferior para evitar recortes */
+            transition: opacity 0.3s ease; /* Smooth transition for opacity changes */
         }
 
         /* La pregunta principal ahora ocupa la posición del h2 */
@@ -233,8 +234,8 @@
         }
 
         /* Visualización de notas seleccionadas (lista de respuesta final) */
-        #selectedNotesDisplay {
-            background-color: #e6f7ff; /* Azul muy claro */
+        /* #selectedNotesDisplay {
+            background-color: #e6f7ff;
             padding: 15px;
             border-radius: 8px;
             min-height: 50px;
@@ -246,13 +247,13 @@
             border: 1px solid #dbeafe;
             font-weight: 500;
             margin-bottom: 15px;
-            text-align: center; /* Asegura que el texto esté centrado */
-            width: 100%; /* Ocupa el 100% del contenedor padre */
-            box-sizing: border-box; /* Incluir padding y border en el ancho */
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
         }
         #selectedNotesDisplay strong {
-            color: #0056b3; /* Azul más oscuro */
-        }
+            color: #0056b3;
+        } */
 
         /* Grupo de botones de acción principal */
         .action-buttons-group {
@@ -800,9 +801,9 @@
             .note-display {
                 font-size: 1.4em; /* Tamaño de fuente más pequeño */
             }
-            #selectedNotesDisplay {
-                font-size: 1.1em; /* Ligeramente más grande */
-            }
+            /* #selectedNotesDisplay {
+                font-size: 1.1em;
+            } */
             .modal-content .modal-buttons {
                 flex-direction: column;
             }
@@ -848,9 +849,219 @@
                 width: 100%; /* Full width for save buttons on mobile */
             }
         }
+
+        /* --- Tutorial Specific Styles --- */
+        #tutorialModalOverlay {
+            z-index: 1005; /* Higher than welcome modal and all highlight elements */
+            background-color: rgba(0, 0, 0, 0.05); /* Lighter background for tutorial */
+        }
+
+        #tutorialModalContent {
+            max-width: 600px;
+            margin-top: 0; /* Reset margin-top from .modal-content */
+            transform: translateY(0); /* Reset transform from .modal-content */
+            position: relative; /* For image positioning */
+            align-self: center; /* Default centering within flex container */
+            transition: margin 0.3s ease, align-self 0.3s ease, transform 0.3s ease; /* Smooth transition for repositioning */
+        }
+
+        .tutorial-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .tutorial-step h3 {
+            font-size: 2.2em;
+            color: #0056b3;
+            margin-bottom: 10px;
+        }
+
+        .tutorial-step p {
+            font-size: 1.1em;
+            color: #334155;
+            margin-bottom: 10px;
+        }
+
+        .tutorial-step img {
+            max-width: 90%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
+        .tutorial-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tutorial-buttons button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex: 1 1 auto; /* Allow buttons to grow */
+            min-width: 100px; /* Minimum width for buttons */
+        }
+
+        #prevTutorialBtn {
+            background-color: #6c757d;
+            color: white;
+        }
+        #prevTutorialBtn:hover {
+            background-color: #5a6268;
+        }
+
+        #nextTutorialBtn {
+            background-color: #28a745;
+            color: white;
+        }
+        #nextTutorialBtn:hover {
+            background-color: #218838;
+        }
+
+        #skipTutorialBtn {
+            background-color: #f0ad4e;
+            color: white;
+        }
+        #skipTutorialBtn:hover {
+            background-color: #ec971f;
+        }
+
+        /* Highlighting elements for tutorial */
+        .tutorial-highlight-box {
+            position: absolute;
+            border: 3px solid #facc15; /* Yellow border */
+            border-radius: 10px;
+            z-index: 1003; /* Below tutorial modal, above main app */
+            pointer-events: none; /* Allow clicks to pass through */
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.8); /* Glow effect */
+        }
+
+        .tutorial-highlight-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent overlay */
+            z-index: 1002; /* Below highlight box, above main app */
+            display: none;
+            transition: opacity 0.3s ease;
+            pointer-events: none; /* IMPORTANT: Allow clicks to pass through this overlay */
+        }
+        .tutorial-highlight-overlay.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        .tutorial-tooltip {
+            position: absolute;
+            background-color: #334155;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            z-index: 1004; /* Below tutorial modal, above highlight box */
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            max-width: 250px;
+            text-align: left;
+        }
+        .tutorial-tooltip.visible {
+            opacity: 1;
+        }
+
+        /* Arrow for tooltip */
+        .tutorial-tooltip::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        /* Tooltip positioning adjustments */
+        .tutorial-tooltip.top::after {
+            border-width: 8px 8px 0 8px;
+            border-color: #334155 transparent transparent transparent;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .tutorial-tooltip.bottom::after {
+            border-width: 0 8px 8px 8px;
+            border-color: transparent transparent #334155 transparent;
+            top: -8px;
+            left: 50%;
+            transform: translateY(-50%);
+        }
+        .tutorial-tooltip.left::after {
+            border-width: 8px 0 8px 8px;
+            border-color: transparent transparent transparent #334155;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .tutorial-tooltip.right::after {
+            border-width: 8px 8px 8px 0;
+            border-color: transparent #334155 transparent transparent;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @media (max-width: 768px) {
+            #tutorialModalContent {
+                padding: 20px;
+            }
+            .tutorial-step h3 {
+                font-size: 1.8em;
+            }
+            .tutorial-step p {
+                font-size: 1em;
+            }
+            .tutorial-buttons button {
+                font-size: 1em;
+                padding: 10px 15px;
+            }
+            .tutorial-tooltip {
+                max-width: 200px;
+                font-size: 0.8em;
+                padding: 8px 12px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Tutorial Modal -->
+    <div id="tutorialModalOverlay" class="modal-overlay">
+        <div id="tutorialModalContent" class="modal-content">
+            <div id="tutorialStepsContainer">
+                <!-- Tutorial steps will be dynamically inserted here -->
+            </div>
+            <div class="tutorial-buttons">
+                <button id="prevTutorialBtn">Anterior</button>
+                <button id="nextTutorialBtn">Siguiente</button>
+                <button id="skipTutorialBtn">Omitir Tutorial</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Welcome Modal -->
     <div id="welcomeModalOverlay" class="modal-overlay">
         <div id="welcomeModalContent" class="modal-content">
@@ -861,7 +1072,7 @@
         </div>
     </div>
 
-    <div class="container" id="mainAppContainer" style="display: none;">
+    <div class="container" id="mainAppContainer">
         <!-- Question text now at the top, replacing the "Ejercicio:" heading -->
         <p id="chordQuestionText" style="text-align: center; font-size: 1.3em; font-weight: 600; color: #1e40af; margin-bottom: 10px;">Cargando ejercicio...</p>
 
@@ -903,9 +1114,10 @@
                 </div>
             </div>
 
-            <div id="selectedNotesDisplay">
+            <!-- Removed the selected notes display as it's no longer needed -->
+            <!-- <div id="selectedNotesDisplay">
                 Notas seleccionadas: Ninguna
-            </div>
+            </div> -->
         </div>
 
         <!-- Action buttons -->
@@ -942,7 +1154,6 @@
     <!-- Final message display (after ending session) -->
     <div id="finalMessageDisplay">
         <div id="resultsContentToCapture"> <!-- New wrapper div for content to be captured -->
-            <!-- Removed h3 "Entrenamiento Finalizado" -->
             
             <div class="user-name-input-group"> <!-- Moved to top -->
                 <label for="userNameInput">Tu Nombre:</label>
@@ -1166,7 +1377,7 @@
         ];
         const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
         const accidentalButtonsContainer = document.getElementById('accidentalButtons');
-        const selectedNotesDisplay = document.getElementById('selectedNotesDisplay');
+        // const selectedNotesDisplay = document.getElementById('selectedNotesDisplay'); // Removed this element
         const musicalStaffCanvas = document.getElementById('musicalStaffCanvas'); // Canvas for musical staff
 
         // Main Action Buttons
@@ -1244,7 +1455,8 @@
         function showCustomMessage(title, message, type = 'info') {
             const modalOverlay = document.createElement('div');
             modalOverlay.classList.add('modal-overlay', 'visible');
-            modalOverlay.style.zIndex = 1002; // Higher z-index than other modals
+            // Set a very high z-index to ensure it's always on top
+            modalOverlay.style.zIndex = 9999; 
             modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.2)'; // More transparent
 
             const modalContent = document.createElement('div');
@@ -1349,18 +1561,17 @@
          * Updates the display of selected notes (final answer list) and button visibility.
          */
         function updateSelectedNotesDisplay() {
-            if (selectedUserNotes.length === 0) {
-                selectedNotesDisplay.innerHTML = 'Notas seleccionadas: Ninguna';
-            } else {
-                selectedNotesDisplay.innerHTML = `Notas seleccionadas: <strong>${selectedUserNotes.join(', ')}</strong>`; // Display raw user notes
-            }
+            // The textual display of selected notes is removed.
+            // This function now primarily manages button visibility/disabled state.
 
             // Control visibility/disabled state of action buttons
+            // Confirm button is enabled when exactly 4 notes are selected (given note + 3 user notes)
             confirmAnswerButton.style.display = selectedUserNotes.length === 4 ? 'block' : 'none';
             confirmAnswerButton.disabled = selectedUserNotes.length !== 4;
 
-            clearAllSelectionButton.style.display = selectedUserNotes.length > 0 ? 'block' : 'none';
-            clearAllSelectionButton.disabled = selectedUserNotes.length === 0;
+            // Clear button is enabled if there are more than just the given note
+            clearAllSelectionButton.style.display = selectedUserNotes.length > 1 ? 'block' : 'none';
+            clearAllSelectionButton.disabled = selectedUserNotes.length <= 1;
 
             changeQuestionButton.style.display = 'block'; // Always visible
             changeQuestionButton.disabled = false; // Always enabled (unless training is generally disabled)
@@ -1437,12 +1648,20 @@
          */
         function toggleNoteInAnswer(note) {
             const normalizedNote = normalizeNote(note);
+            const normalizedGivenNote = normalizeNote(currentGivenNote);
+
+            // Prevent removal of the currentGivenNote
+            if (normalizedNote === normalizedGivenNote) {
+                showCustomMessage("Nota Dada", "La nota dada no se puede deseleccionar.", "info");
+                return;
+            }
+
             const index = selectedUserNotes.findIndex(n => normalizeNote(n) === normalizedNote);
             let message = '';
             let messageType = 'info';
 
             if (index > -1) {
-                // Note found, remove it
+                // Note found, remove it (only if it's not the given note)
                 selectedUserNotes.splice(index, 1);
                 message = `Nota ${note} eliminada.`;
                 messageType = 'info';
@@ -1460,8 +1679,9 @@
                 }
             }
             updateSelectedNotesDisplay();
+            updateGridNoteDisplays(); // Update grid with selected notes
             // Call drawMusicalStaff with currentGivenNote and selectedUserNotes
-            drawMusicalStaff(selectedUserNotes); // Pass only selected notes for highlighting
+            drawMusicalStaff(selectedUserNotes); // Pass all selected notes for highlighting
             if (message) {
                 // Only show custom message if it's not the "limit reached" one (which is already shown)
                 if (messageType !== 'warning') {
@@ -1576,19 +1796,17 @@
 
 
         /**
-         * Clears all selected notes in the final answer list.
+         * Clears all selected notes in the final answer list, except for the given note.
          */
         function clearSelection() {
-            selectedUserNotes = [];
+            // Filter out the currentGivenNote, keeping only it
+            selectedUserNotes = selectedUserNotes.filter(note => normalizeNote(note) === normalizeNote(currentGivenNote));
             activeNaturalNote = ''; // Reset active selection states
             activeAccidental = '';
             updateSelectedNotesDisplay(); // This will also handle button and keyboard visuals
-            // When clearing selection, draw only the currentGivenNote if it exists, otherwise clear entirely
-            if (currentGivenNote) {
-                drawMusicalStaff([]); // Clear staff, then redraw with only the given note (implicitly done by generateComplexExercise)
-            } else {
-                drawMusicalStaff([]); // Clear staff if no given note
-            }
+            updateGridNoteDisplays(); // Update grid with selected notes
+            // When clearing selection, draw only the currentGivenNote
+            drawMusicalStaff(selectedUserNotes); // Pass all selected notes (which will just be the given note)
         }
 
         /**
@@ -1949,20 +2167,53 @@
             noteDisplaySpanInFirstCell.textContent = currentGivenNote;
             noteDisplaySpanInFirstCell.classList.add('highlighted');
 
+            // Pre-select the given note
+            selectedUserNotes = [currentGivenNote];
+
             // Draw staff initially with only the currentGivenNote
-            drawMusicalStaff([]); // Draw only the given note, no selected notes yet
+            drawMusicalStaff(selectedUserNotes); // Draw only the given note, as it's pre-selected
 
             // Clear user's selected notes and feedback message
             console.log("generateComplexExercise: Clearing selection and feedback.");
-            clearSelection(); // Clear all selected notes and current building note
+            // clearSelection(); // No longer call clearSelection directly, as we pre-select the given note
             feedbackModalOverlay.classList.remove('visible'); // Ensure feedback modal is hidden
             feedbackModalContent.className = 'modal-content'; // Reset feedback modal classes
+
+            updateSelectedNotesDisplay(); // Update display for selected notes and button states
+            updateGridNoteDisplays(); // Update grid with selected notes (initially just the given note)
 
             // Ensure training elements are enabled for a new exercise
             console.log("generateComplexExercise: Enabling training interaction.");
             enableTrainingInteraction();
             console.log("generateComplexExercise: New exercise generated successfully.");
         }
+
+        /**
+         * Updates the note displays in gridCells[1] to gridCells[3] based on selectedUserNotes.
+         */
+        function updateGridNoteDisplays() {
+            // Get notes selected by user, excluding the given note
+            const userAddedNotes = selectedUserNotes.filter(note => normalizeNote(note) !== normalizeNote(currentGivenNote));
+            // Sort them for consistent display (e.g., C, D, E, F)
+            userAddedNotes.sort((a, b) => {
+                const semitoneA = noteToSemitoneMap[normalizeNote(a)];
+                const semitoneB = noteToSemitoneMap[normalizeNote(b)];
+                return semitoneA - semitoneB;
+            });
+
+            // Populate grid cells 1, 2, 3
+            for (let i = 1; i < gridCells.length; i++) {
+                const noteDisplaySpan = gridCells[i].querySelector('.note-display');
+                // Use the sorted userAddedNotes to fill the cells
+                if (userAddedNotes[i - 1]) {
+                    noteDisplaySpan.textContent = userAddedNotes[i - 1];
+                } else {
+                    noteDisplaySpan.textContent = ''; // Clear if no note
+                }
+                noteDisplaySpan.classList.remove('highlighted'); // Ensure no highlighting on user notes in grid
+            }
+        }
+
 
         /**
          * Disables all interactive elements of the training.
@@ -2012,7 +2263,8 @@
          */
         function handleChangeQuestion() { // Renamed function
             console.log("handleChangeQuestion: Change exercise button clicked.");
-            clearSelection(); // Clear any existing selection
+            // Clear selection will now only keep the given note
+            clearSelection();
             generateComplexExercise(); // Generate a new exercise
         }
 
@@ -2104,7 +2356,7 @@
                 console.log("checkAnswer: Not evaluation time. Showing feedback and generating new exercise.");
                 setTimeout(() => {
                     feedbackModalOverlay.classList.remove('visible'); // Hide feedback modal
-                    generateComplexExercise(); // Generate a new exercise
+                    generateComplexExercise(); // Generate a new exercise to start the next batch
                 }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
             }
         }
@@ -2281,55 +2533,388 @@
             }
         }
 
+        // --- Tutorial Logic ---
+        const tutorialModalOverlay = document.getElementById('tutorialModalOverlay');
+        const tutorialStepsContainer = document.getElementById('tutorialStepsContainer');
+        const prevTutorialBtn = document.getElementById('prevTutorialBtn');
+        const nextTutorialBtn = document.getElementById('nextTutorialBtn');
+        const skipTutorialBtn = document.getElementById('skipTutorialBtn');
 
-        // Event Listeners
+        let currentTutorialStepIndex = 0;
+        let tutorialStepsData = [];
+
+        // Dynamic highlight elements
+        let highlightBox = document.createElement('div');
+        highlightBox.classList.add('tutorial-highlight-box');
+        document.body.appendChild(highlightBox);
+
+        let highlightOverlay = document.createElement('div');
+        highlightOverlay.classList.add('tutorial-highlight-overlay');
+        document.body.appendChild(highlightOverlay);
+
+        let tooltip = document.createElement('div');
+        tooltip.classList.add('tutorial-tooltip');
+        document.body.appendChild(tooltip);
+
+        /**
+         * Defines the content and target elements for each tutorial step.
+         */
+        function setupTutorialSteps() {
+            console.log("setupTutorialSteps: Initializing tutorial steps data.");
+            tutorialStepsData = [
+                {
+                    title: "¡Bienvenido al Tutorial!",
+                    text: "Esta guía interactiva te ayudará a entender cómo funciona Bloque Armónico Pro. ¡Vamos a empezar!",
+                    imageSrc: "https://placehold.co/400x200/2563eb/ffffff?text=Bienvenido"
+                },
+                {
+                    title: "La Pregunta del Ejercicio",
+                    text: "Aquí verás la pregunta principal: qué acorde debes armonizar y cuál es la nota dada con su intervalo. Observa la nota resaltada en la cuadrícula.",
+                    targetElementId: "displaySection",
+                    // imageSrc removed to avoid obscuring the live app
+                },
+                {
+                    title: "El Pentagrama Musical",
+                    text: "Este es el pentagrama donde se mostrarán las notas que selecciones. La nota dada aparecerá aquí inicialmente.",
+                    targetElementId: "staffArea",
+                    // imageSrc removed
+                },
+                {
+                    title: "Selección de Notas Naturales",
+                    text: "Usa estos botones para seleccionar la nota natural (C, D, E, F, G, A, B) que deseas añadir a tu respuesta.",
+                    targetElementId: "naturalNoteButtons",
+                    // imageSrc removed
+                },
+                {
+                    title: "Selección de Accidentales",
+                    text: "Después de elegir una nota natural, puedes añadirle un sostenido (#), doble sostenido (##), bemol (b) o doble bemol (bb) con estos botones.",
+                    targetElementId: "accidentalButtons",
+                    // imageSrc removed
+                },
+                {
+                    title: "El Bloque de Notas",
+                    text: "A medida que selecciones las notas, se irán mostrando aquí, llenando el bloque. La primera nota es la nota dada.",
+                    targetElementId: "questionArea", // Target the entire questionArea to show the block filling
+                    // imageSrc removed
+                },
+                {
+                    title: "Confirmar Respuesta",
+                    text: "Una vez que tengas tus 4 notas seleccionadas, haz clic aquí para verificar si tu respuesta es correcta.",
+                    targetElementId: "confirmAnswerButton",
+                    // imageSrc removed
+                },
+                {
+                    title: "Borrar Selección",
+                    text: "Si necesitas corregir o empezar de nuevo tu selección de notas, usa este botón para borrar todas las notas elegidas (excepto la nota dada).",
+                    targetElementId: "clearAllSelectionButton",
+                    // imageSrc removed
+                },
+                {
+                    title: "Cambiar Ejercicio",
+                    text: "Si un ejercicio es demasiado difícil o simplemente quieres uno nuevo, haz clic aquí para generar un nuevo desafío.",
+                    targetElementId: "changeQuestionButton",
+                    // imageSrc removed
+                },
+                {
+                    title: "Retroalimentación y Evaluación",
+                    text: "Después de cada respuesta, recibirás retroalimentación. Periódicamente, se te mostrará una evaluación de tu progreso.",
+                    imageSrc: "https://placehold.co/400x200/dcfce7/15803d?text=Retroalimentación"
+                },
+                {
+                    title: "Resultados Finales",
+                    text: "Al terminar tu sesión, podrás ver un resumen de tu rendimiento, guardar tus resultados como imagen o PDF, y empezar una nueva sesión.",
+                    targetElementId: "finalMessageDisplay",
+                    // imageSrc removed, as this will highlight the actual final message display
+                },
+                {
+                    title: "¡Listo para Entrenar!",
+                    text: "¡Has completado el tutorial! Ahora estás listo para comenzar tu entrenamiento de armonización. ¡Mucha suerte!",
+                    imageSrc: "https://placehold.co/400x200/2563eb/ffffff?text=Comenzar+Ahora"
+                }
+            ];
+
+            // Populate tutorial steps in the DOM
+            tutorialStepsContainer.innerHTML = ''; // Ensure it's empty before populating
+            tutorialStepsData.forEach((step, index) => {
+                console.log(`setupTutorialSteps: Adding step ${index}: ${step.title}`);
+                const stepDiv = document.createElement('div');
+                stepDiv.classList.add('tutorial-step');
+                stepDiv.innerHTML = `
+                    <h3>${step.title}</h3>
+                    <p>${step.text}</p>
+                    ${step.imageSrc ? `<img src="${step.imageSrc}" alt="${step.title}">` : ''}
+                `;
+                tutorialStepsContainer.appendChild(stepDiv);
+            });
+            console.log("setupTutorialSteps: All tutorial steps added to DOM.");
+        }
+
+        /**
+         * Displays a specific tutorial step.
+         * @param {number} index - The index of the step to display.
+         */
+        function showTutorialStep(index) {
+            console.log(`showTutorialStep: Attempting to show step ${index}. Current index: ${currentTutorialStepIndex}`);
+            if (index < 0 || index >= tutorialStepsData.length) {
+                console.warn(`showTutorialStep: Invalid step index: ${index}. Tutorial has ${tutorialStepsData.length} steps.`);
+                return;
+            }
+
+            currentTutorialStepIndex = index;
+            console.log(`showTutorialStep: currentTutorialStepIndex updated to ${currentTutorialStepIndex}.`);
+
+            // Ensure main app is visible but dimmed for highlighting
+            // This is already set in window.onload, but ensuring it here for robustness
+            mainAppContainer.style.display = 'flex';
+            mainAppContainer.style.opacity = '0.3'; // Dim the main app
+            mainAppContainer.style.pointerEvents = 'none'; // Disable interaction
+
+            const steps = document.querySelectorAll('.tutorial-step');
+            steps.forEach((step, i) => {
+                step.style.display = (i === index) ? 'flex' : 'none';
+            });
+            console.log(`showTutorialStep: Displaying step ${index} in DOM.`);
+
+            // Update button visibility
+            prevTutorialBtn.style.display = (index === 0) ? 'none' : 'block';
+            nextTutorialBtn.textContent = (index === tutorialStepsData.length - 1) ? 'Finalizar Tutorial' : 'Siguiente';
+            console.log(`showTutorialStep: Buttons updated. Prev display: ${prevTutorialBtn.style.display}, Next text: ${nextTutorialBtn.textContent}`);
+
+            // Apply highlighting
+            const currentStep = tutorialStepsData[index];
+            if (currentStep.targetElementId) {
+                console.log(`showTutorialStep: Applying highlight to element: ${currentStep.targetElementId}`);
+                applyHighlight(currentStep.targetElementId, currentStep.text);
+            } else {
+                console.log("showTutorialStep: No target element for highlight, removing any existing highlight.");
+                removeHighlight();
+            }
+            console.log(`showTutorialStep: Step ${index} displayed successfully.`);
+        }
+
+        /**
+         * Applies a visual highlight to a target element and shows a tooltip.
+         * @param {string} elementId - The ID of the element to highlight.
+         * @param {string} tooltipText - The text to display in the tooltip.
+         */
+        function applyHighlight(elementId, tooltipText) {
+            const targetElement = document.getElementById(elementId);
+            if (!targetElement) {
+                console.warn(`applyHighlight: Element with ID ${elementId} not found for tutorial highlight.`);
+                removeHighlight();
+                return;
+            }
+
+            const rect = targetElement.getBoundingClientRect();
+            console.log(`applyHighlight: Highlighting element ${elementId} at rect:`, rect);
+
+            // Position highlight box
+            highlightBox.style.width = `${rect.width + 10}px`;
+            highlightBox.style.height = `${rect.height + 10}px`;
+            highlightBox.style.left = `${rect.left - 5}px`;
+            highlightBox.style.top = `${rect.top - 5}px`;
+            highlightBox.style.display = 'block';
+            console.log("applyHighlight: Highlight box positioned and displayed.");
+
+            // Show overlay
+            highlightOverlay.classList.add('visible');
+            console.log("applyHighlight: Highlight overlay visible.");
+
+            // Position tooltip
+            tooltip.innerHTML = tooltipText;
+            tooltip.classList.add('visible');
+            tooltip.classList.remove('top', 'bottom', 'left', 'right'); // Reset positioning classes
+
+            let tooltipX, tooltipY;
+            const tooltipPadding = 15; // Padding between element and tooltip
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            // Try bottom
+            tooltipX = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
+            tooltipY = rect.bottom + tooltipPadding;
+            if (tooltipY + tooltip.offsetHeight < viewportHeight) {
+                tooltip.classList.add('bottom');
+            } else {
+                // Try top
+                tooltipY = rect.top - tooltip.offsetHeight - tooltipPadding;
+                if (tooltipY > 0) {
+                    tooltip.classList.add('top');
+                } else {
+                    // Try right
+                    tooltipX = rect.right + tooltipPadding;
+                    tooltipY = rect.top + rect.height / 2 - tooltip.offsetHeight / 2;
+                    if (tooltipX + tooltip.offsetWidth < viewportWidth) {
+                        tooltip.classList.add('right');
+                    } else {
+                        // Try left
+                        tooltipX = rect.left - tooltip.offsetWidth - tooltipPadding;
+                        tooltipY = rect.top + rect.height / 2 - tooltip.offsetHeight / 2;
+                        tooltip.classList.add('left');
+                    }
+                }
+            }
+
+            // Adjust X to keep within viewport
+            if (tooltipX < 0) tooltipX = 0;
+            if (tooltipX + tooltip.offsetWidth > viewportWidth) tooltipX = viewportWidth - tooltip.offsetWidth;
+
+            tooltip.style.left = `${tooltipX}px`;
+            tooltip.style.top = `${tooltipY}px`;
+            console.log(`applyHighlight: Tooltip positioned at (${tooltipX}, ${tooltipY}) with text: ${tooltipText}`);
+
+            // --- New: Adjust tutorial modal content position ---
+            const tutorialModalContent = document.getElementById('tutorialModalContent');
+            const tutorialModalContentRect = tutorialModalContent.getBoundingClientRect();
+
+            // Reset modal position to default (centered by flexbox)
+            tutorialModalContent.style.alignSelf = 'center';
+            tutorialModalContent.style.marginTop = '0';
+            tutorialModalContent.style.marginBottom = '0';
+            tutorialModalContent.style.transform = 'none'; // Ensure no translateY
+
+            // Check for overlap between modal and highlight box
+            const overlap = !(rect.right < tutorialModalContentRect.left ||
+                              rect.left > tutorialModalContentRect.right ||
+                              rect.bottom < tutorialModalContentRect.top ||
+                              rect.top > tutorialModalContentRect.bottom);
+
+            if (overlap) {
+                console.log("applyHighlight: Overlap detected. Adjusting tutorial modal position.");
+                const highlightMidY = rect.top + rect.height / 2;
+                // const modalHeight = tutorialModalContentRect.height; // Not directly used for positioning with align-self
+
+                // Determine if highlight is in upper or lower half of the screen
+                if (highlightMidY < viewportHeight / 2) { // Highlight is in upper half, move modal to bottom
+                    tutorialModalContent.style.alignSelf = 'flex-end'; // Align to bottom of flex container
+                    tutorialModalContent.style.marginBottom = '20px'; // Add a small margin from bottom
+                    tutorialModalContent.style.marginTop = 'auto'; // Push to bottom
+                } else { // Highlight is in lower half, move modal to top
+                    tutorialModalContent.style.alignSelf = 'flex-start'; // Align to top of flex container
+                    tutorialModalContent.style.marginTop = '20px'; // Add a small margin from top
+                    tutorialModalContent.style.marginBottom = 'auto'; // Push to top
+                }
+            } else {
+                console.log("applyHighlight: No overlap. Resetting tutorial modal to center.");
+                tutorialModalContent.style.alignSelf = 'center'; // Center it
+                // Reset margins to auto for flex centering (this is the default behavior of `margin: auto` in flex containers)
+                tutorialModalContent.style.marginTop = 'auto';
+                tutorialModalContent.style.marginBottom = 'auto';
+            }
+        }
+
+        /**
+         * Removes the visual highlight and tooltip.
+         */
+        function removeHighlight() {
+            console.log("removeHighlight: Removing highlight and tooltip.");
+            highlightBox.style.display = 'none';
+            highlightOverlay.classList.remove('visible');
+            tooltip.classList.remove('visible');
+        }
+
+        // Event Listeners for Tutorial Buttons
+        prevTutorialBtn.addEventListener('click', () => {
+            console.log("prevTutorialBtn: Clicked. Current step index:", currentTutorialStepIndex);
+            if (currentTutorialStepIndex > 0) {
+                showTutorialStep(currentTutorialStepIndex - 1);
+            }
+        });
+
+        nextTutorialBtn.addEventListener('click', () => {
+            console.log("nextTutorialBtn: Clicked. Current step index:", currentTutorialStepIndex);
+            if (currentTutorialStepIndex < tutorialStepsData.length - 1) {
+                showTutorialStep(currentTutorialStepIndex + 1);
+            } else {
+                // Last step, finish tutorial
+                console.log("nextTutorialBtn: Last tutorial step reached. Finishing tutorial.");
+                finishTutorial();
+            }
+        });
+
+        skipTutorialBtn.addEventListener('click', () => {
+            console.log("skipTutorialBtn: Clicked. Skipping tutorial.");
+            finishTutorial();
+        });
+
+        /**
+         * Finishes the tutorial and transitions to the welcome modal.
+         */
+        function finishTutorial() {
+            console.log("finishTutorial: Finishing tutorial process.");
+            tutorialModalOverlay.classList.remove('visible');
+            removeHighlight(); // Ensure highlights are removed
+
+            // Keep mainAppContainer visible and interactive, then show welcome modal on top
+            mainAppContainer.style.opacity = '1'; // Restore full opacity
+            mainAppContainer.style.pointerEvents = 'auto'; // Re-enable interaction
+
+            welcomeModalOverlay.classList.add('visible'); // Show welcome modal on top of the app
+            console.log("finishTutorial: Tutorial finished. Welcome modal displayed on top of app.");
+        }
+
+        // --- Existing App Event Listeners ---
         confirmAnswerButton.addEventListener('click', checkAnswer);
         clearAllSelectionButton.addEventListener('click', clearSelection);
         changeQuestionButton.addEventListener('click', handleChangeQuestion);
-        continueTrainingButton.addEventListener('click', continueTraining); // Renamed
-        endSessionButton.addEventListener('click', endSession); // Renamed
+        continueTrainingButton.addEventListener('click', continueTraining);
+        endSessionButton.addEventListener('click', endSession);
 
         // New event listeners for save buttons
         saveAsPhotoButton.addEventListener('click', saveAsPhoto);
         saveAsPdfButton.addEventListener('click', saveAsPdf);
 
         startButton.addEventListener('click', async () => {
-            console.log("startButton: Clicked. Hiding welcome modal and initializing application.");
+            console.log("startButton: Clicked. Hiding welcome modal and enabling application.");
             welcomeModalOverlay.classList.remove('visible'); // Hide welcome modal
-            mainAppContainer.style.display = 'flex'; // Show main app container
+            // mainAppContainer.style.display is already 'flex' from window.onload or tutorial finish, just ensure opacity and pointer-events are correct
+            mainAppContainer.style.opacity = '1'; // Ensure full opacity
+            mainAppContainer.style.pointerEvents = 'auto'; // Ensure interaction is enabled
             sessionStartTime = Date.now(); // Record session start time
 
             // Start audio context immediately on user gesture
             await startAudioContext();
             console.log("startButton: Audio context start attempt completed.");
 
-            // Now initialize application components
-            try {
-                console.log("startButton: Initializing application components...");
-                generateNoteButtons(); // Generate note buttons
-                generateComplexExercise(); // This includes drawing staff and updating displays
-                console.log("startButton: Application components initialized successfully.");
-                
-                // Ensure interaction is enabled after everything is loaded
-                enableTrainingInteraction();
-                console.log("startButton: All setup complete. Application interaction enabled.");
+            // Now ensure interaction is enabled
+            console.log("startButton: Enabling training interaction.");
+            enableTrainingInteraction();
+            console.log("startButton: All setup complete. Application interaction enabled.");
 
-            } catch (error) {
-                console.error("startButton: Error during application setup:", error);
-                chordQuestionTextDiv.innerHTML = "¡Error al cargar la aplicación! Revisa la consola del navegador.";
-                disableTrainingInteraction(); // Ensure training is disabled on error
-                showCustomMessage("Error de Carga", "Hubo un problema al inicializar la aplicación. Por favor, revisa la consola del navegador para más detalles.", "error");
-            }
         });
 
-        // Show welcome modal on initial load
+        // Show tutorial modal on initial load
         window.onload = function() {
-            console.log("window.onload: Window loaded. Initializing welcome modal.");
-            welcomeModalOverlay.classList.add('visible'); // Show welcome modal immediately
-            mainAppContainer.style.display = 'none'; // Ensure main app is hidden initially
-            console.log("window.onload: Welcome modal displayed, main app hidden.");
+            console.log("window.onload: Window loaded. Initializing tutorial modal.");
+            try {
+                // First, initialize app components so they are ready for highlighting
+                console.log("window.onload: Initializing application components for tutorial display.");
+                generateNoteButtons(); // Generate note buttons
+                generateComplexExercise(); // This includes drawing staff and updating displays
+                console.log("window.onload: Application components initialized.");
+
+                // Ensure main app is visible but dimmed for tutorial highlighting
+                mainAppContainer.style.display = 'flex'; // Ensure it's displayed
+                mainAppContainer.style.opacity = '0.3';
+                mainAppContainer.style.pointerEvents = 'none';
+
+                welcomeModalOverlay.classList.remove('visible'); // Ensure welcome modal is hidden initially, use remove('visible') instead of style.display = 'none' for consistency
+                setupTutorialSteps(); // Setup tutorial data and DOM elements
+                tutorialModalOverlay.classList.add('visible'); // Show tutorial modal immediately
+                showTutorialStep(0); // Show the first step
+                
+                console.log("window.onload: Tutorial modal displayed, main app visible (dimmed), welcome modal hidden.");
+            } catch (error) {
+                console.error("window.onload: Error during tutorial setup:", error);
+                showCustomMessage("Error de Carga Inicial", "Hubo un problema al inicializar el tutorial. Por favor, revisa la consola del navegador.", "error");
+                // Fallback to showing welcome modal or main app if tutorial fails
+                welcomeModalOverlay.classList.add('visible');
+                mainAppContainer.style.opacity = '1'; // Ensure app is visible and interactive on error
+                mainAppContainer.style.pointerEvents = 'auto';
+                mainAppContainer.style.display = 'flex'; // Ensure it's displayed
+                tutorialModalOverlay.classList.remove('visible');
+            }
         };
     </script>
 </body>
 </html>
-
