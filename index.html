@@ -116,11 +116,11 @@
             margin: 20px auto;
             border: 2px solid #64748b;
             border-radius: 5px;
-            overflow: hidden;
-            height: auto;
-            max-height: 280px;
+            overflow: hidden; /* Changed from auto to hidden to prevent scrollbars */
+            height: auto; /* Allow height to adjust to content */
+            min-height: 220px; /* Ensure minimum height for 4 cells */
+            max-height: 320px; /* Increased max-height for larger screens */
             flex-grow: 1;
-            min-height: 0;
             box-sizing: border-box; /* Incluir padding y border en el ancho */
         }
 
@@ -135,6 +135,7 @@
             font-weight: 700;
             color: #334155;
             box-sizing: border-box;
+            min-height: 50px; /* Ensure minimum height for each cell */
         }
 
         .interval-label {
@@ -788,12 +789,13 @@
             .notes-grid {
                 width: 100%; /* Ocupa el 100% del #questionArea en móvil */
                 max-width: 150px; /* Ancho máximo más pequeño para la cuadrícula */
-                height: auto;
-                max-height: 200px; /* Altura máxima para asegurar que los 4 cuadros se vean */
+                min-height: 180px; /* Adjusted minimum height for mobile */
+                max-height: 240px; /* Adjusted maximum height for mobile */
             }
             .grid-cell {
                 padding: 8px 6px; /* Padding más pequeño */
                 font-size: 1.1em; /* Tamaño de fuente más pequeño */
+                min-height: 40px; /* Adjusted minimum height for mobile cells */
             }
             .interval-label {
                 font-size: 0.9em; /* Mantiene el tamaño relativo */
@@ -1838,10 +1840,10 @@
          * Draws the musical staff with the given notes as a whole note chord, always in treble clef.
          * The `currentGivenNote` will be positioned as the highest voice within G4-G5 range.
          * Other notes in `notesToDisplayRaw` will be placed below it, in closest descending order,
-         * ensuring a closed voicing within an octave range.
-         * @param {string[]} notesToHighlight - Array of notes to be highlighted (e.g., user's selected notes).
+         * ensuring a closed voicing within an octave range if 4 notes are provided.
+         * @param {string[]} notesToDisplayRaw - Array of notes to be displayed (e.g., user's selected notes).
          */
-        function drawMusicalStaff(notesToHighlight = []) {
+        function drawMusicalStaff(notesToDisplayRaw = []) {
             const canvas = musicalStaffCanvas;
             if (!canvas) { console.error("Canvas element not found for musical staff."); return; }
             const context = canvas.getContext('2d');
@@ -1849,154 +1851,103 @@
 
             // Resize canvas based on container and screen size
             const containerWidth = canvas.parentElement.clientWidth;
-            // Set canvas width to 100% of its parent, but respect max-width for larger screens
-            canvas.width = Math.min(containerWidth, 550);
+            canvas.width = Math.min(containerWidth, 550); // Max width for desktop
             canvas.height = 180; // Default height for desktop
             
-            // Adjust canvas dimensions for smaller screens
             if (window.innerWidth <= 768) {
                 canvas.width = Math.min(containerWidth, 180); // Smaller max-width for mobile
                 canvas.height = 160; // Smaller height for mobile
             }
 
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
-            // Crucial: Resize the VexFlow renderer to the actual canvas dimensions
             renderer.resize(canvas.width, canvas.height);
             const ctx = renderer.getContext();
             const stave = new Stave(10, 0, canvas.width - 20);
             stave.addClef("treble").addTimeSignature("4/4"); // Always treble clef
             stave.setContext(ctx).draw();
 
-            const finalStaveNoteKeys = [];
-            const finalStaveNoteAccidentals = [];
-
-            // Combine currentGivenNote and notesToHighlight for display
-            let allNotesForStaffDisplay = new Set();
-            if (currentGivenNote) {
-                allNotesForStaffDisplay.add(currentGivenNote);
-            }
-            notesToHighlight.forEach(note => allNotesForStaffDisplay.add(note));
-
-            if (allNotesForStaffDisplay.size === 0) {
+            if (notesToDisplayRaw.length === 0) {
                 return; // Draw empty staff if no notes to display
             }
 
-            // Convert notes to objects with original string, semitone (0-11), and placeholder for absolute semitone
-            let processedNotes = Array.from(allNotesForStaffDisplay).map(noteString => {
-                return {
-                    originalString: noteString,
-                    semitone: noteToSemitoneMap[normalizeNote(noteString)], // 0-11
-                    absoluteSemitone: 0 // Will be calculated
-                };
-            });
+            let processedNotes = notesToDisplayRaw.map(noteString => ({
+                originalString: noteString,
+                semitone: noteToSemitoneMap[normalizeNote(noteString)],
+                absoluteSemitone: 0 // Will be calculated
+            }));
 
-            let orderedNotesForVexFlow = []; // This will hold notes in ascending order of absolute semitone for VexFlow
-            let highestNoteObj;
+            let arrangedNotesWithOctave = [];
 
-            // 1. Identify the highest note (currentGivenNote) and place it in the G4-G5 range
-            highestNoteObj = processedNotes.find(n => normalizeNote(n.originalString) === normalizeNote(currentGivenNote));
-
+            // 1. Identify the highest note (currentGivenNote) and place it in the G4-G5 range.
+            let highestNoteObj = processedNotes.find(n => normalizeNote(n.originalString) === normalizeNote(currentGivenNote));
             if (!highestNoteObj) {
-                // Fallback: If currentGivenNote is not found, take the highest semitone from available notes
-                processedNotes.sort((a, b) => b.semitone - a.semitone);
+                // Fallback: If currentGivenNote is not found in notesToDisplayRaw,
+                // which should not happen if selectedUserNotes always contains it.
+                // If it does, pick the highest semitone from the provided notes as the top voice.
+                processedNotes.sort((a,b) => b.semitone - a.semitone);
                 highestNoteObj = processedNotes[0];
             }
 
-            // Calculate octave for the highest note to be in G4-G5 range (MIDI 67-79)
-            const semitoneOfHighest = highestNoteObj.semitone;
             let targetOctaveForHighest;
-
-            if (semitoneOfHighest >= naturalLetterSemitone['G']) { // G is semitone 7
+            if (highestNoteObj.semitone >= naturalLetterSemitone['G']) { // G is semitone 7 (MIDI 67)
                 targetOctaveForHighest = 4;
-            } else {
+            } else { // C (MIDI 60) to F# (MIDI 66)
                 targetOctaveForHighest = 5;
             }
-            highestNoteObj.absoluteSemitone = semitoneOfHighest + (targetOctaveForHighest * 12);
-            orderedNotesForVexFlow.push(highestNoteObj);
+            highestNoteObj.absoluteSemitone = highestNoteObj.semitone + (targetOctaveForHighest * 12);
+            arrangedNotesWithOctave.push(highestNoteObj);
 
-            // 2. Place other notes below the highest, ensuring closest descending order and closed voicing
-            // Get the canonical forms of all *correct* notes to check for "closed voicing"
-            const allCorrectCanonicalNotes = currentCorrectNotes.map(n => normalizeNote(n));
-
-            // Create a temporary set of notes already placed (by their canonical form)
-            let placedCanonicalNotes = new Set([normalizeNote(highestNoteObj.originalString)]);
+            // 2. Place the remaining notes below the highest, ensuring closest descending order and closed voicing.
+            // Get the other notes, sort them by semitone in descending order.
+            let otherNotes = processedNotes.filter(n => normalizeNote(n.originalString) !== normalizeNote(highestNoteObj.originalString));
+            otherNotes.sort((a, b) => b.semitone - a.semitone); // Sort by semitone for consistent processing
 
             let lastAbsoluteSemitonePlaced = highestNoteObj.absoluteSemitone;
 
-            // Iterate to find the remaining 3 notes
-            for (let i = 0; i < 3; i++) {
-                let foundNextNote = false;
-                // Search downwards for the next closest note
-                for (let semitoneDown = 1; semitoneDown <= 12; semitoneDown++) { // Check up to an octave below
-                    let candidateAbsoluteSemitone = lastAbsoluteSemitonePlaced - semitoneDown;
-                    let candidateSemitone = (candidateAbsoluteSemitone % 12 + 12) % 12; // Normalize to 0-11
+            for (let i = 0; i < otherNotes.length; i++) {
+                let currentOtherNote = otherNotes[i];
+                let foundPlacement = false;
 
-                    const candidateCanonicalNote = canonicalNotes[candidateSemitone];
+                // Iterate downwards from the last placed note to find the closest valid octave for currentOtherNote
+                // This ensures closed voicing and notes are placed below each other.
+                for (let octaveAdjustment = 0; octaveAdjustment < 2; octaveAdjustment++) { // Check current octave and one below
+                    let candidateAbsoluteSemitone = currentOtherNote.semitone + ((Math.floor(lastAbsoluteSemitonePlaced / 12) - octaveAdjustment) * 12);
+                    
+                    // Ensure the candidate is strictly below the last placed note
+                    while (candidateAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
+                        candidateAbsoluteSemitone -= 12;
+                    }
 
-                    // Check if this candidate is one of the *correct* chord notes and hasn't been placed yet
-                    if (allCorrectCanonicalNotes.includes(candidateCanonicalNote) && !placedCanonicalNotes.has(candidateCanonicalNote)) {
-                        // Ensure no *other* correct chord notes exist between lastPlaced and current candidate
-                        let isClosedVoicing = true;
-                        for (let k = 1; k < semitoneDown; k++) {
-                            let intermediateSemitone = (lastAbsoluteSemitonePlaced - k) % 12;
-                            if (intermediateSemitone < 0) intermediateSemitone += 12; // Ensure positive modulo
-                            if (allCorrectCanonicalNotes.includes(canonicalNotes[intermediateSemitone])) {
-                                isClosedVoicing = false;
-                                break;
-                            }
-                        }
-
-                        if (isClosedVoicing) {
-                            // Find the original spelling from notesToDisplayRaw that matches this canonical note
-                            const originalSpelling = Array.from(allNotesForStaffDisplay).find(rawNote => normalizeNote(rawNote) === candidateCanonicalNote);
-
-                            if (originalSpelling) {
-                                orderedNotesForVexFlow.push({
-                                    originalString: originalSpelling,
-                                    semitone: candidateSemitone,
-                                    absoluteSemitone: candidateAbsoluteSemitone
-                                });
-                                placedCanonicalNotes.add(candidateCanonicalNote); // Mark as placed
-                                lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone;
-                                foundNextNote = true;
-                                break; // Found the next note, move to find the next voice
-                            }
-                        }
+                    // Check if this position is already taken by another note that has been placed
+                    if (!arrangedNotesWithOctave.some(n => n.absoluteSemitone === candidateAbsoluteSemitone)) {
+                        currentOtherNote.absoluteSemitone = candidateAbsoluteSemitone;
+                        arrangedNotesWithOctave.push(currentOtherNote);
+                        lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone; // Update last placed note
+                        foundPlacement = true;
+                        break; // Found a placement, move to the next note
                     }
                 }
-                // Fallback if a note wasn't found in the immediate closed voicing search (shouldn't happen with correct logic)
-                if (!foundNextNote && orderedNotesForVexFlow.length < 4) {
-                    // This fallback logic might need adjustment if allCorrectCanonicalNotes isn't the source
-                    // For now, it's about placing the remaining notes from allNotesForStaffDisplay
-                    const remainingNotesToPlace = Array.from(allNotesForStaffDisplay).filter(n => !placedCanonicalNotes.has(normalizeNote(n)));
-                    if (remainingNotesToPlace.length > 0) {
-                        // Sort remaining by semitone and pick the highest one that is not yet placed
-                        remainingNotesToPlace.sort((a, b) => noteToSemitoneMap[normalizeNote(a)] - noteToSemitoneMap[normalizeNote(b)]);
-                        const nextHighestRemainingOriginal = remainingNotesToPlace[remainingNotesToPlace.length - 1];
-                        const nextHighestRemainingCanonical = normalizeNote(nextHighestRemainingOriginal);
-                        const nextHighestRemainingSemitone = noteToSemitoneMap[nextHighestRemainingCanonical];
-
-                        let candidateAbsoluteSemitone = lastAbsoluteSemitonePlaced - 12; // Start an octave below
-                        // Adjust to match the semitone, ensuring it's below the last placed note
-                        while ((candidateAbsoluteSemitone % 12 + 12) % 12 !== nextHighestRemainingSemitone || candidateAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
-                            candidateAbsoluteSemitone -= 1; // Move down by semitone until match and below
-                        }
-
-                        orderedNotesForVexFlow.push({
-                            originalString: nextHighestRemainingOriginal,
-                            semitone: nextHighestRemainingSemitone,
-                            absoluteSemitone: candidateAbsoluteSemitone
-                        });
-                        placedCanonicalNotes.add(nextHighestRemainingCanonical);
-                        lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone;
+                
+                // Fallback if no ideal closed voicing placement was found (e.g., if notes are enharmonically far apart)
+                if (!foundPlacement) {
+                    // Just place it in the closest octave below the last placed note.
+                    let tempAbsoluteSemitone = currentOtherNote.semitone + (Math.floor(lastAbsoluteSemitonePlaced / 12) * 12);
+                    while (tempAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
+                        tempAbsoluteSemitone -= 12;
                     }
+                    currentOtherNote.absoluteSemitone = tempAbsoluteSemitone;
+                    arrangedNotesWithOctave.push(currentOtherNote);
+                    lastAbsoluteSemitonePlaced = tempAbsoluteSemitone;
                 }
             }
 
             // Final sort by absolute semitone for VexFlow rendering (ascending order, lowest to highest)
-            orderedNotesForVexFlow.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
+            arrangedNotesWithOctave.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
 
-            orderedNotesForVexFlow.forEach(noteObj => {
+            const finalStaveNoteKeys = [];
+            const finalStaveNoteAccidentals = [];
+
+            arrangedNotesWithOctave.forEach(noteObj => {
                 const match = noteObj.originalString.match(/^([A-G])(.*)$/i);
                 if (!match) {
                     console.warn(`Could not parse note string for VexFlow: ${noteObj.originalString}`);
@@ -2021,9 +1972,9 @@
             });
 
             // Apply highlighting to selected notes
-            notesToHighlight.forEach(highlightNote => {
+            notesToDisplayRaw.forEach(highlightNote => { // Use notesToDisplayRaw for highlighting
                 const normalizedHighlightNote = normalizeNote(highlightNote);
-                orderedNotesForVexFlow.forEach((noteObj, index) => {
+                arrangedNotesWithOctave.forEach((noteObj, index) => {
                     if (normalizeNote(noteObj.originalString) === normalizedHighlightNote) {
                         chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" }); // Blue color
                     }
@@ -2189,26 +2140,38 @@
         }
 
         /**
-         * Updates the note displays in gridCells[1] to gridCells[3] based on selectedUserNotes.
+         * Updates the note displays in gridCells[0] to gridCells[3] based on selectedUserNotes.
+         * The labels are taken from currentOrderedLabelsForDisplay.
+         * The notes are the currentGivenNote (first cell) and the user's other selected notes, sorted by pitch.
          */
         function updateGridNoteDisplays() {
-            // Get notes selected by user, excluding the given note
-            const userAddedNotes = selectedUserNotes.filter(note => normalizeNote(note) !== normalizeNote(currentGivenNote));
-            // Sort them for consistent display (e.g., C, D, E, F)
-            userAddedNotes.sort((a, b) => {
-                const semitoneA = noteToSemitoneMap[normalizeNote(a)];
-                const semitoneB = noteToSemitoneMap[normalizeNote(b)];
-                return semitoneA - semitoneB;
+            // Set the label for all cells based on currentOrderedLabelsForDisplay
+            gridCells.forEach((cell, index) => {
+                const intervalLabelSpan = cell.querySelector('.interval-label');
+                intervalLabelSpan.textContent = currentOrderedLabelsForDisplay[index];
             });
 
-            // Populate grid cells 1, 2, 3
+            // Handle the first cell (given note)
+            const givenNoteDisplaySpan = gridCells[0].querySelector('.note-display');
+            givenNoteDisplaySpan.textContent = currentGivenNote;
+            givenNoteDisplaySpan.classList.add('highlighted');
+
+            // Get user's selected notes, excluding the given note, and sort them by semitone
+            const userAddedNotes = selectedUserNotes
+                .filter(note => normalizeNote(note) !== normalizeNote(currentGivenNote))
+                .map(note => ({
+                    originalString: note,
+                    semitone: noteToSemitoneMap[normalizeNote(note)]
+                }))
+                .sort((a, b) => a.semitone - b.semitone); // Sort by semitone for consistent display
+
+            // Populate the remaining cells (index 1 to 3) with sorted user-added notes
             for (let i = 1; i < gridCells.length; i++) {
                 const noteDisplaySpan = gridCells[i].querySelector('.note-display');
-                // Use the sorted userAddedNotes to fill the cells
-                if (userAddedNotes[i - 1]) {
-                    noteDisplaySpan.textContent = userAddedNotes[i - 1];
+                if (userAddedNotes[i - 1]) { // userAddedNotes has 0, 1, 2 indices for gridCells 1, 2, 3
+                    noteDisplaySpan.textContent = userAddedNotes[i - 1].originalString;
                 } else {
-                    noteDisplaySpan.textContent = ''; // Clear if no note
+                    noteDisplaySpan.textContent = ''; // Clear if no note selected for this position
                 }
                 noteDisplaySpan.classList.remove('highlighted'); // Ensure no highlighting on user notes in grid
             }
