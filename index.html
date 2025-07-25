@@ -860,11 +860,11 @@
 
         #tutorialModalContent {
             max-width: 600px;
-            margin-top: 0; /* Reset margin-top from .modal-content */
-            transform: translateY(0); /* Reset transform from .modal-content */
+            /* Removed fixed margin-top and transform to allow dynamic positioning */
             position: relative; /* For image positioning */
-            align-self: center; /* Default centering within flex container */
+            align-self: center; /* Default centering within flex container, will be overridden */
             transition: margin 0.3s ease, align-self 0.3s ease, transform 0.3s ease; /* Smooth transition for repositioning */
+            box-sizing: border-box; /* Ensure padding and border are included in width/height */
         }
 
         .tutorial-step {
@@ -1193,7 +1193,7 @@
                     "1": ["1", "b7", "5", "b3"],
                     "b3": ["b3", "1", "b7", "5"],
                     "5": ["5", "b3", "1", "b7"],
-                    "b7": ["b7", "b5", "b3", "1"],
+                    "b7": ["b7", "5", "b3", "1"], // Corrected: was ["b7", "b5", "b3", "1"]
                     "9": ["9", "b7", "5", "b3"], // 9 replaces 1
                     "11": ["11", "b3", "1", "b7"] // 11 replaces 5, order: Tension, b3, 1, b7
                 }
@@ -1542,38 +1542,32 @@
                 }
             }
 
-            // Disable note selection buttons if 4 notes are already selected
+            // Disable natural note buttons if 4 notes are already selected
             const naturalButtons = naturalNoteButtonsContainer.querySelectorAll('.note-button');
             const accidentalButtons = accidentalButtonsContainer.querySelectorAll('.note-button');
 
             if (selectedUserNotes.length >= 4) {
-                // Disable natural note buttons if 4 notes are selected (no more natural notes can be added)
                 naturalButtons.forEach(button => {
                     if (button && button.classList && !button.classList.contains('selected')) { // Defensive check
                         button.classList.add('disabled');
                     }
                 });
-
-                // Accidental buttons:
-                // They should be enabled ONLY if the last user-added note (which must be the 4th note)
-                // is present and can be modified.
-                if (lastUserAddedNoteIndex !== -1 && lastUserAddedNoteIndex === 3) { // Ensure it's the 4th note
+                // Accidental buttons remain enabled if there's a lastUserAddedNoteIndex to modify
+                if (lastUserAddedNoteIndex !== -1) {
                     accidentalButtons.forEach(button => {
                         if (button && button.classList) {
                             button.classList.remove('disabled'); // Enable them
                         }
                     });
                 } else {
-                    // If 4 notes are selected but the last one isn't the one to be modified by accidentals, disable them.
-                    // This scenario shouldn't happen if lastUserAddedNoteIndex is correctly maintained.
                     accidentalButtons.forEach(button => {
                         if (button && button.classList) {
-                            button.classList.add('disabled');
+                            button.classList.add('disabled'); // Disable if no note to modify
                         }
                     });
                 }
             } else {
-                // If less than 4 notes are selected, enable all natural and accidental buttons
+                // If less than 4 notes, enable all natural and accidental buttons
                 naturalButtons.forEach(button => {
                     if (button && button.classList) { // Defensive check
                         button.classList.remove('disabled');
@@ -2005,7 +1999,7 @@
 
             // 6. Formulate the question text (more concise)
             let questionText = `¿Cuáles son las notas del acorde <strong>${selectedChordType.name}</strong> si <strong>${currentGivenNote}</strong> es su <strong>${currentGivenIntervalName}</strong>?<br>
-                                <small>(Introduce las 3 notas restantes en orden descendente. La 4ta nota es la nota dada.)</small>`;
+                                <small>(La 1ra voz es la nota dada. Introduce la 2da, 3ra y 4ta voz en orden descendente.)</small>`;
 
             chordQuestionTextDiv.innerHTML = questionText;
 
@@ -2116,11 +2110,8 @@
             accidentalButtonsContainer.addEventListener('click', handleAccidentalClick);
 
             // Visually enable all note buttons (remove disabled class)
-            document.querySelectorAll('.note-button').forEach(button => {
-                if (button && button.classList) { // Defensive check
-                    button.classList.remove('disabled');
-                }
-            });
+            // This is now handled by updateButtonSelectionVisuals for more granular control.
+            // No need to explicitly remove 'disabled' here for all, as updateButtonSelectionVisuals does it.
             console.log("enableTrainingInteraction: Training interaction enabled.");
         }
 
@@ -2425,11 +2416,6 @@
         highlightOverlay.classList.add('tutorial-highlight-overlay');
         document.body.appendChild(highlightOverlay);
 
-        // Removed tooltip element as it's no longer needed for duplicated messages
-        // let tooltip = document.createElement('div');
-        // tooltip.classList.add('tutorial-tooltip');
-        // document.body.appendChild(tooltip);
-
         /**
          * Defines the content and target elements for each tutorial step.
          */
@@ -2445,43 +2431,36 @@
                     title: "La Pregunta del Ejercicio",
                     text: "Aquí verás la pregunta principal: qué acorde debes armonizar y cuál es la nota dada con su intervalo. Observa la nota resaltada en la cuadrícula.",
                     targetElementId: "chordQuestionText", // Changed to target the question text directly
-                    // imageSrc removed to avoid obscuring the live app
                 },
                 {
                     title: "El Pentagrama Musical",
                     text: "Este es el pentagrama donde se mostrarán las notas que selecciones. La nota dada aparecerá aquí inicialmente.",
                     targetElementId: "staffArea",
-                    // imageSrc removed
                 },
                 {
                     title: "Selección de Notas",
-                    text: "Para seleccionar una nota natural (C, D, E, F, G, A, B), haz un click en su botón. Para añadir una alteración (sostenido, bemol, etc.), haz click en la nota natural y luego en la alteración. Un segundo click en la misma nota o alteración la deseleccionará.",
+                    text: "Para seleccionar una nota natural (C, D, E, F, G, A, B), haz click en su botón. Para añadir una alteración (sostenido, bemol, etc.), haz click en la nota natural y luego en la alteración. Un segundo click en la misma nota la deseleccionará.", // Updated text
                     targetElementId: "noteBuildingControls", // Target both natural and accidental buttons
-                    // imageSrc removed
                 },
                 {
                     title: "El Bloque de Notas",
                     text: "A medida que selecciones las notas, se irán mostrando aquí, llenando el bloque. La primera nota es la nota dada.",
                     targetElementId: "questionArea", // Target the entire questionArea to show the block filling
-                    // imageSrc removed
                 },
                 {
                     title: "Confirmar Respuesta",
                     text: "Una vez que tengas tus 4 notas seleccionadas, haz clic aquí para verificar si tu respuesta es correcta.",
                     targetElementId: "confirmAnswerButton",
-                    // imageSrc removed
                 },
                 {
                     title: "Borrar Selección",
                     text: "Si necesitas corregir o empezar de nuevo tu selección de notas, usa este botón para borrar todas las notas elegidas (excepto la nota dada).",
                     targetElementId: "clearAllSelectionButton",
-                    // imageSrc removed
                 },
                 {
                     title: "Cambiar Ejercicio",
                     text: "Si un ejercicio es demasiado difícil o simplemente quieres uno nuevo, haz clic aquí para generar un nuevo desafío.",
                     targetElementId: "changeQuestionButton",
-                    // imageSrc removed
                 },
                 {
                     title: "Retroalimentación y Evaluación",
@@ -2492,7 +2471,6 @@
                     title: "Resultados Finales",
                     text: "Al terminar tu sesión, podrás ver un resumen de tu rendimiento, guardar tus resultados como imagen o PDF, y empezar una nueva sesión.",
                     targetElementId: "finalMessageDisplay",
-                    // imageSrc removed, as this will highlight the actual final message display
                 },
                 {
                     title: "¡Listo para Entrenar!",
@@ -2551,7 +2529,7 @@
             const currentStep = tutorialStepsData[index];
             if (currentStep.targetElementId) {
                 console.log(`showTutorialStep: Applying highlight to element: ${currentStep.targetElementId}`);
-                applyHighlight(currentStep.targetElementId); // No longer passing tooltip text here
+                applyHighlight(currentStep.targetElementId);
             } else {
                 console.log("showTutorialStep: No target element for highlight, removing any existing highlight.");
                 removeHighlight();
@@ -2560,7 +2538,7 @@
         }
 
         /**
-         * Applies a visual highlight to a target element.
+         * Applies a visual highlight to a target element and positions the modal.
          * @param {string} elementId - The ID of the element to highlight.
          */
         function applyHighlight(elementId) {
@@ -2586,7 +2564,32 @@
             highlightOverlay.classList.add('visible');
             console.log("applyHighlight: Highlight overlay visible.");
 
-            // Removed tooltip positioning logic as it's no longer used for duplicated messages
+            // --- Dynamic modal positioning logic ---
+            const modalContentHeight = tutorialModalContent.offsetHeight;
+            const viewportHeight = window.innerHeight;
+
+            // Calculate space above and below the highlighted element
+            const spaceAbove = rect.top;
+            const spaceBelow = viewportHeight - rect.bottom;
+
+            // Default to centering the modal
+            tutorialModalContent.style.marginTop = '0';
+            tutorialModalContent.style.marginBottom = '0';
+            tutorialModalContent.style.alignSelf = 'center';
+
+            if (spaceBelow >= modalContentHeight + 20) { // If enough space below, place it below
+                tutorialModalContent.style.alignSelf = 'flex-start'; // Align to top of overlay
+                tutorialModalContent.style.marginTop = `${rect.bottom + 20}px`; // 20px buffer
+                console.log("applyHighlight: Positioning modal below highlighted element.");
+            } else if (spaceAbove >= modalContentHeight + 20) { // If enough space above, place it above
+                tutorialModalContent.style.alignSelf = 'flex-end'; // Align to bottom of overlay
+                tutorialModalContent.style.marginBottom = `${viewportHeight - rect.top + 20}px`; // 20px buffer from top of element
+                console.log("applyHighlight: Positioning modal above highlighted element.");
+            } else {
+                // If neither above nor below has enough space, try to center it or place it where it fits best
+                // For simplicity, we'll keep it centered by default if not enough space
+                console.log("applyHighlight: Not enough space above/below, keeping modal centered.");
+            }
         }
 
         /**
@@ -2596,7 +2599,10 @@
             console.log("removeHighlight: Removing highlight and tooltip.");
             highlightBox.style.display = 'none';
             highlightOverlay.classList.remove('visible');
-            // Removed tooltip.classList.remove('visible');
+            // Reset modal positioning
+            tutorialModalContent.style.marginTop = '0';
+            tutorialModalContent.style.marginBottom = '0';
+            tutorialModalContent.style.alignSelf = 'center';
         }
 
         // Event Listeners for Tutorial Buttons
