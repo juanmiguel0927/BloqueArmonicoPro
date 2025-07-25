@@ -234,28 +234,6 @@
             color: #94a3b8;
         }
 
-        /* Visualización de notas seleccionadas (lista de respuesta final) */
-        /* #selectedNotesDisplay {
-            background-color: #e6f7ff;
-            padding: 15px;
-            border-radius: 8px;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            color: #1e40af;
-            border: 1px solid #dbeafe;
-            font-weight: 500;
-            margin-bottom: 15px;
-            text-align: center;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        #selectedNotesDisplay strong {
-            color: #0056b3;
-        } */
-
         /* Grupo de botones de acción principal */
         .action-buttons-group {
             display: flex;
@@ -733,9 +711,13 @@
             }
             /* Ajuste para la pregunta principal en móvil */
             #chordQuestionText {
-                font-size: 1.2em; /* Ligeramente más pequeño para asegurar visibilidad */
+                font-size: 1.1em; /* Ligeramente más pequeño para asegurar visibilidad */
                 margin-top: 0px;
-                margin-bottom: 15px; /* Más espacio debajo de la pregunta */
+                margin-bottom: 10px; /* Más espacio debajo de la pregunta */
+                line-height: 1.4; /* Ajustar line-height para mejor legibilidad */
+            }
+            #chordQuestionText small {
+                font-size: 0.8em; /* Hacer la letra pequeña aún más pequeña en móvil */
             }
             /* En pantallas pequeñas, apila la sección de visualización verticalmente */
             #displaySection {
@@ -771,7 +753,7 @@
                 max-width: unset;
             }
             .note-button {
-                font-size: 0.95em; /* Aumentado para mejor legibilidad */
+                font-size: 0.9em; /* Aumentado para mejor legibilidad */
                 padding: 10px 0; /* Aumentado para mejor tacto */
             }
             .action-buttons-group {
@@ -804,9 +786,6 @@
             .note-display {
                 font-size: 1.4em; /* Tamaño de fuente más pequeño */
             }
-            /* #selectedNotesDisplay {
-                font-size: 1.1em;
-            } */
             .modal-content .modal-buttons {
                 flex-direction: column;
             }
@@ -969,8 +948,6 @@
             display: block;
             opacity: 1;
         }
-
-        /* Removed .tutorial-tooltip styles as it's no longer used for duplicated messages */
     </style>
 </head>
 <body>
@@ -1039,11 +1016,6 @@
                     <!-- Accidental buttons will be generated here -->
                 </div>
             </div>
-
-            <!-- Removed the selected notes display as it's no longer needed -->
-            <!-- <div id="selectedNotesDisplay">
-                Notas seleccionadas: Ninguna
-            </div> -->
         </div>
 
         <!-- Action buttons -->
@@ -1304,7 +1276,6 @@
         ];
         const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
         const accidentalButtonsContainer = document.getElementById('accidentalButtons');
-        // const selectedNotesDisplay = document.getElementById('selectedNotesDisplay'); // Removed this element
         const musicalStaffCanvas = document.getElementById('musicalStaffCanvas'); // Canvas for musical staff
 
         // Main Action Buttons
@@ -1800,21 +1771,36 @@
             let highestNoteInChord = processedNotes[0]; 
 
             // Determine the octave for the highest note in the chord (currentGivenNote)
-            // Place it in the G4-G5 range (MIDI 67-79) for treble clef readability.
             let baseOctaveForHighestNote;
-            if (highestNoteInChord.semitone >= naturalLetterSemitone['G']) { // If the note is G or higher (A, B)
-                baseOctaveForHighestNote = 4; // Place it in the 4th octave (e.g., G4, A4, B4)
-            } else { // If the note is C, D, E, F
-                baseOctaveForHighestNote = 5; // Place it in the 5th octave (e.g., C5, D5, E5, F5)
+            const highestNoteNaturalLetter = highestNoteInChord.originalString.charAt(0).toUpperCase();
+            const highestNoteAccidental = highestNoteInChord.originalString.substring(1);
+
+            // Determine the "base" octave for the natural letter of the highest note.
+            // This is the octave where the natural version of this note would typically reside
+            // if it were the highest note in a chord around the G4-G5 range.
+            if (['C', 'D', 'E', 'F'].includes(highestNoteNaturalLetter)) {
+                baseOctaveForHighestNote = 5; // Aim for C5, D5, E5, F5
+            } else { // G, A, B
+                baseOctaveForHighestNote = 4; // Aim for G4, A4, B4
             }
-            highestNoteInChord.absoluteSemitone = highestNoteInChord.semitone + (baseOctaveForHighestNote * 12);
+
+            // Calculate the absolute semitone for the *natural* version of this note in the determined base octave.
+            let naturalAbsoluteSemitoneOfHighest = naturalLetterSemitone[highestNoteNaturalLetter] + (baseOctaveForHighestNote * 12);
+
+            // Now, adjust this natural absolute semitone based on the accidental to get the true MIDI value.
+            let semitonesAdjustment = 0;
+            if (highestNoteAccidental === '#') semitonesAdjustment = 1;
+            else if (highestNoteAccidental === '##') semitonesAdjustment = 2;
+            else if (highestNoteAccidental === 'b') semitonesAdjustment = -1;
+            else if (highestNoteAccidental === 'bb') semitonesAdjustment = -2;
+
+            highestNoteInChord.absoluteSemitone = naturalAbsoluteSemitoneOfHighest + semitonesAdjustment;
 
             let arrangedNotesWithOctave = [highestNoteInChord];
             let lastAbsoluteSemitonePlaced = highestNoteInChord.absoluteSemitone;
 
             // Define the lower bound for the chord: the highest note's semitone in the octave below `baseOctaveForHighestNote`.
-            // This ensures all notes stay within the octave range of the highest note.
-            const lowerBoundOctaveSemitone = highestNoteInChord.absoluteSemitone - 12; // One octave below the highest note
+            const lowerBoundOctaveSemitone = highestNoteInChord.absoluteSemitone - 12;
 
             // Iterate through the remaining notes (which are the user's other 3 selected notes).
             // Sort them by semitone in descending order for visual staff placement.
@@ -1833,8 +1819,6 @@
                 // Ensure the note is within the specified octave range:
                 // If the candidate note is below the lower bound of the desired octave range,
                 // bring it up an octave. This is a hard constraint for drawing.
-                // This might break strict closed voicing if the note above is very close,
-                // but it adheres to the user's octave range rule.
                 while (candidateAbsoluteSemitone < lowerBoundOctaveSemitone) {
                     candidateAbsoluteSemitone += 12;
                 }
@@ -1859,7 +1843,29 @@
                 let baseNoteLetter = match[1].toLowerCase();
                 let accidentalSymbol = match[2];
 
-                const octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12);
+                // --- CRITICAL FIX: Determine VexFlow octave based on letter and enharmonic context ---
+                let octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12); // Default to MIDI octave
+
+                // Special handling for enharmonic notes that cross conceptual octave boundaries for VexFlow.
+                // Cb, Cbb: These notes have a 'C' letter but their pitch is equivalent to 'B' or 'A#',
+                // which might place them in a lower MIDI octave. VexFlow needs them in the C-octave.
+                if (baseNoteLetter.toUpperCase() === 'C' && ['b', 'bb'].includes(accidentalSymbol)) {
+                    // If the note's pitch is equivalent to B (semitone 11), but its letter is C,
+                    // it means it's Cb. Its MIDI octave is N, but VexFlow needs N+1 to be `c/N+1b`.
+                    if (noteObj.absoluteSemitone % 12 === 11) { // Checks if it's enharmonically B
+                        octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12) + 1;
+                    }
+                }
+                // B#, B##: These notes have a 'B' letter but their pitch is equivalent to 'C' or 'C#',
+                // which might place them in a higher MIDI octave. VexFlow needs them in the B-octave.
+                else if (baseNoteLetter.toUpperCase() === 'B' && ['#', '##'].includes(accidentalSymbol)) {
+                    // If the note's pitch is equivalent to C (semitone 0), but its letter is B,
+                    // it means it's B#. Its MIDI octave is N, but VexFlow needs N-1 to be `b/N-1#`.
+                    if (noteObj.absoluteSemitone % 12 === 0) { // Checks if it's enharmonically C
+                        octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12) - 1;
+                    }
+                }
+                // --- END CRITICAL FIX ---
 
                 finalStaveNoteKeys.push(`${baseNoteLetter}/${octaveForVexFlow}`);
                 finalStaveNoteAccidentals.push(accidentalSymbol || null);
@@ -2032,7 +2038,6 @@
 
             // Clear user's selected notes and feedback message
             console.log("generateComplexExercise: Clearing selection and feedback.");
-            // clearSelection(); // No longer call clearSelection directly, as we pre-select the given note
             feedbackModalOverlay.classList.remove('visible'); // Ensure feedback modal is hidden
             feedbackModalContent.className = 'modal-content'; // Reset feedback modal classes
 
