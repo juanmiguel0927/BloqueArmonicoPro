@@ -733,15 +733,16 @@
             }
             /* Ajuste para la pregunta principal en móvil */
             #chordQuestionText {
-                font-size: 1.5em; /* Ligeramente más grande */
-                margin-top: 0px; /* Subido aún más */
-                margin-bottom: 5px; /* Más cerca del cuadro */
+                font-size: 1.2em; /* Ligeramente más pequeño para asegurar visibilidad */
+                margin-top: 0px;
+                margin-bottom: 15px; /* Más espacio debajo de la pregunta */
             }
             /* En pantallas pequeñas, apila la sección de visualización verticalmente */
             #displaySection {
                 flex-direction: column; /* Apila elementos verticalmente */
                 align-items: center; /* Centra los elementos apilados */
                 gap: 15px; /* Espacio entre el cuadro de notas y el pentagrama */
+                margin-bottom: 20px; /* Más espacio debajo de la sección de visualización */
             }
             #questionArea {
                 max-width: 160px; /* Ancho más pequeño para el cuadro de notas */
@@ -2190,7 +2191,7 @@
             }
 
             exercisesCompletedCount++; // Increment total exercises completed in this batch // Renamed variable
-            totalExercisesAttempted++; // Increment total exercises for overall score // Renamed variable
+            totalExercisesAttempted++; // Total exercises attempted across all batches
             if (isCorrect) {
                 totalCorrectAnswers++; // Increment total correct for overall score
             }
@@ -2710,3 +2711,5 @@
     </script>
 </body>
 </html>
+
+
