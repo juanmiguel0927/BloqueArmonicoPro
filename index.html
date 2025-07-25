@@ -1278,7 +1278,7 @@
                 voicing_rules: {
                     "1": ["1", "b5", "b3", "1"],
                     "b3": ["b3", "1", "b5", "b3"],
-                    "b5": ["b5", "b3", "1", "b5"]
+                    "b5": ["b5", "b3", "1", "b7"] // Fixed: was "b5", "b3", "1", "b5"
                 }
             },
             "sus2": {
@@ -1422,6 +1422,7 @@
         let currentGivenIntervalName = ''; // Stores the name (e.g., "fundamental") of the given interval
         let currentGivenLabel = ''; // Stores the label (e.g., "1", "b3", "11") of the given interval
         let currentGivenNote = ''; // Stores the actual note that was given (e.g., "C#")
+        let currentGivenNoteWithOctave = ''; // Stores the actual note that was given (e.g., "C#") with octave for audio
         let currentOrderedLabelsForDisplay = []; // Stores the labels for the grid in the specific order of the current exercise
         let currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing.
 
@@ -1498,14 +1499,14 @@
         // Feedback duration in milliseconds
         const FEEDBACK_DURATION = 3000; // 3 seconds
 
-        // Global Tone.js synth instance (kept for potential future use, but not used for playback)
+        // Global Tone.js synth and reverb instance
         let synth;
+        let reverb; // Declare reverb globally
         let audioContextStarted = false;
 
         /**
-         * Initializes the Tone.js audio context.
+         * Initializes the Tone.js audio context and the FM synthesizer.
          * Called on "Start" button click to comply with browser autoplay policy.
-         * Note: Actual playback logic has been removed as per user request.
          */
         async function startAudioContext() {
             console.log("Attempting to start AudioContext...");
@@ -1515,12 +1516,35 @@
                     Tone.context.lookAhead = 0.0; // Reduce lookAhead for lower latency
                     console.log("AudioContext started successfully! LookAhead set to 0.0.");
                     audioContextStarted = true;
-                    // Initialize the synthesizer (even if not used for playback, it sets up the audio context)
-                    synth = new Tone.PolySynth(Tone.Synth, {
-                        oscillator: { type: "triangle" },
-                        envelope: { attack: 0.005, decay: 0.2, sustain: 0.1, release: 0.5 }
-                    }).toDestination();
-                    console.log("Synth initialized.");
+
+                    // Initialize Reverb effect
+                    reverb = new Tone.Reverb({
+                        decay: 1.5,    // Reverb decay time in seconds (slightly shorter for clarity)
+                        preDelay: 0.01, // Time before reverb starts
+                        wet: 0.3     // Amount of wet signal (0-1), slightly less wet
+                    }).toDestination(); // Connect reverb directly to output
+
+                    // Initialize the FM synthesizer for a piano-like sound
+                    synth = new Tone.PolySynth(Tone.FMSynth, {
+                        oscillator: { type: "sine" }, // Carrier oscillator
+                        envelope: { // Amplitude envelope for the overall sound
+                            attack: 0.005, // Fast attack for percussive feel
+                            decay: 0.8,  // Moderate decay
+                            sustain: 0.0, // No sustain, decays completely
+                            release: 1.0  // Longer release for piano resonance
+                        },
+                        modulation: { type: "sine" }, // Modulator oscillator
+                        modulationEnvelope: { // Envelope for the modulator
+                            attack: 0.001, // Very fast attack for modulation
+                            decay: 0.2,
+                            sustain: 0.0,
+                            release: 0.2
+                        },
+                        harmonicity: 3, // Relationship between carrier and modulator frequencies
+                        modulationIndex: 15 // Depth of modulation
+                    }).connect(reverb); // Connect synth to reverb
+
+                    console.log("FM Synth and Reverb initialized for piano-like sound.");
                 } catch (e) {
                     console.error("Error al iniciar AudioContext:", e);
                     showCustomMessage("Error de Audio", "No se pudo iniciar el audio. Por favor, asegúrate de que tu navegador lo permita.", "error");
@@ -2095,6 +2119,119 @@
             voice.draw(ctx, stave);
         }
 
+        /**
+         * Determines appropriate octaves for a set of notes for musical playback,
+         * ensuring they form a closed voicing descending from a given highest note.
+         * @param {string[]} notesRaw - Array of raw note names (e.g., ["C", "E", "G"]).
+         * @param {string} highestNoteWithOctave - The note that should be the highest, *including its octave* (e.g., "C4", "G#5").
+         * @returns {Array<{note: string, midi: number}>} Array of notes with assigned octaves and MIDI numbers.
+         */
+        function getNotesWithOctavesForPlayback(notesRaw, highestNoteWithOctave) {
+            if (notesRaw.length === 0) return [];
+
+            let processedNotes = notesRaw.map(noteString => ({
+                originalString: noteString,
+                semitone: noteToSemitoneMap[normalizeNote(noteString)], // Semitone 0-11
+                midi: 0 // Will be calculated
+            }));
+
+            // Parse the highestNoteWithOctave to get its MIDI value
+            let highestNoteMIDI = Tone.Midi(highestNoteWithOctave).toMidi();
+
+            // The first note in processedNotes (which is currentCorrectNotes[0]) is the one that should be played as highest
+            // It needs to be assigned the `highestNoteMIDI`
+            processedNotes[0].midi = highestNoteMIDI;
+
+            let lastMIDIPlaced = highestNoteMIDI;
+
+            // Assign octaves to the rest of the notes in descending order
+            // Sort the *remaining* notes by their semitone (0-11) in descending order to help with placement
+            let otherNotesForPlayback = processedNotes.slice(1);
+            otherNotesForPlayback.sort((a, b) => b.semitone - a.semitone);
+
+            for (let i = 0; i < otherNotesForPlayback.length; i++) {
+                let currentNote = otherNotesForPlayback[i];
+                let candidateMIDI = currentNote.semitone + (Math.floor(lastMIDIPlaced / 12) * 12);
+
+                // Adjust downwards to be strictly below the last placed note to ensure closed voicing
+                while (candidateMIDI >= lastMIDIPlaced) {
+                    candidateMIDI -= 12;
+                }
+
+                // Ensure notes are within a reasonable audible range (e.g., not too low).
+                // Let's ensure they are not below C2 (MIDI 36) and not above C6 (MIDI 84)
+                while (candidateMIDI < 36 && candidateMIDI < (highestNoteMIDI - 24)) { // Ensure at least 2 octaves below highest
+                    candidateMIDI += 12;
+                }
+                while (candidateMIDI > 84) { // C6
+                    candidateMIDI -= 12;
+                }
+                
+                currentNote.midi = candidateMIDI;
+                lastMIDIPlaced = currentNote.midi;
+            }
+
+            // Combine and sort by MIDI for playback (lowest to highest)
+            processedNotes.sort((a, b) => a.midi - b.midi);
+
+            // Convert MIDI to Tone.js note strings (e.g., "C4")
+            return processedNotes.map(noteObj => ({
+                note: Tone.Midi(noteObj.midi).toNote(),
+                midi: noteObj.midi
+            }));
+        }
+
+        /**
+         * Plays the correct chord as an arpeggio (descending) and then as a block chord.
+         * Uses the currentCorrectNotes and currentGivenNote to determine octaves.
+         * @param {string[]} notesToPlay - Array of raw note names (e.g., ["C", "E", "G"]).
+         * @param {string} highestNoteWithOctave - The note that should be the highest, *including its octave* (e.g., "C4", "G#5").
+         */
+        async function playCorrectChordSound(notesToPlay, highestNoteWithOctave) {
+            console.log("playCorrectChordSound: Attempting to play chord sound.");
+            if (!audioContextStarted || !synth) {
+                console.warn("AudioContext not started or synth not initialized. Cannot play sound.");
+                return;
+            }
+
+            // Stop any ongoing playback and clear all scheduled events
+            Tone.Transport.stop();
+            Tone.Transport.cancel(); 
+            Tone.Transport.bpm.value = 60; // Set BPM
+            Tone.Transport.start(); // Start transport immediately
+
+            const notesForPlayback = getNotesWithOctavesForPlayback(notesToPlay, highestNoteWithOctave);
+            // Notes for arpeggio (descending)
+            const noteNamesWithOctavesDescending = notesForPlayback.map(n => n.note).reverse();
+            // Notes for block chord (ascending, as returned by getNotesWithOctavesForPlayback)
+            const noteNamesWithOctavesAscending = notesForPlayback.map(n => n.note);
+
+            if (noteNamesWithOctavesDescending.length === 0) {
+                console.warn("No notes to play for the chord.");
+                return;
+            }
+
+            let currentTime = Tone.now(); // Get the current audio context time for immediate scheduling
+
+            const arpeggioNoteDuration = "8n"; // Eighth note duration for each arpeggio note
+            const arpeggioInterval = 0.15; // Slightly faster interval for arpeggio notes (e.g., 0.15 seconds)
+
+            console.log("playCorrectChordSound: Scheduling descending arpeggio...");
+            noteNamesWithOctavesDescending.forEach((note, index) => {
+                synth.triggerAttackRelease(note, arpeggioNoteDuration, currentTime + (index * arpeggioInterval));
+                console.log(`Playing arpeggio note: ${note} at time: ${currentTime + (index * arpeggioInterval)}`);
+            });
+
+            // Calculate time for the block chord to start after the arpeggio
+            const totalArpeggioDuration = (noteNamesWithOctavesDescending.length - 1) * arpeggioInterval + Tone.Time(arpeggioNoteDuration).toSeconds();
+            const chordStartTime = currentTime + totalArpeggioDuration + 0.2; // Add a small pause after arpeggio
+
+            const chordDuration = "2n"; // Half note duration for the chord
+            console.log("playCorrectChordSound: Scheduling block chord...");
+            synth.triggerAttackRelease(noteNamesWithOctavesAscending, chordDuration, chordStartTime);
+            console.log(`Playing block chord: ${noteNamesWithOctavesAscending.join(', ')} at time: ${chordStartTime}`);
+        }
+
 
         /**
          * Generates a complex chord exercise with a visual grid based on selected difficulty.
@@ -2172,6 +2309,18 @@
             const givenNoteIndex = Math.floor(Math.random() * notesForQuestionRoot.length);
             currentGivenNote = notesForQuestionRoot[givenNoteIndex];
             console.log("generateComplexExercise: Nota dada (principal):", currentGivenNote);
+
+            // Determine the octave for currentGivenNote for playback
+            let baseOctaveForGivenNote;
+            const givenNoteNaturalLetter = currentGivenNote.charAt(0).toUpperCase();
+            if (['C', 'D', 'E', 'F'].includes(givenNoteNaturalLetter)) {
+                baseOctaveForGivenNote = 5; // Aim for C5, D5, E5, F5
+            } else { // G, A, B
+                baseOctaveForGivenNote = 4; // Aim for G4, A4, B4
+            }
+            currentGivenNoteWithOctave = `${currentGivenNote}${baseOctaveForGivenNote}`;
+            console.log("generateComplexExercise: Nota dada con octava para audio:", currentGivenNoteWithOctave);
+
 
             // 4. Calculate the actual root note of the chord
             // The root is 'givenNote' minus the 'givenInterval' semitones
@@ -2378,6 +2527,8 @@
          */
         function handleChangeQuestion() { // Renamed function
             console.log("handleChangeQuestion: Change exercise button clicked.");
+            Tone.Transport.stop(); // Stop any ongoing playback
+            Tone.Transport.cancel(); // Clear all scheduled events
             // Clear selection will now only keep the given note
             clearSelection();
             generateComplexExercise(); // Generate a new exercise
@@ -2419,6 +2570,7 @@
                     feedbackHtml = `<p>¡Correcto! 🎉</p>`;
                     console.log("checkAnswer: Answer is correct. Displaying correct chord on staff.");
                     drawMusicalStaff(currentCorrectNotes); // Display correct notes on staff
+                    playCorrectChordSound(currentCorrectNotes, currentGivenNoteWithOctave); // <--- Play sound for correct answer
                 } else {
                     feedbackHtml = `<p>Incorrecto. Inténtalo de nuevo.</p>`;
                     console.log("checkAnswer: Answer is incorrect. Reverting staff to only given note.");
@@ -2542,6 +2694,8 @@
          */
         function endSession() { // Renamed function
             console.log("endSession: Ending training session.");
+            Tone.Transport.stop(); // Stop any ongoing playback
+            Tone.Transport.cancel(); // Clear all scheduled events
             evaluationModalOverlay.classList.remove('visible');
             mainAppContainer.style.display = 'none'; // Hide the main app UI // Renamed variable
 
@@ -2843,6 +2997,7 @@
             highlightBox.style.top = `${rect.top - 5}px`;
             highlightBox.style.display = 'block';
             highlightBox.style.pointerEvents = 'none'; // Ensure it doesn't block clicks
+            highlightBox.style.position = 'fixed'; // Ensure it stays with viewport
             console.log("applyHighlight: Highlight box positioned and displayed.");
 
             // Show overlay
