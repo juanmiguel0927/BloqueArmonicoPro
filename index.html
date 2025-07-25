@@ -969,84 +969,7 @@
             opacity: 1;
         }
 
-        .tutorial-tooltip {
-            position: absolute;
-            background-color: #334155;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            z-index: 1004; /* Below tutorial modal, above highlight box */
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            max-width: 250px;
-            text-align: left;
-        }
-        .tutorial-tooltip.visible {
-            opacity: 1;
-        }
-
-        /* Arrow for tooltip */
-        .tutorial-tooltip::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-style: solid;
-        }
-
-        /* Tooltip positioning adjustments */
-        .tutorial-tooltip.top::after {
-            border-width: 8px 8px 0 8px;
-            border-color: #334155 transparent transparent transparent;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .tutorial-tooltip.bottom::after {
-            border-width: 0 8px 8px 8px;
-            border-color: transparent transparent #334155 transparent;
-            top: -8px;
-            left: 50%;
-            transform: translateY(-50%);
-        }
-        .tutorial-tooltip.left::after {
-            border-width: 8px 0 8px 8px;
-            border-color: transparent transparent transparent #334155;
-            right: -8px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        .tutorial-tooltip.right::after {
-            border-width: 8px 8px 8px 0;
-            border-color: transparent #334155 transparent transparent;
-            left: -8px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        @media (max-width: 768px) {
-            #tutorialModalContent {
-                padding: 20px;
-            }
-            .tutorial-step h3 {
-                font-size: 1.8em;
-            }
-            .tutorial-step p {
-                font-size: 1em;
-            }
-            .tutorial-buttons button {
-                font-size: 1em;
-                padding: 10px 15px;
-            }
-            .tutorial-tooltip {
-                max-width: 200px;
-                font-size: 0.8em;
-                padding: 8px 12px;
-            }
-        }
+        /* Removed .tutorial-tooltip styles as it's no longer used for duplicated messages */
     </style>
 </head>
 <body>
@@ -1261,7 +1184,7 @@
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                     { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
-                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 },
+                    { semitones: 7, name: "quinta", "label": "5", degreeOffset: 4 },
                     { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
                     { semitones: 2, name: "novena", label: "9", degreeOffset: 1 },
                     { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 }
@@ -1644,8 +1567,8 @@
 
         /**
          * Toggles a note in the selectedUserNotes array.
-         * Note: This function no longer updates the musical staff directly.
-         * The staff is only updated on checkAnswer() or generateComplexExercise().
+         * This function now adds notes in the exact order they are clicked,
+         * maintaining the given note at the first position.
          * @param {string} note - The note string (e.g., "C", "C#", "Db").
          */
         function toggleNoteInAnswer(note) {
@@ -1659,24 +1582,25 @@
             }
 
             const index = selectedUserNotes.findIndex(n => normalizeNote(n) === normalizedNote);
-            let message = '';
-            let messageType = 'info';
+            // let message = ''; // Removed message variable
+            // let messageType = 'info'; // Removed messageType variable
 
             if (index > -1) {
                 // Note found, remove it (only if it's not the given note)
                 selectedUserNotes.splice(index, 1);
-                message = `Nota ${note} eliminada.`;
-                messageType = 'info';
+                // message = `Nota ${note} eliminada.`; // Removed message assignment
+                // messageType = 'info'; // Removed messageType assignment
             } else {
                 // Note not found, add it if less than 4 notes are selected
                 if (selectedUserNotes.length < 4) {
+                    // Add the new note to the end. No automatic sorting here.
                     selectedUserNotes.push(note);
-                    message = `Nota ${note} añadida.`;
-                    messageType = 'success';
+                    // message = `Nota ${note} añadida.`; // Removed message assignment
+                    // messageType = 'success'; // Removed messageType assignment
                 } else {
-                    message = "Límite de 4 notas alcanzado. Deselecciona una antes de añadir otra.";
-                    messageType = 'warning';
-                    showCustomMessage("Límite de Notas", message, messageType);
+                    // message = "Límite de 4 notas alcanzado. Deselecciona una antes de añadir otra."; // Kept this message
+                    // messageType = 'warning'; // Kept this messageType
+                    showCustomMessage("Límite de Notas", "Límite de 4 notas alcanzado. Deselecciona una antes de añadir otra.", "warning");
                     return; // Do not update visuals if not added
                 }
             }
@@ -1684,12 +1608,12 @@
             updateGridNoteDisplays(); // Update grid with selected notes
             // Call drawMusicalStaff with currentGivenNote and selectedUserNotes
             drawMusicalStaff(selectedUserNotes); // Pass all selected notes for highlighting
-            if (message) {
-                // Only show custom message if it's not the "limit reached" one (which is already shown)
-                if (messageType !== 'warning') {
-                    showCustomMessage("Selección de Nota", message, messageType);
-                }
-            }
+            // if (message) { // Removed conditional message display
+            //     // Only show custom message if it's not the "limit reached" one (which is already shown)
+            //     if (messageType !== 'warning') {
+            //         showCustomMessage("Selección de Nota", message, messageType);
+            //     }
+            // }
         }
 
         /**
@@ -1840,7 +1764,7 @@
          * Draws the musical staff with the given notes as a whole note chord, always in treble clef.
          * The `currentGivenNote` will be positioned as the highest voice within G4-G5 range.
          * Other notes in `notesToDisplayRaw` will be placed below it, in closest descending order,
-         * ensuring a closed voicing within an octave range if 4 notes are provided.
+         * ensuring a closed voicing and staying within the octave range of the given note.
          * @param {string[]} notesToDisplayRaw - Array of notes to be displayed (e.g., user's selected notes).
          */
         function drawMusicalStaff(notesToDisplayRaw = []) {
@@ -1873,72 +1797,57 @@
             let processedNotes = notesToDisplayRaw.map(noteString => ({
                 originalString: noteString,
                 semitone: noteToSemitoneMap[normalizeNote(noteString)],
-                absoluteSemitone: 0 // Will be calculated
+                absoluteSemitone: 0 // This will be calculated based on octave placement
             }));
 
-            let arrangedNotesWithOctave = [];
+            // Find the highest note in the chord (which should be currentGivenNote based on selectedUserNotes structure)
+            // If notesToDisplayRaw is currentCorrectNotes, then currentCorrectNotes[0] is the highest.
+            // We assume notesToDisplayRaw is already ordered with the highest note first (the given note).
+            let highestNoteInChord = processedNotes[0]; 
 
-            // 1. Identify the highest note (currentGivenNote) and place it in the G4-G5 range.
-            let highestNoteObj = processedNotes.find(n => normalizeNote(n.originalString) === normalizeNote(currentGivenNote));
-            if (!highestNoteObj) {
-                // Fallback: If currentGivenNote is not found in notesToDisplayRaw,
-                // which should not happen if selectedUserNotes always contains it.
-                // If it does, pick the highest semitone from the provided notes as the top voice.
-                processedNotes.sort((a,b) => b.semitone - a.semitone);
-                highestNoteObj = processedNotes[0];
+            // Determine the octave for the highest note in the chord (currentGivenNote)
+            // Place it in the G4-G5 range (MIDI 67-79) for treble clef readability.
+            let baseOctaveForHighestNote;
+            if (highestNoteInChord.semitone >= naturalLetterSemitone['G']) { // If the note is G or higher (A, B)
+                baseOctaveForHighestNote = 4; // Place it in the 4th octave (e.g., G4, A4, B4)
+            } else { // If the note is C, D, E, F
+                baseOctaveForHighestNote = 5; // Place it in the 5th octave (e.g., C5, D5, E5, F5)
             }
+            highestNoteInChord.absoluteSemitone = highestNoteInChord.semitone + (baseOctaveForHighestNote * 12);
 
-            let targetOctaveForHighest;
-            if (highestNoteObj.semitone >= naturalLetterSemitone['G']) { // G is semitone 7 (MIDI 67)
-                targetOctaveForHighest = 4;
-            } else { // C (MIDI 60) to F# (MIDI 66)
-                targetOctaveForHighest = 5;
-            }
-            highestNoteObj.absoluteSemitone = highestNoteObj.semitone + (targetOctaveForHighest * 12);
-            arrangedNotesWithOctave.push(highestNoteObj);
+            let arrangedNotesWithOctave = [highestNoteInChord];
+            let lastAbsoluteSemitonePlaced = highestNoteInChord.absoluteSemitone;
 
-            // 2. Place the remaining notes below the highest, ensuring closest descending order and closed voicing.
-            // Get the other notes, sort them by semitone in descending order.
-            let otherNotes = processedNotes.filter(n => normalizeNote(n.originalString) !== normalizeNote(highestNoteObj.originalString));
-            otherNotes.sort((a, b) => b.semitone - a.semitone); // Sort by semitone for consistent processing
+            // Define the lower bound for the chord: the highest note's semitone in the octave below `baseOctaveForHighestNote`.
+            // This ensures all notes stay within the octave range of the highest note.
+            const lowerBoundOctaveSemitone = highestNoteInChord.absoluteSemitone - 12; // One octave below the highest note
 
-            let lastAbsoluteSemitonePlaced = highestNoteObj.absoluteSemitone;
+            // Iterate through the remaining notes (which are the user's other 3 selected notes).
+            // Sort them by semitone in descending order for visual staff placement.
+            let otherNotesForStaff = processedNotes.slice(1);
+            otherNotesForStaff.sort((a, b) => b.semitone - a.semitone);
 
-            for (let i = 0; i < otherNotes.length; i++) {
-                let currentOtherNote = otherNotes[i];
-                let foundPlacement = false;
+            for (let i = 0; i < otherNotesForStaff.length; i++) {
+                let currentNote = otherNotesForStaff[i];
+                let candidateAbsoluteSemitone = currentNote.semitone + (Math.floor(lastAbsoluteSemitonePlaced / 12) * 12);
 
-                // Iterate downwards from the last placed note to find the closest valid octave for currentOtherNote
-                // This ensures closed voicing and notes are placed below each other.
-                for (let octaveAdjustment = 0; octaveAdjustment < 2; octaveAdjustment++) { // Check current octave and one below
-                    let candidateAbsoluteSemitone = currentOtherNote.semitone + ((Math.floor(lastAbsoluteSemitonePlaced / 12) - octaveAdjustment) * 12);
-                    
-                    // Ensure the candidate is strictly below the last placed note
-                    while (candidateAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
-                        candidateAbsoluteSemitone -= 12;
-                    }
+                // Adjust downwards to be strictly below the last placed note to ensure closed voicing (if possible).
+                while (candidateAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
+                    candidateAbsoluteSemitone -= 12;
+                }
 
-                    // Check if this position is already taken by another note that has been placed
-                    if (!arrangedNotesWithOctave.some(n => n.absoluteSemitone === candidateAbsoluteSemitone)) {
-                        currentOtherNote.absoluteSemitone = candidateAbsoluteSemitone;
-                        arrangedNotesWithOctave.push(currentOtherNote);
-                        lastAbsoluteSemitonePlaced = candidateAbsoluteSemitone; // Update last placed note
-                        foundPlacement = true;
-                        break; // Found a placement, move to the next note
-                    }
+                // Ensure the note is within the specified octave range:
+                // If the candidate note is below the lower bound of the desired octave range,
+                // bring it up an octave. This is a hard constraint for drawing.
+                // This might break strict closed voicing if the note above is very close,
+                // but it adheres to the user's octave range rule.
+                while (candidateAbsoluteSemitone < lowerBoundOctaveSemitone) {
+                    candidateAbsoluteSemitone += 12;
                 }
                 
-                // Fallback if no ideal closed voicing placement was found (e.g., if notes are enharmonically far apart)
-                if (!foundPlacement) {
-                    // Just place it in the closest octave below the last placed note.
-                    let tempAbsoluteSemitone = currentOtherNote.semitone + (Math.floor(lastAbsoluteSemitonePlaced / 12) * 12);
-                    while (tempAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
-                        tempAbsoluteSemitone -= 12;
-                    }
-                    currentOtherNote.absoluteSemitone = tempAbsoluteSemitone;
-                    arrangedNotesWithOctave.push(currentOtherNote);
-                    lastAbsoluteSemitonePlaced = tempAbsoluteSemitone;
-                }
+                currentNote.absoluteSemitone = candidateAbsoluteSemitone;
+                arrangedNotesWithOctave.push(currentNote);
+                lastAbsoluteSemitonePlaced = currentNote.absoluteSemitone; // Update for next iteration
             }
 
             // Final sort by absolute semitone for VexFlow rendering (ascending order, lowest to highest)
@@ -2096,7 +2005,8 @@
 
 
             // 6. Formulate the question text (more concise)
-            let questionText = `¿Cuáles son las notas del acorde <strong>${selectedChordType.name}</strong> si <strong>${currentGivenNote}</strong> es su <strong>${currentGivenIntervalName}</strong>?`;
+            let questionText = `¿Cuáles son las notas del acorde <strong>${selectedChordType.name}</strong> si <strong>${currentGivenNote}</strong> es su <strong>${currentGivenIntervalName}</strong>?<br>
+                                <small>(Introduce las 3 notas restantes en orden descendente. La 4ta nota es la nota dada.)</small>`;
 
             chordQuestionTextDiv.innerHTML = questionText;
 
@@ -2156,20 +2066,12 @@
             givenNoteDisplaySpan.textContent = currentGivenNote;
             givenNoteDisplaySpan.classList.add('highlighted');
 
-            // Get user's selected notes, excluding the given note, and sort them by semitone
-            const userAddedNotes = selectedUserNotes
-                .filter(note => normalizeNote(note) !== normalizeNote(currentGivenNote))
-                .map(note => ({
-                    originalString: note,
-                    semitone: noteToSemitoneMap[normalizeNote(note)]
-                }))
-                .sort((a, b) => a.semitone - b.semitone); // Sort by semitone for consistent display
-
-            // Populate the remaining cells (index 1 to 3) with sorted user-added notes
+            // Populate the remaining cells (index 1 to 3) with the user's added notes,
+            // which are now in the order they were clicked (after the given note).
             for (let i = 1; i < gridCells.length; i++) {
                 const noteDisplaySpan = gridCells[i].querySelector('.note-display');
-                if (userAddedNotes[i - 1]) { // userAddedNotes has 0, 1, 2 indices for gridCells 1, 2, 3
-                    noteDisplaySpan.textContent = userAddedNotes[i - 1].originalString;
+                if (selectedUserNotes[i]) { // selectedUserNotes[0] is given note, so index i directly maps to selectedUserNotes[i]
+                    noteDisplaySpan.textContent = selectedUserNotes[i];
                 } else {
                     noteDisplaySpan.textContent = ''; // Clear if no note selected for this position
                 }
@@ -2234,6 +2136,10 @@
 
         /**
          * Checks the user's answer.
+         * This function now performs a strict, order-sensitive comparison.
+         * The user's selected notes (after the given note) must be in the exact
+         * descending order as the correct notes, and each note must match its
+         * corresponding interval position.
          */
         async function checkAnswer() {
             console.log("checkAnswer: Starting answer check.");
@@ -2243,16 +2149,19 @@
             const normalizedCorrectNotes = currentCorrectNotes.map(note => normalizeNote(note));
             console.log("checkAnswer: Notas correctas esperadas (normalizadas):", normalizedCorrectNotes);
 
-            // Sort both lists for order-independent comparison
-            userNotesNormalized.sort();
-            normalizedCorrectNotes.sort();
-
             let isCorrect = false;
             let feedbackHtml = '';
 
             // Ensure exactly 4 notes are selected for a valid answer attempt
             if (userNotesNormalized.length === 4) {
-                isCorrect = userNotesNormalized.every((note, index) => note === normalizedCorrectNotes[index]);
+                // Compare arrays directly without sorting, enforcing exact order and content match for each position.
+                isCorrect = userNotesNormalized.every((note, index) => {
+                    // Log for debugging specific mismatches
+                    if (note !== normalizedCorrectNotes[index]) {
+                        console.log(`Mismatch at index ${index}: User selected ${selectedUserNotes[index]} (normalized: ${note}), Expected ${currentCorrectNotes[index]} (normalized: ${normalizedCorrectNotes[index]})`);
+                    }
+                    return note === normalizedCorrectNotes[index];
+                });
 
                 if (isCorrect) {
                     feedbackHtml = `<p>¡Correcto! 🎉</p>`;
@@ -2384,7 +2293,7 @@
             evaluationModalOverlay.classList.remove('visible');
             mainAppContainer.style.display = 'none'; // Hide the main app UI // Renamed variable
 
-            sessionEndTime = Date.now(); // Record session end time
+            sessionEndTime = Date.now(); // Record session start time
             const durationMs = sessionEndTime - sessionStartTime;
 
             // Format duration
@@ -2506,7 +2415,7 @@
         let currentTutorialStepIndex = 0;
         let tutorialStepsData = [];
 
-        // Dynamic highlight elements
+        // Dynamic highlight elements (no longer used for tooltips, but kept for visual highlight box)
         let highlightBox = document.createElement('div');
         highlightBox.classList.add('tutorial-highlight-box');
         document.body.appendChild(highlightBox);
@@ -2515,9 +2424,10 @@
         highlightOverlay.classList.add('tutorial-highlight-overlay');
         document.body.appendChild(highlightOverlay);
 
-        let tooltip = document.createElement('div');
-        tooltip.classList.add('tutorial-tooltip');
-        document.body.appendChild(tooltip);
+        // Removed tooltip element as it's no longer needed for duplicated messages
+        // let tooltip = document.createElement('div');
+        // tooltip.classList.add('tutorial-tooltip');
+        // document.body.appendChild(tooltip);
 
         /**
          * Defines the content and target elements for each tutorial step.
@@ -2533,7 +2443,7 @@
                 {
                     title: "La Pregunta del Ejercicio",
                     text: "Aquí verás la pregunta principal: qué acorde debes armonizar y cuál es la nota dada con su intervalo. Observa la nota resaltada en la cuadrícula.",
-                    targetElementId: "displaySection",
+                    targetElementId: "chordQuestionText", // Changed to target the question text directly
                     // imageSrc removed to avoid obscuring the live app
                 },
                 {
@@ -2543,15 +2453,9 @@
                     // imageSrc removed
                 },
                 {
-                    title: "Selección de Notas Naturales",
-                    text: "Usa estos botones para seleccionar la nota natural (C, D, E, F, G, A, B) que deseas añadir a tu respuesta.",
-                    targetElementId: "naturalNoteButtons",
-                    // imageSrc removed
-                },
-                {
-                    title: "Selección de Accidentales",
-                    text: "Después de elegir una nota natural, puedes añadirle un sostenido (#), doble sostenido (##), bemol (b) o doble bemol (bb) con estos botones.",
-                    targetElementId: "accidentalButtons",
+                    title: "Selección de Notas",
+                    text: "Para seleccionar una nota natural (C, D, E, F, G, A, B), haz un click en su botón. Para añadir una alteración (sostenido, bemol, etc.), haz click en la nota natural y luego en la alteración. Un segundo click en la misma nota o alteración la deseleccionará.",
+                    targetElementId: "noteBuildingControls", // Target both natural and accidental buttons
                     // imageSrc removed
                 },
                 {
@@ -2627,7 +2531,6 @@
             console.log(`showTutorialStep: currentTutorialStepIndex updated to ${currentTutorialStepIndex}.`);
 
             // Ensure main app is visible but dimmed for highlighting
-            // This is already set in window.onload, but ensuring it here for robustness
             mainAppContainer.style.display = 'flex';
             mainAppContainer.style.opacity = '0.3'; // Dim the main app
             mainAppContainer.style.pointerEvents = 'none'; // Disable interaction
@@ -2647,7 +2550,7 @@
             const currentStep = tutorialStepsData[index];
             if (currentStep.targetElementId) {
                 console.log(`showTutorialStep: Applying highlight to element: ${currentStep.targetElementId}`);
-                applyHighlight(currentStep.targetElementId, currentStep.text);
+                applyHighlight(currentStep.targetElementId); // No longer passing tooltip text here
             } else {
                 console.log("showTutorialStep: No target element for highlight, removing any existing highlight.");
                 removeHighlight();
@@ -2656,11 +2559,10 @@
         }
 
         /**
-         * Applies a visual highlight to a target element and shows a tooltip.
+         * Applies a visual highlight to a target element.
          * @param {string} elementId - The ID of the element to highlight.
-         * @param {string} tooltipText - The text to display in the tooltip.
          */
-        function applyHighlight(elementId, tooltipText) {
+        function applyHighlight(elementId) {
             const targetElement = document.getElementById(elementId);
             if (!targetElement) {
                 console.warn(`applyHighlight: Element with ID ${elementId} not found for tutorial highlight.`);
@@ -2683,87 +2585,7 @@
             highlightOverlay.classList.add('visible');
             console.log("applyHighlight: Highlight overlay visible.");
 
-            // Position tooltip
-            tooltip.innerHTML = tooltipText;
-            tooltip.classList.add('visible');
-            tooltip.classList.remove('top', 'bottom', 'left', 'right'); // Reset positioning classes
-
-            let tooltipX, tooltipY;
-            const tooltipPadding = 15; // Padding between element and tooltip
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-
-            // Try bottom
-            tooltipX = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
-            tooltipY = rect.bottom + tooltipPadding;
-            if (tooltipY + tooltip.offsetHeight < viewportHeight) {
-                tooltip.classList.add('bottom');
-            } else {
-                // Try top
-                tooltipY = rect.top - tooltip.offsetHeight - tooltipPadding;
-                if (tooltipY > 0) {
-                    tooltip.classList.add('top');
-                } else {
-                    // Try right
-                    tooltipX = rect.right + tooltipPadding;
-                    tooltipY = rect.top + rect.height / 2 - tooltip.offsetHeight / 2;
-                    if (tooltipX + tooltip.offsetWidth < viewportWidth) {
-                        tooltip.classList.add('right');
-                    } else {
-                        // Try left
-                        tooltipX = rect.left - tooltip.offsetWidth - tooltipPadding;
-                        tooltipY = rect.top + rect.height / 2 - tooltip.offsetHeight / 2;
-                        tooltip.classList.add('left');
-                    }
-                }
-            }
-
-            // Adjust X to keep within viewport
-            if (tooltipX < 0) tooltipX = 0;
-            if (tooltipX + tooltip.offsetWidth > viewportWidth) tooltipX = viewportWidth - tooltip.offsetWidth;
-
-            tooltip.style.left = `${tooltipX}px`;
-            tooltip.style.top = `${tooltipY}px`;
-            console.log(`applyHighlight: Tooltip positioned at (${tooltipX}, ${tooltipY}) with text: ${tooltipText}`);
-
-            // --- New: Adjust tutorial modal content position ---
-            const tutorialModalContent = document.getElementById('tutorialModalContent');
-            const tutorialModalContentRect = tutorialModalContent.getBoundingClientRect();
-
-            // Reset modal position to default (centered by flexbox)
-            tutorialModalContent.style.alignSelf = 'center';
-            tutorialModalContent.style.marginTop = '0';
-            tutorialModalContent.style.marginBottom = '0';
-            tutorialModalContent.style.transform = 'none'; // Ensure no translateY
-
-            // Check for overlap between modal and highlight box
-            const overlap = !(rect.right < tutorialModalContentRect.left ||
-                              rect.left > tutorialModalContentRect.right ||
-                              rect.bottom < tutorialModalContentRect.top ||
-                              rect.top > tutorialModalContentRect.bottom);
-
-            if (overlap) {
-                console.log("applyHighlight: Overlap detected. Adjusting tutorial modal position.");
-                const highlightMidY = rect.top + rect.height / 2;
-                // const modalHeight = tutorialModalContentRect.height; // Not directly used for positioning with align-self
-
-                // Determine if highlight is in upper or lower half of the screen
-                if (highlightMidY < viewportHeight / 2) { // Highlight is in upper half, move modal to bottom
-                    tutorialModalContent.style.alignSelf = 'flex-end'; // Align to bottom of flex container
-                    tutorialModalContent.style.marginBottom = '20px'; // Add a small margin from bottom
-                    tutorialModalContent.style.marginTop = 'auto'; // Push to bottom
-                } else { // Highlight is in lower half, move modal to top
-                    tutorialModalContent.style.alignSelf = 'flex-start'; // Align to top of flex container
-                    tutorialModalContent.style.marginTop = '20px'; // Add a small margin from top
-                    tutorialModalContent.style.marginBottom = 'auto'; // Push to top
-                }
-            } else {
-                console.log("applyHighlight: No overlap. Resetting tutorial modal to center.");
-                tutorialModalContent.style.alignSelf = 'center'; // Center it
-                // Reset margins to auto for flex centering (this is the default behavior of `margin: auto` in flex containers)
-                tutorialModalContent.style.marginTop = 'auto';
-                tutorialModalContent.style.marginBottom = 'auto';
-            }
+            // Removed tooltip positioning logic as it's no longer used for duplicated messages
         }
 
         /**
@@ -2773,7 +2595,7 @@
             console.log("removeHighlight: Removing highlight and tooltip.");
             highlightBox.style.display = 'none';
             highlightOverlay.classList.remove('visible');
-            tooltip.classList.remove('visible');
+            // Removed tooltip.classList.remove('visible');
         }
 
         // Event Listeners for Tutorial Buttons
