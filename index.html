@@ -1278,7 +1278,7 @@
                 voicing_rules: {
                     "1": ["1", "b5", "b3", "1"],
                     "b3": ["b3", "1", "b5", "b3"],
-                    "b5": ["b5", "b3", "1", "b7"] // Fixed: was "b5", "b3", "1", "b5"
+                    "b5": ["b5", "b3", "1", "b7"] // Corrected: was "b5", "b3", "1", "b5"
                 }
             },
             "sus2": {
@@ -1427,9 +1427,9 @@
         let currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing.
 
         // Training Evaluation Variables
-        let exercisesCompletedCount = 0; // Exercises completed in the current batch
-        let totalExercisesAttempted = 0; // Total exercises attempted across all batches
-        let totalCorrectAnswers = 0; // Total correct answers across all batches
+        let exercisesCompletedCount = 0; // Exercises completed in the current batch (unique questions correctly answered)
+        let totalExercisesAttempted = 0; // Total submissions made (including retries on same question)
+        let totalCorrectAnswers = 0; // Total correct submissions
         const EXERCISES_PER_EVALUATION = 5; // Renamed constant
         // Stores performance data for the current evaluation batch: { 'chordType_intervalName': { correct: N, total: M } }
         let trainingSessionData = {}; // Renamed variable
@@ -1630,25 +1630,15 @@
 
         /**
          * Determines the "technically correct" enharmonic spelling for a note based on its interval context.
-         * @param {string} rootNoteString - The original spelling of the chord's root (e.g., "Db", "C#").
+         * @param {string} rootLetter - The natural letter of the chord's root (e.g., "C", "D", "B").
          * @param {number} absoluteTargetSemitone - The absolute semitone value (0-11) of the note to be spelled.
-         * @param {string} intervalLabel - The label of the interval this note represents (e.g., "b3", "5", "#11").
+         * @param {number} targetDegreeOffset - The degree offset of the target note relative to the root (e.g., 0 for 1st, 1 for 2nd, 2 for 3rd, etc.).
          * @returns {string} The technically correct enharmonic spelling (e.g., "Eb", "Gb", "F#").
          */
-        function getCorrectEnharmonicSpelling(rootNoteString, absoluteTargetSemitone, intervalLabel) {
-            const rootLetter = rootNoteString.charAt(0).toUpperCase();
+        function getCorrectEnharmonicSpelling(rootLetter, absoluteTargetSemitone, targetDegreeOffset) {
             const rootLetterNum = letterToNumberMap[rootLetter];
 
-            // Find the interval definition to get the base degree offset
-            const chordType = chordStructures[currentChordTypeKey];
-            const intervalDef = chordType.intervals.find(int => int.label === intervalLabel);
-
-            if (!intervalDef || intervalDef.degreeOffset === undefined) {
-                console.warn(`Could not find degreeOffset for interval label ${intervalLabel}. Falling back to canonical.`);
-                return canonicalNotes[absoluteTargetSemitone];
-            }
-
-            const targetLetterNum = (rootLetterNum + intervalDef.degreeOffset) % 7;
+            const targetLetterNum = (rootLetterNum + targetDegreeOffset + 7) % 7; // +7 to handle negative results from modulo
             const targetBaseLetter = numberToLetterMap[targetLetterNum];
             const targetBaseSemitone = naturalLetterSemitone[targetBaseLetter];
 
@@ -1792,6 +1782,9 @@
             const clickedNote = event.target.dataset.note;
             if (!clickedNote || event.target.classList.contains('disabled')) return;
 
+            console.log("handleNaturalNoteClick: Before modification, selectedUserNotes:", [...selectedUserNotes]);
+            console.log("handleNaturalNoteClick: Clicked note:", clickedNote, "Active accidental:", activeAccidental);
+
             const normalizedClickedNote = normalizeNote(clickedNote);
             const normalizedGivenNote = normalizeNote(currentGivenNote);
 
@@ -1823,6 +1816,7 @@
                         }
                     }
                 }
+                console.log("handleNaturalNoteClick: Note removed. New selectedUserNotes:", [...selectedUserNotes]);
             } else {
                 // Note not found, add it if less than maxNotesAllowed are selected
                 if (selectedUserNotes.length < maxNotesAllowed) {
@@ -1830,6 +1824,7 @@
                     const noteToAdd = activeAccidental ? applyAccidentalToNote(clickedNote, activeAccidental) : clickedNote;
                     selectedUserNotes.push(noteToAdd);
                     lastUserAddedNoteIndex = selectedUserNotes.length - 1; // Mark this as the last user-added note
+                    console.log("handleNaturalNoteClick: Note added. New selectedUserNotes:", [...selectedUserNotes]);
                 } else {
                     showCustomMessage("Límite de Notas", `Límite de ${maxNotesAllowed} notas alcanzado. Deselecciona una antes de añadir otra.`, "warning");
                     return;
@@ -1843,6 +1838,7 @@
             updateSelectedNotesDisplay();
             updateGridNoteDisplays();
             drawMusicalStaff(selectedUserNotes);
+            console.log("handleNaturalNoteClick: After draw, selectedUserNotes:", [...selectedUserNotes]);
         }
 
         /**
@@ -1854,13 +1850,15 @@
             const clickedAccidental = event.target.dataset.accidental;
             if (!clickedAccidental || event.target.classList.contains('disabled')) return;
 
+            console.log("handleAccidentalClick: Before modification, selectedUserNotes:", [...selectedUserNotes]);
+            console.log("handleAccidentalClick: Clicked accidental:", clickedAccidental, "Last user added index:", lastUserAddedNoteIndex);
+
             // If no user-added note to modify, just set the active accidental and return
             if (lastUserAddedNoteIndex === -1) {
                 showCustomMessage("Acción Inválida", "Selecciona primero una nota natural para aplicar una alteración.", "info");
                 return;
             }
 
-            // Get the note to modify
             let noteToModify = selectedUserNotes[lastUserAddedNoteIndex];
             if (!noteToModify) { // Should not happen if lastUserAddedNoteIndex is valid
                 console.error("No note found at lastUserAddedNoteIndex for accidental modification.");
@@ -1873,6 +1871,7 @@
                 event.target.classList.remove('selected'); // Deselect the button
                 // Apply an empty accidental to revert to natural
                 selectedUserNotes[lastUserAddedNoteIndex] = applyAccidentalToNote(noteToModify, '');
+                console.log("handleAccidentalClick: Accidental removed. New selectedUserNotes:", [...selectedUserNotes]);
             } else {
                 // Deselect any previously active accidental button
                 document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => {
@@ -1881,8 +1880,8 @@
                 // Set the new active accidental and select the button
                 activeAccidental = clickedAccidental;
                 event.target.classList.add('selected');
-                // Apply the new accidental
                 selectedUserNotes[lastUserAddedNoteIndex] = applyAccidentalToNote(noteToModify, activeAccidental);
+                console.log("handleAccidentalClick: Accidental applied. New selectedUserNotes:", [...selectedUserNotes]);
             }
             
             // Immediately clear active accidental and deselect the button after application
@@ -1892,6 +1891,7 @@
             updateSelectedNotesDisplay();
             updateGridNoteDisplays();
             drawMusicalStaff(selectedUserNotes);
+            console.log("handleAccidentalClick: After draw, selectedUserNotes:", [...selectedUserNotes]);
         }
 
 
@@ -1899,10 +1899,11 @@
          * Clears all selected notes in the final answer list, except for the given note.
          */
         function clearSelection() {
+            console.log("clearSelection: Before clear, selectedUserNotes:", [...selectedUserNotes]);
             // Filter out the currentGivenNote, keeping only it
             selectedUserNotes = selectedUserNotes.filter(note => normalizeNote(note) === normalizeNote(currentGivenNote));
             lastUserAddedNoteIndex = -1; // Reset last user added note index
-            activeAccidental = ''; // Clear active accidental state
+            activeAccidental = ''; // Clear any active accidental
             // Clear visual selection of all note buttons
             document.querySelectorAll('.note-button').forEach(button => {
                 if (button && button.classList) {
@@ -1913,6 +1914,7 @@
             updateGridNoteDisplays(); // Update grid with selected notes
             // When clearing selection, draw only the currentGivenNote
             drawMusicalStaff(selectedUserNotes); // Pass all selected notes (which will just be the given note)
+            console.log("clearSelection: After clear and draw, selectedUserNotes:", [...selectedUserNotes]);
         }
 
         /**
@@ -1948,6 +1950,7 @@
          * @param {string[]} notesToDisplayRaw - Array of notes to be displayed (e.g., user's selected notes).
          */
         function drawMusicalStaff(notesToDisplayRaw = []) {
+            console.log("drawMusicalStaff: Notes received for drawing:", [...notesToDisplayRaw]);
             const canvas = musicalStaffCanvas;
             if (!canvas) { console.error("Canvas element not found for musical staff."); return; }
             const context = canvas.getContext('2d');
@@ -1971,6 +1974,7 @@
             stave.setContext(ctx).draw();
 
             if (notesToDisplayRaw.length === 0) {
+                console.warn("drawMusicalStaff: No notes to display, drawing empty staff.");
                 return; // Draw empty staff if no notes to display
             }
 
@@ -2055,7 +2059,8 @@
                     console.warn(`Could not parse note string for VexFlow: ${noteObj.originalString}`);
                     return;
                 }
-                let baseNoteLetter = match[1].toLowerCase();
+                // CRITICAL FIX: Convert baseNoteLetter to uppercase for VexFlow
+                let baseNoteLetter = match[1].toUpperCase(); 
                 let accidentalSymbol = match[2];
 
                 // --- CRITICAL FIX: Determine VexFlow octave based on letter and enharmonic context ---
@@ -2087,6 +2092,7 @@
             });
 
             if (finalStaveNoteKeys.length === 0) {
+                console.warn("drawMusicalStaff: No valid notes to draw after processing for VexFlow.");
                 return; // No valid notes to draw after all processing
             }
 
@@ -2117,6 +2123,8 @@
 
             new Formatter().joinVoices([voice]).format([voice], canvas.width - 30);
             voice.draw(ctx, stave);
+            console.log("drawMusicalStaff: Final stave note keys for VexFlow:", finalStaveNoteKeys);
+            console.log("drawMusicalStaff: Final stave note accidentals for VexFlow:", finalStaveNoteAccidentals);
         }
 
         /**
@@ -2322,12 +2330,28 @@
             console.log("generateComplexExercise: Nota dada con octava para audio:", currentGivenNoteWithOctave);
 
 
-            // 4. Calculate the actual root note of the chord
-            // The root is 'givenNote' minus the 'givenInterval' semitones
-            const actualRootSemitone = (noteToSemitoneMap[normalizeNote(currentGivenNote)] - givenInterval.semitones + 12) % 12; // Normalize givenNote here
-            // Store the root in its original spelling from notesForQuestionRoot if possible, otherwise canonical
-            currentChordRoot = notesForQuestionRoot.find(note => normalizeNote(note) === canonicalNotes[actualRootSemitone]) || canonicalNotes[actualRootSemitone];
-            console.log("generateComplexExercise: Raíz calculada del acorde:", currentChordRoot);
+            // 4. Calculate the actual root note of the chord (both letter and semitone)
+            const givenNoteSemitone = noteToSemitoneMap[normalizeNote(currentGivenNote)];
+            const actualRootSemitone = (givenNoteSemitone - givenInterval.semitones + 12) % 12;
+
+            // Determine the correct letter name for the root
+            const givenNoteLetter = currentGivenNote.charAt(0).toUpperCase();
+            const givenNoteLetterNum = letterToNumberMap[givenNoteLetter];
+            // Calculate the root letter based on the degree offset from the given note
+            const rootLetterNum = (givenNoteLetterNum - givenInterval.degreeOffset + 7) % 7; // +7 to handle negative results
+            const rootLetter = numberToLetterMap[rootLetterNum];
+
+            // Now, derive the full spelling of the root based on its calculated letter and semitone
+            const rootNaturalSemitone = naturalLetterSemitone[rootLetter];
+            let rootAccidentalSemitoneDiff = (actualRootSemitone - rootNaturalSemitone + 12) % 12;
+            let rootAccidental = '';
+            if (rootAccidentalSemitoneDiff === 1) rootAccidental = '#';
+            else if (rootAccidentalSemitoneDiff === 2) rootAccidental = '##';
+            else if (rootAccidentalSemitoneDiff === 11) rootAccidental = 'b';
+            else if (rootAccidentalSemitoneDiff === 10) rootAccidental = 'bb';
+            currentChordRoot = `${rootLetter}${rootAccidental}`;
+            console.log("generateComplexExercise: Calculated currentChordRoot (correct spelling):", currentChordRoot);
+
 
             // Create a map of *all* base intervals for quick lookup (original semitones)
             const originalIntervalsMap = {};
@@ -2338,7 +2362,7 @@
             // Determine the labels for the grid and the actual correct notes for the voicing
             let baseVoicingLabels = selectedChordType.voicing_rules[currentGivenLabel];
             if (!baseVoicingLabels) {
-                console.error(`generateComplexExercise: Error: No hay reglas de voicing para la etiqueta principal "${currentGivenLabel}" en el acorde ${currentChordTypeKey}.`);
+                console.error(`generateComplexExercise: Error: No hay reglas de voicing válidas para la etiqueta principal "${currentGivenLabel}" en el acorde ${currentChordTypeKey}.`);
                 chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
                 disableTrainingInteraction();
                 return;
@@ -2373,10 +2397,20 @@
                     return;
                 }
 
-                const actualNoteSemitone = (noteToSemitoneMap[normalizeNote(currentChordRoot)] + semitonesToRoot + 12) % 12; // +12 to handle negative results
-                // Use getCorrectEnharmonicSpelling for the display note
-                const correctSpelling = getCorrectEnharmonicSpelling(currentChordRoot, actualNoteSemitone, displayLabel);
-                currentCorrectNotes.push(correctSpelling);
+                // Calculate the actual semitone of the note in the chord
+                const actualNoteSemitone = (noteToSemitoneMap[normalizeNote(currentChordRoot)] + semitonesToRoot + 12) % 12;
+
+                // Find the degreeOffset for the current label to pass to getCorrectEnharmonicSpelling
+                const intervalDefForSpelling = selectedChordType.intervals.find(int => int.label === label); // Use original label for degreeOffset
+                if (!intervalDefForSpelling || intervalDefForSpelling.degreeOffset === undefined) {
+                    console.warn(`Could not find degreeOffset for interval label ${label}. Falling back to canonical.`);
+                    currentCorrectNotes.push(canonicalNotes[actualNoteSemitone]);
+                } else {
+                    // Pass the *calculated* root letter (e.g., 'B' for Bb) to getCorrectEnharmonicSpelling
+                    const correctSpelling = getCorrectEnharmonicSpelling(rootLetter, actualNoteSemitone, intervalDefForSpelling.degreeOffset);
+                    currentCorrectNotes.push(correctSpelling);
+                }
+                
                 currentOrderedLabelsForDisplay.push(displayLabel); // Use the potentially modified displayLabel for the grid
                 currentActualChordIntervals.push({ label: displayLabel, semitones: semitonesToRoot }); // Store for updateSelectedNotesDisplay
             });
@@ -2418,7 +2452,7 @@
 
 
             // Display ONLY the given note in the first cell and highlight it
-            const noteDisplaySpanInFirstCell = gridCells[0].querySelector('.note-display');
+            const noteDisplaySpanInFirstCell = gridCells[0].querySelector('span.note-display'); // Use span.note-display for specificity
             noteDisplaySpanInFirstCell.textContent = currentGivenNote;
             noteDisplaySpanInFirstCell.classList.add('highlighted');
 
@@ -2555,9 +2589,11 @@
             let isCorrect = false;
             let feedbackHtml = '';
 
-            // Ensure exactly the expected number of notes are selected for a valid answer attempt
+            // Update total attempts regardless of correctness
+            totalExercisesAttempted++;
+
+            // Determine if the current submission is correct
             if (userNotesNormalized.length === expectedNoteCount) {
-                // Compare arrays directly without sorting, enforcing exact order and content match for each position.
                 isCorrect = userNotesNormalized.every((note, index) => {
                     // Log for debugging specific mismatches
                     if (note !== normalizedCorrectNotes[index]) {
@@ -2568,72 +2604,74 @@
 
                 if (isCorrect) {
                     feedbackHtml = `<p>¡Correcto! 🎉</p>`;
-                    console.log("checkAnswer: Answer is correct. Displaying correct chord on staff.");
                     drawMusicalStaff(currentCorrectNotes); // Display correct notes on staff
-                    playCorrectChordSound(currentCorrectNotes, currentGivenNoteWithOctave); // <--- Play sound for correct answer
+                    playCorrectChordSound(currentCorrectNotes, currentGivenNoteWithOctave);
+                    totalCorrectAnswers++; // Increment total correct answers only on correct submission
                 } else {
-                    feedbackHtml = `<p>Incorrecto. Inténtalo de nuevo.</p>`;
-                    console.log("checkAnswer: Answer is incorrect. Reverting staff to only given note.");
+                    feedbackHtml = `<p>Incorrecto. Inténtalo de nuevo.</p>
+                                    <div class="modal-buttons">
+                                        <button id="tryAgainButton">Intentar de Nuevo</button>
+                                    </div>`;
                     drawMusicalStaff([currentGivenNote]); // Revert staff to only the given note
                 }
             } else {
+                // This case handles incorrect number of notes selected
                 feedbackHtml = `<p>Por favor, selecciona exactamente ${expectedNoteCount} notas.</p>`;
                 feedbackModalContent.classList.remove('correct');
                 feedbackModalContent.classList.add('incorrect');
                 feedbackModalContent.innerHTML = feedbackHtml;
-                feedbackModalOverlay.classList.add('visible'); // Show feedback modal
-                disableTrainingInteraction(); // Disable interaction
+                feedbackModalOverlay.classList.add('visible');
+                disableTrainingInteraction();
                 setTimeout(() => {
-                    feedbackModalOverlay.classList.remove('visible'); // Hide feedback modal
-                    enableTrainingInteraction(); // Re-enable interaction
-                }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
-                console.log("checkAnswer: Not expected number of notes selected. Showing feedback and returning.");
-                return; // Exit function if selection is not 4 notes
+                    feedbackModalOverlay.classList.remove('visible');
+                    enableTrainingInteraction();
+                }, FEEDBACK_DURATION);
+                return;
             }
 
-            // Update training session data for evaluation
+            // Update training session data for specific chord/interval performance
+            // This data tracks attempts and correct answers for each unique question type within the batch.
             const performanceKey = `${currentChordTypeKey}_${currentGivenIntervalName}`;
-            if (!trainingSessionData[performanceKey]) { // Renamed variable
-                trainingSessionData[performanceKey] = { correct: 0, total: 0 }; // Renamed variable
+            if (!trainingSessionData[performanceKey]) {
+                trainingSessionData[performanceKey] = { correct: 0, total: 0 };
             }
-            trainingSessionData[performanceKey].total++; // Renamed variable
+            trainingSessionData[performanceKey].total++; // This counts attempts for a specific chord/interval combo
             if (isCorrect) {
-                trainingSessionData[performanceKey].correct++; // Renamed variable
+                trainingSessionData[performanceKey].correct++; // This counts correct submissions for a specific chord/interval combo
             }
 
-            exercisesCompletedCount++; // Increment total exercises completed in this batch // Renamed variable
-            totalExercisesAttempted++; // Total exercises attempted across all batches
-            if (isCorrect) {
-                totalCorrectAnswers++; // Increment total correct for overall score
-            }
-
-            console.log("checkAnswer: Ejercicios respondidos (batch):", exercisesCompletedCount);
-            console.log("checkAnswer: Total ejercicios (general):", totalExercisesAttempted);
-            console.log("checkAnswer: Datos de sesión del entrenamiento:", trainingSessionData);
-
+            // Display feedback modal
             feedbackModalContent.className = 'modal-content'; // Reset classes
             feedbackModalContent.classList.add(isCorrect ? 'correct' : 'incorrect');
             feedbackModalContent.innerHTML = feedbackHtml;
-            feedbackModalOverlay.classList.add('visible'); // Show feedback modal
-
-            // Disable interaction while feedback/evaluation is displayed
+            feedbackModalOverlay.classList.add('visible');
             disableTrainingInteraction();
 
-            // Check if it's time for an evaluation
-            if (exercisesCompletedCount % EXERCISES_PER_EVALUATION === 0) { // Renamed constant
-                console.log("checkAnswer: ¡Es hora de la evaluación! Llamando a displayEvaluation().");
-                // Hide feedback modal, then show evaluation modal after a short delay
+            // Logic for advancing or retrying
+            if (isCorrect) {
+                // Increment exercisesCompletedCount ONLY when a unique question is correctly answered
+                // This counter is used to trigger the evaluation every EXERCISES_PER_EVALUATION questions.
+                exercisesCompletedCount++; 
                 setTimeout(() => {
                     feedbackModalOverlay.classList.remove('visible');
-                    displayEvaluation(); // This will show the evaluation modal
-                }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
-            } else {
-                // If not evaluation, just show feedback for a short time and advance
-                console.log("checkAnswer: Not evaluation time. Showing feedback and generating new exercise.");
-                setTimeout(() => {
-                    feedbackModalOverlay.classList.remove('visible'); // Hide feedback modal
-                    generateComplexExercise(); // Generate a new exercise to start the next batch
-                }, FEEDBACK_DURATION); // Use FEEDBACK_DURATION
+                    // Check for evaluation after a correct answer, regardless of previous incorrect attempts on this question
+                    if (exercisesCompletedCount % EXERCISES_PER_EVALUATION === 0) {
+                        displayEvaluation();
+                    } else {
+                        generateComplexExercise();
+                    }
+                }, FEEDBACK_DURATION);
+            } else { // If incorrect, allow retry on the same question
+                const tryAgainButton = document.getElementById('tryAgainButton');
+                if (tryAgainButton) {
+                    const tryAgainHandler = () => {
+                        feedbackModalOverlay.classList.remove('visible');
+                        clearSelection(); // Clear user's input, keep given note
+                        enableTrainingInteraction(); // Re-enable interaction
+                        tryAgainButton.removeEventListener('click', tryAgainHandler);
+                    };
+                    tryAgainButton.addEventListener('click', tryAgainHandler);
+                }
             }
         }
 
@@ -2642,24 +2680,35 @@
          */
         function displayEvaluation() {
             console.log("displayEvaluation: displayEvaluation() ha sido llamada.");
-            let batchTotalCorrect = 0;
-            let batchTotalQuestions = 0;
+            let batchTotalCorrectUniqueExercises = 0; // Counts unique exercises correctly solved in this batch
+            let batchTotalAttemptsInBatch = 0; // Counts all attempts made in this batch
             const areasToWorkOn = [];
 
-            for (const key in trainingSessionData) { // Renamed variable
-                const data = trainingSessionData[key]; // Renamed variable
-                batchTotalCorrect += data.correct;
-                batchTotalQuestions += data.total;
+            // Calculate overall performance for the current batch of EXERCISES_PER_EVALUATION unique questions.
+            for (const key in trainingSessionData) { 
+                const data = trainingSessionData[key]; 
+                // If this unique exercise was solved at least once correctly, count it as a solved exercise for the batch.
+                if (data.correct > 0) {
+                    batchTotalCorrectUniqueExercises++;
+                }
+                batchTotalAttemptsInBatch += data.total; // Sum all attempts for all exercises in the batch
 
                 if (data.total > 0 && (data.correct / data.total) < 0.6) { // Threshold for "needs work"
                     const [chordTypeKey, intervalName] = key.split('_');
                     const chordName = chordStructures[chordTypeKey] ? chordStructures[chordTypeKey].name : chordTypeKey;
-                    areasToWorkOn.push(`Acordes ${chordName} cuando la ${intervalName} es la nota dada.`);
+                    
+                    // Add detailed performance for the specific area
+                    areasToWorkOn.push(`Acordes ${chordName} cuando la ${intervalName} es la nota dada (Correctas: ${data.correct}, Intentos: ${data.total}, Precisión: ${((data.correct / data.total) * 100).toFixed(0)}%).`);
                 }
             }
 
-            const batchPercentage = batchTotalQuestions > 0 ? ((batchTotalCorrect / batchTotalQuestions) * 100).toFixed(0) : 0;
-            evaluationSummary.innerHTML = `En los últimos ${EXERCISES_PER_EVALUATION} ejercicios: **${batchTotalCorrect} de ${batchTotalQuestions}** correctas (${batchPercentage}%).`; // Renamed constant and text
+            const batchPercentage = batchTotalAttemptsInBatch > 0 ? ((batchTotalCorrectUniqueExercises / batchTotalAttemptsInBatch) * 100).toFixed(0) : 0;
+            
+            // Update the summary text to reflect unique exercises solved vs. total unique exercises in batch,
+            // and then separately show total attempts and overall accuracy.
+            evaluationSummary.innerHTML = `En los últimos ${EXERCISES_PER_EVALUATION} ejercicios: ` +
+                                        `<strong>${batchTotalCorrectUniqueExercises} de ${EXERCISES_PER_EVALUATION}</strong> ejercicios resueltos.<br>` +
+                                        `Tuviste un total de <strong>${batchTotalAttemptsInBatch} intentos</strong> con una precisión del <strong>${batchPercentage}%</strong>.`;
 
             adviceList.innerHTML = ''; // Clear previous advice
             if (areasToWorkOn.length > 0) {
