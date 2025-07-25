@@ -1281,9 +1281,10 @@
         // User selected notes for the final answer list
         let selectedUserNotes = [];
 
-        // New state for the current natural and accidental buttons clicked
-        let activeNaturalNote = ''; // e.g., "C", "D"
-        let activeAccidental = ''; // e.g., "#", "b", "##", "bb" or ""
+        // Global variable to track the index of the last user-added note that can be modified by accidentals
+        let lastUserAddedNoteIndex = -1;
+        // Stores the currently active accidental button (for visual feedback and immediate application)
+        let activeAccidental = '';
 
         // Session timing variables
         let sessionStartTime = 0; // Timestamp when the session starts
@@ -1509,215 +1510,207 @@
          * Updates the visual state of the natural and accidental buttons based on selectedUserNotes.
          */
         function updateButtonSelectionVisuals() {
-            // Remove all 'selected' classes first
-            document.querySelectorAll('.note-button').forEach(button => {
+            // Remove all 'selected' classes first from natural note buttons
+            document.querySelectorAll('.natural-note-buttons .note-button').forEach(button => {
+                if (button && button.classList) { // Defensive check
+                    button.classList.remove('selected');
+                }
+            });
+            // Remove all 'selected' classes first from accidental buttons
+            document.querySelectorAll('.accidental-buttons .note-button').forEach(button => {
                 if (button && button.classList) { // Defensive check
                     button.classList.remove('selected');
                 }
             });
 
-            // Apply 'selected' class to buttons that form part of selected notes
+            // Apply 'selected' class to natural note buttons that are part of selected notes
             selectedUserNotes.forEach(userNote => {
-                const naturalPart = userNote.match(/[A-G]/i)[0];
-                const accidentalPart = userNote.replace(naturalPart, '');
-
-                // Select natural button
-                const naturalButton = document.querySelector(`.natural-note-buttons button[data-note="${naturalPart}"]`);
-                if (naturalButton && naturalButton.classList) { // Defensive check
-                    naturalButton.classList.add('selected');
-                }
-
-                // Select accidental button if present
-                if (accidentalPart) {
-                    const accidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${accidentalPart}"]`);
-                    if (accidentalButton && accidentalButton.classList) { // Defensive check
-                        accidentalButton.classList.add('selected');
+                const naturalPart = userNote.match(/[A-G]/i)?.[0]; // Get the natural part (e.g., "C" from "C#")
+                if (naturalPart) {
+                    const naturalButton = document.querySelector(`.natural-note-buttons button[data-note="${naturalPart}"]`);
+                    if (naturalButton && naturalButton.classList) {
+                        naturalButton.classList.add('selected');
                     }
                 }
             });
+
+            // Apply 'selected' class to the active accidental button
+            if (activeAccidental) {
+                const accidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${activeAccidental}"]`);
+                if (accidentalButton && accidentalButton.classList) {
+                    accidentalButton.classList.add('selected');
+                }
+            }
 
             // Disable note selection buttons if 4 notes are already selected
             const naturalButtons = naturalNoteButtonsContainer.querySelectorAll('.note-button');
             const accidentalButtons = accidentalButtonsContainer.querySelectorAll('.note-button');
 
             if (selectedUserNotes.length >= 4) {
+                // Disable natural note buttons if 4 notes are selected (no more natural notes can be added)
                 naturalButtons.forEach(button => {
                     if (button && button.classList && !button.classList.contains('selected')) { // Defensive check
                         button.classList.add('disabled');
                     }
                 });
-                accidentalButtons.forEach(button => {
-                    if (button && button.classList && !button.classList.contains('selected')) { // Defensive check
-                        button.classList.add('disabled');
-                    }
-                });
-            } else {
-                naturalButtons.forEach(button => {
-                    if (button && button.classList) { // Defensive check
-                        button.classList.remove('disabled');
-                    }
-                });
-                accidentalButtons.forEach(button => {
-                    if (button && button.classList) { // Defensive check
-                        button.classList.remove('disabled');
-                    }
-                });
-            }
-        }
 
-        /**
-         * Toggles a note in the selectedUserNotes array.
-         * This function now adds notes in the exact order they are clicked,
-         * maintaining the given note at the first position.
-         * @param {string} note - The note string (e.g., "C", "C#", "Db").
-         */
-        function toggleNoteInAnswer(note) {
-            const normalizedNote = normalizeNote(note);
-            const normalizedGivenNote = normalizeNote(currentGivenNote);
-
-            // Prevent removal of the currentGivenNote
-            if (normalizedNote === normalizedGivenNote) {
-                showCustomMessage("Nota Dada", "La nota dada no se puede deseleccionar.", "info");
-                return;
-            }
-
-            const index = selectedUserNotes.findIndex(n => normalizeNote(n) === normalizedNote);
-            // let message = ''; // Removed message variable
-            // let messageType = 'info'; // Removed messageType variable
-
-            if (index > -1) {
-                // Note found, remove it (only if it's not the given note)
-                selectedUserNotes.splice(index, 1);
-                // message = `Nota ${note} eliminada.`; // Removed message assignment
-                // messageType = 'info'; // Removed messageType assignment
-            } else {
-                // Note not found, add it if less than 4 notes are selected
-                if (selectedUserNotes.length < 4) {
-                    // Add the new note to the end. No automatic sorting here.
-                    selectedUserNotes.push(note);
-                    // message = `Nota ${note} añadida.`; // Removed message assignment
-                    // messageType = 'success'; // Removed messageType assignment
+                // Accidental buttons:
+                // They should be enabled ONLY if the last user-added note (which must be the 4th note)
+                // is present and can be modified.
+                if (lastUserAddedNoteIndex !== -1 && lastUserAddedNoteIndex === 3) { // Ensure it's the 4th note
+                    accidentalButtons.forEach(button => {
+                        if (button && button.classList) {
+                            button.classList.remove('disabled'); // Enable them
+                        }
+                    });
                 } else {
-                    // message = "Límite de 4 notas alcanzado. Deselecciona una antes de añadir otra."; // Kept this message
-                    // messageType = 'warning'; // Kept this messageType
-                    showCustomMessage("Límite de Notas", "Límite de 4 notas alcanzado. Deselecciona una antes de añadir otra.", "warning");
-                    return; // Do not update visuals if not added
+                    // If 4 notes are selected but the last one isn't the one to be modified by accidentals, disable them.
+                    // This scenario shouldn't happen if lastUserAddedNoteIndex is correctly maintained.
+                    accidentalButtons.forEach(button => {
+                        if (button && button.classList) {
+                            button.classList.add('disabled');
+                        }
+                    });
                 }
+            } else {
+                // If less than 4 notes are selected, enable all natural and accidental buttons
+                naturalButtons.forEach(button => {
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('disabled');
+                    }
+                });
+                accidentalButtons.forEach(button => {
+                    if (button && button.classList) { // Defensive check
+                        button.classList.remove('disabled');
+                    }
+                });
             }
-            updateSelectedNotesDisplay();
-            updateGridNoteDisplays(); // Update grid with selected notes
-            // Call drawMusicalStaff with currentGivenNote and selectedUserNotes
-            drawMusicalStaff(selectedUserNotes); // Pass all selected notes for highlighting
-            // if (message) { // Removed conditional message display
-            //     // Only show custom message if it's not the "limit reached" one (which is already shown)
-            //     if (messageType !== 'warning') {
-            //         showCustomMessage("Selección de Nota", message, messageType);
-            //     }
-            // }
         }
 
         /**
-         * Attempts to combine active natural and accidental notes and toggle them in the answer.
+         * Applies an accidental to a given note string, always starting from its natural part.
+         * This function handles adding, changing, or removing accidentals.
+         * @param {string} noteString - The note (e.g., "C", "D#", "Eb").
+         * @param {string} newAccidental - The accidental to apply ("#", "##", "b", "bb", or "").
+         * @returns {string} The new note string with the applied accidental.
          */
-        function attemptToggleCombinedNote() {
-            if (activeNaturalNote !== '') {
-                const fullNote = `${activeNaturalNote}${activeAccidental}`;
-                toggleNoteInAnswer(fullNote);
-                // Reset active selections after attempting to toggle
-                activeNaturalNote = '';
-                activeAccidental = '';
-                // Deselect natural and accidental buttons visually
-                document.querySelectorAll('.natural-note-buttons .note-button.selected').forEach(button => {
-                    if (button && button.classList) { // Defensive check
-                        button.classList.remove('selected');
-                    }
-                });
-                document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => {
-                    if (button && button.classList) { // Defensive check
-                        button.classList.remove('selected');
-                    }
-                });
+        function applyAccidentalToNote(noteString, newAccidental) {
+            const naturalPartMatch = noteString.match(/[A-G]/i);
+            if (!naturalPartMatch) {
+                console.error(`Invalid note string for accidental application: ${noteString}`);
+                return noteString; // Return original if parsing fails
             }
+            const naturalPart = naturalPartMatch[0]; // e.g., "C" from "C#" or "Cb"
+
+            return `${naturalPart}${newAccidental}`;
         }
 
         /**
          * Handles click on a natural note button.
+         * Adds or removes the natural note, applying any active accidental.
          * @param {Event} event - The click event.
          */
         function handleNaturalNoteClick(event) {
             const clickedNote = event.target.dataset.note;
-            if (!clickedNote || (event.target.classList && event.target.classList.contains('disabled'))) return; // Defensive check
+            if (!clickedNote || event.target.classList.contains('disabled')) return;
 
-            // Deselect previous natural note button if different one is clicked
-            if (activeNaturalNote && activeNaturalNote !== clickedNote) {
-                const prevNaturalButton = document.querySelector(`.natural-note-buttons button[data-note="${activeNaturalNote}"]`);
-                if (prevNaturalButton) prevNaturalButton.classList.remove('selected');
-            }
+            const normalizedClickedNote = normalizeNote(clickedNote);
+            const normalizedGivenNote = normalizeNote(currentGivenNote);
 
-            // Toggle selected class for the clicked natural note button
-            event.target.classList.toggle('selected');
-
-            // If a natural note is already active and the same one is clicked, it means
-            // the user is trying to deselect it or finalize a selection with no accidental.
-            if (activeNaturalNote === clickedNote) {
-                if (activeAccidental === '') { // If no accidental is active, toggle the natural note itself
-                    toggleNoteInAnswer(clickedNote);
+            // Find the note in selectedUserNotes (excluding the given note at index 0)
+            let indexToModify = -1;
+            for (let i = 1; i < selectedUserNotes.length; i++) {
+                // We need to check if the natural part of the selected note matches the clicked natural note
+                const selectedNoteNaturalPart = selectedUserNotes[i].match(/[A-G]/i)?.[0];
+                if (selectedNoteNaturalPart && normalizeNote(selectedNoteNaturalPart) === normalizedClickedNote) {
+                    indexToModify = i;
+                    break;
                 }
-                // In any case, reset activeNaturalNote
-                activeNaturalNote = '';
-            } else {
-                // Set the new active natural note
-                activeNaturalNote = clickedNote;
             }
 
-            // If an accidental is already active, attempt to toggle the combined note
-            if (activeAccidental !== '') {
-                attemptToggleCombinedNote();
+            if (indexToModify > -1) {
+                // Note (or its altered version) found, remove it
+                selectedUserNotes.splice(indexToModify, 1);
+                // If the removed note was the last user-added, reset lastUserAddedNoteIndex
+                if (indexToModify === lastUserAddedNoteIndex) {
+                    lastUserAddedNoteIndex = -1;
+                    // Re-evaluate lastUserAddedNoteIndex to find the new highest user-added note
+                    for (let i = selectedUserNotes.length - 1; i >= 0; i--) {
+                        if (normalizeNote(selectedUserNotes[i]) !== normalizedGivenNote) {
+                            lastUserAddedNoteIndex = i;
+                            break;
+                        }
+                    }
+                }
             } else {
-                // If no natural note is active, just update button visuals
-                updateButtonSelectionVisuals();
+                // Note not found, add it if less than 4 notes are selected
+                if (selectedUserNotes.length < 4) {
+                    // Apply activeAccidental if set, otherwise just add the natural note
+                    const noteToAdd = activeAccidental ? applyAccidentalToNote(clickedNote, activeAccidental) : clickedNote;
+                    selectedUserNotes.push(noteToAdd);
+                    lastUserAddedNoteIndex = selectedUserNotes.length - 1; // Mark this as the last user-added note
+                } else {
+                    showCustomMessage("Límite de Notas", "Límite de 4 notas alcanzado. Deselecciona una antes de añadir otra.", "warning");
+                    return;
+                }
             }
+
+            // Clear active accidental state and its visual selection after a natural note click
+            activeAccidental = '';
+            document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => button.classList.remove('selected'));
+
+            updateSelectedNotesDisplay();
+            updateGridNoteDisplays();
+            drawMusicalStaff(selectedUserNotes);
         }
-
 
         /**
          * Handles click on an accidental button.
+         * Applies the accidental to the last user-added note.
          * @param {Event} event - The click event.
          */
         function handleAccidentalClick(event) {
             const clickedAccidental = event.target.dataset.accidental;
-            if (!clickedAccidental || (event.target.classList && event.target.classList.contains('disabled'))) return; // Defensive check
+            if (!clickedAccidental || event.target.classList.contains('disabled')) return;
 
-            // Deselect previous accidental button if different one is clicked
-            if (activeAccidental && activeAccidental !== clickedAccidental) {
-                const prevAccidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${activeAccidental}"]`);
-                if (prevAccidentalButton) prevAccidentalButton.classList.remove('selected');
+            // If no user-added note to modify, just set the active accidental and return
+            if (lastUserAddedNoteIndex === -1) {
+                showCustomMessage("Acción Inválida", "Selecciona primero una nota natural para aplicar una alteración.", "info");
+                return;
             }
 
-            // Toggle selected class for the clicked accidental button
-            event.target.classList.toggle('selected');
+            // Get the note to modify
+            let noteToModify = selectedUserNotes[lastUserAddedNoteIndex];
+            if (!noteToModify) { // Should not happen if lastUserAddedNoteIndex is valid
+                console.error("No note found at lastUserAddedNoteIndex for accidental modification.");
+                return;
+            }
 
-            // If an accidental is already active and the same one is clicked, it means
-            // the user is trying to deselect it or finalize a selection with the current natural.
+            // If the same accidental is clicked again, it means we want to remove it
             if (activeAccidental === clickedAccidental) {
-                if (activeNaturalNote === '') { // If no natural is active, this click is ambiguous, do nothing or show message
-                    showCustomMessage("Selección", "Por favor, selecciona primero una nota natural (C, D, E, F, G, A, B).", "info");
-                    return;
-                }
-                // In any case, reset activeAccidental
-                activeAccidental = '';
+                activeAccidental = ''; // Clear the active accidental
+                event.target.classList.remove('selected'); // Deselect the button
+                // Apply an empty accidental to revert to natural
+                selectedUserNotes[lastUserAddedNoteIndex] = applyAccidentalToNote(noteToModify, '');
             } else {
-                // Set the new active accidental
+                // Deselect any previously active accidental button
+                document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => {
+                    button.classList.remove('selected');
+                });
+                // Set the new active accidental and select the button
                 activeAccidental = clickedAccidental;
+                event.target.classList.add('selected');
+                // Apply the new accidental
+                selectedUserNotes[lastUserAddedNoteIndex] = applyAccidentalToNote(noteToModify, activeAccidental);
             }
+            
+            // Immediately clear active accidental and deselect the button after application
+            activeAccidental = '';
+            document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => button.classList.remove('selected'));
 
-            // If a natural note is already active, attempt to toggle the combined note
-            if (activeNaturalNote !== '') {
-                attemptToggleCombinedNote();
-            } else {
-                // If no natural note is active, just update button visuals
-                updateButtonSelectionVisuals();
-            }
+            updateSelectedNotesDisplay();
+            updateGridNoteDisplays();
+            drawMusicalStaff(selectedUserNotes);
         }
 
 
@@ -1727,9 +1720,15 @@
         function clearSelection() {
             // Filter out the currentGivenNote, keeping only it
             selectedUserNotes = selectedUserNotes.filter(note => normalizeNote(note) === normalizeNote(currentGivenNote));
-            activeNaturalNote = ''; // Reset active selection states
-            activeAccidental = '';
-            updateSelectedNotesDisplay(); // This will also handle button and keyboard visuals
+            lastUserAddedNoteIndex = -1; // Reset last user added note index
+            activeAccidental = ''; // Clear active accidental state
+            // Clear visual selection of all note buttons
+            document.querySelectorAll('.note-button').forEach(button => {
+                if (button && button.classList) {
+                    button.classList.remove('selected');
+                }
+            });
+            updateSelectedNotesDisplay(); // This will also handle button visuals
             updateGridNoteDisplays(); // Update grid with selected notes
             // When clearing selection, draw only the currentGivenNote
             drawMusicalStaff(selectedUserNotes); // Pass all selected notes (which will just be the given note)
@@ -2030,6 +2029,8 @@
 
             // Pre-select the given note
             selectedUserNotes = [currentGivenNote];
+            lastUserAddedNoteIndex = -1; // No user-added notes yet
+            activeAccidental = ''; // Clear any active accidental
 
             // Draw staff initially with only the currentGivenNote
             drawMusicalStaff(selectedUserNotes); // Draw only the given note, as it's pre-selected
