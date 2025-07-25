@@ -1278,7 +1278,7 @@
                 voicing_rules: {
                     "1": ["1", "b5", "b3", "1"],
                     "b3": ["b3", "1", "b5", "b3"],
-                    "b5": ["b5", "b3", "1", "b7"] // Corrected: was "b5", "b3", "1", "b5"
+                    "b5": ["b5", "b3", "1", "bb7"] // Corrected: was "b5", "b3", "1", "b5"
                 }
             },
             "sus2": {
@@ -1431,7 +1431,7 @@
         let totalExercisesAttempted = 0; // Total submissions made (including retries on same question)
         let totalCorrectAnswers = 0; // Total correct submissions
         const EXERCISES_PER_EVALUATION = 5; // Renamed constant
-        // Stores performance data for the current evaluation batch: { 'chordType_intervalName': { correct: N, total: M } }
+        // Stores performance data for the current evaluation batch: { 'chordType_intervalName': { correct: N, total: M, completed: boolean } }
         let trainingSessionData = {}; // Renamed variable
 
         // User selected notes for the final answer list
@@ -2592,6 +2592,12 @@
             // Update total attempts regardless of correctness
             totalExercisesAttempted++;
 
+            // Ensure performanceKey exists and has a 'completed' flag initialized
+            const performanceKey = `${currentChordTypeKey}_${currentGivenIntervalName}`;
+            if (!trainingSessionData[performanceKey]) {
+                trainingSessionData[performanceKey] = { correct: 0, total: 0, completed: false };
+            }
+
             // Determine if the current submission is correct
             if (userNotesNormalized.length === expectedNoteCount) {
                 isCorrect = userNotesNormalized.every((note, index) => {
@@ -2606,7 +2612,19 @@
                     feedbackHtml = `<p>¡Correcto! 🎉</p>`;
                     drawMusicalStaff(currentCorrectNotes); // Display correct notes on staff
                     playCorrectChordSound(currentCorrectNotes, currentGivenNoteWithOctave);
-                    totalCorrectAnswers++; // Increment total correct answers only on correct submission
+                    
+                    // Increment totalCorrectAnswers for overall session accuracy
+                    totalCorrectAnswers++; 
+
+                    // Increment exercisesCompletedCount ONLY if this question hasn't been completed yet in this batch
+                    if (!trainingSessionData[performanceKey].completed) {
+                        exercisesCompletedCount++;
+                        trainingSessionData[performanceKey].completed = true; // Mark this specific question as completed for the current batch
+                    }
+                    
+                    // Always increment correct count for this specific question type for detailed stats
+                    trainingSessionData[performanceKey].correct++; 
+
                 } else {
                     feedbackHtml = `<p>Incorrecto. Inténtalo de nuevo.</p>
                                     <div class="modal-buttons">
@@ -2629,16 +2647,8 @@
                 return;
             }
 
-            // Update training session data for specific chord/interval performance
-            // This data tracks attempts and correct answers for each unique question type within the batch.
-            const performanceKey = `${currentChordTypeKey}_${currentGivenIntervalName}`;
-            if (!trainingSessionData[performanceKey]) {
-                trainingSessionData[performanceKey] = { correct: 0, total: 0 };
-            }
-            trainingSessionData[performanceKey].total++; // This counts attempts for a specific chord/interval combo
-            if (isCorrect) {
-                trainingSessionData[performanceKey].correct++; // This counts correct submissions for a specific chord/interval combo
-            }
+            // Always increment total count for this specific question type for detailed stats
+            trainingSessionData[performanceKey].total++; 
 
             // Display feedback modal
             feedbackModalContent.className = 'modal-content'; // Reset classes
@@ -2649,9 +2659,6 @@
 
             // Logic for advancing or retrying
             if (isCorrect) {
-                // Increment exercisesCompletedCount ONLY when a unique question is correctly answered
-                // This counter is used to trigger the evaluation every EXERCISES_PER_EVALUATION questions.
-                exercisesCompletedCount++; 
                 setTimeout(() => {
                     feedbackModalOverlay.classList.remove('visible');
                     // Check for evaluation after a correct answer, regardless of previous incorrect attempts on this question
@@ -2680,34 +2687,31 @@
          */
         function displayEvaluation() {
             console.log("displayEvaluation: displayEvaluation() ha sido llamada.");
-            let batchTotalCorrectUniqueExercises = 0; // Counts unique exercises correctly solved in this batch
+            // exercisesCompletedCount already holds the count of unique exercises correctly solved in this batch
             let batchTotalAttemptsInBatch = 0; // Counts all attempts made in this batch
             const areasToWorkOn = [];
 
             // Calculate overall performance for the current batch of EXERCISES_PER_EVALUATION unique questions.
             for (const key in trainingSessionData) { 
                 const data = trainingSessionData[key]; 
-                // If this unique exercise was solved at least once correctly, count it as a solved exercise for the batch.
-                if (data.correct > 0) {
-                    batchTotalCorrectUniqueExercises++;
-                }
                 batchTotalAttemptsInBatch += data.total; // Sum all attempts for all exercises in the batch
 
-                if (data.total > 0 && (data.correct / data.total) < 0.6) { // Threshold for "needs work"
+                // Only add to areasToWorkOn if the question was attempted and accuracy is below threshold
+                if (data.total > 0 && (data.correct / data.total) < 0.8) { // Increased threshold for "needs work" to 80%
                     const [chordTypeKey, intervalName] = key.split('_');
                     const chordName = chordStructures[chordTypeKey] ? chordStructures[chordTypeKey].name : chordTypeKey;
                     
                     // Add detailed performance for the specific area
-                    areasToWorkOn.push(`Acordes ${chordName} cuando la ${intervalName} es la nota dada (Correctas: ${data.correct}, Intentos: ${data.total}, Precisión: ${((data.correct / data.total) * 100).toFixed(0)}%).`);
+                    areasToWorkOn.push(`Acordes ${chordName} con ${intervalName} como voz principal (Correctas: ${data.correct}, Intentos: ${data.total}, Precisión: ${((data.correct / data.total) * 100).toFixed(0)}%).`);
                 }
             }
 
-            const batchPercentage = batchTotalAttemptsInBatch > 0 ? ((batchTotalCorrectUniqueExercises / batchTotalAttemptsInBatch) * 100).toFixed(0) : 0;
-            
+            const batchPercentage = batchTotalAttemptsInBatch > 0 ? ((exercisesCompletedCount / batchTotalAttemptsInBatch) * 100).toFixed(0) : 0; // Use exercisesCompletedCount for overall batch accuracy
+
             // Update the summary text to reflect unique exercises solved vs. total unique exercises in batch,
             // and then separately show total attempts and overall accuracy.
             evaluationSummary.innerHTML = `En los últimos ${EXERCISES_PER_EVALUATION} ejercicios: ` +
-                                        `<strong>${batchTotalCorrectUniqueExercises} de ${EXERCISES_PER_EVALUATION}</strong> ejercicios resueltos.<br>` +
+                                        `<strong>${exercisesCompletedCount} de ${EXERCISES_PER_EVALUATION}</strong> ejercicios resueltos.<br>` +
                                         `Tuviste un total de <strong>${batchTotalAttemptsInBatch} intentos</strong> con una precisión del <strong>${batchPercentage}%</strong>.`;
 
             adviceList.innerHTML = ''; // Clear previous advice
