@@ -70,6 +70,12 @@
             line-height: 1.3;
         }
 
+        #chordQuestionText small .voice-count {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #1e40af;
+        }
+
 
         /* Contenedor para la pregunta y el pentagrama (lado a lado en desktop, apilado en móvil) */
         #displaySection {
@@ -171,6 +177,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px; /* Reduced gap */
+            margin-top: 25px; /* Added margin to separate from display section */
             margin-bottom: 20px; /* Reduced margin */
             flex-grow: 1;
             min-height: 0;
@@ -217,7 +224,7 @@
             font-size: 0.9em; /* Slightly reduced font size */
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
+            transition: background-color: 0.2s ease, transform 0.1s ease;
             user-select: none;
             min-width: 40px; /* Slightly reduced min-width */
             touch-action: manipulation; /* Mejora la respuesta táctil */
@@ -261,7 +268,7 @@
             font-size: 1.1em; /* Slightly reduced font size */
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            transition: background-color: 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             touch-action: manipulation; /* Mejora la respuesta táctil */
             box-sizing: border-box; /* Incluir padding y border en el ancho */
@@ -297,6 +304,22 @@
         }
         #changeQuestionButton:hover {
             background-color: #5a6268;
+        }
+
+        #hintButton {
+            background-color: #3b82f6; /* Blue */
+            color: white;
+        }
+        #hintButton:hover {
+            background-color: #2563eb;
+        }
+
+        #showAnswerButton {
+            background-color: #ef4444; /* Red */
+            color: white;
+        }
+        #showAnswerButton:hover {
+            background-color: #dc2626;
         }
 
         /* Estilos comunes de modal (para retroalimentación y evaluación) */
@@ -380,7 +403,7 @@
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            transition: background-color: 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             touch-action: manipulation; /* Mejora la respuesta táctil */
             box-sizing: border-box; /* Incluir padding y border en el ancho */
@@ -473,12 +496,11 @@
 
         /* New styles for dynamic stats display */
         .final-stats-container {
-            display: flex;
-            justify-content: space-around;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             width: 100%;
             margin-top: 15px;
             margin-bottom: 20px;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
             gap: 15px; /* Spacing between stat boxes */
         }
 
@@ -557,7 +579,7 @@
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            transition: background-color: 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             touch-action: manipulation;
             box-sizing: border-box;
@@ -642,7 +664,7 @@
             font-size: 1.3em;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color: 0.3s ease, transform 0.2s ease;
             box-shadow: 0 6px 12px rgba(0,0,0,0.2);
             touch-action: manipulation; /* Mejora la respuesta táctil */
             box-sizing: border-box; /* Incluir padding y border en el ancho */
@@ -662,10 +684,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%; /* Ocupa todo el ancho disponible */
-            flex: 1; /* Permite que el área del pentagrama ocupe el espacio restante */
-            max-width: 550px; /* Ancho máximo para el pentagrama en pantallas grandes */
-            min-width: 300px; /* Ancho mínimo para el pentagrama en pantallas pequeñas */
+            flex: 0 0 350px; /* Ancho fijo para el área del pentagrama */
+            max-width: 350px;
             height: fit-content;
             padding: 10px;
             box-sizing: border-box;
@@ -675,12 +695,8 @@
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            width: 100%; /* Ajusta el ancho del canvas al contenedor */
-            max-width: 550px; /* Ancho máximo para desktop */
-            height: auto; /* Permite que crezca/se encoja */
-            max-height: 180px; /* Establece una altura máxima para evitar que sea demasiado alto */
-            flex-grow: 1;
-            min-height: 0;
+            width: 100%; /* El canvas ocupa todo el ancho de #staffArea */
+            height: 180px; /* Altura fija para el canvas */
             box-sizing: border-box;
         }
 
@@ -740,7 +756,7 @@
             padding: 8px 15px; /* Reduced padding */
             border-radius: 20px;
             cursor: pointer;
-            transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+            transition: background-color: 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
             font-size: 0.9em; /* Slightly reduced font size */
             font-weight: 500;
             border: 1px solid #cbd5e1;
@@ -762,6 +778,246 @@
 
         .radio-group input[type="radio"]:checked + label:hover {
             background-color: #1e40af;
+        }
+
+        /* NEW: Input Method Toggle Styles */
+        .input-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            padding: 5px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .toggle-button {
+            padding: 8px 15px;
+            border: none;
+            background-color: transparent;
+            color: #475569;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color: 0.2s, color 0.2s;
+        }
+        .toggle-button.active {
+            background-color: #ffffff;
+            color: #2563eb;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* NEW: Piano Styles */
+        .piano-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            height: 250px; /* Taller keys */
+            width: 100%;
+            max-width: 1200px; /* Wider for three octaves */
+            margin: 0 auto 100px auto; /* More margin at the bottom */
+        }
+        .piano-key {
+            border: 1px solid #64748b;
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            transition: background-color: 0.1s ease;
+            box-sizing: border-box;
+        }
+        .piano-key.white {
+            background-color: #ffffff;
+            width: calc(100% / 22); /* 100 / 22 keys (C3 to C6) */
+            height: 100%;
+        }
+        .piano-key.white:hover {
+            background-color: #e2e8f0;
+        }
+        .piano-key.black {
+            background-color: #334155;
+            width: 3%;
+            height: 65%; /* Slightly taller black keys */
+            position: absolute;
+            z-index: 2;
+            transform: translateX(-50%);
+        }
+        .piano-key.black:hover {
+            background-color: #475569;
+        }
+        .piano-key.selected {
+            background-color: #3b82f6;
+            border-color: #1e40af;
+        }
+        /* Positioning for black keys - based on 22 white keys */
+        .piano-key.black[data-note="C#/3"] { left: calc(100% / 22 * 1); }
+        .piano-key.black[data-note="D#/3"] { left: calc(100% / 22 * 2); }
+        .piano-key.black[data-note="F#/3"] { left: calc(100% / 22 * 4); }
+        .piano-key.black[data-note="G#/3"] { left: calc(100% / 22 * 5); }
+        .piano-key.black[data-note="A#/3"] { left: calc(100% / 22 * 6); }
+        .piano-key.black[data-note="C#/4"] { left: calc(100% / 22 * 8); }
+        .piano-key.black[data-note="D#/4"] { left: calc(100% / 22 * 9); }
+        .piano-key.black[data-note="F#/4"] { left: calc(100% / 22 * 11); }
+        .piano-key.black[data-note="G#/4"] { left: calc(100% / 22 * 12); }
+        .piano-key.black[data-note="A#/4"] { left: calc(100% / 22 * 13); }
+        .piano-key.black[data-note="C#/5"] { left: calc(100% / 22 * 15); }
+        .piano-key.black[data-note="D#/5"] { left: calc(100% / 22 * 16); }
+        .piano-key.black[data-note="F#/5"] { left: calc(100% / 22 * 18); }
+        .piano-key.black[data-note="G#/5"] { left: calc(100% / 22 * 19); }
+        .piano-key.black[data-note="A#/5"] { left: calc(100% / 22 * 20); }
+
+
+        /* NEW: Streak Counter Styles */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 5px 10px;
+            box-sizing: border-box;
+            gap: 15px;
+        }
+        .status-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Adjust gap */
+        }
+        .status-bar-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto; /* Push controls to the right */
+        }
+        #streakCounter, #scoreCounter {
+            font-size: 1em; /* smaller base font */
+            font-weight: 600;
+            padding: 4px 10px; /* smaller padding */
+            border-radius: 20px;
+            display: flex; /* use flex for layout */
+            align-items: center; /* center items */
+        }
+        #streakCounter {
+            flex-direction: column; /* Stack for centering */
+            color: #f59e0b; /* Amber color for streak */
+            background-color: #fffbeb;
+            border: 1px solid #fde68a;
+            line-height: 1;
+            padding: 6px 12px;
+        }
+        .streak-label {
+            font-size: 0.6em;
+            font-weight: 500;
+            margin-top: -2px; /* visual adjustment */
+        }
+        .streak-value {
+            font-size: 1.5em; /* large number */
+            font-weight: 700;
+            line-height: 1;
+        }
+        #scoreCounter {
+            color: #475569;
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            flex-direction: column; /* Stack correct/incorrect */
+            line-height: 1.1;
+            padding: 4px 8px;
+            gap: 0;
+        }
+        .score-correct, .score-incorrect {
+            font-size: 0.9em;
+        }
+        
+        #settingsButton {
+            background-color: #8b5cf6; /* Violet */
+            color: white;
+            border: none;
+            padding: 6px 12px; /* smaller padding */
+            font-size: 1em; /* adjust icon size */
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color: 0.2s;
+        }
+        #settingsButton:hover {
+            background-color: #7c3aed;
+        }
+
+        /* Styles for the new notation selector in the status bar */
+        .notation-selector .radio-group {
+            padding: 3px;
+            border-radius: 20px;
+            background-color: #e2e8f0;
+            gap: 3px;
+        }
+        .notation-selector .radio-group label {
+            background-color: transparent;
+            color: #475569;
+            border: none;
+            padding: 4px 8px; /* smaller padding */
+            font-size: 0.7em; /* smaller font */
+            box-shadow: none;
+        }
+        .notation-selector .radio-group input[type="radio"]:checked + label {
+            background-color: #ffffff;
+            color: #2563eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* NEW: Settings Modal Styles */
+        #settingsModalContent {
+            max-width: 600px;
+            text-align: left;
+            margin-top: 0; /* Override default modal margin */
+        }
+        #settingsModalContent h3 {
+            text-align: center;
+        }
+        .settings-section {
+            margin-bottom: 25px;
+        }
+        .settings-section h4 {
+            font-size: 1.2em;
+            color: #475569;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-item input[type="radio"],
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        .checkbox-item label {
+            font-weight: 500;
+            color: #334155;
+            cursor: pointer;
+        }
+        #saveSettingsButton {
+             background-color: #28a745;
+             color: white;
+        }
+        #cancelSettingsButton {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        /* NEW: Enharmonic Modal Styles */
+        #enharmonicModalContent {
+            max-width: 350px;
+        }
+        #enharmonicChoices button {
+            background-color: #3b82f6;
+            color: white;
+            font-size: 1.5em; /* Make text bigger */
         }
 
 
@@ -793,26 +1049,28 @@
             #chordQuestionText small {
                 font-size: 0.7em; /* Make small text even smaller on mobile */
             }
-            /* En pantallas pequeñas, apila la sección de visualización verticalmente */
+            /* Mantener la sección de visualización horizontal en pantallas pequeñas */
             #displaySection {
-                flex-direction: column; /* Apila elementos verticalmente */
-                align-items: center; /* Centra los elementos apilados */
-                gap: 10px; /* Reduced space between note box and staff */
+                flex-direction: row; /* Mantiene los elementos en una fila */
+                align-items: flex-start; /* Alinea los elementos en la parte superior */
+                justify-content: center; /* Centra el grupo */
+                gap: 5px; /* Espacio reducido entre los elementos */
                 margin-bottom: 15px; /* Reduced space below display section */
             }
             #questionArea {
-                max-width: 150px; /* Further reduced width for note box */
-                width: 100%; /* Ensure it takes 100% of parent width */
-                flex: 0 0 auto; /* Prevent stretching */
+                flex: 1 1 45%; /* Permite crecer/encogerse, base del 45% */
+                max-width: 45%; /* Limita el ancho máximo */
+                min-width: 140px; /* Ancho mínimo para evitar que sea demasiado pequeño */
                 padding: 8px; /* Reduced padding */
-                min-width: unset; /* Remove min-width for more flexibility */
             }
             #staffArea {
-                max-width: 170px; /* Further reduced max width for staff */
-                min-width: unset; /* Remove min-width when stacked */
-                width: 100%; /* Ensure it takes 100% of parent width */
-                flex: 0 0 auto;
-                padding: 10px; /* Reduced padding */
+                flex: 1 1 50%; /* Permite crecer/encogerse, base del 50% */
+                max-width: 50%; /* Limita el ancho máximo */
+                min-width: 150px; /* Ancho mínimo */
+                padding: 5px; /* Reduced padding */
+                flex-basis: 180px; /* Base de ancho fija */
+                flex-grow: 0;
+                flex-shrink: 0;
             }
             .note-building-controls {
                 flex-direction: column; /* Stack natural and accidental buttons */
@@ -887,10 +1145,10 @@
                 padding: 12px 25px; /* Adjusted padding */
             }
             #musicalStaffCanvas {
-                width: 100%; /* Ensure canvas takes full width of its parent */
-                height: auto;
-                max-width: 170px; /* Further reduced max width for staff on mobile */
-                max-height: 150px; /* Further reduced max height for staff on mobile */
+                width: 100%; /* El canvas ocupa todo el ancho de #staffArea */
+                height: 160px; /* Altura fija también en móvil */
+                max-width: 100%; /* Remueve el límite de píxeles fijos */
+                max-height: none; /* Remueve la altura máxima */
             }
 
             /* Mobile adjustments for the final stats container */
@@ -965,7 +1223,7 @@
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color: 0.3s ease, transform 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             flex: 1 1 auto; /* Allow buttons to grow */
             min-width: 100px; /* Minimum width for buttons */
@@ -1052,6 +1310,25 @@
     <div class="container" id="mainAppContainer">
         <!-- Question text now at the top, replacing the "Ejercicio:" heading -->
         <p id="chordQuestionText" style="text-align: center; font-size: 1.3em; font-weight: 600; color: #1e40af; margin-bottom: 10px;">Cargando ejercicio...</p>
+        
+        <!-- NEW: Status Bar with Streak and Settings -->
+        <div class="status-bar">
+            <div class="status-bar-left">
+                <div id="streakCounter">🔥 Días de Racha: 0</div>
+                <div id="scoreCounter">✅ 0 / ❌ 0</div>
+            </div>
+            <div class="status-bar-controls">
+                <div class="notation-selector">
+                    <div class="radio-group" id="notationSelection">
+                        <input type="radio" id="notationAmericano" name="notationSystem" value="american" checked>
+                        <label for="notationAmericano">C,D,E</label>
+                        <input type="radio" id="notationLatino" name="notationSystem" value="latin">
+                        <label for="notationLatino">Do,Re,Mi</label>
+                    </div>
+                </div>
+                <button id="settingsButton">⚙️ Ajustes</button>
+            </div>
+        </div>
 
         <!-- New Difficulty Selection -->
         <div class="difficulty-selection" id="difficultySelection">
@@ -1096,6 +1373,12 @@
         </div>
 
         <div class="input-group">
+            <!-- NEW: Input Method Toggle -->
+            <div class="input-toggle">
+                <button id="cifradoToggle" class="toggle-button active">Cifrado</button>
+                <button id="pianoToggle" class="toggle-button">Piano</button>
+            </div>
+
             <div class="note-building-controls" id="noteBuildingControls">
                 <div id="naturalNoteButtons" class="natural-note-buttons">
                     <!-- Natural note buttons will be generated here -->
@@ -1104,11 +1387,17 @@
                     <!-- Accidental buttons will be generated here -->
                 </div>
             </div>
+            <!-- NEW: Piano Input -->
+            <div id="piano-container" class="piano-container" style="display: none;">
+                <!-- Piano keys will be generated here -->
+            </div>
         </div>
 
         <!-- Action buttons -->
         <div class="action-buttons-group">
             <button id="confirmAnswerButton">Confirmar</button>
+            <button id="hintButton">Pista</button>
+            <button id="showAnswerButton">Mostrar Respuesta</button>
             <button id="clearAllSelectionButton">Borrar</button>
             <button id="changeQuestionButton">Cambiar Ejercicio</button>
         </div>
@@ -1123,7 +1412,7 @@
 
     <!-- Evaluation Modal -->
     <div id="evaluationModalOverlay" class="modal-overlay">
-        <div class="modal-content">
+        <div id="evaluationModalContent" class="modal-content">
             <h3>Resultados de la Evaluación</h3>
             <p id="evaluationSummary"></p>
             <p>Áreas a trabajar:</p>
@@ -1136,6 +1425,44 @@
             </div>
         </div>
     </div>
+    
+    <!-- NEW: Settings Modal -->
+    <div id="settingsModalOverlay" class="modal-overlay">
+        <div id="settingsModalContent" class="modal-content">
+            <h3>Ajustes de Práctica</h3>
+            
+            <div class="settings-section">
+                <h4>Tipos de Acorde</h4>
+                <div id="chordTypesCheckboxes" class="checkbox-group">
+                    <!-- Checkboxes for chord types will be generated here -->
+                </div>
+            </div>
+            
+            <div class="settings-section" id="leadVoicesSection">
+                <h4>Voces Principales Permitidas (Tensiones)</h4>
+                <div id="leadVoicesCheckboxes" class="checkbox-group">
+                    <!-- Checkboxes for lead voices will be generated here -->
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button id="saveSettingsButton">Guardar y Reiniciar</button>
+                <button id="cancelSettingsButton">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Enharmonic Choice Modal -->
+    <div id="enharmonicModalOverlay" class="modal-overlay">
+        <div id="enharmonicModalContent" class="modal-content">
+            <h3>Seleccionar Alteración</h3>
+            <p>¿Cómo deseas escribir esta nota?</p>
+            <div id="enharmonicChoices" class="modal-buttons">
+                <!-- Buttons will be generated here -->
+            </div>
+        </div>
+    </div>
+
 
     <!-- Final message display (after ending session) -->
     <div id="finalMessageDisplay">
@@ -1157,6 +1484,14 @@
                 <div class="stat-box">
                     <span class="stat-label">Respuestas Correctas</span>
                     <span class="stat-value" id="correctAnswersDisplay">0</span>
+                </div>
+                 <div class="stat-box">
+                    <span class="stat-label">Pistas Usadas</span>
+                    <span class="stat-value" id="hintsUsedDisplay">0</span>
+                </div>
+                 <div class="stat-box">
+                    <span class="stat-label">Respuestas Usadas</span>
+                    <span class="stat-value" id="answersUsedDisplay">0</span>
                 </div>
                 <div class="stat-box">
                     <span class="stat-label">Precisión Total</span>
@@ -1222,30 +1557,26 @@
         const chordStructures = {
             // Basic Level Triads
             "major": {
-                name: "Mayor (triada)",
+                name: "Mayor",
                 difficulty: "basic",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 4, name: "tercera", label: "3", degreeOffset: 2 },
-                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 }
+                    { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }
                 ],
-                // Voicing rules for 4-part closed harmony, descending from lead voice
-                // For basic, we'll only use the first 3 notes (1 given + 2 user added).
-                // The 4th note here is for internal consistency if we were to use 4 voices always.
-                // It will be sliced later for basic difficulty.
                 voicing_rules: {
-                    "1": ["1", "5", "3", "1"], // Lead is 1, then 5, 3, and 1 (octave lower)
-                    "3": ["3", "1", "5", "3"], // Lead is 3, then 1, 5, and 3 (octave lower)
-                    "5": ["5", "3", "1", "5"]  // Corrected: was "5", "b3", "1", "5"
+                    "1": ["1", "5", "3", "1"], 
+                    "3": ["3", "1", "5", "3"], 
+                    "5": ["5", "3", "1", "5"]
                 }
             },
             "minor": {
-                name: "Menor (triada)",
+                name: "Menor",
                 difficulty: "basic",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
-                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 }
+                    { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }
                 ],
                 voicing_rules: {
                     "1": ["1", "5", "b3", "1"],
@@ -1254,11 +1585,11 @@
                 }
             },
             "augmented": {
-                name: "Aumentada (triada)",
+                name: "Aumentada",
                 difficulty: "basic",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 4, name: "tercera", label: "3", degreeOffset: 2 },
+                    { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
                     { semitones: 8, name: "quinta aumentada", label: "#5", degreeOffset: 4 }
                 ],
                 voicing_rules: {
@@ -1268,26 +1599,26 @@
                 }
             },
             "diminished": {
-                name: "Disminuida (triada)",
+                name: "Disminuida",
                 difficulty: "basic",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
+                    { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                     { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }
                 ],
                 voicing_rules: {
                     "1": ["1", "b5", "b3", "1"],
                     "b3": ["b3", "1", "b5", "b3"],
-                    "b5": ["b5", "b3", "1", "bb7"] // Corrected: was "b5", "b3", "1", "b5"
+                    "b5": ["b5", "b3", "1", "bb7"]
                 }
             },
             "sus2": {
-                name: "Sus2 (triada)",
+                name: "Sus2",
                 difficulty: "basic",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 2, name: "segunda", label: "2", degreeOffset: 1 },
-                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 }
+                    { semitones: 2, name: "segunda mayor", label: "2", degreeOffset: 1 },
+                    { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }
                 ],
                 voicing_rules: {
                     "1": ["1", "5", "2", "1"],
@@ -1296,12 +1627,12 @@
                 }
             },
             "sus4": {
-                name: "Sus4 (triada)",
+                name: "Sus4",
                 difficulty: "basic",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 5, name: "cuarta", label: "4", degreeOffset: 3 },
-                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 }
+                    { semitones: 5, name: "cuarta justa", label: "4", degreeOffset: 3 },
+                    { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }
                 ],
                 voicing_rules: {
                     "1": ["1", "5", "4", "1"],
@@ -1311,14 +1642,14 @@
             },
             // Intermediate Level Chords (up to 7th)
             "maj7": {
-                name: "Mayor Séptima (maj7)",
+                name: "mayor 7",
                 difficulty: "intermediate",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 4, name: "tercera", label: "3", degreeOffset: 2 },
-                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 },
-                    { semitones: 11, name: "séptima", label: "7", degreeOffset: 6 },
-                    { semitones: 2, name: "novena", label: "9", degreeOffset: 1 }, // Tension, for advanced
+                    { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
+                    { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 },
+                    { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, // Tension, for advanced
                     { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 } // Tension, for advanced
                 ],
                 voicing_rules: {
@@ -1331,15 +1662,15 @@
                 }
             },
             "m7": {
-                name: "Menor Séptima (m7)",
+                name: "menor 7",
                 difficulty: "intermediate",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
-                    { semitones: 7, name: "quinta", "label": "5", degreeOffset: 4 },
-                    { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
-                    { semitones: 2, name: "novena", label: "9", degreeOffset: 1 }, // Tension, for advanced
-                    { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 } // Tension, for advanced
+                    { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta justa", "label": "5", degreeOffset: 4 },
+                    { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
+                    { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, // Tension, for advanced
+                    { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 } // Tension, for advanced
                 ],
                 voicing_rules: {
                     "1": ["1", "b7", "5", "b3"],
@@ -1351,19 +1682,19 @@
                 }
             },
             "7": { // Dominant 7th chord
-                name: "Dominante Séptima (7)",
+                name: "7",
                 difficulty: "intermediate",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 4, name: "tercera", label: "3", degreeOffset: 2 },
-                    { semitones: 7, name: "quinta", label: "5", degreeOffset: 4 },
-                    { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
-                    { semitones: 2, name: "novena", label: "9", degreeOffset: 1 }, // Tension, for advanced
+                    { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
+                    { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
+                    { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
+                    { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, // Tension, for advanced
                     { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 }, // Tension, for advanced
                     { semitones: 3, name: "novena aumentada", label: "#9", degreeOffset: 1 }, // Tension, for advanced
                     { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }, // Tension, for advanced
-                    { semitones: 9, name: "trecena", label: "13", degreeOffset: 5 }, // Tension, for advanced
-                    { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 } // Tension, for advanced
+                    { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 }, // Tension, for advanced
+                    { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 } // Tension, for advanced
                 ],
                 voicing_rules: {
                     "1": ["1", "b7", "5", "3"],
@@ -1379,14 +1710,14 @@
                 }
             },
             "m7b5": {
-                name: "Menor Séptima con 5ta Disminuida (m7b5)",
+                name: "menor 7(b5)",
                 difficulty: "intermediate",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
-                    { semitones: 6, name: "quinta", label: "b5", degreeOffset: 4 },
-                    { semitones: 10, name: "séptima", label: "b7", degreeOffset: 6 },
-                    { semitones: 5, name: "onceava", label: "11", degreeOffset: 3 }, // Tension, for advanced
+                    { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
+                    { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 },
+                    { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
+                    { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }, // Tension, for advanced
                     { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 } // Tension, for advanced
                 ],
                 voicing_rules: {
@@ -1399,13 +1730,13 @@
                 }
             },
             "dim7": {
-                name: "Disminuido Séptima (°7)",
+                name: "disminuido 7",
                 difficulty: "intermediate",
                 intervals: [
                     { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
-                    { semitones: 3, name: "tercera", label: "b3", degreeOffset: 2 },
-                    { semitones: 6, name: "quinta", label: "b5", degreeOffset: 4 },
-                    { semitones: 9, name: "séptima", label: "bb7", degreeOffset: 6 }
+                    { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
+                    { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 },
+                    { semitones: 9, name: "séptima disminuida", label: "bb7", degreeOffset: 6 }
                 ],
                 voicing_rules: {
                     "1": ["1", "bb7", "b5", "b3"],
@@ -1416,35 +1747,78 @@
             }
         };
 
-        let currentCorrectNotes = []; // Stores the correct notes for the current exercise (technically correct spelling)
-        let currentChordRoot = ''; // Stores the root of the current chord for feedback (original spelling)
-        let currentChordTypeKey = ''; // Stores the key (e.g., "maj7") of the current chord
-        let currentGivenIntervalName = ''; // Stores the name (e.g., "fundamental") of the given interval
-        let currentGivenLabel = ''; // Stores the label (e.g., "1", "b3", "11") of the given interval
-        let currentGivenNote = ''; // Stores the actual note that was given (e.g., "C#")
-        let currentGivenNoteWithOctave = ''; // Stores the actual note that was given (e.g., "C#") with octave for audio
-        let currentOrderedLabelsForDisplay = []; // Stores the labels for the grid in the specific order of the current exercise
-        let currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing.
+        // --- State Management ---
+        const state = {
+            // Current exercise details
+            correctNotes: [], // Correct notes with spelling but WITHOUT octave
+            correctNotesWithOctave: [], // Correct notes WITH octave for answer checking
+            chordRoot: '',
+            chordTypeKey: '',
+            givenIntervalName: '',
+            givenLabel: '',
+            givenNote: '',
+            givenNoteWithOctave: '', // Note with octave for audio/staff positioning
+            orderedLabelsForDisplay: [],
 
-        // Training Evaluation Variables
-        let exercisesCompletedCount = 0; // Exercises completed in the current batch (unique questions correctly answered)
-        let totalExercisesAttempted = 0; // Total submissions made (including retries on same question)
-        let totalCorrectAnswers = 0; // Total correct submissions
-        const EXERCISES_PER_EVALUATION = 5; // Renamed constant
-        // Stores performance data for the current evaluation batch: { 'chordType_intervalName': { correct: N, total: M, completed: boolean } }
-        let trainingSessionData = {}; // Renamed variable
+            // User interaction state
+            selectedUserNotes: [], // Now stores notes with octave, e.g., ["G/4", "E/4", "C/4"]
+            lastUserAddedNoteIndex: -1,
+            activeAccidental: '',
 
-        // User selected notes for the final answer list
-        let selectedUserNotes = [];
+            // Session timing and statistics
+            session: {
+                startTime: 0,
+                endTime: 0,
+            },
+            stats: {
+                exercisesCompleted: 0,
+                totalAttempts: 0,
+                totalCorrect: 0,
+                currentStreak: 0,
+                lastPlayed: 0,
+                hintsUsed: 0,
+                answersUsed: 0,
+            },
+            
+            // Evaluation data for the current batch
+            evaluation: {
+                questionsAttemptedInBatch: 0,
+                data: {}, // Stores detailed attempt data for areas to work on
+                exercisesPerEval: 5,
+                batchCorrect: 0,
+                batchHintsUsed: 0,
+                batchAnswersUsed: 0
+            },
 
-        // Global variable to track the index of the last user-added note that can be modified by accidentals
-        let lastUserAddedNoteIndex = -1;
-        // Stores the currently active accidental button (for visual feedback and immediate application)
-        let activeAccidental = '';
+            // App settings and preferences
+            userName: '',
+            difficulty: 'basic',
+            notationSystem: 'american', // 'american' or 'latin'
+            customPractice: {
+                isActive: false,
+                allowedChords: [],
+                allowedLeads: []
+            },
 
-        // Session timing variables
-        let sessionStartTime = 0; // Timestamp when the session starts
-        let sessionEndTime = 0; // Timestamp when the session ends
+            // System state
+            audioContextStarted: false
+        };
+
+        const enharmonicEquivalents = {
+            "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb",
+            "Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#"
+        };
+
+        const americanToLatin = {
+            "C": "Do", "D": "Re", "E": "Mi", "F": "Fa", "G": "Sol", "A": "La", "B": "Si"
+        };
+        const latinToAmerican = {
+            "Do": "C", "Re": "D", "Mi": "E", "Fa": "F", "Sol": "G", "La": "A", "Si": "B"
+        };
+
+        const intervalSortOrder = {
+            '1': 1, 'b2': 2, '2': 3, '#2': 4, 'b3': 5, '3': 6, '4': 7, '#4': 8, 'b5': 9, '5': 10, '#5': 11, 'b6': 12, '6': 13, '#6': 14, 'bb7': 15, 'b7': 16, '7': 17, 'b9': 18, '9': 19, '#9': 20, 'b11': 21, '11': 22, '#11': 23, 'b13': 24, '13': 25, '#13': 26
+        };
 
         // DOM elements
         const welcomeModalOverlay = document.getElementById('welcomeModalOverlay'); // New welcome modal
@@ -1465,6 +1839,8 @@
         const confirmAnswerButton = document.getElementById('confirmAnswerButton');
         const clearAllSelectionButton = document.getElementById('clearAllSelectionButton');
         const changeQuestionButton = document.getElementById('changeQuestionButton');
+        const hintButton = document.getElementById('hintButton');
+        const showAnswerButton = document.getElementById('showAnswerButton');
 
 
         // Feedback Modal Elements
@@ -1488,13 +1864,33 @@
         const totalExercisesDisplay = document.getElementById('totalExercisesDisplay'); // New stat display
         const correctAnswersDisplay = document.getElementById('correctAnswersDisplay'); // New stat display
         const overallAccuracyDisplay = document.getElementById('overallAccuracyDisplay'); // New stat display
+        const hintsUsedDisplay = document.getElementById('hintsUsedDisplay');
+        const answersUsedDisplay = document.getElementById('answersUsedDisplay');
         const sessionDateDisplay = document.getElementById('sessionDateDisplay'); // New: Session date display
         const sessionTimeDisplay = document.getElementById('sessionTimeDisplay'); // New: Session time display
         const sessionDurationDisplay = document.getElementById('sessionDurationDisplay'); // New: Session duration display
 
         // Difficulty selection elements
         const difficultyRadios = document.querySelectorAll('input[name="difficulty"]');
-        let currentDifficulty = 'basic'; // Default difficulty
+
+        // NEW: Gamification and Settings Elements
+        const streakCounter = document.getElementById('streakCounter');
+        const scoreCounter = document.getElementById('scoreCounter');
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsModalOverlay = document.getElementById('settingsModalOverlay');
+        const settingsModalContent = document.getElementById('settingsModalContent');
+        const saveSettingsButton = document.getElementById('saveSettingsButton');
+        const cancelSettingsButton = document.getElementById('cancelSettingsButton');
+        const chordTypesCheckboxesContainer = document.getElementById('chordTypesCheckboxes');
+        const leadVoicesCheckboxesContainer = document.getElementById('leadVoicesCheckboxes');
+        const leadVoicesSection = document.getElementById('leadVoicesSection');
+        const cifradoToggle = document.getElementById('cifradoToggle');
+        const pianoToggle = document.getElementById('pianoToggle');
+        const pianoContainer = document.getElementById('piano-container');
+        const enharmonicModalOverlay = document.getElementById('enharmonicModalOverlay');
+        const enharmonicChoicesContainer = document.getElementById('enharmonicChoices');
+        const notationRadios = document.querySelectorAll('input[name="notationSystem"]');
+
 
         // Feedback duration in milliseconds
         const FEEDBACK_DURATION = 3000; // 3 seconds
@@ -1502,7 +1898,6 @@
         // Global Tone.js synth and reverb instance
         let synth;
         let reverb; // Declare reverb globally
-        let audioContextStarted = false;
 
         /**
          * Initializes the Tone.js audio context and the FM synthesizer.
@@ -1510,12 +1905,12 @@
          */
         async function startAudioContext() {
             console.log("Attempting to start AudioContext...");
-            if (!audioContextStarted) {
+            if (!state.audioContextStarted) {
                 try {
                     await Tone.start();
                     Tone.context.lookAhead = 0.0; // Reduce lookAhead for lower latency
                     console.log("AudioContext started successfully! LookAhead set to 0.0.");
-                    audioContextStarted = true;
+                    state.audioContextStarted = true;
 
                     // Initialize Reverb effect
                     reverb = new Tone.Reverb({
@@ -1614,12 +2009,11 @@
 
         /**
          * Normalizes a note to its canonical sharp representation for internal comparison.
-         * Uses noteToSemitoneMap for comprehensive enharmonic handling.
          * @param {string} note - The note to normalize (e.g., "C#", "Db").
          * @returns {string} The normalized note (e.g., "C#", "D").
          */
         function normalizeNote(note) {
-            const upperNote = note.trim().toUpperCase();
+            const upperNote = note.trim().toUpperCase().split('/')[0]; // Ignore octave for normalization
             const semitone = noteToSemitoneMap[upperNote];
             if (semitone !== undefined) {
                 return canonicalNotes[semitone];
@@ -1654,21 +2048,35 @@
             return `${targetBaseLetter}${accidental}`;
         }
 
+        /**
+         * Converts a note name from American to the selected notation system.
+         * @param {string} americanNote - The note in American notation (e.g., "C#", "F", "Bb").
+         * @returns {string} The note in the currently selected notation system.
+         */
+        function displayNote(americanNote) {
+            if (state.notationSystem === 'latin') {
+                const naturalPart = americanNote.match(/[A-G]/)[0];
+                const accidentalPart = americanNote.substring(naturalPart.length);
+                return americanToLatin[naturalPart] + accidentalPart;
+            }
+            return americanNote;
+        }
+
 
         /**
          * Updates the display of selected notes (final answer list) and button visibility.
          */
         function updateSelectedNotesDisplay() {
             // Determine the expected number of notes based on difficulty
-            const expectedNoteCount = (currentDifficulty === 'basic') ? 3 : 4;
+            const expectedNoteCount = (state.difficulty === 'basic') ? 3 : 4;
 
             // Control visibility/disabled state of action buttons
-            confirmAnswerButton.style.display = selectedUserNotes.length === expectedNoteCount ? 'block' : 'none';
-            confirmAnswerButton.disabled = selectedUserNotes.length !== expectedNoteCount;
+            confirmAnswerButton.style.display = state.selectedUserNotes.length === expectedNoteCount ? 'block' : 'none';
+            confirmAnswerButton.disabled = state.selectedUserNotes.length !== expectedNoteCount;
 
             // Clear button is enabled if there are more than just the given note
-            clearAllSelectionButton.style.display = selectedUserNotes.length > 1 ? 'block' : 'none';
-            clearAllSelectionButton.disabled = selectedUserNotes.length <= 1;
+            clearAllSelectionButton.style.display = state.selectedUserNotes.length > 1 ? 'block' : 'none';
+            clearAllSelectionButton.disabled = state.selectedUserNotes.length <= 1;
 
             changeQuestionButton.style.display = 'block'; // Always visible
             changeQuestionButton.disabled = false; // Always enabled (unless training is generally disabled)
@@ -1681,82 +2089,74 @@
          * Updates the visual state of the natural and accidental buttons based on selectedUserNotes.
          */
         function updateButtonSelectionVisuals() {
-            // Remove all 'selected' classes first from natural note buttons
+            const selectedNotesWithoutOctave = state.selectedUserNotes.map(note => note.split('/')[0]);
+
             document.querySelectorAll('.natural-note-buttons .note-button').forEach(button => {
-                if (button && button.classList) { // Defensive check
-                    button.classList.remove('selected');
-                }
+                button.classList.remove('selected');
             });
-            // Remove all 'selected' classes first from accidental buttons
             document.querySelectorAll('.accidental-buttons .note-button').forEach(button => {
-                if (button && button.classList) { // Defensive check
-                    button.classList.remove('selected');
-                }
+                button.classList.remove('selected');
             });
 
-            // Apply 'selected' class to natural note buttons that are part of selected notes
-            selectedUserNotes.forEach(userNote => {
-                const naturalPart = userNote.match(/[A-G]/i)?.[0]; // Get the natural part (e.g., "C" from "C#")
+            selectedNotesWithoutOctave.forEach(userNote => {
+                const naturalPart = userNote.match(/[A-G]/i)?.[0];
                 if (naturalPart) {
                     const naturalButton = document.querySelector(`.natural-note-buttons button[data-note="${naturalPart}"]`);
-                    if (naturalButton && naturalButton.classList) {
+                    if (naturalButton) {
                         naturalButton.classList.add('selected');
                     }
                 }
             });
 
-            // Apply 'selected' class to the active accidental button
-            if (activeAccidental) {
-                const accidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${activeAccidental}"]`);
-                if (accidentalButton && accidentalButton.classList) {
+            if (state.activeAccidental) {
+                const accidentalButton = document.querySelector(`.accidental-buttons button[data-accidental="${state.activeAccidental}"]`);
+                if (accidentalButton) {
                     accidentalButton.classList.add('selected');
                 }
             }
 
-            // Determine the maximum number of user-added notes allowed
-            const maxUserAddedNotes = (currentDifficulty === 'basic') ? 2 : 3;
-            const currentAddedNotesCount = selectedUserNotes.length - 1; // Exclude the given note
+            if (pianoContainer) {
+                // Create a set of selected notes WITH OCTAVE for efficient lookup
+                const selectedNotesWithOctave = new Set(state.selectedUserNotes);
+
+                pianoContainer.querySelectorAll('.piano-key').forEach(key => {
+                    const keyNoteWithOctave = key.dataset.note;
+                    if (keyNoteWithOctave) {
+                        const keyNoteName = keyNoteWithOctave.split('/')[0];
+                        const equivalentName = enharmonicEquivalents[keyNoteName];
+                        const equivalentNoteWithOctave = equivalentName ? `${equivalentName}/${keyNoteWithOctave.split('/')[1]}` : null;
+                        
+                        // Highlight the key if its specific note/octave OR its enharmonic equivalent is in the selection set
+                        if (selectedNotesWithOctave.has(keyNoteWithOctave) || (equivalentNoteWithOctave && selectedNotesWithOctave.has(equivalentNoteWithOctave))) {
+                            key.classList.add('selected');
+                        } else {
+                            key.classList.remove('selected');
+                        }
+                    }
+                });
+            }
+
+
+            const maxUserAddedNotes = (state.difficulty === 'basic') ? 2 : 3;
+            const currentAddedNotesCount = state.selectedUserNotes.length - 1;
 
             const naturalButtons = naturalNoteButtonsContainer.querySelectorAll('.note-button');
             const accidentalButtons = accidentalButtonsContainer.querySelectorAll('.note-button');
 
-            if (currentAddedNotesCount >= maxUserAddedNotes) {
-                naturalButtons.forEach(button => {
-                    if (button && button.classList && !button.classList.contains('selected')) { // Defensive check
-                        button.classList.add('disabled');
-                    }
-                });
-                // Accidental buttons remain enabled if there's a lastUserAddedNoteIndex to modify
-                if (lastUserAddedNoteIndex !== -1) {
-                    accidentalButtons.forEach(button => {
-                        if (button && button.classList) {
-                            button.classList.remove('disabled'); // Enable them
-                        }
-                    });
-                } else {
-                    accidentalButtons.forEach(button => {
-                        if (button && button.classList) {
-                            button.classList.add('disabled'); // Disable if no note to modify
-                        }
-                    });
-                }
+            const disableButtons = currentAddedNotesCount >= maxUserAddedNotes;
+            naturalButtons.forEach(button => {
+                button.classList.toggle('disabled', disableButtons && !button.classList.contains('selected'));
+            });
+
+            if (state.lastUserAddedNoteIndex === -1 && disableButtons) {
+                 accidentalButtons.forEach(button => button.classList.add('disabled'));
             } else {
-                // If less than max notes, enable all natural and accidental buttons
-                naturalButtons.forEach(button => {
-                    if (button && button.classList) { // Defensive check
-                        button.classList.remove('disabled');
-                    }
-                });
-                accidentalButtons.forEach(button => {
-                    if (button && button.classList) { // Defensive check
-                        button.classList.remove('disabled');
-                    }
-                });
+                 accidentalButtons.forEach(button => button.classList.remove('disabled'));
             }
         }
 
         /**
-         * Applies an accidental to a given note string, always starting from its natural part.
+         * Applies an accidental to a given note string (without octave).
          * This function handles adding, changing, or removing accidentals.
          * @param {string} noteString - The note (e.g., "C", "D#", "Eb").
          * @param {string} newAccidental - The accidental to apply ("#", "##", "b", "bb", or "").
@@ -1775,70 +2175,63 @@
 
         /**
          * Handles click on a natural note button.
-         * Adds or removes the natural note, applying any active accidental.
+         * Adds or removes the natural note, calculating the correct descending octave.
          * @param {Event} event - The click event.
          */
         function handleNaturalNoteClick(event) {
             const clickedNote = event.target.dataset.note;
             if (!clickedNote || event.target.classList.contains('disabled')) return;
 
-            console.log("handleNaturalNoteClick: Before modification, selectedUserNotes:", [...selectedUserNotes]);
-            console.log("handleNaturalNoteClick: Clicked note:", clickedNote, "Active accidental:", activeAccidental);
-
-            const normalizedClickedNote = normalizeNote(clickedNote);
-            const normalizedGivenNote = normalizeNote(currentGivenNote);
-
-            // Determine max notes based on difficulty
-            const maxNotesAllowed = (currentDifficulty === 'basic') ? 3 : 4;
-
-            // Find the note in selectedUserNotes (excluding the given note at index 0)
-            let indexToModify = -1;
-            for (let i = 1; i < selectedUserNotes.length; i++) {
-                // We need to check if the natural part of the selected note matches the clicked natural note
-                const selectedNoteNaturalPart = selectedUserNotes[i].match(/[A-G]/i)?.[0];
-                if (selectedNoteNaturalPart && normalizeNote(selectedNoteNaturalPart) === normalizedClickedNote) {
-                    indexToModify = i;
+            const maxNotesAllowed = (state.difficulty === 'basic') ? 3 : 4;
+            
+            // Check if this natural note is already in the selection (ignoring octave)
+            let foundIndex = -1;
+            for(let i = 1; i < state.selectedUserNotes.length; i++) {
+                const naturalPart = state.selectedUserNotes[i].split('/')[0].match(/[A-G]/i)[0];
+                if (naturalPart === clickedNote) {
+                    foundIndex = i;
                     break;
                 }
             }
 
-            if (indexToModify > -1) {
-                // Note (or its altered version) found, remove it
-                selectedUserNotes.splice(indexToModify, 1);
-                // If the removed note was the last user-added, reset lastUserAddedNoteIndex
-                if (indexToModify === lastUserAddedNoteIndex) {
-                    lastUserAddedNoteIndex = -1;
-                    // Re-evaluate lastUserAddedNoteIndex to find the new highest user-added note
-                    for (let i = selectedUserNotes.length - 1; i >= 0; i--) {
-                        if (normalizeNote(selectedUserNotes[i]) !== normalizedGivenNote) {
-                            lastUserAddedNoteIndex = i;
-                            break;
-                        }
-                    }
+            if (foundIndex > -1) {
+                // Note found, remove it
+                state.selectedUserNotes.splice(foundIndex, 1);
+                if (foundIndex === state.lastUserAddedNoteIndex) {
+                     state.lastUserAddedNoteIndex = -1; // Reset
                 }
-                console.log("handleNaturalNoteClick: Note removed. New selectedUserNotes:", [...selectedUserNotes]);
             } else {
-                // Note not found, add it if less than maxNotesAllowed are selected
-                if (selectedUserNotes.length < maxNotesAllowed) {
-                    // Apply activeAccidental if set, otherwise just add the natural note
-                    const noteToAdd = activeAccidental ? applyAccidentalToNote(clickedNote, activeAccidental) : clickedNote;
-                    selectedUserNotes.push(noteToAdd);
-                    lastUserAddedNoteIndex = selectedUserNotes.length - 1; // Mark this as the last user-added note
-                    console.log("handleNaturalNoteClick: Note added. New selectedUserNotes:", [...selectedUserNotes]);
+                // Note not found, add it if there's space
+                if (state.selectedUserNotes.length < maxNotesAllowed) {
+                    // --- INTELLIGENT OCTAVE CALCULATION ---
+                    const lastNoteWithOctave = state.selectedUserNotes[state.selectedUserNotes.length - 1];
+                    const lastNoteMidi = Tone.Midi(lastNoteWithOctave.replace('/', '')).toMidi();
+                    
+                    const newNoteSemitone = noteToSemitoneMap[normalizeNote(clickedNote)];
+                    
+                    // Start by placing it in the same octave as the last note
+                    let candidateMidi = newNoteSemitone + (Math.floor(lastNoteMidi / 12) * 12);
+                    
+                    // Adjust downwards to be strictly below the last placed note
+                    while (candidateMidi >= lastNoteMidi) {
+                        candidateMidi -= 12;
+                    }
+                    
+                    const noteName = Tone.Midi(candidateMidi).toNote();
+                    const noteToAddWithOctave = noteName.replace(/(\d+)$/, '/$1');
+                    state.selectedUserNotes.push(noteToAddWithOctave);
+                    state.lastUserAddedNoteIndex = state.selectedUserNotes.length - 1;
+
                 } else {
-                    showCustomMessage("Límite de Notas", `Límite de ${maxNotesAllowed} notas alcanzado. Deselecciona una antes de añadir otra.`, "warning");
+                    showCustomMessage("Límite de Notas", `Límite de ${maxNotesAllowed} notas alcanzado.`, "warning");
                     return;
                 }
             }
 
-            // Clear active accidental state and its visual selection after a natural note click
-            activeAccidental = '';
+            state.activeAccidental = '';
             document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => button.classList.remove('selected'));
 
-            updateSelectedNotesDisplay();
-            updateGridNoteDisplays();
-            drawMusicalStaff(selectedUserNotes);
-            console.log("handleNaturalNoteClick: After draw, selectedUserNotes:", [...selectedUserNotes]);
+            updateAllDisplays();
         }
 
         /**
@@ -1850,48 +2243,34 @@
             const clickedAccidental = event.target.dataset.accidental;
             if (!clickedAccidental || event.target.classList.contains('disabled')) return;
 
-            console.log("handleAccidentalClick: Before modification, selectedUserNotes:", [...selectedUserNotes]);
-            console.log("handleAccidentalClick: Clicked accidental:", clickedAccidental, "Last user added index:", lastUserAddedNoteIndex);
-
-            // If no user-added note to modify, just set the active accidental and return
-            if (lastUserAddedNoteIndex === -1) {
+            if (state.lastUserAddedNoteIndex === -1) {
                 showCustomMessage("Acción Inválida", "Selecciona primero una nota natural para aplicar una alteración.", "info");
                 return;
             }
 
-            let noteToModify = selectedUserNotes[lastUserAddedNoteIndex];
-            if (!noteToModify) { // Should not happen if lastUserAddedNoteIndex is valid
-                console.error("No note found at lastUserAddedNoteIndex for accidental modification.");
-                return;
-            }
+            let noteToModify = state.selectedUserNotes[state.lastUserAddedNoteIndex];
+            if (!noteToModify) return;
 
-            // If the same accidental is clicked again, it means we want to remove it
-            if (activeAccidental === clickedAccidental) {
-                activeAccidental = ''; // Clear the active accidental
-                event.target.classList.remove('selected'); // Deselect the button
-                // Apply an empty accidental to revert to natural
-                selectedUserNotes[lastUserAddedNoteIndex] = applyAccidentalToNote(noteToModify, '');
-                console.log("handleAccidentalClick: Accidental removed. New selectedUserNotes:", [...selectedUserNotes]);
+            const noteWithoutOctave = noteToModify.split('/')[0];
+            const octave = noteToModify.split('/')[1];
+
+            if (state.activeAccidental === clickedAccidental) {
+                state.activeAccidental = '';
+                event.target.classList.remove('selected');
+                state.selectedUserNotes[state.lastUserAddedNoteIndex] = `${applyAccidentalToNote(noteWithoutOctave, '')}/${octave}`;
             } else {
-                // Deselect any previously active accidental button
                 document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => {
                     button.classList.remove('selected');
                 });
-                // Set the new active accidental and select the button
-                activeAccidental = clickedAccidental;
+                state.activeAccidental = clickedAccidental;
                 event.target.classList.add('selected');
-                selectedUserNotes[lastUserAddedNoteIndex] = applyAccidentalToNote(noteToModify, activeAccidental);
-                console.log("handleAccidentalClick: Accidental applied. New selectedUserNotes:", [...selectedUserNotes]);
+                state.selectedUserNotes[state.lastUserAddedNoteIndex] = `${applyAccidentalToNote(noteWithoutOctave, state.activeAccidental)}/${octave}`;
             }
             
-            // Immediately clear active accidental and deselect the button after application
-            activeAccidental = '';
+            state.activeAccidental = '';
             document.querySelectorAll('.accidental-buttons .note-button.selected').forEach(button => button.classList.remove('selected'));
 
-            updateSelectedNotesDisplay();
-            updateGridNoteDisplays();
-            drawMusicalStaff(selectedUserNotes);
-            console.log("handleAccidentalClick: After draw, selectedUserNotes:", [...selectedUserNotes]);
+            updateAllDisplays();
         }
 
 
@@ -1899,22 +2278,14 @@
          * Clears all selected notes in the final answer list, except for the given note.
          */
         function clearSelection() {
-            console.log("clearSelection: Before clear, selectedUserNotes:", [...selectedUserNotes]);
-            // Filter out the currentGivenNote, keeping only it
-            selectedUserNotes = selectedUserNotes.filter(note => normalizeNote(note) === normalizeNote(currentGivenNote));
-            lastUserAddedNoteIndex = -1; // Reset last user added note index
-            activeAccidental = ''; // Clear any active accidental
-            // Clear visual selection of all note buttons
-            document.querySelectorAll('.note-button').forEach(button => {
-                if (button && button.classList) {
-                    button.classList.remove('selected');
-                }
-            });
-            updateSelectedNotesDisplay(); // This will also handle button visuals
-            updateGridNoteDisplays(); // Update grid with selected notes
-            // When clearing selection, draw only the currentGivenNote
-            drawMusicalStaff(selectedUserNotes); // Pass all selected notes (which will just be the given note)
-            console.log("clearSelection: After clear and draw, selectedUserNotes:", [...selectedUserNotes]);
+            // Keep only the first note (the given note with its octave)
+            state.selectedUserNotes.splice(1);
+            state.lastUserAddedNoteIndex = -1;
+            state.activeAccidental = '';
+
+            document.querySelectorAll('.note-button.selected').forEach(button => button.classList.remove('selected'));
+            
+            updateAllDisplays();
         }
 
         /**
@@ -1924,9 +2295,9 @@
             naturalNoteButtonsContainer.innerHTML = '';
             naturalNotes.forEach(note => {
                 const button = document.createElement('button');
-                button.textContent = note;
+                button.textContent = displayNote(note);
                 button.classList.add('note-button');
-                button.dataset.note = note;
+                button.dataset.note = note; // Internal value is always American
                 naturalNoteButtonsContainer.appendChild(button);
             });
             naturalNoteButtonsContainer.addEventListener('click', handleNaturalNoteClick);
@@ -1943,177 +2314,91 @@
         }
 
         /**
-         * Draws the musical staff with the given notes as a whole note chord, always in treble clef.
-         * The `currentGivenNote` will be positioned as the highest voice within G4-G5 range.
-         * Other notes in `notesToDisplayRaw` will be placed below it, in closest descending order,
-         * ensuring a closed voicing and staying within the octave range of the given note.
-         * @param {string[]} notesToDisplayRaw - Array of notes to be displayed (e.g., user's selected notes).
+         * Generates the three-octave piano keyboard (C3 to C6).
          */
-        function drawMusicalStaff(notesToDisplayRaw = []) {
-            console.log("drawMusicalStaff: Notes received for drawing:", [...notesToDisplayRaw]);
+        function generatePiano() {
+            pianoContainer.innerHTML = '';
+            const octaves = [3, 4, 5];
+            const whiteNotes = ["C", "D", "E", "F", "G", "A", "B"];
+            
+            // Create white keys for three octaves
+            octaves.forEach(octave => {
+                whiteNotes.forEach(note => {
+                    const key = document.createElement('div');
+                    key.classList.add('piano-key', 'white');
+                    key.dataset.note = `${note}/${octave}`;
+                    pianoContainer.appendChild(key);
+                });
+            });
+
+            // Add the final C6 key
+            const c6Key = document.createElement('div');
+            c6Key.classList.add('piano-key', 'white');
+            c6Key.dataset.note = `C/6`;
+            pianoContainer.appendChild(c6Key);
+
+             // Create and position black keys
+            const blackNotes = [
+                "C#/3", "D#/3", "F#/3", "G#/3", "A#/3",
+                "C#/4", "D#/4", "F#/4", "G#/4", "A#/4",
+                "C#/5", "D#/5", "F#/5", "G#/5", "A#/5"
+            ];
+
+            blackNotes.forEach(blackNote => {
+                const key = document.createElement('div');
+                key.classList.add('piano-key', 'black');
+                key.dataset.note = blackNote;
+                pianoContainer.appendChild(key);
+            });
+
+
+            pianoContainer.addEventListener('click', handlePianoKeyClick);
+        }
+
+        /**
+         * Draws the musical staff with the given notes.
+         * @param {string[]} notesWithOctave - Array of notes with octave to display, e.g., ["G/4", "E/4"].
+         */
+        function drawMusicalStaff(notesWithOctave = []) {
+            console.log("drawMusicalStaff: Notes received for drawing:", [...notesWithOctave]);
             const canvas = musicalStaffCanvas;
-            if (!canvas) { console.error("Canvas element not found for musical staff."); return; }
+            if (!canvas) { console.error("Canvas element not found."); return; }
             const context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Resize canvas based on container and screen size
-            const containerWidth = canvas.parentElement.clientWidth;
-            canvas.width = Math.min(containerWidth, 550); // Max width for desktop
-            canvas.height = 180; // Default height for desktop
-            
-            if (window.innerWidth <= 768) {
-                canvas.width = Math.min(containerWidth, 180); // Smaller max-width for mobile
-                canvas.height = 160; // Smaller height for mobile
-            }
+            canvas.width = 330;
+            canvas.height = 180;
 
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
             renderer.resize(canvas.width, canvas.height);
             const ctx = renderer.getContext();
             const stave = new Stave(10, 0, canvas.width - 20);
-            stave.addClef("treble").addTimeSignature("4/4"); // Always treble clef
-            stave.setContext(ctx).draw();
+            stave.addClef("treble").addTimeSignature("4/4").setContext(ctx).draw();
 
-            if (notesToDisplayRaw.length === 0) {
-                console.warn("drawMusicalStaff: No notes to display, drawing empty staff.");
-                return; // Draw empty staff if no notes to display
-            }
+            if (notesWithOctave.length === 0) return;
 
-            let processedNotes = notesToDisplayRaw.map(noteString => ({
-                originalString: noteString,
-                semitone: noteToSemitoneMap[normalizeNote(noteString)],
-                absoluteSemitone: 0 // This will be calculated based on octave placement
-            }));
+            // Sort notes by pitch for correct VexFlow rendering (lowest to highest)
+            const sortedNotes = [...notesWithOctave].sort((a, b) => Tone.Midi(a.replace('/', '')).toMidi() - Tone.Midi(b.replace('/', '')).toMidi());
 
-            // Find the highest note in the chord (which should be currentGivenNote based on selectedUserNotes structure)
-            // If notesToDisplayRaw is currentCorrectNotes, then currentCorrectNotes[0] is the highest.
-            // We assume notesToDisplayRaw is already ordered with the highest note first (the given note).
-            let highestNoteInChord = processedNotes[0]; 
-
-            // Determine the octave for the highest note in the chord (currentGivenNote)
-            let baseOctaveForHighestNote;
-            const highestNoteNaturalLetter = highestNoteInChord.originalString.charAt(0).toUpperCase();
-            const highestNoteAccidental = highestNoteInChord.originalString.substring(1);
-
-            // Determine the "base" octave for the natural letter of the highest note.
-            // This is the octave where the natural version of this note would typically reside
-            // if it were the highest note in a chord around the G4-G5 range.
-            if (['C', 'D', 'E', 'F'].includes(highestNoteNaturalLetter)) {
-                baseOctaveForHighestNote = 5; // Aim for C5, D5, E5, F5
-            } else { // G, A, B
-                baseOctaveForHighestNote = 4; // Aim for G4, A4, B4
-            }
-
-            // Calculate the absolute semitone for the *natural* version of this note in the determined base octave.
-            let naturalAbsoluteSemitoneOfHighest = naturalLetterSemitone[highestNoteNaturalLetter] + (baseOctaveForHighestNote * 12);
-
-            // Now, adjust this natural absolute semitone based on the accidental to get the true MIDI value.
-            let semitonesAdjustment = 0;
-            if (highestNoteAccidental === '#') semitonesAdjustment = 1;
-            else if (highestNoteAccidental === '##') semitonesAdjustment = 2;
-            else if (highestNoteAccidental === 'b') semitonesAdjustment = -1;
-            else if (highestNoteAccidental === 'bb') semitonesAdjustment = -2;
-
-            highestNoteInChord.absoluteSemitone = naturalAbsoluteSemitoneOfHighest + semitonesAdjustment;
-
-            let arrangedNotesWithOctave = [highestNoteInChord];
-            let lastAbsoluteSemitonePlaced = highestNoteInChord.absoluteSemitone;
-
-            // Define the lower bound for the chord: the highest note's semitone in the octave below `baseOctaveForHighestNote`.
-            const lowerBoundOctaveSemitone = highestNoteInChord.absoluteSemitone - 12;
-
-            // Iterate through the remaining notes (which are the user's other selected notes).
-            // Sort them by semitone in descending order for visual staff placement.
-            let otherNotesForStaff = processedNotes.slice(1);
-            otherNotesForStaff.sort((a, b) => b.semitone - a.semitone);
-
-            for (let i = 0; i < otherNotesForStaff.length; i++) {
-                let currentNote = otherNotesForStaff[i];
-                let candidateAbsoluteSemitone = currentNote.semitone + (Math.floor(lastAbsoluteSemitonePlaced / 12) * 12);
-
-                // Adjust downwards to be strictly below the last placed note to ensure closed voicing (if possible).
-                while (candidateAbsoluteSemitone >= lastAbsoluteSemitonePlaced) {
-                    candidateAbsoluteSemitone -= 12;
-                }
-
-                // Ensure the note is within the specified octave range:
-                // If the candidate note is below the lower bound of the desired octave range,
-                // bring it up an octave. This is a hard constraint for drawing.
-                while (candidateAbsoluteSemitone < lowerBoundOctaveSemitone) {
-                    candidateAbsoluteSemitone += 12;
-                }
-                
-                currentNote.absoluteSemitone = candidateAbsoluteSemitone;
-                arrangedNotesWithOctave.push(currentNote);
-                lastAbsoluteSemitonePlaced = currentNote.absoluteSemitone; // Update for next iteration
-            }
-
-            // Final sort by absolute semitone for VexFlow rendering (ascending order, lowest to highest)
-            arrangedNotesWithOctave.sort((a, b) => a.absoluteSemitone - b.absoluteSemitone);
-
-            const finalStaveNoteKeys = [];
-            const finalStaveNoteAccidentals = [];
-
-            arrangedNotesWithOctave.forEach(noteObj => {
-                const match = noteObj.originalString.match(/^([A-G])(.*)$/i);
-                if (!match) {
-                    console.warn(`Could not parse note string for VexFlow: ${noteObj.originalString}`);
-                    return;
-                }
-                // CRITICAL FIX: Convert baseNoteLetter to uppercase for VexFlow
-                let baseNoteLetter = match[1].toUpperCase(); 
-                let accidentalSymbol = match[2];
-
-                // --- CRITICAL FIX: Determine VexFlow octave based on letter and enharmonic context ---
-                let octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12); // Default to MIDI octave
-
-                // Special handling for enharmonic notes that cross conceptual octave boundaries for VexFlow.
-                // Cb, Cbb: These notes have a 'C' letter but their pitch is equivalent to 'B' or 'A#',
-                // which might place them in a lower MIDI octave. VexFlow needs them in the C-octave.
-                if (baseNoteLetter.toUpperCase() === 'C' && ['b', 'bb'].includes(accidentalSymbol)) {
-                    // If the note's pitch is equivalent to B (semitone 11), but its letter is C,
-                    // it means it's Cb. Its MIDI octave is N, but VexFlow needs N+1 to be `c/N+1b`.
-                    if (noteObj.absoluteSemitone % 12 === 11) { // Checks if it's enharmonically B
-                        octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12) + 1;
-                    }
-                }
-                // B#, B##: These notes have a 'B' letter but their pitch is equivalent to 'C' or 'C#',
-                // which might place them in a higher MIDI octave. VexFlow needs them in the B-octave.
-                else if (baseNoteLetter.toUpperCase() === 'B' && ['#', '##'].includes(accidentalSymbol)) {
-                    // If the note's pitch is equivalent to C (semitone 0), but its letter is B,
-                    // it means it's B#. Its MIDI octave is N, but VexFlow needs N-1 to be `b/N-1#`.
-                    if (noteObj.absoluteSemitone % 12 === 0) { // Checks if it's enharmonically C
-                        octaveForVexFlow = Math.floor(noteObj.absoluteSemitone / 12) - 1;
-                    }
-                }
-                // --- END CRITICAL FIX ---
-
-                finalStaveNoteKeys.push(`${baseNoteLetter}/${octaveForVexFlow}`);
-                finalStaveNoteAccidentals.push(accidentalSymbol || null);
-            });
-
-            if (finalStaveNoteKeys.length === 0) {
-                console.warn("drawMusicalStaff: No valid notes to draw after processing for VexFlow.");
-                return; // No valid notes to draw after all processing
-            }
-
+            const staveNoteKeys = sortedNotes.map(note => note.toLowerCase());
+            const notesForHighlighting = notesWithOctave.map(note => note.toLowerCase());
+            
             const chordStaveNote = new StaveNote({
-                keys: finalStaveNoteKeys,
+                keys: staveNoteKeys,
                 duration: "w"
             });
 
-            // Apply highlighting to selected notes
-            notesToDisplayRaw.forEach(highlightNote => { // Use notesToDisplayRaw for highlighting
-                const normalizedHighlightNote = normalizeNote(highlightNote);
-                arrangedNotesWithOctave.forEach((noteObj, index) => {
-                    if (normalizeNote(noteObj.originalString) === normalizedHighlightNote) {
-                        chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" }); // Blue color
-                    }
-                });
+            // Apply highlighting to all selected notes
+             staveNoteKeys.forEach((key, index) => {
+                if (notesForHighlighting.includes(key)) {
+                    chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" });
+                }
             });
 
             // Add accidentals
-            finalStaveNoteAccidentals.forEach((accidental, index) => {
-                if (accidental) {
+            sortedNotes.forEach((note, index) => {
+                if (note.includes('#') || note.includes('b')) {
+                    const accidental = note.includes('##') ? '##' : note.includes('bb') ? 'bb' : note.includes('#') ? '#' : 'b';
                     chordStaveNote.addAccidental(index, new Accidental(accidental));
                 }
             });
@@ -2123,225 +2408,141 @@
 
             new Formatter().joinVoices([voice]).format([voice], canvas.width - 30);
             voice.draw(ctx, stave);
-            console.log("drawMusicalStaff: Final stave note keys for VexFlow:", finalStaveNoteKeys);
-            console.log("drawMusicalStaff: Final stave note accidentals for VexFlow:", finalStaveNoteAccidentals);
         }
 
         /**
-         * Determines appropriate octaves for a set of notes for musical playback,
-         * ensuring they form a closed voicing descending from a given highest note.
+         * Determines appropriate octaves for a set of notes for musical playback.
+         * This function now returns notes with octaves based on the pre-calculated correct answer.
          * @param {string[]} notesRaw - Array of raw note names (e.g., ["C", "E", "G"]).
-         * @param {string} highestNoteWithOctave - The note that should be the highest, *including its octave* (e.g., "C4", "G#5").
-         * @returns {Array<{note: string, midi: number}>} Array of notes with assigned octaves and MIDI numbers.
+         * @param {string} highestNoteWithOctave - The note that should be the highest, with octave (e.g., "G/4").
+         * @returns {string[]} Array of notes with assigned octaves.
          */
         function getNotesWithOctavesForPlayback(notesRaw, highestNoteWithOctave) {
             if (notesRaw.length === 0) return [];
-
-            let processedNotes = notesRaw.map(noteString => ({
-                originalString: noteString,
-                semitone: noteToSemitoneMap[normalizeNote(noteString)], // Semitone 0-11
-                midi: 0 // Will be calculated
-            }));
-
-            // Parse the highestNoteWithOctave to get its MIDI value
-            let highestNoteMIDI = Tone.Midi(highestNoteWithOctave).toMidi();
-
-            // The first note in processedNotes (which is currentCorrectNotes[0]) is the one that should be played as highest
-            // It needs to be assigned the `highestNoteMIDI`
-            processedNotes[0].midi = highestNoteMIDI;
-
-            let lastMIDIPlaced = highestNoteMIDI;
-
-            // Assign octaves to the rest of the notes in descending order
-            // Sort the *remaining* notes by their semitone (0-11) in descending order to help with placement
-            let otherNotesForPlayback = processedNotes.slice(1);
-            otherNotesForPlayback.sort((a, b) => b.semitone - a.semitone);
-
-            for (let i = 0; i < otherNotesForPlayback.length; i++) {
-                let currentNote = otherNotesForPlayback[i];
-                let candidateMIDI = currentNote.semitone + (Math.floor(lastMIDIPlaced / 12) * 12);
-
-                // Adjust downwards to be strictly below the last placed note to ensure closed voicing
-                while (candidateMIDI >= lastMIDIPlaced) {
-                    candidateMIDI -= 12;
-                }
-
-                // Ensure notes are within a reasonable audible range (e.g., not too low).
-                // Let's ensure they are not below C2 (MIDI 36) and not above C6 (MIDI 84)
-                while (candidateMIDI < 36 && candidateMIDI < (highestNoteMIDI - 24)) { // Ensure at least 2 octaves below highest
-                    candidateMIDI += 12;
-                }
-                while (candidateMIDI > 84) { // C6
-                    candidateMIDI -= 12;
+            
+            const highestNoteToneJs = highestNoteWithOctave.replace('/', '');
+            let notesWithOctaves = [highestNoteToneJs];
+            let lastNoteMidi = Tone.Midi(highestNoteToneJs).toMidi();
+            
+            // Start from the second note in the raw array
+            for (let i = 1; i < notesRaw.length; i++) {
+                const currentNote = notesRaw[i];
+                const currentNoteSemitone = noteToSemitoneMap[normalizeNote(currentNote)];
+                
+                // Start by placing it in the same octave as the last note
+                let candidateMidi = currentNoteSemitone + (Math.floor(lastNoteMidi / 12) * 12);
+                
+                // Adjust downwards to be strictly below the last placed note
+                while (candidateMidi >= lastNoteMidi) {
+                    candidateMidi -= 12;
                 }
                 
-                currentNote.midi = candidateMIDI;
-                lastMIDIPlaced = currentNote.midi;
+                notesWithOctaves.push(Tone.Midi(candidateMidi).toNote());
+                lastNoteMidi = candidateMidi;
             }
 
-            // Combine and sort by MIDI for playback (lowest to highest)
-            processedNotes.sort((a, b) => a.midi - b.midi);
-
-            // Convert MIDI to Tone.js note strings (e.g., "C4")
-            return processedNotes.map(noteObj => ({
-                note: Tone.Midi(noteObj.midi).toNote(),
-                midi: noteObj.midi
-            }));
+            return notesWithOctaves;
         }
 
         /**
          * Plays the correct chord as an arpeggio (descending) and then as a block chord.
-         * Uses the currentCorrectNotes and currentGivenNote to determine octaves.
-         * @param {string[]} notesToPlay - Array of raw note names (e.g., ["C", "E", "G"]).
-         * @param {string} highestNoteWithOctave - The note that should be the highest, *including its octave* (e.g., "C4", "G#5").
+         * @param {string[]} notesToPlay - Array of raw note names (e.g., ["G", "E", "C"]).
+         * @param {string} highestNoteWithOctave - The highest note with its octave (e.g., "G/4").
          */
         async function playCorrectChordSound(notesToPlay, highestNoteWithOctave) {
             console.log("playCorrectChordSound: Attempting to play chord sound.");
-            if (!audioContextStarted || !synth) {
+            if (!state.audioContextStarted || !synth) {
                 console.warn("AudioContext not started or synth not initialized. Cannot play sound.");
                 return;
             }
 
-            // Stop any ongoing playback and clear all scheduled events
             Tone.Transport.stop();
             Tone.Transport.cancel(); 
-            Tone.Transport.bpm.value = 60; // Set BPM
-            Tone.Transport.start(); // Start transport immediately
+            Tone.Transport.start();
 
             const notesForPlayback = getNotesWithOctavesForPlayback(notesToPlay, highestNoteWithOctave);
-            // Notes for arpeggio (descending)
-            const noteNamesWithOctavesDescending = notesForPlayback.map(n => n.note).reverse();
-            // Notes for block chord (ascending, as returned by getNotesWithOctavesForPlayback)
-            const noteNamesWithOctavesAscending = notesForPlayback.map(n => n.note);
+            notesForPlayback.sort((a,b) => Tone.Midi(b).toMidi() - Tone.Midi(a).toMidi()); // Descending for arpeggio
+            
+            if (notesForPlayback.length === 0) return;
 
-            if (noteNamesWithOctavesDescending.length === 0) {
-                console.warn("No notes to play for the chord.");
-                return;
-            }
-
-            let currentTime = Tone.now(); // Get the current audio context time for immediate scheduling
-
-            const arpeggioNoteDuration = "8n"; // Eighth note duration for each arpeggio note
-            const arpeggioInterval = 0.15; // Slightly faster interval for arpeggio notes (e.g., 0.15 seconds)
-
-            console.log("playCorrectChordSound: Scheduling descending arpeggio...");
-            noteNamesWithOctavesDescending.forEach((note, index) => {
-                synth.triggerAttackRelease(note, arpeggioNoteDuration, currentTime + (index * arpeggioInterval));
-                console.log(`Playing arpeggio note: ${note} at time: ${currentTime + (index * arpeggioInterval)}`);
+            let currentTime = Tone.now();
+            const arpeggioInterval = 0.15;
+            notesForPlayback.forEach((note, index) => {
+                synth.triggerAttackRelease(note, "8n", currentTime + (index * arpeggioInterval));
             });
 
-            // Calculate time for the block chord to start after the arpeggio
-            const totalArpeggioDuration = (noteNamesWithOctavesDescending.length - 1) * arpeggioInterval + Tone.Time(arpeggioNoteDuration).toSeconds();
-            const chordStartTime = currentTime + totalArpeggioDuration + 0.2; // Add a small pause after arpeggio
+            const totalArpeggioDuration = (notesForPlayback.length - 1) * arpeggioInterval + Tone.Time("8n").toSeconds();
+            const chordStartTime = currentTime + totalArpeggioDuration + 0.2;
 
-            const chordDuration = "2n"; // Half note duration for the chord
-            console.log("playCorrectChordSound: Scheduling block chord...");
-            synth.triggerAttackRelease(noteNamesWithOctavesAscending, chordDuration, chordStartTime);
-            console.log(`Playing block chord: ${noteNamesWithOctavesAscending.join(', ')} at time: ${chordStartTime}`);
+            synth.triggerAttackRelease(notesForPlayback, "2n", chordStartTime);
         }
 
-
         /**
-         * Generates a complex chord exercise with a visual grid based on selected difficulty.
+         * Generates a complex chord exercise with a visual grid based on selected difficulty and custom practice settings.
          */
-        function generateComplexExercise() { // Renamed function
-            console.log("generateComplexExercise: Starting new exercise generation."); // Debug message
-            console.log("Current Difficulty:", currentDifficulty);
+        function generateComplexExercise() {
+            console.log("generateComplexExercise: Starting new exercise generation.");
 
-            let availableChordTypeKeys = [];
-            for (const key in chordStructures) {
+            let availableChordTypeKeys = Object.keys(chordStructures).filter(key => {
                 const chord = chordStructures[key];
-                if (currentDifficulty === 'basic') {
-                    if (chord.difficulty === 'basic') {
-                        availableChordTypeKeys.push(key);
-                    }
-                } else if (currentDifficulty === 'intermediate') {
-                    if (chord.difficulty === 'intermediate') {
-                        availableChordTypeKeys.push(key);
-                    }
-                } else if (currentDifficulty === 'advanced') {
-                    // For advanced, include all intermediate chords. If 'advanced' chords are added, they would go here.
-                    if (chord.difficulty === 'intermediate') { // Or 'advanced' if defined
-                        availableChordTypeKeys.push(key);
-                    }
-                }
-            }
+                const matchesDifficulty = (state.difficulty === 'basic' && chord.difficulty === 'basic') ||
+                                        (state.difficulty === 'intermediate' && chord.difficulty === 'intermediate') ||
+                                        (state.difficulty === 'advanced' && chord.difficulty === 'intermediate');
+                const matchesCustomPractice = !state.customPractice.isActive || state.customPractice.allowedChords.includes(key);
+                return matchesDifficulty && matchesCustomPractice;
+            });
 
             if (availableChordTypeKeys.length === 0) {
-                console.error("No chord types available for the current difficulty level.");
-                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. No hay acordes disponibles para este nivel de dificultad.";
+                showCustomMessage("Sin Ejercicios", "No hay acordes disponibles con los filtros actuales.", "warning");
                 disableTrainingInteraction();
+                changeQuestionButton.disabled = false; // Ensure this is always enabled
                 return;
             }
 
-            // 1. Choose a random chord type from the filtered list
             const randomChordTypeKey = availableChordTypeKeys[Math.floor(Math.random() * availableChordTypeKeys.length)];
             const selectedChordType = chordStructures[randomChordTypeKey];
-            currentChordTypeKey = randomChordTypeKey;
-            console.log("generateComplexExercise: Tipo de acorde seleccionado:", currentChordTypeKey);
+            state.chordTypeKey = randomChordTypeKey;
 
-            // 2. Choose a random interval to be the lead voice (from defined voicing rules)
             let possibleLeadLabels = Object.keys(selectedChordType.voicing_rules);
-
-            // Filter possible lead labels based on difficulty for intermediate level
-            if (currentDifficulty === 'intermediate') {
-                // For intermediate, lead voice cannot be a tension (9, b9, #9, 11, #11, 13)
-                possibleLeadLabels = possibleLeadLabels.filter(label =>
-                    !['9', 'b9', '#9', '11', '#11', '13'].includes(label)
-                );
+            if (state.difficulty === 'advanced') {
+                possibleLeadLabels = possibleLeadLabels.filter(label => ['b9', '9', '#9', '11', '#11', '13'].includes(label));
+                 if (state.customPractice.isActive && state.customPractice.allowedLeads.length > 0) {
+                     possibleLeadLabels = possibleLeadLabels.filter(label => state.customPractice.allowedLeads.includes(label));
+                }
+            } else {
+                 possibleLeadLabels = possibleLeadLabels.filter(label => !['b9', '9', '#9', '11', '#11', '13'].includes(label));
             }
+
 
             if (possibleLeadLabels.length === 0) {
-                console.error(`generateComplexExercise: Error: No hay reglas de voicing válidas para la dificultad ${currentDifficulty} en el acorde ${currentChordTypeKey}.`);
-                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                showCustomMessage("Sin Ejercicios", "No hay voces principales disponibles para los acordes seleccionados.", "warning");
                 disableTrainingInteraction();
+                changeQuestionButton.disabled = false; // Ensure this is always enabled
                 return;
             }
-            const randomLeadLabel = possibleLeadLabels[Math.floor(Math.random() * possibleLeadLabels.length)];
-            currentGivenLabel = randomLeadLabel;
-            console.log("generateComplexExercise: Etiqueta de voz principal seleccionada:", currentGivenLabel);
 
-            // Find the full interval object for the chosen lead label
+            const randomLeadLabel = possibleLeadLabels[Math.floor(Math.random() * possibleLeadLabels.length)];
+            state.givenLabel = randomLeadLabel;
+
             const givenInterval = selectedChordType.intervals.find(int => int.label === randomLeadLabel);
             if (!givenInterval) {
-                console.error(`generateComplexExercise: Error: No se encontró el objeto de intervalo para la etiqueta ${randomLeadLabel} en el acorde ${currentChordTypeKey}.`);
-                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
-                disableTrainingInteraction();
-                return;
+                showCustomMessage("Error Interno", `No se encontró el intervalo para la etiqueta ${randomLeadLabel}.`, "error");
+                disableTrainingInteraction(); return;
             }
-            currentGivenIntervalName = givenInterval.name;
-            console.log("generateComplexExercise: Nombre de intervalo dado:", currentGivenIntervalName);
+            state.givenIntervalName = givenInterval.name;
 
+            state.givenNote = notesForQuestionRoot[Math.floor(Math.random() * notesForQuestionRoot.length)];
 
-            // 3. Choose a random note to be that interval (from the expanded notesForQuestionRoot array)
-            const givenNoteIndex = Math.floor(Math.random() * notesForQuestionRoot.length);
-            currentGivenNote = notesForQuestionRoot[givenNoteIndex];
-            console.log("generateComplexExercise: Nota dada (principal):", currentGivenNote);
-
-            // Determine the octave for currentGivenNote for playback
-            let baseOctaveForGivenNote;
-            const givenNoteNaturalLetter = currentGivenNote.charAt(0).toUpperCase();
-            if (['C', 'D', 'E', 'F'].includes(givenNoteNaturalLetter)) {
-                baseOctaveForGivenNote = 5; // Aim for C5, D5, E5, F5
-            } else { // G, A, B
-                baseOctaveForGivenNote = 4; // Aim for G4, A4, B4
-            }
-            currentGivenNoteWithOctave = `${currentGivenNote}${baseOctaveForGivenNote}`;
-            console.log("generateComplexExercise: Nota dada con octava para audio:", currentGivenNoteWithOctave);
-
-
-            // 4. Calculate the actual root note of the chord (both letter and semitone)
-            const givenNoteSemitone = noteToSemitoneMap[normalizeNote(currentGivenNote)];
+            const givenNoteLetter = state.givenNote.charAt(0).toUpperCase();
+            const baseOctaveForGivenNote = ['C', 'D', 'E', 'F'].includes(givenNoteLetter) ? 5 : 4;
+            state.givenNoteWithOctave = `${state.givenNote}/${baseOctaveForGivenNote}`;
+            
+            const givenNoteSemitone = noteToSemitoneMap[normalizeNote(state.givenNote)];
             const actualRootSemitone = (givenNoteSemitone - givenInterval.semitones + 12) % 12;
-
-            // Determine the correct letter name for the root
-            const givenNoteLetter = currentGivenNote.charAt(0).toUpperCase();
             const givenNoteLetterNum = letterToNumberMap[givenNoteLetter];
-            // Calculate the root letter based on the degree offset from the given note
-            const rootLetterNum = (givenNoteLetterNum - givenInterval.degreeOffset + 7) % 7; // +7 to handle negative results
+            const rootLetterNum = (givenNoteLetterNum - givenInterval.degreeOffset + 7) % 7;
             const rootLetter = numberToLetterMap[rootLetterNum];
 
-            // Now, derive the full spelling of the root based on its calculated letter and semitone
             const rootNaturalSemitone = naturalLetterSemitone[rootLetter];
             let rootAccidentalSemitoneDiff = (actualRootSemitone - rootNaturalSemitone + 12) % 12;
             let rootAccidental = '';
@@ -2349,166 +2550,145 @@
             else if (rootAccidentalSemitoneDiff === 2) rootAccidental = '##';
             else if (rootAccidentalSemitoneDiff === 11) rootAccidental = 'b';
             else if (rootAccidentalSemitoneDiff === 10) rootAccidental = 'bb';
-            currentChordRoot = `${rootLetter}${rootAccidental}`;
-            console.log("generateComplexExercise: Calculated currentChordRoot (correct spelling):", currentChordRoot);
-
-
-            // Create a map of *all* base intervals for quick lookup (original semitones)
+            state.chordRoot = `${rootLetter}${rootAccidental}`;
+            
             const originalIntervalsMap = {};
             selectedChordType.intervals.forEach(int => {
                 originalIntervalsMap[int.label] = int.semitones;
             });
+            
+            // --- Determine correct notes WITH OCTAVES ---
+            state.correctNotesWithOctave = [state.givenNoteWithOctave];
+            let lastPlacedMidi = Tone.Midi(state.givenNoteWithOctave.replace('/', '')).toMidi();
 
-            // Determine the labels for the grid and the actual correct notes for the voicing
-            let baseVoicingLabels = selectedChordType.voicing_rules[currentGivenLabel];
+            let baseVoicingLabels = selectedChordType.voicing_rules[state.givenLabel];
             if (!baseVoicingLabels) {
-                console.error(`generateComplexExercise: Error: No hay reglas de voicing válidas para la etiqueta principal "${currentGivenLabel}" en el acorde ${currentChordTypeKey}.`);
-                chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                showCustomMessage("Error Interno", `No se encontraron reglas de voicing para ${state.givenLabel}.`, "error");
                 disableTrainingInteraction();
                 return;
             }
 
-            // --- Apply difficulty-based slicing for basic level ---
-            const expectedVoicingLength = (currentDifficulty === 'basic') ? 3 : 4;
+            const expectedVoicingLength = (state.difficulty === 'basic') ? 3 : 4;
             baseVoicingLabels = baseVoicingLabels.slice(0, expectedVoicingLength);
-            // --- End difficulty-based slicing ---
 
-            currentOrderedLabelsForDisplay = []; // Labels for the grid (e.g., "1", "6", "5", "3")
-            currentCorrectNotes = []; // Actual notes for the answer (e.g., "C", "A", "G", "E")
-            currentActualChordIntervals = []; // Will store {label, semitones} for the expected final voicing.
+            state.orderedLabelsForDisplay = [];
+            state.correctNotes = [];
             
-            baseVoicingLabels.forEach(label => {
+            // The first note/label is the given one, so start calculations from the second one
+            for(let i = 0; i < baseVoicingLabels.length; i++) {
+                const label = baseVoicingLabels[i];
                 let semitonesToRoot;
-                let displayLabel = label; // The label that will be displayed in the grid
+                let displayLabel = label;
 
-                // Apply the exception: maj7 and fundamental, 7th becomes 6th (note and label)
-                if (currentChordTypeKey === "maj7" && currentGivenIntervalName === "fundamental" && label === "7") {
-                    semitonesToRoot = originalIntervalsMap["7"] - 2; // Major 7th (11) - 2 = Major 6th (9)
-                    displayLabel = "6"; // Change the label for display
-                    console.log("generateComplexExercise: Excepción maj7 aplicada: 7ma cambiada a 6ta.");
+                if (state.chordTypeKey === "maj7" && state.givenIntervalName === "fundamental" && label === "7") {
+                    semitonesToRoot = originalIntervalsMap["7"] - 2;
+                    displayLabel = "6";
                 } else {
                     semitonesToRoot = originalIntervalsMap[label];
                 }
 
                 if (semitonesToRoot === undefined) {
-                    console.error(`generateComplexExercise: Error: La etiqueta de voicing "${label}" no se encontró en originalIntervalsMap para el acorde ${currentChordTypeKey}. Esto puede indicar una regla de voicing incorrecta o un intervalo base faltante.`);
-                    chordQuestionTextDiv.innerHTML = "¡Error! No se pudo generar el ejercicio. Contacta al soporte.";
+                     showCustomMessage("Error Interno", `Etiqueta de voicing no encontrada: ${label}.`, "error");
                     disableTrainingInteraction();
                     return;
                 }
-
-                // Calculate the actual semitone of the note in the chord
-                const actualNoteSemitone = (noteToSemitoneMap[normalizeNote(currentChordRoot)] + semitonesToRoot + 12) % 12;
-
-                // Find the degreeOffset for the current label to pass to getCorrectEnharmonicSpelling
-                const intervalDefForSpelling = selectedChordType.intervals.find(int => int.label === label); // Use original label for degreeOffset
-                if (!intervalDefForSpelling || intervalDefForSpelling.degreeOffset === undefined) {
-                    console.warn(`Could not find degreeOffset for interval label ${label}. Falling back to canonical.`);
-                    currentCorrectNotes.push(canonicalNotes[actualNoteSemitone]);
-                } else {
-                    // Pass the *calculated* root letter (e.g., 'B' for Bb) to getCorrectEnharmonicSpelling
-                    const correctSpelling = getCorrectEnharmonicSpelling(rootLetter, actualNoteSemitone, intervalDefForSpelling.degreeOffset);
-                    currentCorrectNotes.push(correctSpelling);
-                }
                 
-                currentOrderedLabelsForDisplay.push(displayLabel); // Use the potentially modified displayLabel for the grid
-                currentActualChordIntervals.push({ label: displayLabel, semitones: semitonesToRoot }); // Store for updateSelectedNotesDisplay
-            });
-            console.log("generateComplexExercise: currentOrderedLabelsForDisplay (grid labels):", currentOrderedLabelsForDisplay);
-            console.log("generateComplexExercise: currentCorrectNotes (expected correct notes with correct spelling):", currentCorrectNotes);
-            console.log("generateComplexExercise: currentActualChordIntervals (for display matching):", currentActualChordIntervals);
+                const actualNoteSemitone = (noteToSemitoneMap[normalizeNote(state.chordRoot)] + semitonesToRoot + 12) % 12;
+                const intervalDefForSpelling = selectedChordType.intervals.find(int => int.label === label);
+                
+                let correctSpelling;
+                if (!intervalDefForSpelling || intervalDefForSpelling.degreeOffset === undefined) {
+                    correctSpelling = canonicalNotes[actualNoteSemitone];
+                } else {
+                    correctSpelling = getCorrectEnharmonicSpelling(rootLetter, actualNoteSemitone, intervalDefForSpelling.degreeOffset);
+                }
+                state.correctNotes.push(correctSpelling);
+                state.orderedLabelsForDisplay.push(displayLabel);
 
+                // For the notes after the first (given) one, calculate their descending octave
+                if (i > 0) {
+                     let candidateMidi = actualNoteSemitone + (Math.floor(lastPlacedMidi / 12) * 12);
+                     while (candidateMidi >= lastPlacedMidi) {
+                         candidateMidi -= 12;
+                     }
+                     const noteName = Tone.Midi(candidateMidi).toNote();
+                     const noteWithOctave = noteName.replace(/(\d+)$/, '/$1');
+                     state.correctNotesWithOctave.push(noteWithOctave);
+                     lastPlacedMidi = candidateMidi;
+                }
+            };
+            console.log("generateComplexExercise: correctNotes (no octave):", state.correctNotes);
+            console.log("generateComplexExercise: correctNotesWithOctave:", state.correctNotesWithOctave);
 
-            // 6. Formulate the question text (more concise)
-            // Updated question text phrasing
-            let questionText = `<strong>${selectedChordType.name}</strong> con <strong>${currentGivenNote}</strong> como <strong>${currentGivenIntervalName}</strong>.<br><small>Armoniza en bloque cerrado, ${currentDifficulty === 'basic' ? '3' : '4'} voces, descendente.</small>`;
+            updateQuestionText();
 
-            chordQuestionTextDiv.innerHTML = questionText;
-
-            // 7. Populate the grid visually: labels for all, note only in the first cell, highlighted
             gridCells.forEach((cell, index) => {
                 const intervalLabelSpan = cell.querySelector('.interval-label');
                 const noteDisplaySpan = cell.querySelector('.note-display');
-
-                // Clear previous content and highlighting
                 noteDisplaySpan.textContent = '';
                 noteDisplaySpan.classList.remove('highlighted');
-                cell.classList.remove('hidden-cell'); // Ensure it's visible by default
-
-                // Assign the determined label to the current grid cell
-                if (currentOrderedLabelsForDisplay[index]) {
-                    intervalLabelSpan.textContent = currentOrderedLabelsForDisplay[index];
+                cell.classList.remove('hidden-cell');
+                if (state.orderedLabelsForDisplay[index]) {
+                    intervalLabelSpan.textContent = state.orderedLabelsForDisplay[index];
                 } else {
-                    intervalLabelSpan.textContent = ''; // Clear label if no corresponding note
+                    intervalLabelSpan.textContent = '';
                 }
             });
 
-            // Hide the 4th grid cell for basic difficulty
-            if (currentDifficulty === 'basic') {
+            if (state.difficulty === 'basic') {
                 gridCells[3].classList.add('hidden-cell');
             } else {
                 gridCells[3].classList.remove('hidden-cell');
             }
 
-
-            // Display ONLY the given note in the first cell and highlight it
-            const noteDisplaySpanInFirstCell = gridCells[0].querySelector('span.note-display'); // Use span.note-display for specificity
-            noteDisplaySpanInFirstCell.textContent = currentGivenNote;
+            const noteDisplaySpanInFirstCell = gridCells[0].querySelector('span.note-display');
+            noteDisplaySpanInFirstCell.textContent = displayNote(state.givenNote);
             noteDisplaySpanInFirstCell.classList.add('highlighted');
 
-            // Pre-select the given note
-            selectedUserNotes = [currentGivenNote];
-            lastUserAddedNoteIndex = -1; // No user-added notes yet
-            activeAccidental = ''; // Clear any active accidental
+            state.selectedUserNotes = [state.givenNoteWithOctave]; // Start with the given note + octave
+            state.lastUserAddedNoteIndex = -1;
+            state.activeAccidental = '';
 
-            // Draw staff initially with only the currentGivenNote
-            drawMusicalStaff(selectedUserNotes); // Draw only the given note, as it's pre-selected
+            drawMusicalStaff(state.selectedUserNotes);
 
-            // Clear user's selected notes and feedback message
-            console.log("generateComplexExercise: Clearing selection and feedback.");
-            feedbackModalOverlay.classList.remove('visible'); // Ensure feedback modal is hidden
-            feedbackModalContent.className = 'modal-content'; // Reset feedback modal classes
+            feedbackModalOverlay.classList.remove('visible');
+            feedbackModalContent.className = 'modal-content';
 
-            updateSelectedNotesDisplay(); // Update display for selected notes and button states
-            updateGridNoteDisplays(); // Update grid with selected notes (initially just the given note)
-
-            // Ensure training elements are enabled for a new exercise
-            console.log("generateComplexExercise: Enabling training interaction.");
+            updateAllDisplays();
             enableTrainingInteraction();
+            hintButton.disabled = false;
             console.log("generateComplexExercise: New exercise generated successfully.");
         }
 
         /**
-         * Updates the note displays in gridCells[0] to gridCells[3] based on selectedUserNotes.
-         * The labels are taken from currentOrderedLabelsForDisplay.
-         * The notes are the currentGivenNote (first cell) and the user's other selected notes, sorted by pitch.
+         * Updates the note displays in the grid based on selectedUserNotes.
          */
         function updateGridNoteDisplays() {
-            // Set the label for all cells based on currentOrderedLabelsForDisplay
             gridCells.forEach((cell, index) => {
                 const intervalLabelSpan = cell.querySelector('.interval-label');
-                intervalLabelSpan.textContent = currentOrderedLabelsForDisplay[index] || ''; // Ensure it's cleared if no label
+                intervalLabelSpan.textContent = state.orderedLabelsForDisplay[index] || '';
             });
 
-            // Handle the first cell (given note)
             const givenNoteDisplaySpan = gridCells[0].querySelector('.note-display');
-            givenNoteDisplaySpan.textContent = currentGivenNote;
+            givenNoteDisplaySpan.textContent = displayNote(state.givenNote);
             givenNoteDisplaySpan.classList.add('highlighted');
 
-            // Populate the remaining cells (index 1 to 3) with the user's added notes,
-            // which are now in the order they were clicked (after the given note).
+            // Sort selected notes descending by pitch for grid display
+            const userNotesToDisplay = [...state.selectedUserNotes];
+            userNotesToDisplay.sort((a,b) => Tone.Midi(b.replace('/', '')).toMidi() - Tone.Midi(a.replace('/', '')).toMidi());
+
             for (let i = 1; i < gridCells.length; i++) {
                 const noteDisplaySpan = gridCells[i].querySelector('.note-display');
-                if (selectedUserNotes[i]) { // selectedUserNotes[0] is given note, so index i directly maps to selectedUserNotes[i]
-                    noteDisplaySpan.textContent = selectedUserNotes[i];
+                if (userNotesToDisplay[i]) {
+                    // Display note without octave
+                    noteDisplaySpan.textContent = displayNote(userNotesToDisplay[i].split('/')[0]);
                 } else {
-                    noteDisplaySpan.textContent = ''; // Clear if no note selected for this position
+                    noteDisplaySpan.textContent = '';
                 }
-                noteDisplaySpan.classList.remove('highlighted'); // Ensure no highlighting on user notes in grid
+                noteDisplaySpan.classList.remove('highlighted');
             }
 
-            // Hide the 4th grid cell for basic difficulty
-            if (currentDifficulty === 'basic') {
+            if (state.difficulty === 'basic') {
                 gridCells[3].classList.add('hidden-cell');
             } else {
                 gridCells[3].classList.remove('hidden-cell');
@@ -2519,20 +2699,21 @@
         /**
          * Disables all interactive elements of the training.
          */
-        function disableTrainingInteraction() { // Renamed function
+        function disableTrainingInteraction() {
             console.log("disableTrainingInteraction: Disabling training interaction.");
             confirmAnswerButton.disabled = true;
             clearAllSelectionButton.disabled = true;
             changeQuestionButton.disabled = true;
+            settingsButton.disabled = true;
+            hintButton.disabled = true;
+            showAnswerButton.disabled = true;
 
-            // Visually disable all note buttons
             document.querySelectorAll('.note-button').forEach(button => {
-                if (button && button.classList) { // Defensive check
+                if (button && button.classList) {
                     button.classList.add('disabled');
                 }
             });
 
-            // Remove event listeners to prevent interaction
             naturalNoteButtonsContainer.removeEventListener('click', handleNaturalNoteClick);
             accidentalButtonsContainer.removeEventListener('click', handleAccidentalClick);
             console.log("disableTrainingInteraction: Training interaction disabled.");
@@ -2541,180 +2722,240 @@
         /**
          * Enables all interactive elements of the training.
          */
-        function enableTrainingInteraction() { // Renamed function
+        function enableTrainingInteraction() {
             console.log("enableTrainingInteraction: Enabling training interaction.");
-            // Button visibility/disabled state is handled by updateSelectedNotesDisplay based on selectedUserNotes.length
             updateSelectedNotesDisplay();
-
-            // Add event listeners back
+            settingsButton.disabled = false;
+            changeQuestionButton.disabled = false;
+            showAnswerButton.disabled = false;
             naturalNoteButtonsContainer.addEventListener('click', handleNaturalNoteClick);
             accidentalButtonsContainer.addEventListener('click', handleAccidentalClick);
-
-            // Visually enable all note buttons (remove disabled class)
-            // This is now handled by updateButtonSelectionVisuals for more granular control.
-            // No need to explicitly remove 'disabled' here for all, as updateButtonSelectionVisuals does it.
             console.log("enableTrainingInteraction: Training interaction enabled.");
         }
 
         /**
          * Handles changing the exercise without checking the answer.
          */
-        function handleChangeQuestion() { // Renamed function
+        function handleChangeQuestion() {
             console.log("handleChangeQuestion: Change exercise button clicked.");
-            Tone.Transport.stop(); // Stop any ongoing playback
-            Tone.Transport.cancel(); // Clear all scheduled events
-            // Clear selection will now only keep the given note
+            Tone.Transport.stop();
+            Tone.Transport.cancel();
             clearSelection();
-            generateComplexExercise(); // Generate a new exercise
+            generateComplexExercise();
         }
 
 
         /**
-         * Checks the user's answer.
-         * This function now performs a strict, order-sensitive comparison.
-         * The user's selected notes (after the given note) must be in the exact
-         * descending order as the correct notes, and each note must match its
-         * corresponding interval position.
+         * Checks the user's answer against the correct notes with octaves.
          */
         async function checkAnswer() {
             console.log("checkAnswer: Starting answer check.");
-            const userNotesNormalized = selectedUserNotes.map(note => normalizeNote(note));
-            console.log("checkAnswer: Notas del usuario (normalizadas):", userNotesNormalized);
+            // Normalize both arrays for comparison: sort by MIDI value and get note name (e.g., C#4)
+            const userNotesNormalized = state.selectedUserNotes
+                .map(n => Tone.Midi(n.replace('/', '')).toNote())
+                .sort((a, b) => Tone.Midi(a).toMidi() - Tone.Midi(b).toMidi());
+            
+            const correctNotesNormalized = state.correctNotesWithOctave
+                 .map(n => Tone.Midi(n.replace('/', '')).toNote())
+                 .sort((a, b) => Tone.Midi(a).toMidi() - Tone.Midi(b).toMidi());
 
-            const normalizedCorrectNotes = currentCorrectNotes.map(note => normalizeNote(note));
-            console.log("checkAnswer: Notas correctas esperadas (normalizadas):", normalizedCorrectNotes);
+            console.log("checkAnswer: User notes (normalized):", userNotesNormalized);
+            console.log("checkAnswer: Correct notes (normalized):", correctNotesNormalized);
 
-            const expectedNoteCount = (currentDifficulty === 'basic') ? 3 : 4;
-
+            const expectedNoteCount = (state.difficulty === 'basic') ? 3 : 4;
             let isCorrect = false;
             let feedbackHtml = '';
 
-            // Update total attempts regardless of correctness
-            totalExercisesAttempted++;
+            state.stats.totalAttempts++;
+            state.evaluation.questionsAttemptedInBatch++; // Increment for every attempt.
 
-            // Ensure performanceKey exists and has a 'completed' flag initialized
-            const performanceKey = `${currentChordTypeKey}_${currentGivenIntervalName}`;
-            if (!trainingSessionData[performanceKey]) {
-                trainingSessionData[performanceKey] = { correct: 0, total: 0, completed: false };
+            const performanceKey = `${state.chordTypeKey}_${state.givenIntervalName}`;
+            if (!state.evaluation.data[performanceKey]) {
+                state.evaluation.data[performanceKey] = { correct: 0, total: 0, completed: false };
             }
 
-            // Determine if the current submission is correct
             if (userNotesNormalized.length === expectedNoteCount) {
-                isCorrect = userNotesNormalized.every((note, index) => {
-                    // Log for debugging specific mismatches
-                    if (note !== normalizedCorrectNotes[index]) {
-                        console.log(`Mismatch at index ${index}: User selected ${selectedUserNotes[index]} (normalized: ${note}), Expected ${currentCorrectNotes[index]} (normalized: ${normalizedCorrectNotes[index]})`);
-                    }
-                    return note === normalizedCorrectNotes[index];
-                });
+                isCorrect = JSON.stringify(userNotesNormalized) === JSON.stringify(correctNotesNormalized);
+            }
 
-                if (isCorrect) {
-                    feedbackHtml = `<p>¡Correcto! 🎉</p>`;
-                    drawMusicalStaff(currentCorrectNotes); // Display correct notes on staff
-                    playCorrectChordSound(currentCorrectNotes, currentGivenNoteWithOctave);
-                    
-                    // Increment totalCorrectAnswers for overall session accuracy
-                    totalCorrectAnswers++; 
+            if (isCorrect) {
+                feedbackHtml = `<p>¡Correcto! 🎉</p>`;
+                drawMusicalStaff(state.correctNotesWithOctave);
+                playCorrectChordSound(state.correctNotes, state.givenNoteWithOctave);
+                
+                state.stats.totalCorrect++;
+                state.evaluation.batchCorrect++;
+                state.stats.currentStreak++;
+                updateScoreDisplay();
 
-                    // Increment exercisesCompletedCount ONLY if this question hasn't been completed yet in this batch
-                    if (!trainingSessionData[performanceKey].completed) {
-                        exercisesCompletedCount++;
-                        trainingSessionData[performanceKey].completed = true; // Mark this specific question as completed for the current batch
-                    }
-                    
-                    // Always increment correct count for this specific question type for detailed stats
-                    trainingSessionData[performanceKey].correct++; 
+                if (!state.evaluation.data[performanceKey].completed) {
+                    state.stats.exercisesCompleted++;
+                    state.evaluation.data[performanceKey].completed = true;
+                }
+                
+                state.evaluation.data[performanceKey].correct++; 
 
+            } else {
+                state.stats.currentStreak = 0;
+                updateScoreDisplay();
+                if (userNotesNormalized.length !== expectedNoteCount) {
+                    feedbackHtml = `<p>Por favor, selecciona exactamente ${expectedNoteCount} notas.</p>`;
                 } else {
                     feedbackHtml = `<p>Incorrecto. Inténtalo de nuevo.</p>
                                     <div class="modal-buttons">
                                         <button id="tryAgainButton">Intentar de Nuevo</button>
                                     </div>`;
-                    drawMusicalStaff([currentGivenNote]); // Revert staff to only the given note
                 }
-            } else {
-                // This case handles incorrect number of notes selected
-                feedbackHtml = `<p>Por favor, selecciona exactamente ${expectedNoteCount} notas.</p>`;
-                feedbackModalContent.classList.remove('correct');
-                feedbackModalContent.classList.add('incorrect');
-                feedbackModalContent.innerHTML = feedbackHtml;
-                feedbackModalOverlay.classList.add('visible');
-                disableTrainingInteraction();
-                setTimeout(() => {
-                    feedbackModalOverlay.classList.remove('visible');
-                    enableTrainingInteraction();
-                }, FEEDBACK_DURATION);
-                return;
+                drawMusicalStaff([state.givenNoteWithOctave]);
             }
 
-            // Always increment total count for this specific question type for detailed stats
-            trainingSessionData[performanceKey].total++; 
+            state.evaluation.data[performanceKey].total++; 
+            savePreferences(); // Save streak progress
 
-            // Display feedback modal
-            feedbackModalContent.className = 'modal-content'; // Reset classes
+            feedbackModalContent.className = 'modal-content';
             feedbackModalContent.classList.add(isCorrect ? 'correct' : 'incorrect');
             feedbackModalContent.innerHTML = feedbackHtml;
             feedbackModalOverlay.classList.add('visible');
             disableTrainingInteraction();
+            
+            const shouldEvaluate = state.evaluation.questionsAttemptedInBatch > 0 && state.evaluation.questionsAttemptedInBatch % state.evaluation.exercisesPerEval === 0;
 
-            // Logic for advancing or retrying
             if (isCorrect) {
                 setTimeout(() => {
                     feedbackModalOverlay.classList.remove('visible');
-                    // Check for evaluation after a correct answer, regardless of previous incorrect attempts on this question
-                    if (exercisesCompletedCount % EXERCISES_PER_EVALUATION === 0) {
+                    if (shouldEvaluate) {
                         displayEvaluation();
                     } else {
                         generateComplexExercise();
                     }
                 }, FEEDBACK_DURATION);
-            } else { // If incorrect, allow retry on the same question
+            } else {
                 const tryAgainButton = document.getElementById('tryAgainButton');
                 if (tryAgainButton) {
                     const tryAgainHandler = () => {
                         feedbackModalOverlay.classList.remove('visible');
-                        clearSelection(); // Clear user's input, keep given note
-                        enableTrainingInteraction(); // Re-enable interaction
+                         if (shouldEvaluate) {
+                            displayEvaluation();
+                        } else {
+                            clearSelection();
+                            enableTrainingInteraction();
+                        }
                         tryAgainButton.removeEventListener('click', tryAgainHandler);
                     };
                     tryAgainButton.addEventListener('click', tryAgainHandler);
+                } else { // Auto-close for "incorrect number of notes"
+                     setTimeout(() => {
+                        feedbackModalOverlay.classList.remove('visible');
+                         if (shouldEvaluate) {
+                            displayEvaluation();
+                        } else {
+                            enableTrainingInteraction();
+                        }
+                    }, FEEDBACK_DURATION);
                 }
             }
         }
 
         /**
+         * Reveals one correct note to the user as a hint.
+         */
+        function giveHint() {
+            state.stats.hintsUsed++;
+            state.evaluation.batchHintsUsed++;
+
+            const expectedNoteCount = (state.difficulty === 'basic') ? 3 : 4;
+            
+            if (state.selectedUserNotes.length >= expectedNoteCount) {
+                showCustomMessage("Pista", "Ya has seleccionado el número correcto de notas. ¡Confirma tu respuesta!", "info");
+                return;
+            }
+
+            // Find the first correct note (with correct spelling) that the user is missing
+            let hintNote = null;
+            // The correct notes are already ordered descendingly by pitch
+            for (const correctNote of state.correctNotesWithOctave) {
+                const userHasNote = state.selectedUserNotes.includes(correctNote);
+                if (!userHasNote) {
+                    hintNote = correctNote;
+                    break;
+                }
+            }
+        
+            if (hintNote) {
+                // Remove any enharmonically equivalent wrong note before adding the correct one
+                const hintNoteName = hintNote.split('/')[0];
+                const equivalent = enharmonicEquivalents[hintNoteName];
+                const existingEnharmonicIndex = state.selectedUserNotes.findIndex(n => {
+                    const nName = n.split('/')[0];
+                    return (equivalent && nName === equivalent) || (enharmonicEquivalents[nName] && enharmonicEquivalents[nName] === hintNoteName);
+                });
+
+                if (existingEnharmonicIndex > 0) { // > 0 to not remove the given note
+                    state.selectedUserNotes.splice(existingEnharmonicIndex, 1);
+                }
+                
+                addNoteToSelection(hintNote);
+                hintButton.disabled = true;
+                showCustomMessage("Pista", "Se ha revelado una nota correcta.", "info");
+            } else {
+                showCustomMessage("Pista", "¡Parece que ya tienes todas las notas correctas!", "info");
+            }
+        }
+
+        /**
+         * Shows the full correct answer and moves to the next question.
+         */
+        function showAnswer() {
+            state.stats.answersUsed++;
+            state.evaluation.batchAnswersUsed++;
+            state.evaluation.questionsAttemptedInBatch++; // Using show answer counts as an attempt
+            
+            state.selectedUserNotes = [...state.correctNotesWithOctave];
+        
+            updateAllDisplays();
+        
+            playCorrectChordSound(state.correctNotes, state.givenNoteWithOctave);
+        
+            disableTrainingInteraction();
+            showCustomMessage("Respuesta Correcta", "Mostrando la solución. El próximo ejercicio comenzará en breve.", "success");
+            
+            const shouldEvaluate = state.evaluation.questionsAttemptedInBatch > 0 && state.evaluation.questionsAttemptedInBatch % state.evaluation.exercisesPerEval === 0;
+
+            setTimeout(() => {
+                if (shouldEvaluate) {
+                    displayEvaluation();
+                } else {
+                    generateComplexExercise();
+                }
+            }, FEEDBACK_DURATION + 1000);
+        }
+
+
+        /**
          * Displays the evaluation modal with summary and advice.
          */
         function displayEvaluation() {
-            console.log("displayEvaluation: displayEvaluation() ha sido llamada.");
-            // exercisesCompletedCount already holds the count of unique exercises correctly solved in this batch
-            let batchTotalAttemptsInBatch = 0; // Counts all attempts made in this batch
+            console.log("displayEvaluation: displayEvaluation() called.");
+            
+            const batchIncorrect = state.evaluation.questionsAttemptedInBatch - state.evaluation.batchCorrect;
+
+            evaluationSummary.innerHTML = `En los últimos <strong>${state.evaluation.exercisesPerEval}</strong> ejercicios:<br>
+                - Acertados: <strong>${state.evaluation.batchCorrect}</strong><br>
+                - Incorrectos: <strong>${batchIncorrect}</strong><br>
+                - Pistas Usadas: <strong>${state.evaluation.batchHintsUsed}</strong><br>
+                - Respuestas Mostradas: <strong>${state.evaluation.batchAnswersUsed}</strong>`;
+
+            adviceList.innerHTML = '';
             const areasToWorkOn = [];
-
-            // Calculate overall performance for the current batch of EXERCISES_PER_EVALUATION unique questions.
-            for (const key in trainingSessionData) { 
-                const data = trainingSessionData[key]; 
-                batchTotalAttemptsInBatch += data.total; // Sum all attempts for all exercises in the batch
-
-                // Only add to areasToWorkOn if the question was attempted and accuracy is below threshold
-                if (data.total > 0 && (data.correct / data.total) < 0.8) { // Increased threshold for "needs work" to 80%
+            for (const key in state.evaluation.data) { 
+                const data = state.evaluation.data[key]; 
+                if (data.total > 0 && (data.correct / data.total) < 0.8) {
                     const [chordTypeKey, intervalName] = key.split('_');
                     const chordName = chordStructures[chordTypeKey] ? chordStructures[chordTypeKey].name : chordTypeKey;
-                    
-                    // Add detailed performance for the specific area
-                    areasToWorkOn.push(`Acordes ${chordName} con ${intervalName} como voz principal (Correctas: ${data.correct}, Intentos: ${data.total}, Precisión: ${((data.correct / data.total) * 100).toFixed(0)}%).`);
+                    areasToWorkOn.push(`Acordes ${chordName} con ${intervalName} como voz principal (Precisión: ${((data.correct / data.total) * 100).toFixed(0)}%).`);
                 }
             }
 
-            const batchPercentage = batchTotalAttemptsInBatch > 0 ? ((exercisesCompletedCount / batchTotalAttemptsInBatch) * 100).toFixed(0) : 0; // Use exercisesCompletedCount for overall batch accuracy
-
-            // Update the summary text to reflect unique exercises solved vs. total unique exercises in batch,
-            // and then separately show total attempts and overall accuracy.
-            evaluationSummary.innerHTML = `En los últimos ${EXERCISES_PER_EVALUATION} ejercicios: ` +
-                                        `<strong>${exercisesCompletedCount} de ${EXERCISES_PER_EVALUATION}</strong> ejercicios resueltos.<br>` +
-                                        `Tuviste un total de <strong>${batchTotalAttemptsInBatch} intentos</strong> con una precisión del <strong>${batchPercentage}%</strong>.`;
-
-            adviceList.innerHTML = ''; // Clear previous advice
             if (areasToWorkOn.length > 0) {
                 areasToWorkOn.forEach(advice => {
                     const listItem = document.createElement('li');
@@ -2728,67 +2969,68 @@
             }
 
             evaluationModalOverlay.classList.add('visible');
-            console.log("displayEvaluation: Clase 'visible' añadida al modal de evaluación.");
+            console.log("displayEvaluation: Evaluation modal visible.");
         }
 
         /**
          * Continues the training after evaluation.
          */
-        function continueTraining() { // Renamed function
+        function continueTraining() {
             console.log("continueTraining: Continuing training.");
-            exercisesCompletedCount = 0; // Reset batch counter // Renamed variable
-            trainingSessionData = {}; // Reset performance data for the new batch // Renamed variable
+            state.stats.exercisesCompleted = 0;
+            state.evaluation.data = {};
+            state.evaluation.questionsAttemptedInBatch = 0;
+            state.evaluation.batchCorrect = 0;
+            state.evaluation.batchHintsUsed = 0;
+            state.evaluation.batchAnswersUsed = 0;
             evaluationModalOverlay.classList.remove('visible');
-            generateComplexExercise(); // Generate a new exercise to start the next batch
+            generateComplexExercise();
         }
 
         /**
          * Ends the training and displays final results.
          */
-        function endSession() { // Renamed function
+        function endSession() {
             console.log("endSession: Ending training session.");
-            Tone.Transport.stop(); // Stop any ongoing playback
-            Tone.Transport.cancel(); // Clear all scheduled events
+            Tone.Transport.stop();
+            Tone.Transport.cancel();
             evaluationModalOverlay.classList.remove('visible');
-            mainAppContainer.style.display = 'none'; // Hide the main app UI // Renamed variable
+            mainAppContainer.style.display = 'none';
 
-            sessionEndTime = Date.now(); // Record session start time
-            const durationMs = sessionEndTime - sessionStartTime;
+            state.session.endTime = Date.now();
+            const durationMs = state.session.endTime - state.session.startTime;
 
-            // Format duration
-            const hours = Math.floor(durationMs / (1000 * 60 * 60));
-            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
-
+            const hours = Math.floor(durationMs / 3600000);
+            const minutes = Math.floor((durationMs % 3600000) / 60000);
+            const seconds = Math.floor((durationMs % 60000) / 1000);
             const formattedDuration = `${hours}h ${minutes}m ${seconds}s`;
 
-            // Get current date and time
             const now = new Date();
             const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
             const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             const formattedDate = now.toLocaleDateString('es-ES', dateOptions);
             const formattedTime = now.toLocaleTimeString('es-ES', timeOptions);
 
-            // Update the new stat display elements
-            totalExercisesDisplay.textContent = totalExercisesAttempted;
-            correctAnswersDisplay.textContent = totalCorrectAnswers;
-            const overallPercentage = totalExercisesAttempted > 0 ? ((totalCorrectAnswers / totalExercisesAttempted) * 100).toFixed(0) : 0; // Renamed variable
+            totalExercisesDisplay.textContent = state.stats.totalAttempts;
+            correctAnswersDisplay.textContent = state.stats.totalCorrect;
+            hintsUsedDisplay.textContent = state.stats.hintsUsed;
+            answersUsedDisplay.textContent = state.stats.answersUsed;
+            const overallPercentage = state.stats.totalAttempts > 0 ? ((state.stats.totalCorrect / state.stats.totalAttempts) * 100).toFixed(0) : 0;
             overallAccuracyDisplay.textContent = `${overallPercentage}%`;
 
-            // Update session info displays
             sessionDateDisplay.textContent = `Fecha: ${formattedDate}`;
             sessionTimeDisplay.textContent = `Hora: ${formattedTime}`;
             sessionDurationDisplay.textContent = `Duración de la práctica: ${formattedDuration}`;
 
-            // Update the summary text, now optionally including the user's name
-            const userName = userNameInput.value.trim();
-            let summaryText = `¡Gracias por practicar!`; // Base message
-            if (userName) {
-                summaryText = `¡Felicidades, ${userName}! ¡Gracias por practicar!`; // Personalized greeting
+            state.userName = userNameInput.value.trim();
+            let summaryText = `¡Gracias por practicar!`;
+            if (state.userName) {
+                summaryText = `¡Felicidades, ${state.userName}! ¡Gracias por practicar!`;
             }
             finalResultsSummary.innerHTML = summaryText;
 
-            finalMessageDisplay.style.display = 'flex'; // Show the final message
+            finalMessageDisplay.style.display = 'flex';
+            savePreferences(); // Save the final user name
             console.log("endSession: Final message displayed.");
         }
 
@@ -2801,17 +3043,16 @@
                 const userName = userNameInput.value.trim();
                 const filename = userName ? `Resultados_Armonico_${userName}.png` : `Resultados_Armonico.png`;
 
-                // Temporarily adjust styles for better capture if needed (e.g., remove scrollbars)
                 const originalOverflow = document.body.style.overflow;
                 document.body.style.overflow = 'hidden';
 
                 const canvas = await html2canvas(resultsContentToCapture, {
-                    scale: 2, // Increase scale for better resolution
-                    useCORS: true, // Important for images if any (though not used here)
-                    logging: false // Disable html2canvas logging
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
                 });
 
-                document.body.style.overflow = originalOverflow; // Restore overflow
+                document.body.style.overflow = originalOverflow;
 
                 const image = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
@@ -2836,23 +3077,22 @@
                 const userName = userNameInput.value.trim();
                 const filename = userName ? `Resultados_Armonico_${userName}.pdf` : `Resultados_Armonico.pdf`;
 
-                // Temporarily adjust styles for better capture if needed
                 const originalOverflow = document.body.style.overflow;
                 document.body.style.overflow = 'hidden';
 
                 const canvas = await html2canvas(resultsContentToCapture, {
-                    scale: 2, // Increase scale for better resolution
+                    scale: 2,
                     useCORS: true,
                     logging: false
                 });
 
-                document.body.style.overflow = originalOverflow; // Restore overflow
+                document.body.style.overflow = originalOverflow;
 
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new window.jspdf.jsPDF({
                     orientation: 'portrait',
                     unit: 'px',
-                    format: [canvas.width, canvas.height] // Use canvas dimensions for PDF
+                    format: [canvas.width, canvas.height]
                 });
 
                 pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
@@ -2864,6 +3104,196 @@
             }
         }
 
+        // --- NEW: Gamification & Settings Logic ---
+        function updateScoreDisplay() {
+            streakCounter.innerHTML = `<div class="streak-label">🔥 Días de Racha</div><div class="streak-value">${state.stats.currentStreak}</div>`;
+            const incorrectCount = state.stats.totalAttempts - state.stats.totalCorrect;
+            scoreCounter.innerHTML = `<div class="score-correct">✅ ${state.stats.totalCorrect}</div><div class="score-incorrect">❌ ${incorrectCount}</div>`;
+        }
+        
+        function openSettingsModal() {
+            populateSettingsModal();
+            settingsModalOverlay.classList.add('visible');
+        }
+
+        function closeSettingsModal() {
+            settingsModalOverlay.classList.remove('visible');
+        }
+
+        function populateSettingsModal() {
+            chordTypesCheckboxesContainer.innerHTML = '';
+            leadVoicesCheckboxesContainer.innerHTML = '';
+            
+            const currentDifficulty = state.difficulty;
+
+            if(currentDifficulty === 'basic' || currentDifficulty === 'intermediate') {
+                leadVoicesSection.style.display = 'none';
+            } else {
+                leadVoicesSection.style.display = 'block';
+            }
+
+            // 1. Filter chords based on current difficulty
+            const availableChordKeys = Object.keys(chordStructures).filter(key => {
+                const chord = chordStructures[key];
+                if (currentDifficulty === 'basic') return chord.difficulty === 'basic';
+                // Advanced level includes intermediate chords for now
+                if (currentDifficulty === 'intermediate' || currentDifficulty === 'advanced') {
+                    return chord.difficulty === 'intermediate';
+                }
+                return false;
+            });
+
+            // 2. Get all possible lead voices from the available chords
+            const allLeadLabels = new Set();
+            availableChordKeys.forEach(key => {
+                Object.keys(chordStructures[key].voicing_rules).forEach(label => {
+                    const isTension = ['b9', '9', '#9', '11', '#11', '13'].includes(label);
+                    // Only add tensions if the level is advanced
+                    if (currentDifficulty === 'advanced' && isTension) {
+                        allLeadLabels.add(label);
+                    }
+                });
+            });
+
+            // 3. Populate chord type checkboxes
+            availableChordKeys.forEach(key => {
+                const chord = chordStructures[key];
+                const isChecked = !state.customPractice.isActive || state.customPractice.allowedChords.includes(key);
+                const item = `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="chord_${key}" value="${key}" ${isChecked ? 'checked' : ''}>
+                        <label for="chord_${key}">${chord.name}</label>
+                    </div>
+                `;
+                chordTypesCheckboxesContainer.innerHTML += item;
+            });
+
+            // 4. Populate lead voice checkboxes
+            Array.from(allLeadLabels).sort((a, b) => (intervalSortOrder[a] || 99) - (intervalSortOrder[b] || 99)).forEach(label => {
+                 const isChecked = !state.customPractice.isActive || state.customPractice.allowedLeads.length === 0 || state.customPractice.allowedLeads.includes(label);
+                const item = `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lead_${label}" value="${label}" ${isChecked ? 'checked' : ''}>
+                        <label for="lead_${label}">${label}</label>
+                    </div>
+                `;
+                leadVoicesCheckboxesContainer.innerHTML += item;
+            });
+        }
+
+        function saveSettings() {
+            const allowedChords = Array.from(chordTypesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+            let allowedLeads = [];
+            if(state.difficulty === 'advanced'){
+                allowedLeads = Array.from(leadVoicesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+            }
+            
+            // Recalculate available options for the current level to see if all are checked
+            const currentDifficulty = state.difficulty;
+            const availableChordKeys = Object.keys(chordStructures).filter(key => {
+                 const chord = chordStructures[key];
+                if (currentDifficulty === 'basic') return chord.difficulty === 'basic';
+                if (currentDifficulty === 'intermediate' || currentDifficulty === 'advanced') return chord.difficulty === 'intermediate';
+                return false;
+            });
+             const allLeadLabels = new Set();
+            if(state.difficulty === 'advanced'){
+                availableChordKeys.forEach(key => {
+                    Object.keys(chordStructures[key].voicing_rules).forEach(label => {
+                        const isTension = ['b9', '9', '#9', '11', '#11', '13'].includes(label);
+                        if (isTension) {
+                            allLeadLabels.add(label);
+                        }
+                    });
+                });
+            }
+
+            // Custom practice is active if the user hasn't selected all available options for the level
+            const allChordsSelected = allowedChords.length === availableChordKeys.length;
+            const allLeadsSelected = allowedLeads.length === allLeadLabels.size;
+            
+            state.customPractice.isActive = !(allChordsSelected && (allLeadsSelected || state.difficulty !== 'advanced'));
+            state.customPractice.allowedChords = allowedChords;
+            state.customPractice.allowedLeads = allowedLeads;
+            
+            savePreferences();
+            closeSettingsModal();
+            // Full UI refresh to apply notation changes
+            updateAllUiText();
+            generateComplexExercise();
+        }
+        
+        function updateAllUiText() {
+            generateNoteButtons(); // This will regenerate buttons with the correct notation
+            updateQuestionText();
+        }
+
+        function updateQuestionText() {
+            if (state.givenNote && state.givenIntervalName) {
+                chordQuestionTextDiv.querySelector('strong:first-child').innerHTML = displayNote(state.givenNote);
+                chordQuestionTextDiv.querySelector('strong:nth-child(2)').textContent = `${state.givenIntervalName} (${state.givenLabel})`;
+                chordQuestionTextDiv.querySelector('strong:nth-child(3)').textContent = chordStructures[state.chordTypeKey].name;
+            }
+        }
+
+        // --- NEW: localStorage Logic ---
+        function savePreferences() {
+            try {
+                const prefs = {
+                    userName: state.userName,
+                    difficulty: state.difficulty,
+                    notationSystem: state.notationSystem,
+                    customPractice: state.customPractice,
+                    currentStreak: state.stats.currentStreak,
+                    lastPlayed: Date.now()
+                };
+                localStorage.setItem('bloqueArmonicoPrefs', JSON.stringify(prefs));
+                console.log("Preferences saved:", prefs);
+            } catch (e) {
+                console.error("Could not save preferences to localStorage:", e);
+            }
+        }
+
+        function loadPreferences() {
+            try {
+                const prefsJSON = localStorage.getItem('bloqueArmonicoPrefs');
+                if (prefsJSON) {
+                    const prefs = JSON.parse(prefsJSON);
+                    state.userName = prefs.userName || '';
+                    state.difficulty = prefs.difficulty || 'basic';
+                    state.notationSystem = prefs.notationSystem || 'american';
+                    state.customPractice = prefs.customPractice || { isActive: false, allowedChords: [], allowedLeads: [] };
+                    
+                    const lastPlayed = prefs.lastPlayed || 0;
+                    if(lastPlayed > 0) {
+                        const today = new Date();
+                        const lastPlayedDate = new Date(lastPlayed);
+                        const yesterday = new Date();
+                        yesterday.setDate(today.getDate() - 1);
+
+                        const isToday = today.toDateString() === lastPlayedDate.toDateString();
+                        const isYesterday = yesterday.toDateString() === lastPlayedDate.toDateString();
+                        
+                        if (isToday || isYesterday) {
+                            state.stats.currentStreak = prefs.currentStreak || 0;
+                        } else {
+                            state.stats.currentStreak = 0; // Reset
+                        }
+                    }
+
+                    // Update UI from loaded prefs
+                    userNameInput.value = state.userName;
+                    document.querySelector(`input[name="difficulty"][value="${state.difficulty}"]`).checked = true;
+                    document.querySelector(`input[name="notationSystem"][value="${state.notationSystem}"]`).checked = true;
+                    
+                    console.log("Preferences loaded:", prefs);
+                }
+            } catch (e) {
+                console.error("Could not load preferences from localStorage:", e);
+            }
+        }
+
+
         // --- Tutorial Logic ---
         const tutorialModalOverlay = document.getElementById('tutorialModalOverlay');
         const tutorialStepsContainer = document.getElementById('tutorialStepsContainer');
@@ -2874,7 +3304,6 @@
         let currentTutorialStepIndex = 0;
         let tutorialStepsData = [];
 
-        // Dynamic highlight elements (no longer used for tooltips, but kept for visual highlight box)
         let highlightBox = document.createElement('div');
         highlightBox.classList.add('tutorial-highlight-box');
         document.body.appendChild(highlightBox);
@@ -2887,22 +3316,26 @@
          * Defines the content and target elements for each tutorial step.
          */
         function setupTutorialSteps() {
-            console.log("setupTutorialSteps: Initializing tutorial steps data.");
             tutorialStepsData = [
                 {
                     title: "¡Bienvenido al Tutorial!",
                     text: "Esta guía interactiva te ayudará a entender cómo funciona Bloque Armónico Pro. ¡Vamos a empezar!",
                     imageSrc: "https://placehold.co/400x200/2563eb/ffffff?text=Bienvenido"
                 },
+                 {
+                    title: "Ajustes y Cifrado",
+                    text: "Usa estos controles para cambiar el sistema de cifrado (Americano/Latino) o para abrir el panel de 'Ajustes' y personalizar tu práctica.",
+                    targetElementId: "settingsButton",
+                },
                 {
                     title: "Niveles de Dificultad",
-                    text: "Puedes elegir entre Básico (solo triadas, 3 notas), Intermedio (acordes hasta la 7ma, 4 notas) y Avanzado (acordes con tensiones, 4 notas).",
-                    targetElementId: "difficultySelection", // Target the new difficulty selection div
+                    text: "Puedes elegir entre Básico (triadas), Intermedio (tétradas) y Avanzado (tétradas con tensiones).",
+                    targetElementId: "difficultySelection",
                 },
                 {
                     title: "La Pregunta del Ejercicio",
-                    text: "Aquí verás el acorde a armonizar y la nota dada con su intervalo. La instrucción de armonización (3 o 4 voces, descendente) se adapta al nivel.",
-                    targetElementId: "chordQuestionText", // Changed to target the question text directly
+                    text: "Aquí verás la nota dada, su función en el acorde y el tipo de acorde a construir.",
+                    targetElementId: "chordQuestionText",
                 },
                 {
                     title: "El Pentagrama Musical",
@@ -2910,38 +3343,43 @@
                     targetElementId: "staffArea",
                 },
                 {
-                    title: "Selección de Notas",
-                    text: "Para seleccionar una nota natural (C, D, E, F, G, A, B), haz click en su botón. Para añadir una alteración (sostenido, bemol, etc.), haz click en la nota natural y luego en la alteración. Un segundo click en la misma nota la deseleccionará.", // Updated text
-                    targetElementId: "noteBuildingControls", // Target both natural and accidental buttons
+                    title: "Modos de Entrada",
+                    text: "Puedes elegir entre introducir las notas con botones de 'Cifrado' o con un 'Piano' interactivo.",
+                    targetElementId: "cifradoToggle", // Target the whole toggle
                 },
                 {
                     title: "El Bloque de Notas",
                     text: "A medida que selecciones las notas, se irán mostrando aquí, llenando el bloque. La primera nota es la nota dada.",
-                    targetElementId: "questionArea", // Target the entire questionArea to show the block filling
+                    targetElementId: "questionArea",
                 },
                 {
                     title: "Confirmar Respuesta",
-                    text: "Una vez que tengas tus notas seleccionadas (3 para Básico, 4 para Intermedio/Avanzado), haz clic aquí para verificar si tu respuesta es correcta.",
+                    text: "Una vez que tengas tus notas seleccionadas, haz clic aquí para verificar si tu respuesta es correcta.",
                     targetElementId: "confirmAnswerButton",
                 },
+                 {
+                    title: "Pedir una Pista",
+                    text: "Si te atascas, el botón 'Pista' revelará una de las notas correctas que te faltan. ¡Úsalo con sabiduría!",
+                    targetElementId: "hintButton",
+                },
                 {
-                    title: "Borrar Selección",
-                    text: "Si necesitas corregir o empezar de nuevo tu selección de notas, usa este botón para borrar todas las notas elegidas (excepto la nota dada).",
+                    title: "Ver la Solución",
+                    text: "Si prefieres ver la respuesta completa, el botón 'Mostrar Respuesta' resolverá el ejercicio por ti y te preparará para el siguiente.",
+                    targetElementId: "showAnswerButton",
+                },
+                {
+                    title: "Borrar y Cambiar",
+                    text: "Usa 'Borrar' para limpiar tu selección actual y 'Cambiar Ejercicio' para obtener uno nuevo sin intentarlo.",
                     targetElementId: "clearAllSelectionButton",
                 },
                 {
-                    title: "Cambiar Ejercicio",
-                    text: "Si un ejercicio es demasiado difícil o simplemente quieres uno nuevo, haz clic aquí para generar un nuevo desafío.",
-                    targetElementId: "changeQuestionButton",
-                },
-                {
                     title: "Retroalimentación y Evaluación",
-                    text: "Después de cada respuesta, recibirás retroalimentación. Periódicamente, se te mostrará una evaluación de tu progreso.",
+                    text: "Después de cada respuesta, recibirás retroalimentación. Cada 5 ejercicios correctos, se te mostrará una evaluación de tu progreso.",
                     imageSrc: "https://placehold.co/400x200/dcfce7/15803d?text=Retroalimentación"
                 },
                 {
                     title: "Resultados Finales",
-                    text: "Al terminar tu sesión, podrás ver un resumen de tu rendimiento, guardar tus resultados como imagen o PDF, y empezar una nueva sesión.",
+                    text: "Al terminar tu sesión, podrás ver un resumen de tu rendimiento, guardar tus resultados como imagen o PDF.",
                     targetElementId: "finalMessageDisplay",
                 },
                 {
@@ -2951,10 +3389,8 @@
                 }
             ];
 
-            // Populate tutorial steps in the DOM
-            tutorialStepsContainer.innerHTML = ''; // Ensure it's empty before populating
+            tutorialStepsContainer.innerHTML = '';
             tutorialStepsData.forEach((step, index) => {
-                console.log(`setupTutorialSteps: Adding step ${index}: ${step.title}`);
                 const stepDiv = document.createElement('div');
                 stepDiv.classList.add('tutorial-step');
                 stepDiv.innerHTML = `
@@ -2964,266 +3400,307 @@
                 `;
                 tutorialStepsContainer.appendChild(stepDiv);
             });
-            console.log("setupTutorialSteps: All tutorial steps added to DOM.");
         }
 
-        /**
-         * Displays a specific tutorial step.
-         * @param {number} index - The index of the step to display.
-         */
         function showTutorialStep(index) {
-            console.log(`showTutorialStep: Attempting to show step ${index}. Current index: ${currentTutorialStepIndex}`);
-            if (index < 0 || index >= tutorialStepsData.length) {
-                console.warn(`showTutorialStep: Invalid step index: ${index}. Tutorial has ${tutorialStepsData.length} steps.`);
-                return;
-            }
+            if (index < 0 || index >= tutorialStepsData.length) return;
 
             currentTutorialStepIndex = index;
-            console.log(`showTutorialStep: currentTutorialStepIndex updated to ${currentTutorialStepIndex}.`);
-
-            // Ensure main app is visible but dimmed for highlighting
             mainAppContainer.style.display = 'flex';
-            mainAppContainer.style.opacity = '0.3'; // Dim the main app
+            mainAppContainer.style.opacity = '0.3';
             mainAppContainer.style.pointerEvents = 'none';
 
             const steps = document.querySelectorAll('.tutorial-step');
             steps.forEach((step, i) => {
                 step.style.display = (i === index) ? 'flex' : 'none';
             });
-            console.log(`showTutorialStep: Displaying step ${index} in DOM.`);
 
-            // Update button visibility
             prevTutorialBtn.style.display = (index === 0) ? 'none' : 'block';
             nextTutorialBtn.textContent = (index === tutorialStepsData.length - 1) ? 'Finalizar Tutorial' : 'Siguiente';
-            console.log(`showTutorialStep: Buttons updated. Prev display: ${prevTutorialBtn.style.display}, Next text: ${nextTutorialBtn.textContent}`);
 
-            // Apply highlighting
             const currentStep = tutorialStepsData[index];
             if (currentStep.targetElementId) {
-                console.log(`showTutorialStep: Applying highlight to element: ${currentStep.targetElementId}`);
                 const targetElement = document.getElementById(currentStep.targetElementId);
                 if (targetElement) {
-                    // Scroll the target element into view
                     targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    // Give a small delay for the scroll to complete before positioning the modal
-                    setTimeout(() => {
-                        applyHighlight(currentStep.targetElementId);
-                    }, 300); // Adjust delay as needed
+                    setTimeout(() => applyHighlight(currentStep.targetElementId), 300);
                 } else {
-                    console.warn(`showTutorialStep: Target element with ID ${currentStep.targetElementId} not found.`);
                     removeHighlight();
-                    // If no target element, position the modal in the center
                     tutorialModalContent.style.marginTop = '0';
-                    tutorialModalContent.style.marginBottom = '0';
                     tutorialModalContent.style.alignSelf = 'center';
                 }
             } else {
-                console.log("showTutorialStep: No target element for highlight, removing any existing highlight.");
                 removeHighlight();
-                // If no target element, position the modal in the center
                 tutorialModalContent.style.marginTop = '0';
-                tutorialModalContent.style.marginBottom = '0';
                 tutorialModalContent.style.alignSelf = 'center';
             }
-            console.log(`showTutorialStep: Step ${index} displayed successfully.`);
         }
-
-        /**
-         * Applies a visual highlight to a target element and positions the modal.
-         * @param {string} elementId - The ID of the element to highlight.
-         */
+        
         function applyHighlight(elementId) {
             const targetElement = document.getElementById(elementId);
-            if (!targetElement) {
-                console.warn(`applyHighlight: Element with ID ${elementId} not found for tutorial highlight.`);
-                removeHighlight();
-                return;
-            }
+            if (!targetElement) { removeHighlight(); return; }
 
             const rect = targetElement.getBoundingClientRect();
-            console.log(`applyHighlight: Highlighting element ${elementId} at rect:`, rect);
-
-            // Position highlight box
             highlightBox.style.width = `${rect.width + 10}px`;
             highlightBox.style.height = `${rect.height + 10}px`;
             highlightBox.style.left = `${rect.left - 5}px`;
             highlightBox.style.top = `${rect.top - 5}px`;
             highlightBox.style.display = 'block';
-            highlightBox.style.pointerEvents = 'none'; // Ensure it doesn't block clicks
-            highlightBox.style.position = 'fixed'; // Ensure it stays with viewport
-            console.log("applyHighlight: Highlight box positioned and displayed.");
-
-            // Show overlay
+            highlightBox.style.position = 'fixed';
             highlightOverlay.classList.add('visible');
-            console.log("applyHighlight: Highlight overlay visible.");
 
-            // --- Dynamic modal positioning logic ---
             const modalContentHeight = tutorialModalContent.offsetHeight;
             const viewportHeight = window.innerHeight;
-
-            // Calculate space above and below the highlighted element
             const spaceAbove = rect.top;
             const spaceBelow = viewportHeight - rect.bottom;
 
             let newMarginTop = '0';
             let newAlignSelf = 'center';
 
-            // Try to place below
-            if (spaceBelow >= modalContentHeight + 20) { // If enough space below
+            if (spaceBelow >= modalContentHeight + 20) {
                 newMarginTop = `${rect.bottom + 20}px`;
-                newAlignSelf = 'flex-start'; // Align to top of overlay
-                console.log("applyHighlight: Positioning modal below highlighted element.");
+                newAlignSelf = 'flex-start';
             }
-            // Try to place above
-            else if (spaceAbove >= modalContentHeight + 20) { // If enough space above
+            else if (spaceAbove >= modalContentHeight + 20) {
                 newMarginTop = `${rect.top - modalContentHeight - 20}px`;
-                newAlignSelf = 'flex-start'; // Align to top of overlay
-                console.log("applyHighlight: Positioning modal above highlighted element.");
+                newAlignSelf = 'flex-start';
             }
-            // Default to centering if not enough space above or below
-            else {
-                newMarginTop = '0'; // Reset margin
-                newAlignSelf = 'center'; // Center vertically
-                console.log("applyHighlight: Not enough space above/below, centering modal.");
-            }
-
+            
             tutorialModalContent.style.marginTop = newMarginTop;
             tutorialModalContent.style.alignSelf = newAlignSelf;
-            // Ensure the modal is not pushed off the screen horizontally
             tutorialModalContent.style.marginLeft = 'auto';
             tutorialModalContent.style.marginRight = 'auto';
             tutorialModalContent.style.left = '0';
             tutorialModalContent.style.right = '0';
-            tutorialModalContent.style.transform = 'translateY(0)'; // Reset transform for positioning
+            tutorialModalContent.style.transform = 'translateY(0)';
         }
 
-        /**
-         * Removes the visual highlight and tooltip.
-         */
         function removeHighlight() {
-            console.log("removeHighlight: Removing highlight and tooltip.");
             highlightBox.style.display = 'none';
             highlightOverlay.classList.remove('visible');
-            // Reset modal positioning
             tutorialModalContent.style.marginTop = '0';
-            tutorialModalContent.style.marginBottom = '0';
             tutorialModalContent.style.alignSelf = 'center';
-            tutorialModalContent.style.transform = 'translateY(0)'; // Reset transform
+            tutorialModalContent.style.transform = 'translateY(0)';
         }
 
-        // Event Listeners for Tutorial Buttons
-        prevTutorialBtn.addEventListener('click', () => {
-            console.log("prevTutorialBtn: Clicked. Current step index:", currentTutorialStepIndex);
-            if (currentTutorialStepIndex > 0) {
-                showTutorialStep(currentTutorialStepIndex - 1);
-            }
-        });
+        function updateAllDisplays() {
+            updateSelectedNotesDisplay();
+            updateGridNoteDisplays();
+            drawMusicalStaff(state.selectedUserNotes);
+        }
 
+        function addNoteToSelection(noteWithOctave) {
+            const maxNotesAllowed = (state.difficulty === 'basic') ? 3 : 4;
+            if (state.selectedUserNotes.length < maxNotesAllowed) {
+                state.selectedUserNotes.push(noteWithOctave);
+                updateAllDisplays();
+            } else {
+                showCustomMessage("Límite de Notas", `Límite de ${maxNotesAllowed} notas alcanzado.`, "warning");
+            }
+        }
+
+        function handleEnharmonicChoice(event) {
+            const chosenNote = event.target.dataset.note;
+            if (chosenNote) {
+                addNoteToSelection(chosenNote);
+            }
+            enharmonicModalOverlay.classList.remove('visible');
+            enharmonicChoicesContainer.onclick = null; // Clean up listener
+        }
+        
+        // Checks if a note or its enharmonic equivalent is in the selection, ignoring the given note
+        function findEnharmonicIndexInUserNotes(noteWithOctave) {
+            const noteName = noteWithOctave.split('/')[0];
+            const equivalent = enharmonicEquivalents[noteName];
+            
+            // Start search from index 1 to protect the given note at index 0
+            for (let i = 1; i < state.selectedUserNotes.length; i++) {
+                const nName = state.selectedUserNotes[i].split('/')[0];
+                if (nName === noteName || (equivalent && nName === equivalent)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        
+        /**
+         * Handles clicks on piano keys to add/remove notes.
+         */
+        function handlePianoKeyClick(event) {
+            const keyElement = event.target.closest('.piano-key');
+            if (!keyElement) return;
+        
+            const noteWithOctave = keyElement.dataset.note;
+            if (!noteWithOctave) return;
+        
+            if (synth) {
+                synth.triggerAttackRelease(noteWithOctave.replace('/', ''), "8n", Tone.now());
+            }
+
+            const [noteName, octave] = noteWithOctave.split('/');
+        
+            // Prevent modifying the given note
+            if (Tone.Midi(noteWithOctave.replace('/', '')).toMidi() === Tone.Midi(state.givenNoteWithOctave.replace('/', '')).toMidi()) {
+                showCustomMessage("Nota Fija", "La nota dada no se puede quitar.", "info");
+                return;
+            };
+            
+            // Check if the specific note with octave is selected
+            const existingIndex = state.selectedUserNotes.indexOf(noteWithOctave);
+
+            if (existingIndex > 0) { // > 0 ensures we don't remove the given note
+                state.selectedUserNotes.splice(existingIndex, 1);
+                updateAllDisplays();
+                return;
+            }
+        
+            // If it's a white key and not selected, add it directly
+            if (!noteName.includes('#')) {
+                addNoteToSelection(noteWithOctave);
+                return;
+            }
+        
+            // --- If it's a BLACK KEY and NOT selected, open the modal ---
+            const sharpNote = noteName;
+            const flatNote = enharmonicEquivalents[sharpNote];
+
+            enharmonicChoicesContainer.innerHTML = '';
+            
+            const sharpButton = document.createElement('button');
+            sharpButton.dataset.note = `${sharpNote}/${octave}`;
+            sharpButton.textContent = displayNote(sharpNote);
+            
+            const flatButton = document.createElement('button');
+            flatButton.dataset.note = `${flatNote}/${octave}`;
+            flatButton.textContent = displayNote(flatNote);
+
+            enharmonicChoicesContainer.appendChild(sharpButton);
+            enharmonicChoicesContainer.appendChild(flatButton);
+            
+            enharmonicChoicesContainer.onclick = handleEnharmonicChoice;
+            enharmonicModalOverlay.classList.add('visible');
+        }
+
+
+        function finishTutorial() {
+            tutorialModalOverlay.classList.remove('visible');
+            removeHighlight();
+            mainAppContainer.style.opacity = '1';
+            mainAppContainer.style.pointerEvents = 'auto';
+            welcomeModalOverlay.classList.add('visible');
+        }
+
+        prevTutorialBtn.addEventListener('click', () => showTutorialStep(currentTutorialStepIndex - 1));
         nextTutorialBtn.addEventListener('click', () => {
-            console.log("nextTutorialBtn: Clicked. Current step index:", currentTutorialStepIndex);
             if (currentTutorialStepIndex < tutorialStepsData.length - 1) {
                 showTutorialStep(currentTutorialStepIndex + 1);
             } else {
-                // Last step, finish tutorial
-                console.log("nextTutorialBtn: Last tutorial step reached. Finishing tutorial.");
                 finishTutorial();
             }
         });
+        skipTutorialBtn.addEventListener('click', finishTutorial);
 
-        skipTutorialBtn.addEventListener('click', () => {
-            console.log("skipTutorialBtn: Clicked. Skipping tutorial.");
-            finishTutorial();
-        });
-
-        /**
-         * Finishes the tutorial and transitions to the welcome modal.
-         */
-        function finishTutorial() {
-            console.log("finishTutorial: Finishing tutorial process.");
-            tutorialModalOverlay.classList.remove('visible');
-            removeHighlight(); // Ensure highlights are removed
-
-            // Keep mainAppContainer visible and interactive, then show welcome modal on top
-            mainAppContainer.style.opacity = '1'; // Restore full opacity
-            mainAppContainer.style.pointerEvents = 'auto'; // Re-enable interaction
-
-            welcomeModalOverlay.classList.add('visible'); // Show welcome modal on top of the app
-            console.log("finishTutorial: Tutorial finished. Welcome modal displayed on top of app.");
-        }
-
-        // --- Existing App Event Listeners ---
+        // --- App Event Listeners ---
         confirmAnswerButton.addEventListener('click', checkAnswer);
         clearAllSelectionButton.addEventListener('click', clearSelection);
         changeQuestionButton.addEventListener('click', handleChangeQuestion);
+        hintButton.addEventListener('click', giveHint);
+        showAnswerButton.addEventListener('click', showAnswer);
         continueTrainingButton.addEventListener('click', continueTraining);
         endSessionButton.addEventListener('click', endSession);
-
-        // New event listeners for save buttons
         saveAsPhotoButton.addEventListener('click', saveAsPhoto);
         saveAsPdfButton.addEventListener('click', saveAsPdf);
+        settingsButton.addEventListener('click', openSettingsModal);
+        saveSettingsButton.addEventListener('click', saveSettings);
+        cancelSettingsButton.addEventListener('click', closeSettingsModal);
+        userNameInput.addEventListener('change', () => {
+             state.userName = userNameInput.value.trim();
+             savePreferences();
+        });
 
-        // Event listeners for difficulty selection
+        // Toggle input method
+        cifradoToggle.addEventListener('click', () => {
+            noteBuildingControls.style.display = 'flex';
+            pianoContainer.style.display = 'none';
+            cifradoToggle.classList.add('active');
+            pianoToggle.classList.remove('active');
+        });
+
+        pianoToggle.addEventListener('click', () => {
+            noteBuildingControls.style.display = 'none';
+            pianoContainer.style.display = 'flex';
+            pianoToggle.classList.add('active');
+            cifradoToggle.classList.remove('active');
+            updateButtonSelectionVisuals(); // Ensure piano is highlighted correctly on switch
+        });
+
+
         difficultyRadios.forEach(radio => {
             radio.addEventListener('change', (event) => {
-                currentDifficulty = event.target.value;
-                console.log("Difficulty changed to:", currentDifficulty);
-                generateComplexExercise(); // Generate a new exercise with the selected difficulty
+                state.difficulty = event.target.value;
+                console.log("Difficulty changed to:", state.difficulty);
+                // Reset custom practice settings when changing difficulty
+                state.customPractice.isActive = false;
+                state.customPractice.allowedChords = [];
+                state.customPractice.allowedLeads = [];
+                savePreferences();
+                generateComplexExercise();
+            });
+        });
+
+        notationRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                state.notationSystem = document.querySelector('input[name="notationSystem"]:checked').value;
+                savePreferences();
+                updateAllUiText();
             });
         });
 
         startButton.addEventListener('click', async () => {
-            console.log("startButton: Clicked. Hiding welcome modal and enabling application.");
-            welcomeModalOverlay.classList.remove('visible'); // Hide welcome modal
-            // mainAppContainer.style.display is already 'flex' from window.onload or tutorial finish, just ensure opacity and pointer-events are correct
-            mainAppContainer.style.opacity = '1'; // Ensure full opacity
-            mainAppContainer.style.pointerEvents = 'auto'; // Ensure interaction is enabled
-            sessionStartTime = Date.now(); // Record session start time
+            console.log("startButton: Clicked.");
+            welcomeModalOverlay.classList.remove('visible');
+            mainAppContainer.style.opacity = '1';
+            mainAppContainer.style.pointerEvents = 'auto';
+            state.session.startTime = Date.now();
 
-            // Start audio context immediately on user gesture
             await startAudioContext();
-            console.log("startButton: Audio context start attempt completed.");
-
-            // Now ensure interaction is enabled
-            console.log("startButton: Enabling training interaction.");
             enableTrainingInteraction();
-            console.log("startButton: All setup complete. Application interaction enabled.");
-
         });
 
-        // Show tutorial modal on initial load
         window.onload = function() {
-            console.log("window.onload: Window loaded. Initializing tutorial modal.");
+            console.log("window.onload: Initializing app...");
             try {
-                // First, initialize app components so they are ready for highlighting
-                console.log("window.onload: Initializing application components for tutorial display.");
-                generateNoteButtons(); // Generate note buttons
-                generateComplexExercise(); // This includes drawing staff and updating displays
-                console.log("window.onload: Application components initialized.");
+                // Prepare a basic structure for the question text before the first generation
+                chordQuestionTextDiv.innerHTML = `<strong></strong> es <strong></strong> de un acorde <strong></strong>.<br><small></small>`;
 
-                // Ensure main app is visible but dimmed for tutorial highlighting
-                mainAppContainer.style.display = 'flex'; // Ensure it's displayed
+                loadPreferences();
+                updateAllUiText();
+                generatePiano();
+                generateComplexExercise();
+                updateScoreDisplay();
+                
+                mainAppContainer.style.display = 'flex';
                 mainAppContainer.style.opacity = '0.3';
                 mainAppContainer.style.pointerEvents = 'none';
+                welcomeModalOverlay.classList.remove('visible');
 
-                welcomeModalOverlay.classList.remove('visible'); // Ensure welcome modal is hidden initially, use remove('visible') instead of style.display = 'none' for consistency
-                setupTutorialSteps(); // Setup tutorial data and DOM elements
-                tutorialModalOverlay.classList.add('visible'); // Show tutorial modal immediately
-                showTutorialStep(0); // Show the first step
+                setupTutorialSteps();
+                tutorialModalOverlay.classList.add('visible');
+                showTutorialStep(0);
                 
-                console.log("window.onload: Tutorial modal displayed, main app visible (dimmed), welcome modal hidden.");
+                console.log("window.onload: Tutorial initialized.");
             } catch (error) {
-                console.error("window.onload: Error during tutorial setup:", error);
-                showCustomMessage("Error de Carga Inicial", "Hubo un problema al inicializar el tutorial. Por favor, revisa la consola del navegador.", "error");
-                // Fallback to showing welcome modal or main app if tutorial fails
+                console.error("window.onload: Error during initial setup:", error);
+                showCustomMessage("Error de Carga", "Hubo un problema al inicializar la aplicación.", "error");
+                // Fallback to showing welcome modal
                 welcomeModalOverlay.classList.add('visible');
-                mainAppContainer.style.opacity = '1'; // Ensure app is visible and interactive on error
+                mainAppContainer.style.opacity = '1';
                 mainAppContainer.style.pointerEvents = 'auto';
-                mainAppContainer.style.display = 'flex'; // Ensure it's displayed
+                mainAppContainer.style.display = 'flex';
                 tutorialModalOverlay.classList.remove('visible');
             }
         };
     </script>
 </body>
 </html>
-
 
