@@ -423,12 +423,12 @@
         <div id="difficultySelection" class="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <label class="text-blue-800 font-semibold">Nivel de Dificultad:</label>
             <div class="flex gap-2 flex-wrap justify-center">
-                <input type="radio" id="difficultyBasic" name="difficulty" value="basic" class="hidden peer" checked>
-                <label for="difficultyBasic" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-all hover:bg-blue-300 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg peer-checked:-translate-y-0.5">Básico</label>
-                <input type="radio" id="difficultyIntermediate" name="difficulty" value="intermediate" class="hidden peer">
-                <label for="difficultyIntermediate" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-all hover:bg-blue-300 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg peer-checked:-translate-y-0.5">Intermedio</label>
-                <input type="radio" id="difficultyAdvanced" name="difficulty" value="advanced" class="hidden peer">
-                <label for="difficultyAdvanced" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-all hover:bg-blue-300 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg peer-checked:-translate-y-0.5">Avanzado</label>
+                <input type="radio" id="difficultyBasic" name="difficulty" value="basic" class="hidden" checked>
+                <label for="difficultyBasic" class="difficulty-label py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors duration-200">Básico</label>
+                <input type="radio" id="difficultyIntermediate" name="difficulty" value="intermediate" class="hidden">
+                <label for="difficultyIntermediate" class="difficulty-label py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors duration-200">Intermedio</label>
+                <input type="radio" id="difficultyAdvanced" name="difficulty" value="advanced" class="hidden">
+                <label for="difficultyAdvanced" class="difficulty-label py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors duration-200">Avanzado</label>
             </div>
         </div>
         
@@ -671,8 +671,8 @@
         const chordStructures = {
             "major": { name: "Mayor", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "3", "1"], "3": ["3", "1", "5", "3"], "5": ["5", "3", "1", "5"] } },
             "minor": { name: "Menor", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "b3", "1"], "b3": ["b3", "1", "5", "b3"], "5": ["5", "b3", "1", "5"] } },
-            "augmented": { name: "Aumentada", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 8, name: "quinta aumentada", label: "#5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "#5", "3", "1"], "3": ["3", "1", "#5", "3"], "#5": ["#5", "3", "1", "#5"] } },
-            "diminished": { name: "Disminuida", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "b5", "b3", "1"], "b3": ["b3", "1", "b5", "b3"], "b5": ["b5", "b3", "1", "1"] } },
+            "augmented": { name: "Aumentado", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 8, name: "quinta aumentada", label: "#5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "#5", "3", "1"], "3": ["3", "1", "#5", "3"], "#5": ["#5", "3", "1", "#5"] } },
+            "diminished": { name: "Disminuido", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "b5", "b3", "1"], "b3": ["b3", "1", "b5", "b3"], "b5": ["b5", "b3", "1", "1"] } },
             "sus2": { name: "Sus2", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 2, name: "segunda mayor", label: "2", degreeOffset: 1 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "2", "1"], "2": ["2", "1", "5", "2"], "5": ["5", "2", "1", "5"] } },
             "sus4": { name: "Sus4", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 5, name: "cuarta justa", label: "4", degreeOffset: 3 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "4", "1"], "4": ["4", "1", "5", "4"], "5": ["5", "4", "1", "5"] } },
             "maj7": { name: "Mayor 7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }, { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 }, { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }], voicing_rules: { "1": ["1", "7", "5", "3"], "3": ["3", "1", "7", "5"], "5": ["5", "3", "1", "7"], "7": ["7", "5", "3", "1"], "9": ["9", "7", "5", "3"], "#11": ["#11", "3", "1", "7"] } },
@@ -778,7 +778,8 @@
                 console.error("Error initializing audio:", e);
                 showCustomMessage("Error de Audio", "No se pudo iniciar el audio.", "error");
             }
-
+            
+            updateDifficultySelectionUI(); // Set initial button colors
             generateNoteButtons();
             generatePiano();
             addEventListeners();
@@ -795,6 +796,21 @@
             }
         }
         
+        function updateDifficultySelectionUI() {
+            difficultyRadios.forEach(radio => {
+                const label = document.querySelector(`label[for="${radio.id}"]`);
+                if (label) {
+                    if (radio.checked) {
+                        label.classList.add('bg-green-500', 'text-white', 'shadow-md');
+                        label.classList.remove('bg-gray-300', 'text-gray-900');
+                    } else {
+                        label.classList.add('bg-gray-300', 'text-gray-900');
+                        label.classList.remove('bg-green-500', 'text-white', 'shadow-md');
+                    }
+                }
+            });
+        }
+
         function addEventListeners() {
             confirmAnswerButton.addEventListener('click', checkAnswer);
             clearAllSelectionButton.addEventListener('click', clearSelection);
@@ -814,6 +830,7 @@
             
             difficultyRadios.forEach(radio => radio.addEventListener('change', (event) => {
                 state.difficulty = event.target.value;
+                updateDifficultySelectionUI();
                 generateExercise();
             }));
 
@@ -1786,4 +1803,5 @@
     </script>
 </body>
 </html>
+
 
