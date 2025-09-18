@@ -403,7 +403,8 @@
                     <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
                     <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50">Do,Re,Mi</label>
                 </div>
-                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-sm transition-colors">⚙️ Ajustes</button>
+                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-sm transition-colors">⚙️</button>
+                <button id="showTutorialButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">?</button>
             </div>
         </div>
 
@@ -728,6 +729,7 @@
         const hintModalOverlay = document.getElementById('hintModalOverlay');
         const hintModalBody = document.getElementById('hintModalBody');
         const hintModalCloseButton = document.getElementById('hintModalCloseButton');
+        const showTutorialButton = document.getElementById('showTutorialButton');
         
         let synth, reverb;
 
@@ -780,6 +782,7 @@
             });
             hintButton.addEventListener('click', giveHint);
             showAnswerButton.addEventListener('click', showAnswer);
+            showTutorialButton.addEventListener('click', startTutorial);
             
             difficultyRadios.forEach(radio => radio.addEventListener('change', (event) => {
                 state.difficulty = event.target.value;
@@ -1147,9 +1150,9 @@
             state.evaluation.batchHintsUsed++;
             updateStatsDisplay();
             
-            const correctNotes = state.correctNotesWithOctave.map(n => n.split('/')[0]).sort();
-            const userNotes = state.selectedUserNotes.map(n => n.split('/')[0]).sort();
-            const missingNote = correctNotes.find(note => !userNotes.includes(note));
+            const correctNotes = state.correctNotesWithOctave.map(n => n ? n.split('/')[0] : '').sort();
+            const userNotes = state.selectedUserNotes.map(n => n ? n.split('/')[0] : '').sort();
+            const missingNote = correctNotes.find(note => note && !userNotes.includes(note));
 
             let hintText;
             if (missingNote) {
@@ -1642,5 +1645,4 @@
     </script>
 </body>
 </html>
-
 
