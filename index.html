@@ -403,8 +403,16 @@
                     <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
                     <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50">Do,Re,Mi</label>
                 </div>
-                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-sm transition-colors">⚙️</button>
+                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">⚙️</button>
                 <button id="showTutorialButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">?</button>
+                <button id="fullscreenButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">
+                    <svg id="fullscreenIconOpen" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"/>
+                    </svg>
+                    <svg id="fullscreenIconClose" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen-exit hidden" viewBox="0 0 16 16">
+                        <path d="M5.5 0a.5.5 0 0 1 .5.5v4A.5.5 0 0 1 5 5h-4a.5.5 0 0 1 0-1h3.5V.5a.5.5 0 0 1 .5-.5zm0 11a.5.5 0 0 1 .5.5v3.5h-3.5a.5.5 0 0 1 0-1h4v-3a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-3a.5.5 0 0 1 .5-.5zm.5-11a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-4a.5.5 0 0 1 .5-.5z"/>
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -637,6 +645,11 @@
             tutorial: {
                 currentStep: 0,
                 isActive: false
+            },
+            keyboard: {
+                lastAccidentalKey: null,
+                lastAccidentalTimestamp: 0,
+                doublePressThreshold: 400 // ms
             }
         };
 
@@ -730,6 +743,9 @@
         const hintModalBody = document.getElementById('hintModalBody');
         const hintModalCloseButton = document.getElementById('hintModalCloseButton');
         const showTutorialButton = document.getElementById('showTutorialButton');
+        const fullscreenButton = document.getElementById('fullscreenButton');
+        const fullscreenIconOpen = document.getElementById('fullscreenIconOpen');
+        const fullscreenIconClose = document.getElementById('fullscreenIconClose');
         
         let synth, reverb;
 
@@ -766,6 +782,9 @@
             generateExercise();
 
             if (startWithTutorial) {
+                 if (window.innerWidth > 768 && document.documentElement.requestFullscreen) {
+                    openFullscreen();
+                }
                 startTutorial();
             } else {
                 localStorage.setItem('harmonicBlockProTutorialCompleted', 'true');
@@ -783,6 +802,10 @@
             hintButton.addEventListener('click', giveHint);
             showAnswerButton.addEventListener('click', showAnswer);
             showTutorialButton.addEventListener('click', startTutorial);
+            document.addEventListener('keydown', handleKeyPress);
+            fullscreenButton.addEventListener('click', toggleFullscreen);
+            document.addEventListener('fullscreenchange', updateFullscreenIcons);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenIcons);
             
             difficultyRadios.forEach(radio => radio.addEventListener('change', (event) => {
                 state.difficulty = event.target.value;
@@ -1253,16 +1276,22 @@
         
         function handleNaturalNoteClick(e) {
             const clickedNote = e.target.dataset.note;
+            addNaturalNote(clickedNote);
+        }
+        
+        function addNaturalNote(note) {
             const lastNoteIndex = state.selectedUserNotes.length - 1;
             const expectedCount = state.difficulty === 'basic' ? 3 : 4;
 
             if (lastNoteIndex >= 1) {
                 const lastNote = state.selectedUserNotes[lastNoteIndex];
-                const naturalPartOfLastNote = lastNote.match(/[A-G]/i)[0].toUpperCase();
-                if (naturalPartOfLastNote === clickedNote) {
-                    state.selectedUserNotes.pop();
-                    updateDisplay();
-                    return;
+                if(lastNote){
+                    const naturalPartOfLastNote = lastNote.match(/[A-G]/i)[0].toUpperCase();
+                    if (naturalPartOfLastNote === note) {
+                        state.selectedUserNotes.pop();
+                        updateDisplay();
+                        return;
+                    }
                 }
             }
 
@@ -1274,39 +1303,143 @@
             const lastNoteWithOctave = state.selectedUserNotes[lastNoteIndex];
             const lastMidi = Tone.Midi(lastNoteWithOctave.replace('/', '')).toMidi();
             
-            // Start checking from the octave of the last note
             let currentOctave = parseInt(lastNoteWithOctave.split('/')[1]);
-            let candidateMidi = Tone.Midi(`${clickedNote}${currentOctave}`).toMidi();
+            let candidateMidi = Tone.Midi(`${note}${currentOctave}`).toMidi();
 
-            // Decrease octave until the new note is below the last one
             while(candidateMidi >= lastMidi) {
                 currentOctave--;
-                candidateMidi = Tone.Midi(`${clickedNote}${currentOctave}`).toMidi();
+                candidateMidi = Tone.Midi(`${note}${currentOctave}`).toMidi();
             }
 
-            const noteWithOctave = `${clickedNote}/${currentOctave}`;
+            const noteWithOctave = `${note}/${currentOctave}`;
             state.selectedUserNotes.push(noteWithOctave);
             updateDisplay();
         }
-
+        
         function handleAccidentalClick(e) {
             const accidental = e.target.dataset.accidental;
+            addAccidental(accidental);
+        }
+
+        function addAccidental(accidental) {
             const lastNoteIndex = state.selectedUserNotes.length - 1;
 
-            if (lastNoteIndex < 1) {
-                showCustomMessage("Acción inválida", "Selecciona una nota natural antes de alterarla.", "warning");
-                return;
-            }
+            if (lastNoteIndex < 1) { return; }
             
             const lastNote = state.selectedUserNotes[lastNoteIndex];
-            const naturalPart = lastNote.match(/[A-G]/i)[0];
+            const naturalPartMatch = lastNote.match(/[A-G]/i);
+             if (!naturalPartMatch) return;
+
+            const naturalPart = naturalPartMatch[0];
             const octavePart = lastNote.match(/\/(\d+)/)[1];
             state.selectedUserNotes[lastNoteIndex] = `${naturalPart}${accidental}/${octavePart}`;
             updateDisplay();
         }
 
+        function handleAccidentalKeyPress(key) {
+            const now = Date.now();
+            const { lastAccidentalKey, lastAccidentalTimestamp, doublePressThreshold } = state.keyboard;
+            
+            let accidental = '';
+
+            if (key === lastAccidentalKey && (now - lastAccidentalTimestamp < doublePressThreshold)) {
+                accidental = key === '+' ? '##' : 'bb';
+                state.keyboard.lastAccidentalKey = null;
+                state.keyboard.lastAccidentalTimestamp = 0;
+            } else {
+                accidental = key === '+' ? '#' : 'b';
+                state.keyboard.lastAccidentalKey = key;
+                state.keyboard.lastAccidentalTimestamp = now;
+            }
+            addAccidental(accidental);
+        }
+
+        function handleKeyPress(e) {
+            if (e.target.tagName === 'INPUT') return;
+            if (document.querySelector('.modal-overlay.visible')) return;
+
+            const key = e.key.toLowerCase();
+            
+            if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(key)) {
+                e.preventDefault();
+                addNaturalNote(key.toUpperCase());
+            }
+
+            if (key === '+' || key === '-') {
+                e.preventDefault();
+                handleAccidentalKeyPress(key);
+            }
+
+            switch(key) {
+                case 'enter':
+                    e.preventDefault();
+                    if(!confirmAnswerButton.disabled) confirmAnswerButton.click();
+                    break;
+                case 'p':
+                    e.preventDefault();
+                    if(!hintButton.disabled) hintButton.click();
+                    break;
+                case 'r':
+                    e.preventDefault();
+                    if(!showAnswerButton.disabled) showAnswerButton.click();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if(!changeQuestionButton.disabled) changeQuestionButton.click();
+                    break;
+                case 'n':
+                    e.preventDefault();
+                    if(!clearAllSelectionButton.disabled) clearAllSelectionButton.click();
+                    break;
+                case 'q':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+            }
+        }
+
+
         function enableButtons() {
             [confirmAnswerButton, clearAllSelectionButton, changeQuestionButton, hintButton, showAnswerButton].forEach(btn => btn.disabled = false);
+        }
+        
+        function openFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        function closeFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                openFullscreen();
+            } else {
+                closeFullscreen();
+            }
+        }
+        
+        function updateFullscreenIcons() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                fullscreenIconOpen.classList.remove('hidden');
+                fullscreenIconClose.classList.add('hidden');
+            } else {
+                fullscreenIconOpen.classList.add('hidden');
+                fullscreenIconClose.classList.remove('hidden');
+            }
         }
 
         // --- Settings and Modal Logic ---
@@ -1544,7 +1677,7 @@
             { id: 'chordQuestionWrapper', title: '¡Bienvenido!', text: 'Aquí se te presentará el ejercicio. Se te dará una nota (melodía) y su función dentro de un acorde específico.' },
             { id: 'displaySection', title: 'Tu Objetivo', text: 'Tu meta es construir el acorde completo, descendiendo desde la melodía, en la tabla de notas y en el pentagrama.' },
             { id: 'inputMethodToggle', title: 'Métodos de Entrada', text: 'Puedes elegir cómo introducir las notas: usando los botones de "Cifrado" o el "Piano" virtual.' },
-            { id: 'noteBuildingControls', title: 'Entrada con Cifrado', text: 'Presiona un botón de nota para añadirla. Presiónalo de nuevo para quitarla. Usa los botones de alteración ( sostenidos / bemoles ) para modificar la última nota que agregaste.' },
+            { id: null, title: 'Atajos de Teclado', text: '¡Usa el teclado para ir más rápido! <br><b>A-G:</b> Notas Naturales <br><b>+/-:</b> Sostenidos/Bemoles (presiona 2 veces para dobles) <br><b>Enter:</b> Confirmar <br><b>P:</b> Pista <br><b>R:</b> Respuesta <br><b>Espacio:</b> Cambiar <br><b>N:</b> Borrar <br><b>Q:</b> Pantalla Completa'},
             { id: 'confirmAnswerButton', title: 'Comprueba tu Respuesta', text: 'Una vez que hayas construido el acorde de 3 o 4 voces, presiona "Confirmar". ¡No dudes en usar "Pista" si necesitas ayuda!' },
             { id: null, title: '¡Todo Listo!', text: 'Has completado el tutorial. ¡Ya puedes comenzar a entrenar! ¡Mucha suerte!' }
         ];
@@ -1571,7 +1704,7 @@
             const modal = document.getElementById('tutorialModal');
             
             titleEl.textContent = step.title;
-            textEl.textContent = step.text;
+            textEl.innerHTML = step.text;
 
             if (step.id) {
                 const targetElement = document.getElementById(step.id);
@@ -1620,6 +1753,9 @@
         }
 
         function endTutorial() {
+            if(document.fullscreenElement) {
+                closeFullscreen();
+            }
             state.tutorial.isActive = false;
             document.getElementById('tutorialOverlay').classList.add('hidden');
             document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
