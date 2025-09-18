@@ -350,6 +350,17 @@
                 <button id="startTutorialButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Ver Tutorial</button>
                 <button id="skipTutorialButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Omitir y Empezar</button>
             </div>
+            <div class="text-center mt-8">
+                <p class="text-sm text-gray-600">Una aplicación de</p>
+                <p class="text-lg font-bold text-blue-800 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-music-note-beamed" viewBox="0 0 16 16">
+                      <path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13c0-1.104 1.12-2 2.5-2s2.5.896 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2z"/>
+                      <path fill-rule="evenodd" d="M14 11V2h1v9h-1zM6 3v10H5V3h1z"/>
+                      <path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4V2.905z"/>
+                    </svg>
+                    Juan Miguel Ríos Redondo
+                </p>
+            </div>
         </div>
     </div>
 
@@ -1195,12 +1206,20 @@
                 return;
             }
 
-            const lastMidi = Tone.Midi(state.selectedUserNotes[lastNoteIndex].replace('/', '')).toMidi();
-            let newNoteMidi = Tone.Midi(`${clickedNote}4`).toMidi();
-            while (newNoteMidi >= lastMidi) {
-                newNoteMidi -= 12;
+            const lastNoteWithOctave = state.selectedUserNotes[lastNoteIndex];
+            const lastMidi = Tone.Midi(lastNoteWithOctave.replace('/', '')).toMidi();
+            
+            // Start checking from the octave of the last note
+            let currentOctave = parseInt(lastNoteWithOctave.split('/')[1]);
+            let candidateMidi = Tone.Midi(`${clickedNote}${currentOctave}`).toMidi();
+
+            // Decrease octave until the new note is below the last one
+            while(candidateMidi >= lastMidi) {
+                currentOctave--;
+                candidateMidi = Tone.Midi(`${clickedNote}${currentOctave}`).toMidi();
             }
-            const noteWithOctave = Tone.Midi(newNoteMidi).toNote().replace(/(\d+)$/, '/$1');
+
+            const noteWithOctave = `${clickedNote}/${currentOctave}`;
             state.selectedUserNotes.push(noteWithOctave);
             updateDisplay();
         }
@@ -1520,7 +1539,7 @@
                     modal.style.top = `${topPos}px`;
                     modal.style.left = `${leftPos}px`;
                     modal.style.transform = '';
-                }, 400); // Wait for scroll animation
+                }, 400); 
 
             } else {
                 modal.style.top = '50%';
