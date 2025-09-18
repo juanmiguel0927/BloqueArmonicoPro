@@ -1123,15 +1123,43 @@
                 console.error("Could not save streak data", e);
             }
         }
+        
+        /**
+         * Converts a note string (e.g., "C##/4") to its pitch class (a number from 0-11).
+         * This allows for enharmonic equivalence checking.
+         * @param {string} noteWithOctave - The note string including octave.
+         * @returns {number|null} The pitch class or null if invalid.
+         */
+        function noteToPitchClass(noteWithOctave) {
+            if (!noteWithOctave) return null;
+            const noteName = noteWithOctave.split('/')[0];
+            const naturalPartMatch = noteName.match(/[A-G]/i);
+            if (!naturalPartMatch) return null;
+
+            const naturalPart = naturalPartMatch[0].toUpperCase();
+            const accidentalPart = noteName.substring(naturalPart.length);
+
+            let semitone = naturalLetterSemitone[naturalPart];
+
+            for (const char of accidentalPart) {
+                if (char === '#') {
+                    semitone++;
+                } else if (char === 'b') {
+                    semitone--;
+                }
+            }
+            return (semitone % 12 + 12) % 12; // Handles negative results from flats
+        }
 
         function checkAnswer() {
             state.stats.totalAttempts++;
             state.evaluation.questionsAttemptedInBatch++;
             
-            const userNotesNormalized = state.selectedUserNotes.map(n => normalizeNote(n)).filter(Boolean).sort();
-            const correctNotesNormalized = state.correctNotesWithOctave.map(n => normalizeNote(n)).filter(Boolean).sort();
+            // Convert notes to pitch classes for enharmonic comparison
+            const userPitchClasses = state.selectedUserNotes.map(noteToPitchClass).filter(pc => pc !== null).sort((a, b) => a - b);
+            const correctPitchClasses = state.correctNotesWithOctave.map(noteToPitchClass).filter(pc => pc !== null).sort((a, b) => a - b);
             
-            const isCorrect = JSON.stringify(userNotesNormalized) === JSON.stringify(correctNotesNormalized);
+            const isCorrect = JSON.stringify(userPitchClasses) === JSON.stringify(correctPitchClasses);
             
             if (isCorrect) {
                 try {
