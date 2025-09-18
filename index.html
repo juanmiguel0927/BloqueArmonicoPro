@@ -369,7 +369,10 @@
         <div id="tutorialModal">
             <h3 id="tutorialTitle" class="text-xl font-bold text-blue-800 mb-2"></h3>
             <p id="tutorialText" class="text-gray-700 mb-4"></p>
-            <button id="tutorialNextButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Siguiente</button>
+            <div class="flex flex-col gap-2 mt-4">
+                <button id="tutorialNextButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Siguiente</button>
+                <button id="tutorialEndButton" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Terminar Tutorial</button>
+            </div>
         </div>
     </div>
 
@@ -420,12 +423,12 @@
         <div id="difficultySelection" class="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <label class="text-blue-800 font-semibold">Nivel de Dificultad:</label>
             <div class="flex gap-2 flex-wrap justify-center">
-                <input type="radio" id="difficultyBasic" name="difficulty" value="basic" class="hidden" checked>
-                <label for="difficultyBasic" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors hover:bg-blue-300">Básico</label>
-                <input type="radio" id="difficultyIntermediate" name="difficulty" value="intermediate" class="hidden">
-                <label for="difficultyIntermediate" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors hover:bg-blue-300">Intermedio</label>
-                <input type="radio" id="difficultyAdvanced" name="difficulty" value="advanced" class="hidden">
-                <label for="difficultyAdvanced" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors hover:bg-blue-300">Avanzado</label>
+                <input type="radio" id="difficultyBasic" name="difficulty" value="basic" class="hidden peer" checked>
+                <label for="difficultyBasic" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-all hover:bg-blue-300 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg peer-checked:-translate-y-0.5">Básico</label>
+                <input type="radio" id="difficultyIntermediate" name="difficulty" value="intermediate" class="hidden peer">
+                <label for="difficultyIntermediate" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-all hover:bg-blue-300 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg peer-checked:-translate-y-0.5">Intermedio</label>
+                <input type="radio" id="difficultyAdvanced" name="difficulty" value="advanced" class="hidden peer">
+                <label for="difficultyAdvanced" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-all hover:bg-blue-300 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg peer-checked:-translate-y-0.5">Avanzado</label>
             </div>
         </div>
         
@@ -746,6 +749,7 @@
         const fullscreenButton = document.getElementById('fullscreenButton');
         const fullscreenIconOpen = document.getElementById('fullscreenIconOpen');
         const fullscreenIconClose = document.getElementById('fullscreenIconClose');
+        const tutorialEndButton = document.getElementById('tutorialEndButton');
         
         let synth, reverb;
 
@@ -802,6 +806,7 @@
             hintButton.addEventListener('click', giveHint);
             showAnswerButton.addEventListener('click', showAnswer);
             showTutorialButton.addEventListener('click', startTutorial);
+            tutorialEndButton.addEventListener('click', endTutorial);
             document.addEventListener('keydown', handleKeyPress);
             fullscreenButton.addEventListener('click', toggleFullscreen);
             document.addEventListener('fullscreenchange', updateFullscreenIcons);
