@@ -380,6 +380,1186 @@
                 <div class="text-xs font-medium text-amber-600">🔥 Días de Racha</div>
                 <div class="text-xl font-bold text-amber-800">0</div>
             </div>
-            <div id="scoreCounter" class="flex flex-col
+            <div id="scoreCounter" class="flex flex-col items-center p-2 rounded-xl bg-gray-100 border border-gray-200">
+                <div class="text-sm text-green-600">✅ 0</div>
+                <div class="text-sm text-red-600">❌ 0</div>
+            </div>
+            <div class="flex items-center gap-2">
+                <!-- Notation selector -->
+                <div class="flex rounded-full bg-gray-200 p-1">
+                    <input type="radio" id="notationAmericano" name="notationSystem" value="american" class="hidden" checked>
+                    <label for="notationAmericano" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50">C,D,E</label>
+                    <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
+                    <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50">Do,Re,Mi</label>
+                </div>
+                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-sm transition-colors">⚙️ Ajustes</button>
+            </div>
+        </div>
+
+        <!-- Difficulty controls -->
+        <div id="difficultySelection" class="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <label class="text-blue-800 font-semibold">Nivel de Dificultad:</label>
+            <div class="flex gap-2 flex-wrap justify-center">
+                <input type="radio" id="difficultyBasic" name="difficulty" value="basic" class="hidden" checked>
+                <label for="difficultyBasic" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors hover:bg-blue-300">Básico</label>
+                <input type="radio" id="difficultyIntermediate" name="difficulty" value="intermediate" class="hidden">
+                <label for="difficultyIntermediate" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors hover:bg-blue-300">Intermedio</label>
+                <input type="radio" id="difficultyAdvanced" name="difficulty" value="advanced" class="hidden">
+                <label for="difficultyAdvanced" class="bg-blue-200 text-blue-800 py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors hover:bg-blue-300">Avanzado</label>
+            </div>
+        </div>
+        
+        <!-- Exercise display area -->
+        <div id="displaySection" class="flex justify-center items-start gap-4 flex-wrap">
+            <div id="questionArea" class="flex-1 min-w-[250px] p-4 bg-blue-100 rounded-lg border border-blue-300">
+                <p class="text-lg font-bold text-blue-800 mb-2">Construye el acorde:</p>
+                <div class="notes-grid w-full">
+                    <div class="grid-cell" id="gridCell0">
+                        <span class="interval-label text-gray-500"></span>
+                        <span class="note-display font-bold"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell1">
+                        <span class="interval-label text-gray-500"></span>
+                        <span class="note-display font-bold"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell2">
+                        <span class="interval-label text-gray-500"></span>
+                        <span class="note-display font-bold"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell3">
+                        <span class="interval-label text-gray-500"></span>
+                        <span class="note-display font-bold"></span>
+                    </div>
+                </div>
+            </div>
+            <div id="staffArea" class="flex-1 min-w-[300px] flex justify-center items-center">
+                <canvas id="musicalStaffCanvas"></canvas>
+            </div>
+        </div>
+        
+        <!-- Note input options (Cifrado vs Piano) -->
+        <div id="inputMethodToggle" class="flex justify-center mb-4">
+            <div class="flex p-1 bg-gray-200 rounded-full">
+                <button id="cifradoToggle" class="py-2 px-4 rounded-full font-semibold transition-all bg-white text-blue-600 shadow-sm active">Cifrado</button>
+                <button id="pianoToggle" class="py-2 px-4 rounded-full font-semibold transition-all text-gray-700">Piano</button>
+            </div>
+        </div>
+
+        <!-- Note selection controls (Cifrado) -->
+        <div id="noteBuildingControls" class="flex flex-col gap-4">
+            <div id="naturalNoteButtons" class="natural-note-buttons"></div>
+            <div id="accidentalButtons" class="accidental-buttons"></div>
+        </div>
+
+        <!-- Piano keyboard, initially hidden -->
+        <div id="piano-container" class="piano-container hidden"></div>
+
+        <!-- Main action buttons -->
+        <div class="action-buttons-group mt-4">
+            <button id="confirmAnswerButton" class="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50">Confirmar</button>
+            <button id="hintButton" class="bg-yellow-500 hover:bg-yellow-600 text-white disabled:opacity-50">Pista</button>
+            <button id="showAnswerButton" class="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50">Mostrar Respuesta</button>
+            <button id="clearAllSelectionButton" class="bg-gray-400 hover:bg-gray-500 text-white disabled:opacity-50">Borrar</button>
+            <button id="changeQuestionButton" class="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50">Cambiar Ejercicio</button>
+        </div>
+    </div>
+    
+    <!-- Modal for instant feedback -->
+    <div id="feedbackModalOverlay" class="modal-overlay hidden">
+        <div id="feedbackModalContent" class="modal-content feedback p-6 rounded-xl shadow-lg"></div>
+    </div>
+
+    <!-- Modal for session evaluation -->
+    <div id="evaluationModalOverlay" class="modal-overlay hidden">
+        <div id="evaluationModalContent" class="modal-content p-6 rounded-xl shadow-lg text-left">
+            <h3 class="text-2xl font-bold text-blue-800 text-center mb-4">Resultados de la Evaluación</h3>
+            <p id="evaluationSummary" class="text-gray-700 mb-2"></p>
+            <p class="text-lg font-bold text-gray-800 mt-4 mb-2">Áreas a trabajar:</p>
+            <ul id="adviceList" class="list-disc list-inside text-gray-600 space-y-1"></ul>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="continueTrainingButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Continuar Entrenamiento</button>
+                <button id="endSessionButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Terminar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for practice settings -->
+    <div id="settingsModalOverlay" class="modal-overlay hidden">
+        <div id="settingsModalContent" class="modal-content p-6 rounded-xl shadow-lg text-left">
+            <h3 class="text-2xl font-bold text-blue-800 text-center mb-4">Ajustes de Práctica</h3>
+            <div class="mb-4">
+                <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-2">Tipos de Acorde</h4>
+                <div id="chordTypesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </div>
+            <div id="leadVoicesSection" class="mb-4 hidden">
+                <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-2">Voces Principales (Tensiones)</h4>
+                <div id="leadVoicesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="saveSettingsButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar y Reiniciar</button>
+                <button id="cancelSettingsButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for enharmonic selection -->
+    <div id="enharmonicModalOverlay" class="modal-overlay hidden">
+        <div id="enharmonicModalContent" class="modal-content p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-bold text-blue-800 mb-2">Seleccionar Alteración</h3>
+            <p class="text-gray-700 mb-4">¿Cómo deseas escribir esta nota?</p>
+            <div id="enharmonicChoices" class="flex justify-center gap-4"></div>
+        </div>
+    </div>
+
+    <!-- Final message and session statistics -->
+    <div id="finalMessageDisplay" class="container hidden p-6 text-center">
+        <h2 class="text-3xl font-bold text-blue-800 mb-4">¡Sesión Terminada!</h2>
+        <div id="resultsContentToCapture" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+            <div class="flex flex-col items-center mb-4">
+                <label for="userNameInput" class="text-lg font-semibold text-gray-800 mb-1">Tu Nombre:</label>
+                <input type="text" id="userNameInput" placeholder="Introduce tu nombre aquí" class="text-center p-2 border rounded-lg w-full max-w-sm">
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Intentos</span>
+                    <span id="totalExercisesDisplay" class="text-2xl font-bold text-gray-800">0</span>
+                </div>
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Aciertos</span>
+                    <span id="correctAnswersDisplay" class="text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Precisión</span>
+                    <span id="overallAccuracyDisplay" class="text-2xl font-bold text-blue-600">0%</span>
+                </div>
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Pistas</span>
+                    <span id="hintsUsedDisplay" class="text-2xl font-bold text-yellow-600">0</span>
+                </div>
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Soluciones</span>
+                    <span id="answersUsedDisplay" class="text-2xl font-bold text-red-600">0</span>
+                </div>
+            </div>
+            <p id="finalResultsSummary" class="text-lg font-medium text-gray-700 mb-4">¡Gracias por practicar!</p>
+            <div class="flex justify-center gap-4 text-sm text-gray-500">
+                <span id="sessionDateDisplay"></span>
+                <span id="sessionTimeDisplay"></span>
+                <span id="sessionDurationDisplay"></span>
+            </div>
+        </div>
+        <div class="flex justify-center gap-4 mt-6">
+            <button id="saveAsPhotoButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar como Foto (PNG)</button>
+            <button id="saveAsPdfButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Guardar como PDF</button>
+        </div>
+    </div>
+
+    <!-- Main application script -->
+    <script type="module">
+        // Import VexFlow modules for the staff
+        import { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
+
+        // Central application state
+        const state = {
+            correctNotes: [],
+            correctNotesWithOctave: [],
+            chordRoot: '',
+            chordTypeKey: '',
+            givenIntervalName: '',
+            givenLabel: '',
+            givenNote: '',
+            givenNoteWithOctave: '',
+            orderedLabelsForDisplay: [],
+            selectedUserNotes: [],
+            lastUserAddedNoteIndex: -1,
+            stats: {
+                totalAttempts: 0,
+                totalCorrect: 0,
+                currentStreak: 0,
+                hintsUsed: 0,
+                answersUsed: 0,
+            },
+            evaluation: {
+                questionsAttemptedInBatch: 0,
+                data: {},
+                exercisesPerEval: 5,
+                batchCorrect: 0,
+                batchHintsUsed: 0,
+                batchAnswersUsed: 0
+            },
+            userName: '',
+            difficulty: 'basic',
+            notationSystem: 'american',
+            customPractice: {
+                isActive: false,
+                allowedChords: [],
+                allowedLeads: []
+            },
+            audioContextStarted: false,
+            session: {
+                startTime: 0
+            },
+            tutorial: {
+                currentStep: 0,
+                isActive: false
+            }
+        };
+
+        // Constants for musical logic
+        const canonicalNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const noteToSemitoneMap = { "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11, "DO": 0, "RE": 2, "MI": 4, "FA": 5, "SOL": 7, "LA": 9, "SI": 11, "DO#": 1, "RE#": 3, "MI#": 5, "FA#": 6, "SOL#": 8, "LA#": 10, "SI#": 0, "DOb": 11, "REb": 1, "MIb": 3, "FAb": 4, "SOLb": 6, "LAb": 8, "SIb": 10};
+        const naturalLetterSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+        const numberToLetterMap = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const letterToNumberMap = { 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6 };
+        const naturalNotes = ["C", "D", "E", "F", "G", "A", "B"];
+        const accidentals = ["#", "b", "##", "bb"]; // Reordered for better UI
+        const notesForQuestionRoot = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"];
+        const enharmonicEquivalents = { "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb", "Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#" };
+        const americanToLatin = { "C": "Do", "D": "Re", "E": "Mi", "F": "Fa", "G": "Sol", "A": "La", "B": "Si" };
+
+        const chordStructures = {
+            "major": { name: "Mayor", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "3", "1"], "3": ["3", "1", "5", "3"], "5": ["5", "3", "1", "5"] } },
+            "minor": { name: "Menor", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "b3", "1"], "b3": ["b3", "1", "5", "b3"], "5": ["5", "b3", "1", "5"] } },
+            "augmented": { name: "Aumentada", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 8, name: "quinta aumentada", label: "#5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "#5", "3", "1"], "3": ["3", "1", "#5", "3"], "#5": ["#5", "3", "1", "#5"] } },
+            "diminished": { name: "Disminuida", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "b5", "b3", "1"], "b3": ["b3", "1", "b5", "b3"], "b5": ["b5", "b3", "1", "1"] } },
+            "sus2": { name: "Sus2", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 2, name: "segunda mayor", label: "2", degreeOffset: 1 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "2", "1"], "2": ["2", "1", "5", "2"], "5": ["5", "2", "1", "5"] } },
+            "sus4": { name: "Sus4", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 5, name: "cuarta justa", label: "4", degreeOffset: 3 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "4", "1"], "4": ["4", "1", "5", "4"], "5": ["5", "4", "1", "5"] } },
+            "maj7": { name: "Mayor 7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }, { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 }, { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }], voicing_rules: { "1": ["1", "7", "5", "3"], "3": ["3", "1", "7", "5"], "5": ["5", "3", "1", "7"], "7": ["7", "5", "3", "1"], "9": ["9", "7", "5", "3"], "#11": ["#11", "3", "1", "7"] } },
+            "m7": { name: "Menor 7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", "label": "5", degreeOffset: 4 }, { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 }, { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }], voicing_rules: { "1": ["1", "b7", "5", "b3"], "b3": ["b3", "1", "b7", "5"], "5": ["5", "b3", "1", "b7"], "b7": ["b7", "5", "b3", "1"], "9": ["9", "b7", "5", "b3"], "11": ["11", "b3", "1", "b7"] } },
+            "7": { name: "7 (Dominante)", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }, { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 }, { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 }, { semitones: 3, name: "novena aumentada", label: "#9", degreeOffset: 1 }, { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }, { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 }, { semitones: 8, name: "trecena menor", label: "b13", degreeOffset: 5 }, { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }], voicing_rules: { "1": ["1", "b7", "5", "3"], "3": ["3", "1", "b7", "5"], "5": ["5", "3", "1", "b7"], "b7": ["b7", "5", "3", "1"], "9": ["9", "b7", "5", "3"], "b9": ["b9", "b7", "5", "3"], "#9": ["#9", "b7", "5", "3"], "11": ["11", "1", "b7", "5"], "#11": ["#11", "3", "1", "b7"], "13": ["13", "3", "1", "b7"], "b13": ["b13", "3", "1", "b7"] } },
+            "m7b5": { name: "Menor 7(b5)", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }, { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 }, { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }, { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 }], voicing_rules: { "1": ["1", "b7", "b5", "b3"], "b3": ["b3", "1", "b7", "b5"], "b5": ["b5", "b3", "1", "b7"], "b7": ["b7", "b5", "b3", "1"], "b9": ["b9", "b7", "b5", "b3"], "11": ["11", "b3", "b7", "b5"] } },
+            "dim7": { name: "Disminuido 7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }, { semitones: 9, name: "séptima disminuida", label: "bb7", degreeOffset: 6 }], voicing_rules: { "1": ["1", "bb7", "b5", "b3"], "b3": ["b3", "1", "bb7", "b5"], "b5": ["b5", "b3", "1", "bb7"], "bb7": ["bb7", "b5", "b3", "1"] } }
+        };
+
+        // DOM element references
+        const welcomeModalOverlay = document.getElementById('welcomeModalOverlay');
+        const mainAppContainer = document.getElementById('mainAppContainer');
+        const chordQuestionText = document.getElementById('chordQuestionText');
+        const gridCells = [
+            document.getElementById('gridCell0'),
+            document.getElementById('gridCell1'),
+            document.getElementById('gridCell2'),
+            document.getElementById('gridCell3')
+        ];
+        const noteBuildingControls = document.getElementById('noteBuildingControls');
+        const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
+        const accidentalButtonsContainer = document.getElementById('accidentalButtons');
+        const musicalStaffCanvas = document.getElementById('musicalStaffCanvas');
+        const confirmAnswerButton = document.getElementById('confirmAnswerButton');
+        const clearAllSelectionButton = document.getElementById('clearAllSelectionButton');
+        const changeQuestionButton = document.getElementById('changeQuestionButton');
+        const hintButton = document.getElementById('hintButton');
+        const showAnswerButton = document.getElementById('showAnswerButton');
+        const feedbackModalOverlay = document.getElementById('feedbackModalOverlay');
+        const feedbackModalContent = document.getElementById('feedbackModalContent');
+        const evaluationModalOverlay = document.getElementById('evaluationModalOverlay');
+        const evaluationSummary = document.getElementById('evaluationSummary');
+        const adviceList = document.getElementById('adviceList');
+        const continueTrainingButton = document.getElementById('continueTrainingButton');
+        const endSessionButton = document.getElementById('endSessionButton');
+        const finalMessageDisplay = document.getElementById('finalMessageDisplay');
+        const totalExercisesDisplay = document.getElementById('totalExercisesDisplay');
+        const correctAnswersDisplay = document.getElementById('correctAnswersDisplay');
+        const overallAccuracyDisplay = document.getElementById('overallAccuracyDisplay');
+        const hintsUsedDisplay = document.getElementById('hintsUsedDisplay');
+        const answersUsedDisplay = document.getElementById('answersUsedDisplay');
+        const sessionDateDisplay = document.getElementById('sessionDateDisplay');
+        const sessionTimeDisplay = document.getElementById('sessionTimeDisplay');
+        const sessionDurationDisplay = document.getElementById('sessionDurationDisplay');
+        const userNameInput = document.getElementById('userNameInput');
+        const saveAsPhotoButton = document.getElementById('saveAsPhotoButton');
+        const saveAsPdfButton = document.getElementById('saveAsPdfButton');
+        const resultsContentToCapture = document.getElementById('resultsContentToCapture');
+        const difficultyRadios = document.querySelectorAll('input[name="difficulty"]');
+        const streakCounter = document.getElementById('streakCounter').querySelector('.text-xl');
+        const scoreCounter = document.getElementById('scoreCounter');
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsModalOverlay = document.getElementById('settingsModalOverlay');
+        const saveSettingsButton = document.getElementById('saveSettingsButton');
+        const cancelSettingsButton = document.getElementById('cancelSettingsButton');
+        const chordTypesCheckboxesContainer = document.getElementById('chordTypesCheckboxes');
+        const leadVoicesCheckboxesContainer = document.getElementById('leadVoicesCheckboxes');
+        const leadVoicesSection = document.getElementById('leadVoicesSection');
+        const cifradoToggle = document.getElementById('cifradoToggle');
+        const pianoToggle = document.getElementById('pianoToggle');
+        const pianoContainer = document.getElementById('piano-container');
+        const enharmonicModalOverlay = document.getElementById('enharmonicModalOverlay');
+        const enharmonicChoicesContainer = document.getElementById('enharmonicChoices');
+        const notationRadios = document.querySelectorAll('input[name="notationSystem"]');
+        
+        let synth, reverb;
+
+        // --- Main Logic ---
+
+        /**
+         * Initializes the audio context and the application.
+         */
+        async function initializeApp(startWithTutorial) {
+            welcomeModalOverlay.classList.add('hidden');
+            mainAppContainer.classList.remove('hidden');
+            state.session = { startTime: Date.now() };
+
+            try {
+                await Tone.start();
+                synth = new Tone.PolySynth(Tone.FMSynth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.005, decay: 0.8, sustain: 0.0, release: 1.0 },
+                    modulation: { type: "sine" },
+                    modulationEnvelope: { attack: 0.001, decay: 0.2, sustain: 0.0, release: 0.2 },
+                    harmonicity: 3, modulationIndex: 15
+                }).toDestination();
+                reverb = new Tone.Reverb({ decay: 1.5, preDelay: 0.01, wet: 0.3 }).toDestination();
+                synth.connect(reverb);
+            } catch (e) {
+                console.error("Error initializing audio:", e);
+                showCustomMessage("Error de Audio", "No se pudo iniciar el audio.", "error");
+            }
+
+            generateNoteButtons();
+            generatePiano();
+            addEventListeners();
+            loadStreakData();
+            generateExercise();
+
+            if (startWithTutorial) {
+                startTutorial();
+            } else {
+                localStorage.setItem('harmonicBlockProTutorialCompleted', 'true');
+            }
+        }
+        
+        function addEventListeners() {
+            confirmAnswerButton.addEventListener('click', checkAnswer);
+            clearAllSelectionButton.addEventListener('click', clearSelection);
+            changeQuestionButton.addEventListener('click', () => {
+                state.stats.totalAttempts++;
+                updateScoreDisplay();
+                generateExercise();
+            });
+            hintButton.addEventListener('click', giveHint);
+            showAnswerButton.addEventListener('click', showAnswer);
+            
+            difficultyRadios.forEach(radio => radio.addEventListener('change', (event) => {
+                state.difficulty = event.target.value;
+                generateExercise();
+            }));
+
+            settingsButton.addEventListener('click', openSettingsModal);
+            saveSettingsButton.addEventListener('click', saveSettings);
+            cancelSettingsButton.addEventListener('click', closeSettingsModal);
+
+            cifradoToggle.addEventListener('click', () => {
+                noteBuildingControls.classList.remove('hidden');
+                pianoContainer.classList.add('hidden');
+                cifradoToggle.classList.add('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+                pianoToggle.classList.remove('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+            });
+
+            pianoToggle.addEventListener('click', () => {
+                noteBuildingControls.classList.add('hidden');
+                pianoContainer.classList.remove('hidden');
+                pianoToggle.classList.add('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+                cifradoToggle.classList.remove('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+            });
+
+            pianoContainer.addEventListener('click', handlePianoKeyClick);
+
+            notationRadios.forEach(radio => radio.addEventListener('change', (event) => {
+                state.notationSystem = event.target.value;
+                updateDisplay();
+                generateNoteButtons();
+            }));
+
+            continueTrainingButton.addEventListener('click', () => evaluationModalOverlay.classList.remove('visible'));
+            endSessionButton.addEventListener('click', endSession);
+            saveAsPhotoButton.addEventListener('click', saveAsPhoto);
+            saveAsPdfButton.addEventListener('click', saveAsPdf);
+             // Redraw staff on window resize to ensure it fits
+            window.addEventListener('resize', () => drawMusicalStaff(state.selectedUserNotes));
+        }
+
+        function showCustomMessage(title, message, type = 'info') {
+            const modal = document.createElement('div');
+            modal.className = `modal-overlay visible`;
+            modal.innerHTML = `
+                <div class="modal-content p-6 rounded-xl shadow-lg feedback ${type === 'success' ? 'correct' : (type === 'error' ? 'incorrect' : '')}">
+                    <h3 class="text-xl font-bold mb-2">${title}</h3>
+                    <p>${message}</p>
+                </div>`;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.remove(), 2500);
+        }
+
+        function normalizeNote(note) {
+            if (!note) return null;
+            let normalizedNote = note.split('/')[0].trim().toUpperCase();
+            if (normalizedNote.length > 1 && normalizedNote.slice(-1) === 'B') {
+                normalizedNote = normalizedNote.slice(0, -1) + 'b';
+            }
+            if (normalizedNote.length > 2 && normalizedNote.slice(-2) === 'BB') {
+                normalizedNote = normalizedNote.slice(0, -2) + 'bb';
+            }
+            const semitone = noteToSemitoneMap[normalizedNote];
+            return semitone !== undefined ? canonicalNotes[semitone] : null;
+        }
+
+        function displayNote(americanNote) {
+            if (!americanNote) return "?";
+            const naturalPart = americanNote.match(/[A-G]/i);
+            if (!naturalPart) return americanNote;
+            
+            const accidentalPart = americanNote.substring(naturalPart[0].length);
+            
+            if (state.notationSystem === 'latin') {
+                const latinPart = americanToLatin[naturalPart[0]];
+                return latinPart + accidentalPart;
+            }
+            return americanNote;
+        }
+        
+        function updateQuestionText() {
+            if (state.givenNote && state.givenIntervalName) {
+                const noteDisplay = displayNote(state.givenNote);
+                const chordName = chordStructures[state.chordTypeKey].name;
+                const voiceCount = (state.difficulty === 'basic') ? "3 voces" : "4 voces";
+                chordQuestionText.innerHTML = `<strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es <strong class="text-xl sm:text-2xl">${state.givenIntervalName} (${state.givenLabel})</strong> de un acorde <strong class="text-xl sm:text-2xl">${chordName}</strong>.<br>
+                <small class="text-sm text-gray-500">Armoniza en bloque cerrado, <span class="font-bold text-indigo-700">${voiceCount}</span>, descendente.</small>`;
+            }
+        }
+
+        function drawMusicalStaff(notesWithOctave = []) {
+            const canvas = musicalStaffCanvas;
+            const context = canvas.getContext('2d');
+            
+            const fixedWidth = 300; 
+            const fixedHeight = 150;
+            canvas.width = fixedWidth;
+            canvas.height = fixedHeight;
+            
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
+            renderer.resize(canvas.width, canvas.height);
+            const ctx = renderer.getContext();
+            
+            const stave = new Stave(10, 0, fixedWidth - 20); 
+            stave.addClef("treble").setContext(ctx).draw();
+
+            if (notesWithOctave.length === 0) return;
+            const validNotes = notesWithOctave.filter(note => note && note.includes('/'));
+            if (validNotes.length === 0) return;
+
+            const sortedNotes = [...validNotes].sort((a, b) => Tone.Midi(a.replace('/', '')).toMidi() - Tone.Midi(b.replace('/', '')).toMidi());
+            const staveNoteKeys = sortedNotes.map(note => note.toLowerCase());
+            const chordStaveNote = new StaveNote({ keys: staveNoteKeys, duration: "w" });
+            
+            sortedNotes.forEach((note, index) => {
+                const accidentalPart = note.match(/[#b]+/);
+                if (accidentalPart) {
+                    chordStaveNote.addAccidental(index, new Accidental(accidentalPart[0]));
+                }
+            });
+
+            const voice = new Voice({ num_beats: 4, beat_value: 4 });
+            voice.addTickables([chordStaveNote]);
+            new Formatter().joinVoices([voice]).format([voice], canvas.width - 40);
+            voice.draw(ctx, stave);
+        }
+
+        function generateExercise() {
+            const chords = Object.keys(chordStructures).filter(key => {
+                const chord = chordStructures[key];
+                const isBasic = state.difficulty === 'basic' && chord.difficulty === 'basic';
+                const isIntermediate = state.difficulty === 'intermediate' && chord.difficulty === 'intermediate';
+                const isAdvanced = state.difficulty === 'advanced' && chord.difficulty === 'intermediate';
+                const matchesDifficulty = isBasic || isIntermediate || isAdvanced;
+                const matchesCustom = !state.customPractice.isActive || state.customPractice.allowedChords.includes(key);
+                return matchesDifficulty && matchesCustom;
+            });
+
+            if (chords.length === 0) {
+                showCustomMessage("Sin Acordes", "No hay acordes disponibles. Revisa tus ajustes.", "warning");
+                return;
+            }
+            const chordTypeKey = chords[Math.floor(Math.random() * chords.length)];
+            const chordData = chordStructures[chordTypeKey];
+            
+            const leads = Object.keys(chordData.voicing_rules).filter(label => {
+                const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+                const isTension = allTensions.includes(label);
+
+                const difficultyMatch = (state.difficulty === 'advanced') ? isTension : !isTension;
+                if (!difficultyMatch) return false;
+
+                if (state.customPractice.isActive && isTension && state.customPractice.allowedLeads.length > 0) {
+                    return state.customPractice.allowedLeads.includes(label);
+                }
+                return true;
+            });
+
+            if (leads.length === 0) {
+                 generateExercise();
+                 return;
+            }
+            const givenLabel = leads[Math.floor(Math.random() * leads.length)];
+
+            const minMidi = 65; // F4
+            const maxMidi = 84; // C6
+            const randomMidi = Math.floor(Math.random() * (maxMidi - minMidi + 1)) + minMidi;
+            const noteFromMidi = new Tone.Midi(randomMidi).toNote();
+            
+            let noteName = noteFromMidi.replace(/\d+$/, '');
+            const octave = noteFromMidi.match(/\d+/)[0];
+
+            const enharmonic = enharmonicEquivalents[noteName];
+            if (enharmonic && Math.random() < 0.5) {
+                noteName = enharmonic;
+            }
+            
+            state.givenNote = noteName;
+            state.givenNoteWithOctave = `${noteName}/${octave}`;
+
+            const givenInterval = chordData.intervals.find(int => int.label === givenLabel);
+            const givenNoteLetter = state.givenNote.charAt(0);
+            
+            const givenNoteSemitone = noteToSemitoneMap[normalizeNote(state.givenNote)];
+            const rootSemitone = (givenNoteSemitone - givenInterval.semitones + 12) % 12;
+            const rootLetterNum = (((letterToNumberMap[givenNoteLetter] - givenInterval.degreeOffset) % 7) + 7) % 7;
+            const rootLetter = numberToLetterMap[rootLetterNum];
+            
+            const accidentalOffset = (rootSemitone - naturalLetterSemitone[rootLetter] + 12) % 12;
+            const accidentalMap = { 0: '', 1: '#', 2: '##', 10: 'bb', 11: 'b' };
+            const accidentalChar = accidentalMap[accidentalOffset] || '';
+
+            state.chordRoot = `${rootLetter}${accidentalChar}`;
+            
+            const voicingLabels = chordData.voicing_rules[givenLabel];
+            state.orderedLabelsForDisplay = voicingLabels.slice(0, state.difficulty === 'basic' ? 3 : 4);
+            state.correctNotesWithOctave = [state.givenNoteWithOctave];
+            
+            let lastMidi = Tone.Midi(state.givenNoteWithOctave.replace('/', '')).toMidi();
+            for (let i = 1; i < state.orderedLabelsForDisplay.length; i++) {
+                const label = state.orderedLabelsForDisplay[i];
+                const interval = chordData.intervals.find(int => int.label === label);
+                if (!interval) continue;
+
+                const rootSemitoneVal = noteToSemitoneMap[normalizeNote(state.chordRoot)];
+                const targetSemitone = (rootSemitoneVal + interval.semitones) % 12;
+                
+                let candidateMidi = Math.floor(lastMidi / 12) * 12 + targetSemitone;
+                if (candidateMidi >= lastMidi) {
+                    candidateMidi -= 12;
+                }
+                
+                const newNote = Tone.Midi(candidateMidi).toNote();
+                state.correctNotesWithOctave.push(newNote.replace(/(\d+)$/, '/$1'));
+                lastMidi = candidateMidi;
+            }
+
+            state.chordTypeKey = chordTypeKey;
+            state.givenIntervalName = givenInterval.name;
+            state.givenLabel = givenLabel;
+            state.selectedUserNotes = [state.givenNoteWithOctave];
+            
+            updateDisplay();
+            enableButtons();
+        }
+
+        async function playCorrectChord() {
+            if (!synth) return;
+            const notes = state.correctNotesWithOctave.map(n => n.replace('/', '')).filter(Boolean);
+            if (notes.length === 0) return;
+
+            const arpeggioNotes = [...notes].sort((a,b) => Tone.Midi(b).toMidi() - Tone.Midi(a).toMidi());
+            let time = Tone.now();
+            arpeggioNotes.forEach((note) => {
+                synth.triggerAttackRelease(note, "8n", time);
+                time += 0.15;
+            });
+            synth.triggerAttackRelease(notes, "2n", time + 0.2);
+        }
+
+        function getTodayDateString() {
+            const today = new Date();
+            return today.toISOString().split('T')[0];
+        }
+
+        function loadStreakData() {
+            try {
+                const data = localStorage.getItem('harmonicBlockProStreak');
+                if (data) {
+                    const { streak, lastPracticeDate } = JSON.parse(data);
+                    const today = getTodayDateString();
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    
+                    if (lastPracticeDate === today || lastPracticeDate === yesterdayStr) {
+                        state.stats.currentStreak = streak || 0;
+                    } else {
+                        state.stats.currentStreak = 0;
+                        saveStreakData();
+                    }
+                }
+            } catch (e) {
+                console.error("Could not load streak data", e);
+                state.stats.currentStreak = 0;
+            }
+            updateStreakDisplay();
+        }
+
+        function saveStreakData() {
+            try {
+                const data = {
+                    streak: state.stats.currentStreak,
+                    lastPracticeDate: getTodayDateString()
+                };
+                localStorage.setItem('harmonicBlockProStreak', JSON.stringify(data));
+            } catch (e) {
+                console.error("Could not save streak data", e);
+            }
+        }
+
+        function checkAnswer() {
+            state.stats.totalAttempts++;
+            state.evaluation.questionsAttemptedInBatch++;
+            
+            const userNotesNormalized = state.selectedUserNotes.map(n => normalizeNote(n)).filter(Boolean).sort();
+            const correctNotesNormalized = state.correctNotesWithOctave.map(n => normalizeNote(n)).filter(Boolean).sort();
+            
+            const isCorrect = JSON.stringify(userNotesNormalized) === JSON.stringify(correctNotesNormalized);
+            
+            if (isCorrect) {
+                try {
+                    const data = localStorage.getItem('harmonicBlockProStreak');
+                    const today = getTodayDateString();
+                    let lastDate = '';
+                    if (data) { lastDate = JSON.parse(data).lastPracticeDate; }
+
+                    if (lastDate !== today) {
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        const yesterdayStr = yesterday.toISOString().split('T')[0];
+                        
+                        if (lastDate === yesterdayStr) {
+                            state.stats.currentStreak++;
+                        } else {
+                            state.stats.currentStreak = 1;
+                        }
+                        saveStreakData();
+                    }
+                } catch (e) {
+                    console.error("Error updating streak", e);
+                    state.stats.currentStreak = 1;
+                    saveStreakData();
+                }
+                
+                state.stats.totalCorrect++;
+                state.evaluation.batchCorrect++;
+                showCustomMessage("Correcto", "¡Felicidades, tu respuesta es correcta!", "success");
+                playCorrectChord();
+                setTimeout(generateExercise, 2000);
+            } else {
+                showCustomMessage("Incorrecto", "Inténtalo de nuevo. Tus notas no coinciden.", "error");
+            }
+            updateStatsDisplay();
+
+            if (state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval) {
+                showEvaluationModal();
+            }
+        }
+
+        function updateStatsDisplay() {
+            updateScoreDisplay();
+            updateStreakDisplay();
+        }
+        
+        function updateScoreDisplay() {
+            const incorrectCount = state.stats.totalAttempts - state.stats.totalCorrect;
+            scoreCounter.innerHTML = `
+                <div class="text-sm text-green-600">✅ ${state.stats.totalCorrect}</div>
+                <div class="text-sm text-red-600">❌ ${incorrectCount}</div>
+            `;
+        }
+
+        function updateStreakDisplay() {
+            streakCounter.textContent = state.stats.currentStreak;
+        }
+
+        function giveHint() {
+            state.stats.hintsUsed++;
+            state.evaluation.batchHintsUsed++;
+            const correctNotes = state.correctNotesWithOctave.map(n => n.split('/')[0]).sort();
+            const userNotes = state.selectedUserNotes.map(n => n.split('/')[0]).sort();
+            const missingNote = correctNotes.find(note => !userNotes.includes(note));
+
+            if (missingNote) {
+                showCustomMessage("Pista", `La nota ${displayNote(missingNote)} es parte del acorde.`, "info");
+            } else {
+                showCustomMessage("Pista", "Ya tienes todas las notas correctas. ¡Verifica las alteraciones!", "info");
+            }
+        }
+
+        function showAnswer() {
+            state.stats.answersUsed++;
+            state.stats.totalAttempts++;
+            state.evaluation.batchAnswersUsed++;
+            state.evaluation.questionsAttemptedInBatch++;
+
+            state.selectedUserNotes = [...state.correctNotesWithOctave];
+            updateDisplay();
+            playCorrectChord();
+            updateStatsDisplay();
+            showCustomMessage("Respuesta", "Mostrando la solución correcta.", "info");
+
+            if (state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval) {
+                setTimeout(showEvaluationModal, 2000);
+            } else {
+                setTimeout(generateExercise, 2000);
+            }
+        }
+
+        function clearSelection() {
+            state.selectedUserNotes = [state.givenNoteWithOctave];
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            updateQuestionText();
+            gridCells.forEach((cell, index) => {
+                const intervalLabel = cell.querySelector('.interval-label');
+                const noteDisplay = cell.querySelector('.note-display');
+                if (state.orderedLabelsForDisplay[index]) {
+                    cell.classList.remove('hidden');
+                    intervalLabel.textContent = state.orderedLabelsForDisplay[index];
+                    const note = state.selectedUserNotes[index]?.split('/')[0];
+                    noteDisplay.textContent = index === 0 ? displayNote(state.givenNote) : (note ? displayNote(note) : "?");
+                } else {
+                    cell.classList.add('hidden');
+                }
+            });
+            drawMusicalStaff(state.selectedUserNotes);
+            updateButtonStates();
+        }
+        
+        function updateButtonStates() {
+            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
+            confirmAnswerButton.disabled = state.selectedUserNotes.length !== expectedCount;
+            clearAllSelectionButton.disabled = state.selectedUserNotes.length <= 1;
+            
+            document.querySelectorAll('.note-button.active').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.piano-key.selected').forEach(key => key.classList.remove('selected'));
+
+            state.selectedUserNotes.forEach(noteWithOctave => {
+                if (!noteWithOctave) return;
+                const key = document.querySelector(`.piano-key[data-note="${noteWithOctave}"]`);
+                if (key) { key.classList.add('selected'); }
+            });
+            
+            const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
+            if (state.selectedUserNotes.length > 1 && lastNote) {
+                const noteOnly = lastNote.split('/')[0];
+                const naturalPartMatch = noteOnly.match(/[A-G]/i);
+                if (naturalPartMatch) {
+                    const naturalPart = naturalPartMatch[0].toUpperCase();
+                    const accidentalPart = noteOnly.substring(naturalPart.length);
+                    
+                    const naturalBtn = document.querySelector(`.note-button[data-note="${naturalPart}"]`);
+                    if (naturalBtn) naturalBtn.classList.add('active');
+                    
+                    if (accidentalPart) {
+                        const accidentalBtn = document.querySelector(`.note-button[data-accidental="${accidentalPart}"]`);
+                        if (accidentalBtn) accidentalBtn.classList.add('active');
+                    }
+                }
+            }
+        }
+        
+        function handleNaturalNoteClick(e) {
+            const clickedNote = e.target.dataset.note;
+            const lastNoteIndex = state.selectedUserNotes.length - 1;
+            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
+
+            if (lastNoteIndex >= 1) {
+                const lastNote = state.selectedUserNotes[lastNoteIndex];
+                const naturalPartOfLastNote = lastNote.match(/[A-G]/i)[0].toUpperCase();
+                if (naturalPartOfLastNote === clickedNote) {
+                    state.selectedUserNotes.pop();
+                    updateDisplay();
+                    return;
+                }
+            }
+
+            if (state.selectedUserNotes.length >= expectedCount) {
+                showCustomMessage("Límite de notas", `Ya has seleccionado las ${expectedCount} notas.`, "warning");
+                return;
+            }
+
+            const lastMidi = Tone.Midi(state.selectedUserNotes[lastNoteIndex].replace('/', '')).toMidi();
+            let newNoteMidi = Tone.Midi(`${clickedNote}4`).toMidi();
+            while (newNoteMidi >= lastMidi) {
+                newNoteMidi -= 12;
+            }
+            const noteWithOctave = Tone.Midi(newNoteMidi).toNote().replace(/(\d+)$/, '/$1');
+            state.selectedUserNotes.push(noteWithOctave);
+            updateDisplay();
+        }
+
+        function handleAccidentalClick(e) {
+            const accidental = e.target.dataset.accidental;
+            const lastNoteIndex = state.selectedUserNotes.length - 1;
+
+            if (lastNoteIndex < 1) {
+                showCustomMessage("Acción inválida", "Selecciona una nota natural antes de alterarla.", "warning");
+                return;
+            }
+            
+            const lastNote = state.selectedUserNotes[lastNoteIndex];
+            const naturalPart = lastNote.match(/[A-G]/i)[0];
+            const octavePart = lastNote.match(/\/(\d+)/)[1];
+            state.selectedUserNotes[lastNoteIndex] = `${naturalPart}${accidental}/${octavePart}`;
+            updateDisplay();
+        }
+
+        function enableButtons() {
+            [confirmAnswerButton, clearAllSelectionButton, changeQuestionButton, hintButton, showAnswerButton].forEach(btn => btn.disabled = false);
+        }
+
+        // --- Settings and Modal Logic ---
+        function populateSettingsModal() {
+            chordTypesCheckboxesContainer.innerHTML = '';
+            const allChordTypes = Object.keys(chordStructures);
+            let relevantChords = [];
+            if (state.difficulty === 'basic') {
+                relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'basic');
+            } else if (state.difficulty === 'intermediate' || state.difficulty === 'advanced') {
+                relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'intermediate');
+            }
+
+            relevantChords.forEach(key => {
+                const chord = chordStructures[key];
+                const isChecked = !state.customPractice.isActive || state.customPractice.allowedChords.includes(key);
+                chordTypesCheckboxesContainer.innerHTML += `
+                    <div class="flex items-center">
+                        <input type="checkbox" id="chord_${key}" value="${key}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
+                        <label for="chord_${key}" class="ml-2 text-gray-700">${chord.name}</label>
+                    </div>
+                `;
+            });
+            
+            leadVoicesSection.classList.toggle('hidden', state.difficulty !== 'advanced');
+            leadVoicesCheckboxesContainer.innerHTML = '';
+            if (state.difficulty === 'advanced') {
+                const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+                const availableTensions = new Set();
+                relevantChords.forEach(key => {
+                    chordStructures[key].intervals.forEach(interval => {
+                        if (allTensions.includes(interval.label)) {
+                            availableTensions.add(interval.label);
+                        }
+                    });
+                });
+
+                allTensions.forEach(label => {
+                    if (availableTensions.has(label)) {
+                        const isChecked = !state.customPractice.isActive || state.customPractice.allowedLeads.length === 0 || state.customPractice.allowedLeads.includes(label);
+                        leadVoicesCheckboxesContainer.innerHTML += `
+                            <div class="flex items-center">
+                                <input type="checkbox" id="lead_${label}" value="${label}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
+                                <label for="lead_${label}" class="ml-2 text-gray-700">${label}</label>
+                            </div>
+                        `;
+                    }
+                });
+            }
+        }
+        
+        function saveSettings() {
+            const allowedChords = Array.from(chordTypesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+            const allowedLeads = Array.from(leadVoicesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+            state.customPractice.isActive = true;
+            state.customPractice.allowedChords = allowedChords;
+            state.customPractice.allowedLeads = allowedLeads;
+            closeSettingsModal();
+            generateExercise();
+        }
+
+        function openSettingsModal() {
+            populateSettingsModal();
+            settingsModalOverlay.classList.add('visible');
+        }
+
+        function closeSettingsModal() {
+            settingsModalOverlay.classList.remove('visible');
+        }
+
+        function showEvaluationModal() {
+            const { batchCorrect, exercisesPerEval, batchHintsUsed, batchAnswersUsed } = state.evaluation;
+            const accuracy = exercisesPerEval > 0 ? Math.round((batchCorrect / exercisesPerEval) * 100) : 0;
+            evaluationSummary.textContent = `Has completado ${exercisesPerEval} ejercicios con una precisión del ${accuracy}%. Has usado ${batchHintsUsed} pistas y ${batchAnswersUsed} soluciones.`;
+            adviceList.innerHTML = `<li>Sigue practicando para mejorar tu velocidad y precisión.</li>`;
+            
+            state.evaluation.questionsAttemptedInBatch = 0;
+            state.evaluation.batchCorrect = 0;
+            state.evaluation.batchHintsUsed = 0;
+            state.evaluation.batchAnswersUsed = 0;
+            
+            evaluationModalOverlay.classList.add('visible');
+        }
+
+        function endSession() {
+            mainAppContainer.classList.add('hidden');
+            evaluationModalOverlay.classList.remove('visible');
+            finalMessageDisplay.classList.remove('hidden');
+
+            const { totalAttempts, totalCorrect, hintsUsed, answersUsed } = state.stats;
+            const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+            
+            totalExercisesDisplay.textContent = totalAttempts;
+            correctAnswersDisplay.textContent = totalCorrect;
+            overallAccuracyDisplay.textContent = `${accuracy}%`;
+            hintsUsedDisplay.textContent = hintsUsed;
+            answersUsedDisplay.textContent = answersUsed;
+
+            const now = new Date();
+            sessionDateDisplay.textContent = now.toLocaleDateString('es-ES');
+            sessionTimeDisplay.textContent = now.toLocaleTimeString('es-ES');
+            const durationMs = now.getTime() - state.session.startTime;
+            const minutes = Math.floor(durationMs / 60000);
+            const seconds = Math.round((durationMs % 60000) / 1000);
+            sessionDurationDisplay.textContent = `Duración: ${minutes}m ${seconds}s`;
+        }
+
+        function saveAsPhoto() {
+            html2canvas(resultsContentToCapture).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `resultados-bloque-armonico-${Date.now()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+        
+        function saveAsPdf() {
+            const { jsPDF } = window.jspdf;
+            html2canvas(resultsContentToCapture).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`resultados-bloque-armonico-${Date.now()}.pdf`);
+            });
+        }
+
+        function handlePianoKeyClick(event) {
+            const keyElement = event.target.closest('.piano-key');
+            if (!keyElement) return;
+
+            const noteWithOctave = keyElement.dataset.note;
+            if (!noteWithOctave) return;
+            
+            synth.triggerAttackRelease(noteWithOctave.replace('/', ''), "8n");
+
+            if (noteWithOctave === state.givenNoteWithOctave) {
+                showCustomMessage("Nota fija", "No puedes quitar la nota dada.", "info");
+                return;
+            }
+
+            const isSelected = state.selectedUserNotes.some(n => n === noteWithOctave);
+            if (isSelected) {
+                state.selectedUserNotes = state.selectedUserNotes.filter(n => n !== noteWithOctave);
+            } else {
+                const givenNoteMidi = Tone.Midi(state.givenNoteWithOctave.replace('/', '')).toMidi();
+                const selectedNoteMidi = Tone.Midi(noteWithOctave.replace('/', '')).toMidi();
+                
+                if (selectedNoteMidi >= givenNoteMidi) {
+                    showCustomMessage("Error de armonía", "Las notas deben estar por debajo de la nota dada.", "warning");
+                    return;
+                }
+                const expectedCount = state.difficulty === 'basic' ? 3 : 4;
+                if (state.selectedUserNotes.length < expectedCount) {
+                    const note = noteWithOctave.split('/')[0];
+                    if (note.includes('#') || note.includes('b')) {
+                        showEnharmonicModal(noteWithOctave);
+                    } else {
+                        state.selectedUserNotes.push(noteWithOctave);
+                    }
+                } else {
+                    showCustomMessage("Límite de notas", `Ya has seleccionado ${expectedCount} notas.`, "warning");
+                }
+            }
+            updateDisplay();
+        }
+
+        function showEnharmonicModal(noteWithOctave) {
+            const [note, octave] = noteWithOctave.split('/');
+            const enharmonic = enharmonicEquivalents[note];
+            if (!enharmonic) {
+                 state.selectedUserNotes.push(noteWithOctave);
+                 updateDisplay();
+                 return;
+            }
+            
+            enharmonicChoicesContainer.innerHTML = `
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" data-note="${note}/${octave}">${displayNote(note)}</button>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" data-note="${enharmonic}/${octave}">${displayNote(enharmonic)}</button>
+            `;
+            enharmonicModalOverlay.classList.add('visible');
+
+            const handler = (e) => {
+                const selectedNote = e.target.dataset.note;
+                state.selectedUserNotes.push(selectedNote);
+                enharmonicModalOverlay.classList.remove('visible');
+                enharmonicChoicesContainer.innerHTML = '';
+                updateDisplay();
+            };
+
+            enharmonicChoicesContainer.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', handler, { once: true });
+            });
+        }
+        
+        function generateNoteButtons() {
+            naturalNoteButtonsContainer.innerHTML = naturalNotes.map(n => `<button class="note-button" data-note="${n}">${displayNote(n)}</button>`).join('');
+            accidentalButtonsContainer.innerHTML = accidentals.map(a => `<button class="note-button px-4" data-accidental="${a}">${a}</button>`).join('');
+            naturalNoteButtonsContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleNaturalNoteClick));
+            accidentalButtonsContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleAccidentalClick));
+        }
+
+        function generatePiano() {
+            pianoContainer.innerHTML = '';
+            const whiteNotes = ["C", "D", "E", "F", "G", "A", "B"];
+            for (let octave = 3; octave <= 5; octave++) {
+                whiteNotes.forEach(note => {
+                    const key = document.createElement('div');
+                    key.className = `piano-key white`;
+                    key.dataset.note = `${note}/${octave}`;
+                    pianoContainer.appendChild(key);
+                });
+            }
+            const c6 = document.createElement('div');
+            c6.className = `piano-key white`;
+            c6.dataset.note = `C/6`;
+            pianoContainer.appendChild(c6);
+
+            const blackNotes = {
+                "C#/3": 1, "D#/3": 2, "F#/3": 4, "G#/3": 5, "A#/3": 6,
+                "C#/4": 8, "D#/4": 9, "F#/4": 11, "G#/4": 12, "A#/4": 13,
+                "C#/5": 15, "D#/5": 16, "F#/5": 18, "G#/5": 19, "A#/5": 20
+            };
+            for (const note in blackNotes) {
+                const key = document.createElement('div');
+                key.className = `piano-key black`;
+                key.dataset.note = note;
+                pianoContainer.appendChild(key);
+            }
+        }
+        
+        // --- Tutorial Logic ---
+        const tutorialSteps = [
+            { id: 'chordQuestionWrapper', title: '¡Bienvenido!', text: 'Aquí se te presentará el ejercicio. Se te dará una nota (melodía) y su función dentro de un acorde específico.' },
+            { id: 'displaySection', title: 'Tu Objetivo', text: 'Tu meta es construir el acorde completo, descendiendo desde la melodía, en la tabla de notas y en el pentagrama.' },
+            { id: 'inputMethodToggle', title: 'Métodos de Entrada', text: 'Puedes elegir cómo introducir las notas: usando los botones de "Cifrado" o el "Piano" virtual.' },
+            { id: 'noteBuildingControls', title: 'Entrada con Cifrado', text: 'Presiona un botón de nota para añadirla. Presiónalo de nuevo para quitarla. Usa los botones de alteración ( sostenidos / bemoles ) para modificar la última nota que agregaste.' },
+            { id: 'confirmAnswerButton', title: 'Comprueba tu Respuesta', text: 'Una vez que hayas construido el acorde de 3 o 4 voces, presiona "Confirmar". ¡No dudes en usar "Pista" si necesitas ayuda!' },
+            { id: null, title: '¡Todo Listo!', text: 'Has completado el tutorial. ¡Ya puedes comenzar a entrenar! ¡Mucha suerte!' }
+        ];
+
+        function startTutorial() {
+            state.tutorial.isActive = true;
+            state.tutorial.currentStep = 0;
+            document.getElementById('tutorialOverlay').classList.remove('hidden');
+            showTutorialStep();
+        }
+
+        function showTutorialStep() {
+            const step = tutorialSteps[state.tutorial.currentStep];
+            if (!step) {
+                endTutorial();
+                return;
+            }
+
+            document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+            
+            const titleEl = document.getElementById('tutorialTitle');
+            const textEl = document.getElementById('tutorialText');
+            const nextButton = document.getElementById('tutorialNextButton');
+            const modal = document.getElementById('tutorialModal');
+            
+            titleEl.textContent = step.title;
+            textEl.textContent = step.text;
+
+            if (step.id) {
+                const targetElement = document.getElementById(step.id);
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                setTimeout(() => {
+                    targetElement.classList.add('tutorial-highlight');
+                    
+                    const rect = targetElement.getBoundingClientRect();
+                    const modalRect = modal.getBoundingClientRect();
+                    
+                    let topPos;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    const modalHeightWithMargin = modalRect.height + 20;
+
+                    if (spaceBelow >= modalHeightWithMargin || spaceBelow > spaceAbove) {
+                        topPos = rect.bottom + 10;
+                    } else {
+                        topPos = rect.top - modalRect.height - 10;
+                    }
+                    
+                    let leftPos = (window.innerWidth / 2) - (modalRect.width / 2);
+                    
+                    if (leftPos < 10) { leftPos = 10; } 
+                    else if (leftPos + modalRect.width > window.innerWidth - 10) {
+                        leftPos = window.innerWidth - modalRect.width - 10;
+                    }
+
+                    modal.style.top = `${topPos}px`;
+                    modal.style.left = `${leftPos}px`;
+                    modal.style.transform = '';
+                }, 400); // Wait for scroll animation
+
+            } else {
+                modal.style.top = '50%';
+                modal.style.left = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+            }
+
+            if (state.tutorial.currentStep === tutorialSteps.length - 1) {
+                nextButton.textContent = '¡Comenzar a Practicar!';
+            } else {
+                nextButton.textContent = 'Siguiente';
+            }
+        }
+
+        function endTutorial() {
+            state.tutorial.isActive = false;
+            document.getElementById('tutorialOverlay').classList.add('hidden');
+            document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+            localStorage.setItem('harmonicBlockProTutorialCompleted', 'true');
+        }
+
+        document.getElementById('tutorialNextButton').addEventListener('click', () => {
+            state.tutorial.currentStep++;
+            showTutorialStep();
+        });
+
+
+        // --- Initial Events ---
+        if (localStorage.getItem('harmonicBlockProTutorialCompleted')) {
+            document.getElementById('startTutorialButton').style.display = 'none';
+            document.getElementById('skipTutorialButton').textContent = 'Comenzar Entrenamiento';
+            document.getElementById('skipTutorialButton').addEventListener('click', () => initializeApp(false));
+        } else {
+            document.getElementById('startTutorialButton').addEventListener('click', () => initializeApp(true));
+            document.getElementById('skipTutorialButton').addEventListener('click', () => initializeApp(false));
+        }
+        
+    </script>
+</body>
+</html>
 
 
