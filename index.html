@@ -476,8 +476,31 @@
     </div>
     
     <!-- Modal for instant feedback -->
-    <div id="feedbackModalOverlay" class="modal-overlay hidden">
-        <div id="feedbackModalContent" class="modal-content feedback p-6 rounded-xl shadow-lg"></div>
+    <div id="quickFeedbackModalOverlay" class="modal-overlay hidden">
+        <div id="quickFeedbackModalContent" class="modal-content feedback p-6 rounded-xl shadow-lg"></div>
+    </div>
+    
+    <!-- Modal for Hint -->
+    <div id="hintModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content p-6 rounded-xl shadow-lg bg-yellow-50 border-yellow-300 border">
+            <h3 id="hintModalTitle" class="text-2xl font-bold text-yellow-800 text-center mb-4">Pista</h3>
+            <div id="hintModalBody" class="text-yellow-900 mb-6"></div>
+            <div class="flex justify-center">
+                <button id="hintModalCloseButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Answer -->
+    <div id="infoModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content p-6 rounded-xl shadow-lg">
+            <h3 id="infoModalTitle" class="text-2xl font-bold text-blue-800 text-center mb-4"></h3>
+            <div id="infoModalBody" class="text-gray-700 mb-6"></div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="infoModalCloseButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cerrar</button>
+                <button id="infoModalNextButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Siguiente Ejercicio</button>
+            </div>
+        </div>
     </div>
 
     <!-- Modal for session evaluation -->
@@ -661,8 +684,8 @@
         const changeQuestionButton = document.getElementById('changeQuestionButton');
         const hintButton = document.getElementById('hintButton');
         const showAnswerButton = document.getElementById('showAnswerButton');
-        const feedbackModalOverlay = document.getElementById('feedbackModalOverlay');
-        const feedbackModalContent = document.getElementById('feedbackModalContent');
+        const quickFeedbackModalOverlay = document.getElementById('quickFeedbackModalOverlay');
+        const quickFeedbackModalContent = document.getElementById('quickFeedbackModalContent');
         const evaluationModalOverlay = document.getElementById('evaluationModalOverlay');
         const evaluationSummary = document.getElementById('evaluationSummary');
         const adviceList = document.getElementById('adviceList');
@@ -697,6 +720,14 @@
         const enharmonicModalOverlay = document.getElementById('enharmonicModalOverlay');
         const enharmonicChoicesContainer = document.getElementById('enharmonicChoices');
         const notationRadios = document.querySelectorAll('input[name="notationSystem"]');
+        const infoModalOverlay = document.getElementById('infoModalOverlay');
+        const infoModalTitle = document.getElementById('infoModalTitle');
+        const infoModalBody = document.getElementById('infoModalBody');
+        const infoModalCloseButton = document.getElementById('infoModalCloseButton');
+        const infoModalNextButton = document.getElementById('infoModalNextButton');
+        const hintModalOverlay = document.getElementById('hintModalOverlay');
+        const hintModalBody = document.getElementById('hintModalBody');
+        const hintModalCloseButton = document.getElementById('hintModalCloseButton');
         
         let synth, reverb;
 
@@ -787,6 +818,20 @@
             saveAsPdfButton.addEventListener('click', saveAsPdf);
              // Redraw staff on window resize to ensure it fits
             window.addEventListener('resize', () => drawMusicalStaff(state.selectedUserNotes));
+            
+            infoModalCloseButton.addEventListener('click', () => {
+                infoModalOverlay.classList.remove('visible');
+            });
+
+            infoModalNextButton.addEventListener('click', () => {
+                infoModalOverlay.classList.remove('visible');
+                generateExercise();
+            });
+            
+            hintModalCloseButton.addEventListener('click', () => {
+                hintModalOverlay.classList.remove('visible');
+            });
+
         }
 
         function showCustomMessage(title, message, type = 'info') {
@@ -822,7 +867,7 @@
             const accidentalPart = americanNote.substring(naturalPart[0].length);
             
             if (state.notationSystem === 'latin') {
-                const latinPart = americanToLatin[naturalPart[0]];
+                const latinPart = americanToLatin[naturalPart[0].toUpperCase()];
                 return latinPart + accidentalPart;
             }
             return americanNote;
@@ -1100,33 +1145,50 @@
         function giveHint() {
             state.stats.hintsUsed++;
             state.evaluation.batchHintsUsed++;
+            updateStatsDisplay();
+            
             const correctNotes = state.correctNotesWithOctave.map(n => n.split('/')[0]).sort();
             const userNotes = state.selectedUserNotes.map(n => n.split('/')[0]).sort();
             const missingNote = correctNotes.find(note => !userNotes.includes(note));
 
+            let hintText;
             if (missingNote) {
-                showCustomMessage("Pista", `La nota ${displayNote(missingNote)} es parte del acorde.`, "info");
+                const enharmonic = enharmonicEquivalents[missingNote];
+                let noteNameToDisplay = displayNote(missingNote);
+
+                if (enharmonic) {
+                    const enharmonicNameToDisplay = displayNote(enharmonic);
+                    noteNameToDisplay += ` / ${enharmonicNameToDisplay}`;
+                }
+                
+                hintText = `La nota <strong>${noteNameToDisplay}</strong> es parte del acorde.`;
             } else {
-                showCustomMessage("Pista", "Ya tienes todas las notas correctas. ¡Verifica las alteraciones!", "info");
+                hintText = "Ya tienes todas las notas correctas. ¡Verifica las alteraciones y las octavas!";
             }
+
+            hintModalBody.innerHTML = `<p>${hintText}</p>`;
+            hintModalOverlay.classList.add('visible');
         }
 
         function showAnswer() {
             state.stats.answersUsed++;
             state.stats.totalAttempts++;
+            state.stats.currentStreak = 0;
             state.evaluation.batchAnswersUsed++;
             state.evaluation.questionsAttemptedInBatch++;
+            updateStatsDisplay();
 
             state.selectedUserNotes = [...state.correctNotesWithOctave];
             updateDisplay();
             playCorrectChord();
-            updateStatsDisplay();
-            showCustomMessage("Respuesta", "Mostrando la solución correcta.", "info");
+            
+            infoModalTitle.textContent = 'Respuesta Correcta';
+            infoModalBody.innerHTML = '<p>Esta es la solución. Puedes cerrar esta ventana para analizarla o pasar al siguiente ejercicio.</p>';
+            infoModalNextButton.classList.remove('hidden');
+            infoModalOverlay.classList.add('visible');
 
             if (state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval) {
-                setTimeout(showEvaluationModal, 2000);
-            } else {
-                setTimeout(generateExercise, 2000);
+                // Future improvement: handle evaluation trigger more gracefully after closing modal
             }
         }
 
