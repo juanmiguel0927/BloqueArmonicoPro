@@ -11,6 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Tailwind CSS for a modern and responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for statistical graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         /* Base document styles */
@@ -265,6 +267,13 @@
         .piano-key.selected {
             background-color: #3b82f6 !important;
         }
+        .piano-key.given-note-highlight {
+            background-color: #fde047 !important;
+            border: 2px solid #f59e0b;
+        }
+        .piano-key.black.given-note-highlight {
+            background-color: #facc15 !important;
+        }
 
         /* Tutorial Styles */
         #tutorialOverlay {
@@ -423,12 +432,12 @@
                 <!-- Notation selector -->
                 <div class="flex rounded-full bg-gray-200 p-1">
                     <input type="radio" id="notationAmericano" name="notationSystem" value="american" class="hidden" checked>
-                    <label for="notationAmericano" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50">C,D,E</label>
+                    <label for="notationAmericano" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50" title="Cifrado Americano (Anglosajón)">C,D,E</label>
                     <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
-                    <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50">Do,Re,Mi</label>
+                    <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50" title="Cifrado Latino">Do,Re,Mi</label>
                 </div>
-                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ajustes de Práctica">⚙️</button>
-                <button id="showTutorialButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ver Tutorial">?</button>
+                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ajustes de Práctica (S)">⚙️</button>
+                <button id="showTutorialButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ver Tutorial (H)">?</button>
                 <button id="fullscreenButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Pantalla Completa (Q)">
                     <svg id="fullscreenIconOpen" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"/>
@@ -442,7 +451,7 @@
 
         <!-- Difficulty controls -->
         <div id="difficultySelection" class="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <label class="text-blue-800 font-semibold">Nivel de Dificultad:</label>
+            <label class="text-blue-800 font-semibold">Nivel de Dificultad (1, 2, 3):</label>
             <div class="flex gap-2 flex-wrap justify-center">
                 <input type="radio" id="difficultyBasic" name="difficulty" value="basic" class="hidden" checked>
                 <label for="difficultyBasic" class="difficulty-label py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors duration-200">Básico</label>
@@ -483,7 +492,7 @@
         
         <!-- Note input options (Cifrado vs Piano) -->
         <div id="inputMethodToggle" class="flex justify-center mb-4">
-            <div class="flex p-1 bg-gray-200 rounded-full">
+            <div class="flex p-1 bg-gray-200 rounded-full" title="Cambiar Entrada (I)">
                 <button id="cifradoToggle" class="py-2 px-4 rounded-full font-semibold transition-all bg-white text-blue-600 shadow-sm active">Cifrado</button>
                 <button id="pianoToggle" class="py-2 px-4 rounded-full font-semibold transition-all text-gray-700">Piano</button>
             </div>
@@ -615,9 +624,9 @@
                 <p class="font-bold">Sugerencia de Práctica:</p>
                 <p id="suggestionText"></p>
             </div>
-             <p class="text-lg font-bold text-gray-800 mt-4 mb-2">Historial Estadístico</p>
-             <div id="sessionHistory" class="text-left text-sm text-gray-600 bg-white p-4 rounded-lg max-h-40 overflow-y-auto">
-                <!-- Session history will be populated here -->
+             <p class="text-lg font-bold text-gray-800 mt-4 mb-2">Historial Estadístico por Acorde</p>
+             <div id="sessionHistory" class="bg-white p-4 rounded-lg w-full h-80 relative">
+                 <canvas id="historyChartCanvas"></canvas>
              </div>
             <div class="flex justify-center gap-4 text-sm text-gray-500 mt-4">
                 <span id="sessionDateDisplay"></span>
@@ -686,6 +695,9 @@
                 doublePressThreshold: 400 // ms
             }
         };
+
+        // Chart instance variable
+        let historyChart = null;
 
         // Constants for musical logic
         const noteToSemitoneMap = {
@@ -892,6 +904,7 @@
                 pianoContainer.classList.add('hidden');
                 cifradoToggle.classList.add('bg-white', 'text-blue-600', 'shadow-sm', 'active');
                 pianoToggle.classList.remove('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+                updateDisplay();
             });
 
             pianoToggle.addEventListener('click', () => {
@@ -899,6 +912,7 @@
                 pianoContainer.classList.remove('hidden');
                 pianoToggle.classList.add('bg-white', 'text-blue-600', 'shadow-sm', 'active');
                 cifradoToggle.classList.remove('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+                updateDisplay();
             });
 
             pianoContainer.addEventListener('click', handlePianoKeyClick);
@@ -918,10 +932,8 @@
             infoModalCloseButton.addEventListener('click', () => {
                 infoModalOverlay.classList.remove('visible');
                 if (state.answerWasShown) {
-                    // After showing the answer, they can't get hints or see the answer again for this exercise
                     hintButton.disabled = true;
                     showAnswerButton.disabled = true;
-                    // But they MUST be able to confirm, so we don't touch confirmAnswerButton
                 }
             });
             
@@ -1399,6 +1411,7 @@
             });
             drawMusicalStaff(state.selectedUserNotes);
             updateButtonStates();
+            updatePianoHighlight();
         }
         
         function updateButtonStates() {
@@ -1407,13 +1420,6 @@
             clearAllSelectionButton.disabled = state.selectedUserNotes.length <= 1;
             
             document.querySelectorAll('.note-button.active').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.piano-key.selected').forEach(key => key.classList.remove('selected'));
-
-            state.selectedUserNotes.forEach(noteWithOctave => {
-                if (!noteWithOctave) return;
-                const key = document.querySelector(`.piano-key[data-note="${noteWithOctave}"]`);
-                if (key) { key.classList.add('selected'); }
-            });
             
             const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
             if (state.selectedUserNotes.length > 1 && lastNote) {
@@ -1432,6 +1438,25 @@
                     }
                 }
             }
+        }
+        
+        function updatePianoHighlight() {
+            document.querySelectorAll('.piano-key').forEach(key => {
+                key.classList.remove('selected', 'given-note-highlight');
+            });
+            
+            if (state.givenNoteWithOctave) {
+                const givenKey = document.querySelector(`.piano-key[data-note="${state.givenNoteWithOctave}"]`);
+                if (givenKey) {
+                    givenKey.classList.add('given-note-highlight');
+                }
+            }
+            
+            state.selectedUserNotes.forEach(noteWithOctave => {
+                if (!noteWithOctave || noteWithOctave === state.givenNoteWithOctave) return;
+                const key = document.querySelector(`.piano-key[data-note="${noteWithOctave}"]`);
+                if (key) { key.classList.add('selected'); }
+            });
         }
         
         function handleNaturalNoteClick(e) {
@@ -1529,6 +1554,18 @@
                 e.preventDefault();
                 handleAccidentalKeyPress(key);
             }
+            
+            if (['1', '2', '3'].includes(key)) {
+                e.preventDefault();
+                const difficulties = { '1': 'basic', '2': 'intermediate', '3': 'advanced' };
+                const difficultyId = `difficulty${key === '1' ? 'Basic' : (key === '2' ? 'Intermediate' : 'Advanced')}`;
+                const radio = document.getElementById(difficultyId);
+                if (radio && !radio.checked) {
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change'));
+                }
+            }
+
 
             switch(key) {
                 case 'enter':
@@ -1554,6 +1591,22 @@
                 case 'q':
                     e.preventDefault();
                     toggleFullscreen();
+                    break;
+                case 's':
+                    e.preventDefault();
+                    if(!settingsButton.disabled) settingsButton.click();
+                    break;
+                case 'h':
+                    e.preventDefault();
+                    if(!showTutorialButton.disabled) showTutorialButton.click();
+                    break;
+                case 'i':
+                    e.preventDefault();
+                    if (noteBuildingControls.classList.contains('hidden')) {
+                        cifradoToggle.click();
+                    } else {
+                        pianoToggle.click();
+                    }
                     break;
             }
         }
@@ -1601,6 +1654,32 @@
                 document.getElementById('tutorialOverlay').style.height = isFullscreen ? '100vh' : '100%';
             }
         }
+        
+        function getPerformanceAnalysis() {
+            const { sessionHistory } = state.stats;
+            const chordStats = {};
+
+            sessionHistory.forEach(item => {
+                const chordName = `${item.chordRoot}${item.chordCifrado}`;
+                if (!chordStats[chordName]) {
+                    chordStats[chordName] = { attempts: 0, correct: 0 };
+                }
+                if(item.status !== '⏭️ Omitido') {
+                    chordStats[chordName].attempts++;
+                }
+                if(item.status === '✅ Correcto') {
+                    chordStats[chordName].correct++;
+                }
+            });
+
+            const strugglingChords = Object.entries(chordStats)
+                .map(([chord, stats]) => ({ chord, accuracy: stats.attempts > 0 ? (stats.correct / stats.attempts) * 100 : 100 }))
+                .filter(item => item.accuracy < 70 && item.attempts > 2)
+                .sort((a, b) => a.accuracy - b.accuracy);
+            
+            return strugglingChords;
+        }
+
 
         // --- Settings and Modal Logic ---
         function populateSettingsModal() {
@@ -1671,12 +1750,18 @@
         }
 
         function showEvaluationModal() {
-            const accuracy = state.stats.totalExercises > 0 ? Math.round((state.stats.totalCorrect / state.stats.totalExercises) * 100) : 0;
-            evaluationSummary.textContent = `Has completado ${state.evaluation.questionsAttemptedInBatch} ejercicios. Tu precisión general es del ${accuracy}%.`;
+            const totalAttempted = state.stats.totalCorrect + state.stats.totalIncorrect;
+            const accuracy = totalAttempted > 0 ? Math.round((state.stats.totalCorrect / totalAttempted) * 100) : 0;
+            evaluationSummary.textContent = `Has completado ${state.evaluation.questionsAttemptedInBatch} ejercicios. Tu precisión general en la sesión es del ${accuracy}%.`;
             
-            adviceList.innerHTML = `<li>Sigue practicando para mejorar tu velocidad y precisión.</li>`;
+            const strugglingChords = getPerformanceAnalysis();
+            if (strugglingChords.length > 0) {
+                 adviceList.innerHTML = `<li>Hemos notado que tienes dificultades con los acordes <strong>${strugglingChords[0].chord}</strong>. Te sugerimos usar los Ajustes (S) para practicar este tipo de acorde específicamente.</li>`;
+            } else {
+                 adviceList.innerHTML = `<li>¡Vas muy bien! Sigue practicando para mejorar tu velocidad y precisión.</li>`;
+            }
             if (accuracy < 70) {
-                 adviceList.innerHTML += `<li>Concéntrate en los acordes con los que tienes más dificultades. Puedes usar los Ajustes para practicar tipos de acordes específicos.</li>`;
+                 adviceList.innerHTML += `<li>Tu precisión es un poco baja. Considera practicar en un nivel de dificultad menor o enfocarte en menos tipos de acordes a la vez.</li>`;
             }
 
             state.evaluation.questionsAttemptedInBatch = 0;
@@ -1689,7 +1774,7 @@
             finalMessageDisplay.classList.remove('hidden');
 
             const { totalExercises, totalCorrect, totalIncorrect, hintsUsed, answersUsed, sessionHistory } = state.stats;
-            const accuracy = totalExercises > 0 ? Math.round((totalCorrect / totalExercises) * 100) : 0;
+            const accuracy = (totalCorrect + totalIncorrect) > 0 ? Math.round((totalCorrect / (totalCorrect + totalIncorrect)) * 100) : 0;
             
             totalExercisesDisplay.textContent = totalExercises;
             correctAnswersDisplay.textContent = totalCorrect;
@@ -1698,36 +1783,65 @@
             hintsUsedDisplay.textContent = hintsUsed;
             answersUsedDisplay.textContent = answersUsed;
             
-            if (accuracy >= 90) {
+            const strugglingChords = getPerformanceAnalysis();
+            if (strugglingChords.length > 0) {
+                suggestionText.textContent = `Tu área principal a mejorar son los acordes ${strugglingChords[0].chord}. ¡Enfócate en ellos en tu próxima sesión!`;
+            } else if (accuracy >= 90) {
                 suggestionText.textContent = "¡Excelente trabajo! Tu precisión es muy alta. Intenta practicar en un nivel de dificultad más alto o con tipos de acordes más complejos.";
             } else if (accuracy >= 70) {
                 suggestionText.textContent = "¡Buen progreso! Sigue así. Para mejorar, intenta usar menos pistas y concéntrate en los acordes que te resultan más difíciles.";
             } else {
-                suggestionText.textContent = "Sigue practicando para mejorar. Te recomendamos volver al nivel 'Básico' o usar los 'Ajustes' (⚙️) para practicar solo acordes Mayores y menores hasta que te sientas más seguro.";
+                suggestionText.textContent = "Sigue practicando para mejorar. Te recomendamos volver al nivel 'Básico' o usar los 'Ajustes' (S) para practicar solo acordes Mayores y menores hasta que te sientas más seguro.";
             }
 
             const historyStats = {};
             sessionHistory.forEach(item => {
                 const chordName = `${item.chordRoot}${item.chordCifrado}`;
                 if (!historyStats[chordName]) {
-                    historyStats[chordName] = { correct: 0, corrected: 0, solution: 0, skipped: 0, total: 0 };
+                    historyStats[chordName] = { correct: 0, corrected: 0, solution: 0, skipped: 0 };
                 }
                 if (item.status === '✅ Correcto') historyStats[chordName].correct++;
                 if (item.status === '⚠️ Corregido') historyStats[chordName].corrected++;
                 if (item.status === '🆘 Solución') historyStats[chordName].solution++;
                 if (item.status === '⏭️ Omitido') historyStats[chordName].skipped++;
-                historyStats[chordName].total++;
             });
 
-            let historyHtml = '<ul class="text-left space-y-1">';
-            for (const chordName in historyStats) {
-                const stats = historyStats[chordName];
-                const accuracy = stats.total > 0 ? Math.round(((stats.correct) / (stats.correct + stats.corrected)) * 100) : 0;
-                historyHtml += `<li><strong>${chordName}:</strong> ${stats.correct} de ${stats.total} (${accuracy}%) <br> <small class="text-gray-500">(Corregidos: ${stats.corrected}, Omitidos: ${stats.skipped}, Soluciones: ${stats.solution})</small></li>`;
+            const chartCanvas = document.getElementById('historyChartCanvas');
+            if (historyChart) {
+                historyChart.destroy();
             }
-            historyHtml += '</ul>';
-            sessionHistoryContainer.innerHTML = historyHtml;
 
+            const labels = Object.keys(historyStats);
+            const correctData = labels.map(label => historyStats[label].correct);
+            const correctedData = labels.map(label => historyStats[label].corrected);
+            const solutionData = labels.map(label => historyStats[label].solution);
+            const skippedData = labels.map(label => historyStats[label].skipped);
+
+            historyChart = new Chart(chartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Correcto', data: correctData, backgroundColor: 'rgba(75, 192, 192, 0.7)' },
+                        { label: 'Corregido', data: correctedData, backgroundColor: 'rgba(255, 206, 86, 0.7)' },
+                        { label: 'Solución', data: solutionData, backgroundColor: 'rgba(255, 99, 132, 0.7)' },
+                        { label: 'Omitido', data: skippedData, backgroundColor: 'rgba(153, 102, 255, 0.7)' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
+                    },
+                    plugins: {
+                        title: { display: false },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    animation: false
+                }
+            });
 
             const now = new Date();
             sessionDateDisplay.textContent = now.toLocaleDateString('es-ES');
@@ -1750,7 +1864,16 @@
         
         function saveAsPdf() {
             const { jsPDF } = window.jspdf;
-            html2canvas(resultsContentToCapture).then(canvas => {
+            html2canvas(resultsContentToCapture, {
+                onclone: (document) => {
+                    const chartCanvas = document.getElementById('historyChartCanvas');
+                    const chartInstance = Chart.getChart(chartCanvas);
+                    if (chartInstance) {
+                        chartInstance.options.animation = false;
+                        chartInstance.update();
+                    }
+                }
+            }).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -1863,12 +1986,12 @@
         
         // --- Tutorial Logic ---
         const tutorialSteps = [
-            { id: 'chordQuestionWrapper', title: 'Paso 1: El Ejercicio', text: 'Aquí se te presentará el ejercicio. Se te dará una nota (melodía) y su función dentro de un acorde específico. Tu objetivo es construir el resto del acorde.' },
-            { id: 'displaySection', title: 'Paso 2: Área de Respuesta', text: 'En la tabla de la izquierda, introduce las notas que faltan. Tu respuesta se reflejará también en el pentagrama de la derecha.' },
-            { id: 'inputMethodToggle', title: 'Paso 3: Métodos de Entrada', text: 'Puedes elegir cómo introducir las notas: usando los botones de "Cifrado" (con notas y alteraciones) o el "Piano" virtual.' },
-            { id: 'confirmAnswerButton', title: 'Paso 4: Comprueba tu Respuesta', text: 'Una vez que hayas construido el acorde, presiona "Confirmar". ¡Usa "Pista" si necesitas ayuda o "Mostrar Respuesta" para ver la solución!' },
-            { id: 'difficultySelection', title: 'Paso 5: Cambia la Dificultad', text: 'Puedes cambiar el nivel de dificultad en cualquier momento. "Avanzado" incluye tensiones como 9nas, 11nas y 13nas.' },
-            { id: 'settingsButton', title: 'Paso 6: Personaliza tu Práctica', text: 'Usa el botón de engranaje (⚙️) para elegir exactamente qué tipos de acordes y tensiones quieres practicar.' },
+            { id: 'chordQuestionWrapper', title: 'Paso 1: El Ejercicio', text: 'Aquí se te presentará el ejercicio: una nota (melodía) y su función dentro de un acorde. Tu objetivo es construir el resto del acorde.' },
+            { id: 'displaySection', title: 'Paso 2: Área de Respuesta', text: 'Introduce las notas que faltan en la tabla de la izquierda. Tu respuesta se reflejará también en el pentagrama de la derecha.' },
+            { id: 'inputMethodToggle', title: 'Paso 3: Métodos de Entrada', text: 'Puedes usar los botones de "Cifrado" o el "Piano" virtual. ¡Usa la tecla (I) para cambiar entre ellos!' },
+            { id: 'difficultySelection', title: 'Paso 4: Cambia la Dificultad', text: 'Puedes cambiar el nivel en cualquier momento usando las teclas (1) para Básico, (2) para Intermedio y (3) para Avanzado.' },
+            { id: 'confirmAnswerButton', title: 'Paso 5: Comprueba tu Respuesta', text: 'Una vez que hayas construido el acorde, presiona "Confirmar" (Enter). ¡Usa las herramientas de ayuda si lo necesitas!' },
+            { id: null, title: 'Atajos de Teclado Completos', text: '<b>A-G:</b> Notas Naturales <br><b>+/-:</b> Sostenidos/Bemoles <br><b>Enter:</b> Confirmar <br><b>P:</b> Pista, <b>R:</b> Respuesta <br><b>Espacio:</b> Cambiar, <b>N:</b> Borrar <br><b>Q:</b> Pantalla Completa <br><b>1,2,3:</b> Dificultad <br><b>I:</b> Cifrado/Piano <br><b>S:</b> Ajustes, <b>H:</b> Ayuda' },
             { id: null, title: '¡Todo Listo!', text: 'Has completado el tutorial. ¡Ya puedes comenzar a entrenar! ¡Mucha suerte!' }
         ];
 
@@ -1949,9 +2072,9 @@
                 startTrainingBtn.classList.add('hidden');
             }
             
-            startTutorialBtn.addEventListener('click', () => initializeApp(true));
-            skipTutorialBtn.addEventListener('click', () => initializeApp(false));
-            startTrainingBtn.addEventListener('click', () => initializeApp(false));
+            startTutorialBtn.addEventListener('click', () => initializeApp(true), { once: true });
+            skipTutorialBtn.addEventListener('click', () => initializeApp(false), { once: true });
+            startTrainingBtn.addEventListener('click', () => initializeApp(false), { once: true });
         }
         
         setupInitialScreen();
@@ -1959,6 +2082,4 @@
     </script>
 </body>
 </html>
-
-
 
