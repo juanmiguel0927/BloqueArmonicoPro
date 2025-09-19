@@ -332,44 +332,42 @@
                 gap: 0.75rem;
                 margin-top: 0.5rem;
             }
-            .action-buttons-group, .modal-buttons {
+            #statusBar {
                 flex-direction: column;
+                gap: 0.5rem;
             }
-            .action-buttons-group button, .modal-buttons button {
+            #statusBarInfo, #statusBarControls {
                 width: 100%;
+                justify-content: space-around;
+            }
+            #statusBarControls {
+                flex-wrap: wrap;
             }
              #displaySection {
-                flex-direction: row;
-                gap: 0.5rem;
-                align-items: stretch;
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            #questionArea, #staffArea {
+                flex-basis: 100%;
+                width: 100%;
+                max-width: 350px;
+            }
+            #chordQuestionText {
+                font-size: 1rem;
+            }
+            #chordQuestionText strong {
+                font-size: 1.1rem;
             }
             #questionArea {
-                flex: 0 0 40%;
-                min-width: 0;
-                padding: 0.5rem;
+                padding: 0.75rem;
             }
-            #staffArea {
-                flex: 0 0 58%;
-                min-width: 0;
-                padding: 0.25rem;
+            .action-buttons-group {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
             }
-            #questionArea p {
-                font-size: 0.9rem;
-                margin-bottom: 0.25rem;
-            }
-            .notes-grid {
-                max-width: none;
-                gap: 2px;
-            }
-            .grid-cell {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.8em;
-            }
-            .grid-cell .note-display {
-                font-size: 1.2em;
-            }
-            #musicalStaffCanvas {
-                height: auto; /* Let aspect ratio define height */
+            #confirmAnswerButton {
+                grid-column: 1 / -1; /* Span full width */
             }
         }
     </style>
@@ -462,20 +460,22 @@
         </div>
 
         <!-- Status bar (streak and score) -->
-        <div class="flex justify-between items-center mb-4 p-2 bg-gray-50 rounded-lg">
-            <div id="streakCounter" class="flex flex-col items-center p-2 rounded-xl bg-amber-50 border border-amber-200">
-                <div class="text-xs font-medium text-amber-600">🔥 Días de Racha</div>
-                <div class="text-xl font-bold text-amber-800">0</div>
+        <div id="statusBar" class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 p-2 bg-gray-50 rounded-lg gap-2">
+            <div id="statusBarInfo" class="flex justify-around items-center gap-2 flex-grow">
+                <div id="streakCounter" class="flex flex-col items-center p-2 rounded-xl bg-amber-50 border border-amber-200">
+                    <div class="text-xs font-medium text-amber-600">🔥 Días de Racha</div>
+                    <div class="text-xl font-bold text-amber-800">0</div>
+                </div>
+                <div id="userDisplay" class="flex flex-col items-center p-2 rounded-xl bg-indigo-50 border border-indigo-200">
+                    <div class="text-xs font-medium text-indigo-600">👤 Usuario</div>
+                    <div id="currentUserName" class="text-base font-bold text-indigo-800"></div>
+                </div>
+                <div id="scoreCounter" class="flex flex-col items-center p-2 rounded-xl bg-gray-100 border border-gray-200">
+                    <div class="text-sm text-green-600">✅ 0</div>
+                    <div class="text-sm text-red-600">❌ 0</div>
+                </div>
             </div>
-            <div id="userDisplay" class="flex flex-col items-center p-2 rounded-xl bg-indigo-50 border border-indigo-200">
-                <div class="text-xs font-medium text-indigo-600">👤 Usuario</div>
-                <div id="currentUserName" class="text-base font-bold text-indigo-800"></div>
-            </div>
-            <div id="scoreCounter" class="flex flex-col items-center p-2 rounded-xl bg-gray-100 border border-gray-200">
-                <div class="text-sm text-green-600">✅ 0</div>
-                <div class="text-sm text-red-600">❌ 0</div>
-            </div>
-            <div class="flex items-center gap-2">
+            <div id="statusBarControls" class="flex justify-center items-center gap-2 flex-wrap">
                 <!-- Notation selector -->
                 <div class="flex rounded-full bg-gray-200 p-1">
                     <input type="radio" id="notationAmericano" name="notationSystem" value="american" class="hidden" checked>
@@ -1780,18 +1780,21 @@
         }
 
         function populateStatsView(container, chartInstance, isFinalView) {
+            const { totalExercises, totalCorrect, totalIncorrect, hintsUsed, answersUsed } = state.stats;
+            const accuracy = (totalCorrect + totalIncorrect) > 0 ? Math.round((totalCorrect / (totalCorrect + totalIncorrect)) * 100) : 0;
+            
             const statsHTML = `
                 <div class="flex flex-col items-center mb-4">
                     <label class="text-lg font-semibold text-gray-800 mb-1">Nombre:</label>
                     <input type="text" value="${state.currentUser}" class="text-center p-2 border rounded-lg w-full max-w-sm" readonly>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Ejercicios</span><span class="text-2xl font-bold text-gray-800">${state.stats.totalExercises}</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Aciertos</span><span class="text-2xl font-bold text-green-600">${state.stats.totalCorrect}</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Desaciertos</span><span class="text-2xl font-bold text-red-600">${state.stats.totalIncorrect}</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Precisión</span><span class="text-2xl font-bold text-blue-600">${(state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0}%</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Pistas</span><span class="text-2xl font-bold text-yellow-600">${state.stats.hintsUsed}</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Soluciones</span><span class="text-2xl font-bold text-red-600">${state.stats.answersUsed}</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Ejercicios</span><span class="text-2xl font-bold text-gray-800">${totalExercises}</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Aciertos</span><span class="text-2xl font-bold text-green-600">${totalCorrect}</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Desaciertos</span><span class="text-2xl font-bold text-red-600">${totalIncorrect}</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Precisión</span><span class="text-2xl font-bold text-blue-600">${accuracy}%</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Pistas</span><span class="text-2xl font-bold text-yellow-600">${hintsUsed}</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Soluciones</span><span class="text-2xl font-bold text-red-600">${answersUsed}</span></div>
                 </div>
                 <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-r-lg"><p class="font-bold">Sugerencia de Práctica:</p><p id="suggestionText-${isFinalView ? 'final' : 'modal'}"></p></div>
                 <p class="text-lg font-bold text-gray-800 mt-4 mb-2">Historial Estadístico por Acorde</p>
@@ -1805,7 +1808,7 @@
             const strugglingChords = getPerformanceAnalysis();
             if (strugglingChords.length > 0) {
                 suggestionEl.textContent = `Tu área principal a mejorar son los acordes ${strugglingChords.map(c=>c.chord).join(', ')}. ¡Enfócate en ellos en tu próxima sesión!`;
-            } else if (((state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0) >= 90) {
+            } else if (accuracy >= 90) {
                 suggestionEl.textContent = "¡Excelente trabajo! Tu precisión es muy alta. Intenta practicar en un nivel de dificultad más alto o con tipos de acordes más complejos.";
             } else {
                 suggestionEl.textContent = "¡Buen progreso! Sigue practicando para mejorar tu velocidad y precisión.";
