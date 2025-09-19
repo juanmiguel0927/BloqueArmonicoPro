@@ -769,84 +769,98 @@
         };
 
         // DOM element references
-        const welcomeModalOverlay = document.getElementById('welcomeModalOverlay');
-        const mainAppContainer = document.getElementById('mainAppContainer');
-        const chordQuestionText = document.getElementById('chordQuestionText');
-        const gridCells = [
-            document.getElementById('gridCell0'),
-            document.getElementById('gridCell1'),
-            document.getElementById('gridCell2'),
-            document.getElementById('gridCell3')
-        ];
-        const noteBuildingControls = document.getElementById('noteBuildingControls');
-        const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
-        const accidentalButtonsContainer = document.getElementById('accidentalButtons');
-        const musicalStaffCanvas = document.getElementById('musicalStaffCanvas');
-        const confirmAnswerButton = document.getElementById('confirmAnswerButton');
-        const clearAllSelectionButton = document.getElementById('clearAllSelectionButton');
-        const changeQuestionButton = document.getElementById('changeQuestionButton');
-        const hintButton = document.getElementById('hintButton');
-        const showAnswerButton = document.getElementById('showAnswerButton');
-        const quickFeedbackModalOverlay = document.getElementById('quickFeedbackModalOverlay');
-        const quickFeedbackModalContent = document.getElementById('quickFeedbackModalContent');
-        const evaluationModalOverlay = document.getElementById('evaluationModalOverlay');
-        const evaluationSummary = document.getElementById('evaluationSummary');
-        const adviceList = document.getElementById('adviceList');
-        const continueTrainingButton = document.getElementById('continueTrainingButton');
-        const endSessionButton = document.getElementById('endSessionButton');
-        const finalMessageDisplay = document.getElementById('finalMessageDisplay');
-        const resultsContentToCapture = document.getElementById('resultsContentToCapture');
-        const difficultyRadios = document.querySelectorAll('input[name="difficulty"]');
-        const streakCounter = document.getElementById('streakCounter').querySelector('.text-xl');
-        const scoreCounter = document.getElementById('scoreCounter');
-        const settingsButton = document.getElementById('settingsButton');
-        const settingsModalOverlay = document.getElementById('settingsModalOverlay');
-        const saveSettingsButton = document.getElementById('saveSettingsButton');
-        const cancelSettingsButton = document.getElementById('cancelSettingsButton');
-        const chordTypesCheckboxesContainer = document.getElementById('chordTypesCheckboxes');
-        const leadVoicesCheckboxesContainer = document.getElementById('leadVoicesCheckboxes');
-        const leadVoicesSection = document.getElementById('leadVoicesSection');
-        const cifradoToggle = document.getElementById('cifradoToggle');
-        const pianoToggle = document.getElementById('pianoToggle');
-        const pianoContainer = document.getElementById('piano-container');
-        const enharmonicModalOverlay = document.getElementById('enharmonicModalOverlay');
-        const enharmonicChoicesContainer = document.getElementById('enharmonicChoices');
-        const notationRadios = document.querySelectorAll('input[name="notationSystem"]');
-        const infoModalOverlay = document.getElementById('infoModalOverlay');
-        const infoModalTitle = document.getElementById('infoModalTitle');
-        const infoModalBody = document.getElementById('infoModalBody');
-        const infoModalCloseButton = document.getElementById('infoModalCloseButton');
-        const hintModalOverlay = document.getElementById('hintModalOverlay');
-        const hintModalBody = document.getElementById('hintModalBody');
-        const hintModalCloseButton = document.getElementById('hintModalCloseButton');
-        const showTutorialButton = document.getElementById('showTutorialButton');
-        const fullscreenButton = document.getElementById('fullscreenButton');
-        const fullscreenIconOpen = document.getElementById('fullscreenIconOpen');
-        const fullscreenIconClose = document.getElementById('fullscreenIconClose');
-        const tutorialEndButton = document.getElementById('tutorialEndButton');
-        const userSelect = document.getElementById('userSelect');
-        const newUserInput = document.getElementById('newUserInput');
-        const loginButton = document.getElementById('loginButton');
-        const guestLoginButton = document.getElementById('guestLoginButton');
-        const deleteUserButton = document.getElementById('deleteUserButton');
-        const currentUserName = document.getElementById('currentUserName');
-        const switchUserButton = document.getElementById('switchUserButton');
-        const switchUserFinalButton = document.getElementById('switchUserFinalButton');
-        const tutorialPromptModalOverlay = document.getElementById('tutorialPromptModalOverlay');
-        const tutorialUserName = document.getElementById('tutorialUserName');
-        const promptStartTutorial = document.getElementById('promptStartTutorial');
-        const promptSkipTutorial = document.getElementById('promptSkipTutorial');
-        const deleteConfirmModalOverlay = document.getElementById('deleteConfirmModalOverlay');
-        const deleteConfirmText = document.getElementById('deleteConfirmText');
-        const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-        const cancelDeleteButton = document.getElementById('cancelDeleteButton');
-        const viewHistoryButton = document.getElementById('viewHistoryButton');
-        const historyModalOverlay = document.getElementById('historyModalOverlay');
-        const historyModalTitle = document.getElementById('historyModalTitle');
-        const historyModalContent = document.getElementById('historyModalContent');
-        const closeHistoryModalButton = document.getElementById('closeHistoryModalButton');
+        let welcomeModalOverlay, mainAppContainer, chordQuestionText, gridCells, noteBuildingControls, naturalNoteButtonsContainer, 
+            accidentalButtonsContainer, musicalStaffCanvas, confirmAnswerButton, clearAllSelectionButton, changeQuestionButton, 
+            hintButton, showAnswerButton, quickFeedbackModalOverlay, quickFeedbackModalContent, evaluationModalOverlay, 
+            evaluationSummary, adviceList, continueTrainingButton, endSessionButton, finalMessageDisplay, resultsContentToCapture, 
+            difficultyRadios, streakCounter, scoreCounter, settingsButton, settingsModalOverlay, saveSettingsButton, 
+            cancelSettingsButton, chordTypesCheckboxesContainer, leadVoicesCheckboxesContainer, leadVoicesSection, cifradoToggle, 
+            pianoToggle, pianoContainer, enharmonicModalOverlay, enharmonicChoicesContainer, notationRadios, infoModalOverlay, 
+            infoModalTitle, infoModalBody, infoModalCloseButton, hintModalOverlay, hintModalBody, hintModalCloseButton, 
+            showTutorialButton, fullscreenButton, fullscreenIconOpen, fullscreenIconClose, tutorialEndButton, userSelect, 
+            newUserInput, loginButton, guestLoginButton, deleteUserButton, currentUserName, switchUserButton, 
+            switchUserFinalButton, tutorialPromptModalOverlay, tutorialUserName, promptStartTutorial, promptSkipTutorial, 
+            deleteConfirmModalOverlay, deleteConfirmText, confirmDeleteButton, cancelDeleteButton, viewHistoryButton, 
+            historyModalOverlay, historyModalTitle, historyModalContent, closeHistoryModalButton;
         
         let synth, reverb;
+
+        function assignDomElements() {
+            welcomeModalOverlay = document.getElementById('welcomeModalOverlay');
+            mainAppContainer = document.getElementById('mainAppContainer');
+            chordQuestionText = document.getElementById('chordQuestionText');
+            gridCells = [
+                document.getElementById('gridCell0'), document.getElementById('gridCell1'),
+                document.getElementById('gridCell2'), document.getElementById('gridCell3')
+            ];
+            noteBuildingControls = document.getElementById('noteBuildingControls');
+            naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
+            accidentalButtonsContainer = document.getElementById('accidentalButtons');
+            musicalStaffCanvas = document.getElementById('musicalStaffCanvas');
+            confirmAnswerButton = document.getElementById('confirmAnswerButton');
+            clearAllSelectionButton = document.getElementById('clearAllSelectionButton');
+            changeQuestionButton = document.getElementById('changeQuestionButton');
+            hintButton = document.getElementById('hintButton');
+            showAnswerButton = document.getElementById('showAnswerButton');
+            quickFeedbackModalOverlay = document.getElementById('quickFeedbackModalOverlay');
+            quickFeedbackModalContent = document.getElementById('quickFeedbackModalContent');
+            evaluationModalOverlay = document.getElementById('evaluationModalOverlay');
+            evaluationSummary = document.getElementById('evaluationSummary');
+            adviceList = document.getElementById('adviceList');
+            continueTrainingButton = document.getElementById('continueTrainingButton');
+            endSessionButton = document.getElementById('endSessionButton');
+            finalMessageDisplay = document.getElementById('finalMessageDisplay');
+            resultsContentToCapture = document.getElementById('resultsContentToCapture');
+            difficultyRadios = document.querySelectorAll('input[name="difficulty"]');
+            streakCounter = document.getElementById('streakCounter').querySelector('.text-xl');
+            scoreCounter = document.getElementById('scoreCounter');
+            settingsButton = document.getElementById('settingsButton');
+            settingsModalOverlay = document.getElementById('settingsModalOverlay');
+            saveSettingsButton = document.getElementById('saveSettingsButton');
+            cancelSettingsButton = document.getElementById('cancelSettingsButton');
+            chordTypesCheckboxesContainer = document.getElementById('chordTypesCheckboxes');
+            leadVoicesCheckboxesContainer = document.getElementById('leadVoicesCheckboxes');
+            leadVoicesSection = document.getElementById('leadVoicesSection');
+            cifradoToggle = document.getElementById('cifradoToggle');
+            pianoToggle = document.getElementById('pianoToggle');
+            pianoContainer = document.getElementById('piano-container');
+            enharmonicModalOverlay = document.getElementById('enharmonicModalOverlay');
+            enharmonicChoicesContainer = document.getElementById('enharmonicChoices');
+            notationRadios = document.querySelectorAll('input[name="notationSystem"]');
+            infoModalOverlay = document.getElementById('infoModalOverlay');
+            infoModalTitle = document.getElementById('infoModalTitle');
+            infoModalBody = document.getElementById('infoModalBody');
+            infoModalCloseButton = document.getElementById('infoModalCloseButton');
+            hintModalOverlay = document.getElementById('hintModalOverlay');
+            hintModalBody = document.getElementById('hintModalBody');
+            hintModalCloseButton = document.getElementById('hintModalCloseButton');
+            showTutorialButton = document.getElementById('showTutorialButton');
+            fullscreenButton = document.getElementById('fullscreenButton');
+            fullscreenIconOpen = document.getElementById('fullscreenIconOpen');
+            fullscreenIconClose = document.getElementById('fullscreenIconClose');
+            tutorialEndButton = document.getElementById('tutorialEndButton');
+            userSelect = document.getElementById('userSelect');
+            newUserInput = document.getElementById('newUserInput');
+            loginButton = document.getElementById('loginButton');
+            guestLoginButton = document.getElementById('guestLoginButton');
+            deleteUserButton = document.getElementById('deleteUserButton');
+            currentUserName = document.getElementById('currentUserName');
+            switchUserButton = document.getElementById('switchUserButton');
+            switchUserFinalButton = document.getElementById('switchUserFinalButton');
+            tutorialPromptModalOverlay = document.getElementById('tutorialPromptModalOverlay');
+            tutorialUserName = document.getElementById('tutorialUserName');
+            promptStartTutorial = document.getElementById('promptStartTutorial');
+            promptSkipTutorial = document.getElementById('promptSkipTutorial');
+            deleteConfirmModalOverlay = document.getElementById('deleteConfirmModalOverlay');
+            deleteConfirmText = document.getElementById('deleteConfirmText');
+            confirmDeleteButton = document.getElementById('confirmDeleteButton');
+            cancelDeleteButton = document.getElementById('cancelDeleteButton');
+            viewHistoryButton = document.getElementById('viewHistoryButton');
+            historyModalOverlay = document.getElementById('historyModalOverlay');
+            historyModalTitle = document.getElementById('historyModalTitle');
+            historyModalContent = document.getElementById('historyModalContent');
+            closeHistoryModalButton = document.getElementById('closeHistoryModalButton');
+        }
 
         // --- Main Logic ---
 
@@ -883,6 +897,7 @@
             updateDifficultySelectionUI(); // Set initial button colors
             generateNoteButtons();
             generatePiano();
+            // Listeners for main app are added here, only once per session
             addEventListeners();
             updateStatsDisplay();
             generateExercise();
@@ -906,8 +921,11 @@
                 }
             });
         }
-
+        
+        let mainAppListenersAttached = false;
         function addEventListeners() {
+            if(mainAppListenersAttached) return;
+
             confirmAnswerButton.addEventListener('click', checkAnswer);
             clearAllSelectionButton.addEventListener('click', clearSelection);
             changeQuestionButton.addEventListener('click', () => {
@@ -983,6 +1001,8 @@
 
             deleteUserButton.addEventListener('click', confirmDeleteUser);
             cancelDeleteButton.addEventListener('click', () => deleteConfirmModalOverlay.classList.remove('visible'));
+            
+            mainAppListenersAttached = true;
         }
 
         function showCustomMessage(title, message, type = 'info') {
@@ -2213,6 +2233,7 @@
 
         function handleSwitchUser() {
             saveUserData();
+            mainAppListenersAttached = false; // Allow listeners to be re-attached for the next session
             mainAppContainer.classList.add('hidden');
             finalMessageDisplay.classList.add('hidden');
             showLoginScreen();
@@ -2227,12 +2248,17 @@
         }
 
         // --- Initial Events ---
-        promptStartTutorial.addEventListener('click', () => initializeApp(true));
-        promptSkipTutorial.addEventListener('click', () => initializeApp(false));
-        loginButton.addEventListener('click', handleLogin);
-        guestLoginButton.addEventListener('click', handleGuestLogin);
         
-        showLoginScreen();
+        document.addEventListener('DOMContentLoaded', () => {
+            assignDomElements();
+
+            promptStartTutorial.addEventListener('click', () => initializeApp(true));
+            promptSkipTutorial.addEventListener('click', () => initializeApp(false));
+            loginButton.addEventListener('click', handleLogin);
+            guestLoginButton.addEventListener('click', handleGuestLogin);
+            
+            showLoginScreen();
+        });
         
     </script>
 </body>
