@@ -343,15 +343,9 @@
             #statusBarControls {
                 flex-wrap: wrap;
             }
-             #displaySection {
+            #displaySection {
                 flex-direction: column;
                 align-items: center;
-                gap: 1rem;
-            }
-            #questionArea, #staffArea {
-                flex-basis: 100%;
-                width: 100%;
-                max-width: 350px;
             }
             #chordQuestionText {
                 font-size: 1rem;
@@ -521,8 +515,8 @@
         </div>
         
         <!-- Exercise display area -->
-        <div id="displaySection" class="flex justify-center items-start gap-4 flex-wrap">
-            <div id="questionArea" class="flex-1 min-w-[250px] p-4 bg-blue-100 rounded-lg border border-blue-300">
+        <div id="displaySection" class="flex justify-center items-start gap-4">
+            <div id="questionArea" class="w-full max-w-md md:flex-1 md:min-w-[250px] p-4 bg-blue-100 rounded-lg border border-blue-300">
                 <p class="text-lg font-bold text-blue-800 mb-2">Construye el acorde:</p>
                 <div class="notes-grid w-full">
                     <div class="grid-cell" id="gridCell0">
@@ -543,7 +537,7 @@
                     </div>
                 </div>
             </div>
-            <div id="staffArea" class="flex-1 min-w-[300px] flex justify-center items-center">
+            <div id="staffArea" class="w-full max-w-md md:flex-1 md:min-w-[300px] flex justify-center items-center">
                 <canvas id="musicalStaffCanvas"></canvas>
             </div>
         </div>
@@ -2240,6 +2234,7 @@
         }
 
         function showLoginScreen() {
+            mainAppListenersAttached = false;
             mainAppContainer.classList.add('hidden');
             finalMessageDisplay.classList.add('hidden');
             welcomeModalOverlay.classList.add('visible');
@@ -2263,4 +2258,6 @@
     </script>
 </body>
 </html>
+" and the following user query: sigue sin verse la partitura en celular. coloca la partitura debajo del bloque en la vertical, creo que así se soluciona la vista en dispositivos moviles
+
 
