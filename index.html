@@ -9,40 +9,11 @@
     <script type="module" src="https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <!-- Tailwind CSS for a modern and responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
         /* Base document styles */
-        :root {
-            --bg-color: #f1f5f9;
-            --container-bg: #ffffff;
-            --text-color: #334155;
-            --border-color: #e2e8f0;
-            --primary-accent: #1e40af;
-            --question-bg: #eff6ff;
-            --question-border: #dbeafe;
-            --note-grid-bg: #f8fafc;
-            --key-white-bg: #ffffff;
-            --key-black-bg: #334155;
-            --key-border: #64748b;
-        }
-
-        .dark-mode {
-            --bg-color: #0f172a;
-            --container-bg: #1e293b;
-            --text-color: #cbd5e1;
-            --border-color: #334155;
-            --primary-accent: #60a5fa;
-            --question-bg: #1e293b;
-            --question-border: #334155;
-            --note-grid-bg: #334155;
-            --key-white-bg: #94a3b8;
-            --key-black-bg: #0f172a;
-            --key-border: #475569;
-        }
-
         html, body {
             height: 100%;
             margin: 0;
@@ -50,85 +21,322 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: var(--bg-color);
+            background-color: #f1f5f9;
             font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-            color: var(--text-color);
+            color: #334155;
             line-height: 1.6;
-            transition: background-color 0.3s, color 0.3s;
         }
 
         /* Main application container */
         .container {
-            background-color: var(--container-bg);
+            background-color: #ffffff;
             padding: 1.5rem;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             max-width: 800px;
             width: 98%;
             box-sizing: border-box;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
             gap: 1rem;
             margin-top: 1rem;
             margin-bottom: 2rem;
-            transition: background-color 0.3s, border-color 0.3s;
         }
 
-        #chordQuestionWrapper { text-align: center; }
-        #chordQuestionText strong { color: var(--primary-accent); }
-        #displaySection { display: flex; justify-content: center; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
-        #questionArea { background-color: var(--question-bg); border: 1px solid var(--question-border); padding: 1rem; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1 1 250px; }
-        #staffArea { flex: 1 1 300px; display: flex; justify-content: center; align-items: center; padding: 0.5rem; }
-        #musicalStaffCanvas { background-color: var(--container-bg); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 100%; height: auto; max-width: 300px; box-sizing: border-box; }
-        .notes-grid { display: grid; grid-template-rows: repeat(4, 1fr); gap: 4px; width: 100%; max-width: 200px; }
-        .grid-cell { background-color: var(--note-grid-bg); border: 1px solid var(--border-color); padding: 0.75rem; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 1.1em; font-weight: 600; }
-        .grid-cell .note-display { font-size: 1.5em; }
-        .grid-cell.hidden { display: none; }
-        .action-buttons-group, .modal-buttons, .audio-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
-        .action-buttons-group button, .modal-buttons button, .audio-buttons button { flex: 1 1 auto; min-width: 120px; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s ease-in-out; box-shadow: 0 4px 6px rgba(0,0,0,0.1); touch-action: manipulation; }
-        .action-buttons-group button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .note-button.active, .toggle-button.active { box-shadow: 0 2px 5px rgba(0,0,0,0.2); transform: translateY(-1px); background-color: #3b82f6; color: white; }
-        .note-building-controls { display: flex; flex-direction: column; gap: 1rem; }
-        .natural-note-buttons, .accidental-buttons { display: grid; gap: 0.5rem; }
-        .natural-note-buttons { grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr)); }
-        .accidental-buttons { grid-template-columns: repeat(4, 1fr); max-width: 200px; margin: 0 auto; }
-        .note-button { padding: 0.75rem; border-radius: 8px; font-weight: 600; background-color: var(--border-color); border: 1px solid #cbd5e1; color: var(--text-color); transition: all 0.2s; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-overlay.visible { display: flex; }
-        .modal-content { background-color: var(--container-bg); padding: 1.5rem 2rem; border-radius: 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); max-width: 450px; width: 90%; text-align: center; }
-        .feedback.correct { background-color: #dcfce7; color: #15803d; border: 1px solid #15803d; }
-        .feedback.incorrect { background-color: #fee2e2; color: #b91c1c; border: 1px solid #b91c1c; }
-        .piano-container { position: relative; display: flex; height: 200px; width: 100%; max-width: 800px; margin: 0 auto; }
-        .piano-key { border: 1px solid var(--key-border); box-sizing: border-box; cursor: pointer; transition: background-color 0.1s ease; }
-        .piano-key.white { background-color: var(--key-white-bg); width: calc(100% / 22); height: 100%; border-radius: 0 0 5px 5px; }
-        .piano-key.black { background-color: var(--key-black-bg); width: 3%; height: 65%; position: absolute; z-index: 2; transform: translateX(-50%); border-radius: 0 0 5px 5px; }
-        .piano-key.black[data-note="C#/3"] { left: calc(100% / 22 * 1); } .piano-key.black[data-note="D#/3"] { left: calc(100% / 22 * 2); } .piano-key.black[data-note="F#/3"] { left: calc(100% / 22 * 4); } .piano-key.black[data-note="G#/3"] { left: calc(100% / 22 * 5); } .piano-key.black[data-note="A#/3"] { left: calc(100% / 22 * 6); } .piano-key.black[data-note="C#/4"] { left: calc(100% / 22 * 8); } .piano-key.black[data-note="D#/4"] { left: calc(100% / 22 * 9); } .piano-key.black[data-note="F#/4"] { left: calc(100% / 22 * 11); } .piano-key.black[data-note="G#/4"] { left: calc(100% / 22 * 12); } .piano-key.black[data-note="A#/4"] { left: calc(100% / 22 * 13); } .piano-key.black[data-note="C#/5"] { left: calc(100% / 22 * 15); } .piano-key.black[data-note="D#/5"] { left: calc(100% / 22 * 16); } .piano-key.black[data-note="F#/5"] { left: calc(100% / 22 * 18); } .piano-key.black[data-note="G#/5"] { left: calc(100% / 22 * 19); } .piano-key.black[data-note="A#/5"] { left: calc(100% / 22 * 20); }
-        .piano-key.selected { background-color: #3b82f6 !important; }
-        #tutorialOverlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); z-index: 2000; }
-        #tutorialModal { position: absolute; background-color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.5); max-width: 350px; width: 90%; border: 2px solid #3b82f6; }
-        .tutorial-highlight { position: relative; z-index: 2001; box-shadow: 0 0 0 4px #3b82f6, 0 0 20px 10px rgba(59, 130, 246, 0.7); border-radius: 8px; transition: box-shadow 0.3s ease-in-out; }
+        /* Styles for the question area */
+        #chordQuestionWrapper {
+            text-align: center;
+        }
+        #chordQuestionText strong {
+            color: #1e40af;
+        }
+
+        /* Container for the staff and note grid */
+        #displaySection {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        #questionArea {
+            background-color: #eff6ff;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid #dbeafe;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 250px;
+        }
+
+        #staffArea {
+            flex: 1 1 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+        }
+        #musicalStaffCanvas {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            height: auto;
+            max-width: 300px; /* Constrains the display width */
+            box-sizing: border-box;
+        }
+
+        /* Note grid styles */
+        .notes-grid {
+            display: grid;
+            grid-template-rows: repeat(4, 1fr);
+            gap: 4px;
+            width: 100%;
+            max-width: 200px;
+        }
+        .grid-cell {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        .grid-cell .note-display {
+            font-size: 1.5em;
+        }
+        .grid-cell.hidden {
+            display: none;
+        }
+
+        /* Interaction button styles */
+        .action-buttons-group, .modal-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        .action-buttons-group button, .modal-buttons button {
+            flex: 1 1 auto;
+            min-width: 120px;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            touch-action: manipulation;
+        }
+
+        .action-buttons-group button:disabled, .note-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         
-        #xpBarContainer { width: 100%; background-color: var(--border-color); border-radius: 9999px; height: 0.75rem; overflow: hidden; }
-        #xpBar { height: 100%; background-color: #3b82f6; border-radius: 9999px; transition: width 0.5s ease-in-out; }
+        .note-button.active, .toggle-button.active {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        /* Note button styles */
+        .note-building-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .natural-note-buttons, .accidental-buttons {
+            display: grid;
+            gap: 0.5rem;
+        }
+        .natural-note-buttons {
+            grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr));
+        }
+        .accidental-buttons {
+            grid-template-columns: repeat(4, 1fr);
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        .note-button {
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            background-color: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            transition: all 0.2s;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-overlay.visible {
+            display: flex;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+        }
+
+        /* Feedback message styles */
+        .feedback.correct {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #15803d;
+        }
+        .feedback.incorrect {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #b91c1c;
+        }
+
+        /* Piano styles */
+        .piano-container {
+            position: relative;
+            display: flex;
+            height: 200px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .piano-key {
+            border: 1px solid #64748b;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: background-color 0.1s ease;
+        }
+        .piano-key.white {
+            background-color: #ffffff;
+            width: calc(100% / 22);
+            height: 100%;
+            border-radius: 0 0 5px 5px;
+        }
+        .piano-key.black {
+            background-color: #334155;
+            width: 3%;
+            height: 65%;
+            position: absolute;
+            z-index: 2;
+            transform: translateX(-50%);
+            border-radius: 0 0 5px 5px;
+        }
+        /* Black key positions */
+        .piano-key.black[data-note="C#/3"] { left: calc(100% / 22 * 1); }
+        .piano-key.black[data-note="D#/3"] { left: calc(100% / 22 * 2); }
+        .piano-key.black[data-note="F#/3"] { left: calc(100% / 22 * 4); }
+        .piano-key.black[data-note="G#/3"] { left: calc(100% / 22 * 5); }
+        .piano-key.black[data-note="A#/3"] { left: calc(100% / 22 * 6); }
+        .piano-key.black[data-note="C#/4"] { left: calc(100% / 22 * 8); }
+        .piano-key.black[data-note="D#/4"] { left: calc(100% / 22 * 9); }
+        .piano-key.black[data-note="F#/4"] { left: calc(100% / 22 * 11); }
+        .piano-key.black[data-note="G#/4"] { left: calc(100% / 22 * 12); }
+        .piano-key.black[data-note="A#/4"] { left: calc(100% / 22 * 13); }
+        .piano-key.black[data-note="C#/5"] { left: calc(100% / 22 * 15); }
+        .piano-key.black[data-note="D#/5"] { left: calc(100% / 22 * 16); }
+        .piano-key.black[data-note="F#/5"] { left: calc(100% / 22 * 18); }
+        .piano-key.black[data-note="G#/5"] { left: calc(100% / 22 * 19); }
+        .piano-key.black[data-note="A#/5"] { left: calc(100% / 22 * 20); }
         
-        #achievementsModalOverlay .modal-content { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        
-        #themeToggle:hover, #modeToggle:hover { transform: scale(1.1); }
-        
+        .piano-key.selected {
+            background-color: #3b82f6 !important;
+        }
+
+        /* Tutorial Styles */
+        #tutorialOverlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 2000;
+        }
+        #tutorialModal {
+            position: absolute;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            max-width: 350px;
+            width: 90%;
+            border: 2px solid #3b82f6;
+        }
+        .tutorial-highlight {
+            position: relative;
+            z-index: 2001;
+            box-shadow: 0 0 0 4px #3b82f6, 0 0 20px 10px rgba(59, 130, 246, 0.7);
+            border-radius: 8px;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        /* Responsive design for mobile devices */
         @media (max-width: 768px) {
-            .container { padding: 1rem; gap: 0.75rem; margin-top: 0.5rem; }
-            .action-buttons-group, .modal-buttons, .audio-buttons { flex-direction: column; }
-            .action-buttons-group button, .modal-buttons button, .audio-buttons button { width: 100%; }
-            #displaySection { flex-direction: row; gap: 0.5rem; align-items: stretch; }
-            #questionArea { flex: 0 0 40%; min-width: 0; padding: 0.5rem; }
-            #staffArea { flex: 0 0 58%; min-width: 0; padding: 0.25rem; }
-            #questionArea p { font-size: 0.9rem; margin-bottom: 0.25rem; }
-            .notes-grid { max-width: none; gap: 2px; }
-            .grid-cell { padding: 0.25rem 0.5rem; font-size: 0.8em; }
-            .grid-cell .note-display { font-size: 1.2em; }
-            #musicalStaffCanvas { height: auto; }
+            .container {
+                padding: 1rem;
+                gap: 0.75rem;
+                margin-top: 0.5rem;
+            }
+            .action-buttons-group, .modal-buttons {
+                flex-direction: column;
+            }
+            .action-buttons-group button, .modal-buttons button {
+                width: 100%;
+            }
+             #displaySection {
+                flex-direction: row;
+                gap: 0.5rem;
+                align-items: stretch;
+            }
+            #questionArea {
+                flex: 0 0 40%;
+                min-width: 0;
+                padding: 0.5rem;
+            }
+            #staffArea {
+                flex: 0 0 58%;
+                min-width: 0;
+                padding: 0.25rem;
+            }
+            #questionArea p {
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+            }
+            .notes-grid {
+                max-width: none;
+                gap: 2px;
+            }
+            .grid-cell {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.8em;
+            }
+            .grid-cell .note-display {
+                font-size: 1.2em;
+            }
+            #musicalStaffCanvas {
+                height: auto; /* Let aspect ratio define height */
+            }
         }
     </style>
 </head>
@@ -137,23 +345,25 @@
     <div id="welcomeModalOverlay" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
         <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-lg w-11/12">
             <h2 class="text-3xl sm:text-4xl font-bold text-blue-800 mb-4">Bienvenido a Bloque Armónico Pro</h2>
-            <p class="text-lg text-gray-700 mb-6">Una herramienta para desarrollar tu técnica de armonización y tu oído musical.</p>
+            <p class="text-lg text-gray-700 mb-6">Una herramienta para desarrollar tu técnica de armonización en bloques cerrados (4-way closed).</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <button id="startTutorialButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Ver Tutorial</button>
                 <button id="skipTutorialButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Omitir y Empezar</button>
             </div>
+            <div class="text-center mt-8">
+                <p class="text-sm text-gray-600">Una aplicación de</p>
+                <p class="text-lg font-bold text-blue-800 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-music-note-beamed" viewBox="0 0 16 16">
+                      <path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13c0-1.104 1.12-2 2.5-2s2.5.896 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2z"/>
+                      <path fill-rule="evenodd" d="M14 11V2h1v9h-1zM6 3v10H5V3h1z"/>
+                      <path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4V2.905z"/>
+                    </svg>
+                    Juan Miguel Ríos Redondo
+                </p>
+            </div>
         </div>
     </div>
 
-    <!-- Achievements Modal -->
-    <div id="achievementsModalOverlay" class="modal-overlay hidden">
-        <div class="modal-content text-center">
-            <h2 class="text-2xl font-bold text-yellow-500 mb-4">🏆 ¡Logro Desbloqueado! 🏆</h2>
-            <div id="achievementsList" class="space-y-3"></div>
-            <button id="closeAchievementsButton" class="mt-6 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">¡Genial!</button>
-        </div>
-    </div>
-    
     <!-- Interactive Tutorial -->
     <div id="tutorialOverlay" class="hidden">
         <div id="tutorialModal">
@@ -170,52 +380,46 @@
     <div id="mainAppContainer" class="container hidden">
         <div class="flex flex-col items-center justify-between mb-4">
             <h1 class="text-2xl font-bold text-center">Bloque Armónico Pro</h1>
-            <div id="gameModeToggle" class="mt-2 flex p-1 bg-gray-200 rounded-full">
-                <button id="harmonizationModeBtn" class="py-1 px-4 text-sm rounded-full font-semibold transition-all bg-white text-blue-600 shadow-sm">Armonización</button>
-                <button id="earTrainingModeBtn" class="py-1 px-4 text-sm rounded-full font-semibold transition-all text-gray-700">Oído</button>
-            </div>
             <div id="chordQuestionWrapper" class="text-lg text-gray-700 mt-2">
-                <p id="chordQuestionText"></p>
-            </div>
-            <div id="earTrainingControls" class="hidden flex-col items-center gap-2 mt-2">
-                <p>Escucha y construye el acorde:</p>
-                <button id="playChordBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors text-lg">Tocar Acorde 🎵</button>
+                <p id="chordQuestionText">
+                    <strong class="text-xl sm:text-2xl"></strong> es <strong class="text-xl sm:text-2xl"></strong> de un acorde <strong class="text-xl sm:text-2xl"></strong>.<br>
+                    <small class="text-sm text-gray-500">Armoniza en bloque cerrado, <span class="font-bold text-indigo-700">4 voces</span>, descendente.</small>
+                </p>
             </div>
         </div>
 
-        <!-- Status bar (streak, score, level, xp) -->
-        <div class="grid grid-cols-3 gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
+        <!-- Status bar (streak and score) -->
+        <div class="flex justify-between items-center mb-4 p-2 bg-gray-50 rounded-lg">
             <div id="streakCounter" class="flex flex-col items-center p-2 rounded-xl bg-amber-50 border border-amber-200">
-                 <div class="text-xs font-medium text-amber-600">🔥 Días de Racha</div>
-                 <div class="text-xl font-bold text-amber-800">0</div>
-            </div>
-            <div id="playerLevel" class="flex flex-col items-center p-2 rounded-xl bg-blue-50 border border-blue-200 text-center">
-                 <div class="text-xs font-medium text-blue-600">Nivel <span id="levelValue" class="font-bold">1</span></div>
-                 <div id="xpBarContainer" class="w-full mt-1"><div id="xpBar"></div></div>
-                 <span id="xpValue" class="text-xs text-blue-800 mt-1">0/100 XP</span>
+                <div class="text-xs font-medium text-amber-600">🔥 Días de Racha</div>
+                <div class="text-xl font-bold text-amber-800">0</div>
             </div>
             <div id="scoreCounter" class="flex flex-col items-center p-2 rounded-xl bg-gray-100 border border-gray-200">
                 <div class="text-sm text-green-600">✅ 0</div>
                 <div class="text-sm text-red-600">❌ 0</div>
             </div>
-        </div>
-        <div class="flex justify-between items-center mb-4">
             <div class="flex items-center gap-2">
-                <input type="radio" id="notationAmericano" name="notationSystem" value="american" class="hidden" checked>
-                <label for="notationAmericano" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50 bg-gray-200">C,D,E</label>
-                <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
-                <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50 bg-gray-200">Do,Re,Mi</label>
-            </div>
-             <div class="flex items-center gap-3">
-                <button id="settingsButton" title="Ajustes de Práctica" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">⚙️</button>
-                <button id="showTutorialButton" title="Ver Tutorial" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">?</button>
-                <button id="themeToggle" title="Modo Oscuro/Claro" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">🌙</button>
-                <button id="fullscreenButton" title="Pantalla Completa / Salir (Q)" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">
-                    <svg id="fullscreenIconOpen" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"/></svg>
-                    <svg id="fullscreenIconClose" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen-exit hidden" viewBox="0 0 16 16"><path d="M5.5 0a.5.5 0 0 1 .5.5v4A.5.5 0 0 1 5 5h-4a.5.5 0 0 1 0-1h3.5V.5a.5.5 0 0 1 .5-.5zm0 11a.5.5 0 0 1 .5.5v3.5h-3.5a.5.5 0 0 1 0-1h4v-3a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-3a.5.5 0 0 1 .5-.5zm.5-11a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-4a.5.5 0 0 1 .5-.5z"/></svg>
+                <!-- Notation selector -->
+                <div class="flex rounded-full bg-gray-200 p-1">
+                    <input type="radio" id="notationAmericano" name="notationSystem" value="american" class="hidden" checked>
+                    <label for="notationAmericano" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50">C,D,E</label>
+                    <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
+                    <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50">Do,Re,Mi</label>
+                </div>
+                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">⚙️</button>
+                <button id="showTutorialButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">?</button>
+                <button id="fullscreenButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg">
+                    <svg id="fullscreenIconOpen" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"/>
+                    </svg>
+                    <svg id="fullscreenIconClose" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen-exit hidden" viewBox="0 0 16 16">
+                        <path d="M5.5 0a.5.5 0 0 1 .5.5v4A.5.5 0 0 1 5 5h-4a.5.5 0 0 1 0-1h3.5V.5a.5.5 0 0 1 .5-.5zm0 11a.5.5 0 0 1 .5.5v3.5h-3.5a.5.5 0 0 1 0-1h4v-3a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-3a.5.5 0 0 1 .5-.5zm.5-11a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-4a.5.5 0 0 1 .5-.5z"/>
+                    </svg>
                 </button>
             </div>
         </div>
+
+        <!-- Difficulty controls -->
         <div id="difficultySelection" class="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <label class="text-blue-800 font-semibold">Nivel de Dificultad:</label>
             <div class="flex gap-2 flex-wrap justify-center">
@@ -227,54 +431,183 @@
                 <label for="difficultyAdvanced" class="difficulty-label py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors duration-200">Avanzado</label>
             </div>
         </div>
+        
+        <!-- Exercise display area -->
         <div id="displaySection" class="flex justify-center items-start gap-4 flex-wrap">
             <div id="questionArea" class="flex-1 min-w-[250px] p-4 bg-blue-100 rounded-lg border border-blue-300">
                 <p class="text-lg font-bold text-blue-800 mb-2">Construye el acorde:</p>
                 <div class="notes-grid w-full">
-                    <div class="grid-cell" id="gridCell0"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
-                    <div class="grid-cell" id="gridCell1"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
-                    <div class="grid-cell" id="gridCell2"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
-                    <div class="grid-cell" id="gridCell3"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell0">
+                        <span class="interval-label text-gray-500"></span>
+                        <span class="note-display font-bold"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell1">
+                        <span class="interval-label text-gray-500"></span>
+                        <span class="note-display font-bold"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell2">
+                        <span class="interval-label text-gray-500"></span>
+                        <span class="note-display font-bold"></span>
+                    </div>
+                    <div class="grid-cell" id="gridCell3">
+                        <span class="interval-label text-gray-500"></span>
+                        <span class="note-display font-bold"></span>
+                    </div>
                 </div>
             </div>
-            <div id="staffArea" class="flex-1 min-w-[300px] flex justify-center items-center"><canvas id="musicalStaffCanvas"></canvas></div>
+            <div id="staffArea" class="flex-1 min-w-[300px] flex justify-center items-center">
+                <canvas id="musicalStaffCanvas"></canvas>
+            </div>
         </div>
-        <div class="audio-buttons">
-            <button id="playBlockBtn">Bloque</button>
-            <button id="playArpeggioBtn">Arpegio</button>
-        </div>
-        <div id="inputMethodToggle" class="flex justify-center my-4">
+        
+        <!-- Note input options (Cifrado vs Piano) -->
+        <div id="inputMethodToggle" class="flex justify-center mb-4">
             <div class="flex p-1 bg-gray-200 rounded-full">
                 <button id="cifradoToggle" class="py-2 px-4 rounded-full font-semibold transition-all bg-white text-blue-600 shadow-sm active">Cifrado</button>
                 <button id="pianoToggle" class="py-2 px-4 rounded-full font-semibold transition-all text-gray-700">Piano</button>
             </div>
         </div>
-        <div id="noteBuildingControls" class="flex flex-col gap-4"><div id="naturalNoteButtons" class="natural-note-buttons"></div><div id="accidentalButtons" class="accidental-buttons"></div></div>
+
+        <!-- Note selection controls (Cifrado) -->
+        <div id="noteBuildingControls" class="flex flex-col gap-4">
+            <div id="naturalNoteButtons" class="natural-note-buttons"></div>
+            <div id="accidentalButtons" class="accidental-buttons"></div>
+        </div>
+
+        <!-- Piano keyboard, initially hidden -->
         <div id="piano-container" class="piano-container hidden"></div>
+
+        <!-- Main action buttons -->
         <div class="action-buttons-group mt-4">
-            <button id="confirmAnswerButton" title="Confirmar Respuesta (Enter)" class="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50">Confirmar</button>
-            <button id="hintButton" title="Mostrar Pista (P)" class="bg-yellow-500 hover:bg-yellow-600 text-white disabled:opacity-50">Pista</button>
-            <button id="showAnswerButton" title="Mostrar Respuesta (R)" class="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50">Mostrar Respuesta</button>
-            <button id="clearAllSelectionButton" title="Borrar Selección (N)" class="bg-gray-400 hover:bg-gray-500 text-white disabled:opacity-50">Borrar</button>
-            <button id="changeQuestionButton" title="Cambiar Ejercicio (Espacio)" class="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50">Cambiar Ejercicio</button>
+            <button id="confirmAnswerButton" class="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50">Confirmar</button>
+            <button id="hintButton" class="bg-yellow-500 hover:bg-yellow-600 text-white disabled:opacity-50">Pista</button>
+            <button id="showAnswerButton" class="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50">Mostrar Respuesta</button>
+            <button id="clearAllSelectionButton" class="bg-gray-400 hover:bg-gray-500 text-white disabled:opacity-50">Borrar</button>
+            <button id="changeQuestionButton" class="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50">Cambiar Ejercicio</button>
         </div>
     </div>
     
-    <!-- Modals -->
-    <div id="quickFeedbackModalOverlay" class="modal-overlay hidden"><div id="quickFeedbackModalContent" class="modal-content feedback p-6 rounded-xl shadow-lg"></div></div>
-    <div id="hintModalOverlay" class="modal-overlay hidden"><div class="modal-content p-6 rounded-xl shadow-lg bg-yellow-50 border-yellow-300 border"><h3 id="hintModalTitle" class="text-2xl font-bold text-yellow-800 text-center mb-4">Pista</h3><div id="hintModalBody" class="text-yellow-900 mb-6"></div><div class="flex justify-center"><button id="hintModalCloseButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">Entendido</button></div></div></div>
-    <div id="infoModalOverlay" class="modal-overlay hidden"><div class="modal-content p-6 rounded-xl shadow-lg"><h3 id="infoModalTitle" class="text-2xl font-bold text-blue-800 text-center mb-4"></h3><div id="infoModalBody" class="text-gray-700 mb-6"></div><div class="flex justify-center gap-4 mt-6"><button id="infoModalCloseButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cerrar</button></div></div></div>
-    <div id="evaluationModalOverlay" class="modal-overlay hidden"><div id="evaluationModalContent" class="modal-content p-6 rounded-xl shadow-lg text-left"><h3 class="text-2xl font-bold text-blue-800 text-center mb-4">Resultados de la Evaluación</h3><p id="evaluationSummary" class="text-gray-700 mb-2"></p><p class="text-lg font-bold text-gray-800 mt-4 mb-2">Áreas a trabajar:</p><ul id="adviceList" class="list-disc list-inside text-gray-600 space-y-1"></ul><div class="flex justify-center gap-4 mt-6"><button id="continueTrainingButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Continuar</button><button id="endSessionButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Terminar Sesión</button></div></div></div>
-    <div id="settingsModalOverlay" class="modal-overlay hidden"><div id="settingsModalContent" class="modal-content p-6 rounded-xl shadow-lg text-left"><h3 class="text-2xl font-bold text-blue-800 text-center mb-4">Ajustes de Práctica</h3><div class="mb-4"><h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-2">Tipos de Acorde</h4><div id="chordTypesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div></div><div id="leadVoicesSection" class="mb-4 hidden"><h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-2">Voces Principales (Tensiones)</h4><div id="leadVoicesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div></div><div class="flex justify-center gap-4 mt-6"><button id="saveSettingsButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar y Reiniciar</button><button id="cancelSettingsButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cancelar</button></div></div></div>
-    <div id="enharmonicModalOverlay" class="modal-overlay hidden"><div id="enharmonicModalContent" class="modal-content p-6 rounded-xl shadow-lg"><h3 class="text-xl font-bold text-blue-800 mb-2">Seleccionar Alteración</h3><p class="text-gray-700 mb-4">¿Cómo deseas escribir esta nota?</p><div id="enharmonicChoices" class="flex justify-center gap-4"></div></div></div>
-    <div id="finalMessageDisplay" class="container hidden p-6 text-center"><h2 class="text-3xl font-bold text-blue-800 mb-4">¡Sesión Terminada!</h2><div id="resultsContentToCapture" class="bg-gray-50 p-6 rounded-lg border border-gray-200"><div class="flex flex-col items-center mb-4"><label for="userNameInput" class="text-lg font-semibold text-gray-800 mb-1">Tu Nombre:</label><input type="text" id="userNameInput" placeholder="Introduce tu nombre aquí" class="text-center p-2 border rounded-lg w-full max-w-sm"></div><div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6"><div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Intentos</span><span id="totalExercisesDisplay" class="text-2xl font-bold text-gray-800">0</span></div><div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Aciertos</span><span id="correctAnswersDisplay" class="text-2xl font-bold text-green-600">0</span></div><div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Desaciertos</span><span id="incorrectAnswersDisplay" class="text-2xl font-bold text-red-600">0</span></div><div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Precisión</span><span id="overallAccuracyDisplay" class="text-2xl font-bold text-blue-600">0%</span></div><div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Pistas</span><span id="hintsUsedDisplay" class="text-2xl font-bold text-yellow-600">0</span></div><div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Soluciones</span><span id="answersUsedDisplay" class="text-2xl font-bold text-red-600">0</span></div></div><div class="my-4"><canvas id="statsChartCanvas"></canvas></div><div class="text-left bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4"><h4 class="text-lg font-semibold text-blue-800 mb-2">Sugerencias de Práctica</h4><p id="finalAdviceDisplay" class="text-blue-900"></p></div><div class="text-left mt-4"><h4 class="text-lg font-semibold text-gray-800 mb-2">Historial de Sesiones</h4><div id="sessionHistoryContainer" class="max-h-40 overflow-y-auto text-sm bg-gray-100 p-2 rounded"></div></div><div class="flex justify-center gap-4 text-sm text-gray-500 mt-4"><span id="sessionDateDisplay"></span><span id="sessionTimeDisplay"></span><span id="sessionDurationDisplay"></span></div></div><div class="flex justify-center gap-4 mt-6"><button id="saveAsPhotoButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar PNG</button><button id="saveAsPdfButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Guardar PDF</button></div></div>
+    <!-- Modal for instant feedback -->
+    <div id="quickFeedbackModalOverlay" class="modal-overlay hidden">
+        <div id="quickFeedbackModalContent" class="modal-content feedback p-6 rounded-xl shadow-lg"></div>
+    </div>
+    
+    <!-- Modal for Hint -->
+    <div id="hintModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content p-6 rounded-xl shadow-lg bg-yellow-50 border-yellow-300 border">
+            <h3 id="hintModalTitle" class="text-2xl font-bold text-yellow-800 text-center mb-4">Pista</h3>
+            <div id="hintModalBody" class="text-yellow-900 mb-6"></div>
+            <div class="flex justify-center">
+                <button id="hintModalCloseButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Answer -->
+    <div id="infoModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content p-6 rounded-xl shadow-lg">
+            <h3 id="infoModalTitle" class="text-2xl font-bold text-blue-800 text-center mb-4"></h3>
+            <div id="infoModalBody" class="text-gray-700 mb-6"></div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="infoModalCloseButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cerrar</button>
+                <button id="infoModalNextButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Siguiente Ejercicio</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for session evaluation -->
+    <div id="evaluationModalOverlay" class="modal-overlay hidden">
+        <div id="evaluationModalContent" class="modal-content p-6 rounded-xl shadow-lg text-left">
+            <h3 class="text-2xl font-bold text-blue-800 text-center mb-4">Resultados de la Evaluación</h3>
+            <p id="evaluationSummary" class="text-gray-700 mb-2"></p>
+            <p class="text-lg font-bold text-gray-800 mt-4 mb-2">Áreas a trabajar:</p>
+            <ul id="adviceList" class="list-disc list-inside text-gray-600 space-y-1"></ul>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="continueTrainingButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Continuar Entrenamiento</button>
+                <button id="endSessionButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Terminar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for practice settings -->
+    <div id="settingsModalOverlay" class="modal-overlay hidden">
+        <div id="settingsModalContent" class="modal-content p-6 rounded-xl shadow-lg text-left">
+            <h3 class="text-2xl font-bold text-blue-800 text-center mb-4">Ajustes de Práctica</h3>
+            <div class="mb-4">
+                <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-2">Tipos de Acorde</h4>
+                <div id="chordTypesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </div>
+            <div id="leadVoicesSection" class="mb-4 hidden">
+                <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-2">Voces Principales (Tensiones)</h4>
+                <div id="leadVoicesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="saveSettingsButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar y Reiniciar</button>
+                <button id="cancelSettingsButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for enharmonic selection -->
+    <div id="enharmonicModalOverlay" class="modal-overlay hidden">
+        <div id="enharmonicModalContent" class="modal-content p-6 rounded-xl shadow-lg">
+            <h3 class="text-xl font-bold text-blue-800 mb-2">Seleccionar Alteración</h3>
+            <p class="text-gray-700 mb-4">¿Cómo deseas escribir esta nota?</p>
+            <div id="enharmonicChoices" class="flex justify-center gap-4"></div>
+        </div>
+    </div>
+
+    <!-- Final message and session statistics -->
+    <div id="finalMessageDisplay" class="container hidden p-6 text-center">
+        <h2 class="text-3xl font-bold text-blue-800 mb-4">¡Sesión Terminada!</h2>
+        <div id="resultsContentToCapture" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+            <div class="flex flex-col items-center mb-4">
+                <label for="userNameInput" class="text-lg font-semibold text-gray-800 mb-1">Tu Nombre:</label>
+                <input type="text" id="userNameInput" placeholder="Introduce tu nombre aquí" class="text-center p-2 border rounded-lg w-full max-w-sm">
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Intentos</span>
+                    <span id="totalExercisesDisplay" class="text-2xl font-bold text-gray-800">0</span>
+                </div>
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Aciertos</span>
+                    <span id="correctAnswersDisplay" class="text-2xl font-bold text-green-600">0</span>
+                </div>
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Precisión</span>
+                    <span id="overallAccuracyDisplay" class="text-2xl font-bold text-blue-600">0%</span>
+                </div>
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Pistas</span>
+                    <span id="hintsUsedDisplay" class="text-2xl font-bold text-yellow-600">0</span>
+                </div>
+                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
+                    <span class="text-xs text-gray-500">Soluciones</span>
+                    <span id="answersUsedDisplay" class="text-2xl font-bold text-red-600">0</span>
+                </div>
+            </div>
+            <p id="finalResultsSummary" class="text-lg font-medium text-gray-700 mb-4">¡Gracias por practicar!</p>
+            <div class="flex justify-center gap-4 text-sm text-gray-500">
+                <span id="sessionDateDisplay"></span>
+                <span id="sessionTimeDisplay"></span>
+                <span id="sessionDurationDisplay"></span>
+            </div>
+        </div>
+        <div class="flex justify-center gap-4 mt-6">
+            <button id="saveAsPhotoButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar como Foto (PNG)</button>
+            <button id="saveAsPdfButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Guardar como PDF</button>
+        </div>
+    </div>
 
     <!-- Main application script -->
     <script type="module">
+        // Import VexFlow modules for the staff
         import { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
 
         // Central application state
         const state = {
+            correctNotes: [],
             correctNotesWithOctave: [],
             chordRoot: '',
             chordTypeKey: '',
@@ -284,39 +617,57 @@
             givenNoteWithOctave: '',
             orderedLabelsForDisplay: [],
             selectedUserNotes: [],
-            exerciseAttempted: false,
-            stats: { totalAttempts: 0, totalCorrect: 0, currentStreak: 0, hintsUsed: 0, answersUsed: 0, noHintsStreak: 0 },
-            evaluation: { questionsAttemptedInBatch: 0, performance: {}, exercisesPerEval: 5, batchCorrect: 0, batchHintsUsed: 0, batchAnswersUsed: 0 },
-            gameMode: 'harmonization',
-            theme: 'light',
-            player: { level: 1, xp: 0, points: 0, xpToNextLevel: 100 },
-            achievements: { unlocked: new Set(), justUnlocked: [] },
-            exerciseStartTime: 0,
+            lastUserAddedNoteIndex: -1,
+            stats: {
+                totalAttempts: 0,
+                totalCorrect: 0,
+                currentStreak: 0,
+                hintsUsed: 0,
+                answersUsed: 0,
+            },
+            evaluation: {
+                questionsAttemptedInBatch: 0,
+                data: {},
+                exercisesPerEval: 5,
+                batchCorrect: 0,
+                batchHintsUsed: 0,
+                batchAnswersUsed: 0
+            },
             userName: '',
             difficulty: 'basic',
             notationSystem: 'american',
-            customPractice: { isActive: false, allowedChords: [], allowedLeads: [] },
+            customPractice: {
+                isActive: false,
+                allowedChords: [],
+                allowedLeads: []
+            },
             audioContextStarted: false,
-            session: { startTime: 0 },
-            tutorial: { currentStep: 0, isActive: false },
-            keyboard: { lastAccidentalKey: null, lastAccidentalTimestamp: 0, doublePressThreshold: 400 }
+            session: {
+                startTime: 0
+            },
+            tutorial: {
+                currentStep: 0,
+                isActive: false
+            },
+            keyboard: {
+                lastAccidentalKey: null,
+                lastAccidentalTimestamp: 0,
+                doublePressThreshold: 400 // ms
+            }
         };
 
-        const ALL_ACHIEVEMENTS = {
-            STREAK_3: { name: "Racha de 3 Días", description: "¡Mantuviste tu racha por 3 días seguidos!", condition: (s) => s.stats.currentStreak >= 3 },
-            FIRST_PERFECT: { name: "Primer Acierto", description: "¡Resolviste tu primer ejercicio correctamente!", condition: (s) => s.stats.totalCorrect >= 1 },
-            LEVEL_5: { name: "Nivel 5 Alcanzado", description: "¡Llegaste al nivel 5!", condition: (s) => s.player.level >= 5 },
-            NO_HINTS_10: { name: "Autosuficiente", description: "Resuelve 10 ejercicios seguidos sin usar pistas.", condition: (s) => s.stats.noHintsStreak >= 10 }
-        };
-
+        // Constants for musical logic
         const canonicalNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-        const noteToSemitoneMap = { "C": 0, "B#": 0, "DBB": 0, "C#": 1, "DB": 1, "B##": 1, "D": 2, "C##": 2, "EBB": 2, "D#": 3, "EB": 3, "FBB": 3, "E": 4, "FB": 4, "D##": 4, "F": 5, "E#": 5, "GBB": 5, "F#": 6, "GB": 6, "E##": 6, "G": 7, "F##": 7, "ABB": 7, "G#": 8, "AB": 8, "A": 9, "G##": 9, "BBB": 9, "A#": 10, "BB": 10, "CBB": 10, "B": 11, "CB": 11, "A##": 11, "DO": 0, "RE": 2, "MI": 4, "FA": 5, "SOL": 7, "LA": 9, "SI": 11, "DO#": 1, "RE#": 3, "MI#": 5, "FA#": 6, "SOL#": 8, "LA#": 10, "SI#": 0, "DOB": 11, "REB": 1, "MIB": 3, "FAB": 4, "SOLB": 6, "LAB": 8, "SIB": 10 };
+        const noteToSemitoneMap = { "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11, "DO": 0, "RE": 2, "MI": 4, "FA": 5, "SOL": 7, "LA": 9, "SI": 11, "DO#": 1, "RE#": 3, "MI#": 5, "FA#": 6, "SOL#": 8, "LA#": 10, "SI#": 0, "DOb": 11, "REb": 1, "MIb": 3, "FAb": 4, "SOLb": 6, "LAb": 8, "SIb": 10};
         const naturalLetterSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
         const numberToLetterMap = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
         const letterToNumberMap = { 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6 };
         const naturalNotes = ["C", "D", "E", "F", "G", "A", "B"];
-        const accidentals = ["#", "b", "##", "bb"];
+        const accidentals = ["#", "b", "##", "bb"]; // Reordered for better UI
+        const notesForQuestionRoot = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"];
+        const enharmonicEquivalents = { "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb", "Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#" };
         const americanToLatin = { "C": "Do", "D": "Re", "E": "Mi", "F": "Fa", "G": "Sol", "A": "La", "B": "Si" };
+
         const chordStructures = {
             "major": { name: "Mayor", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "3", "1"], "3": ["3", "1", "5", "3"], "5": ["5", "3", "1", "5"] } },
             "minor": { name: "Menor", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "b3", "1"], "b3": ["b3", "1", "5", "b3"], "5": ["5", "b3", "1", "5"] } },
@@ -331,94 +682,96 @@
             "dim7": { name: "Disminuido 7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }, { semitones: 9, name: "séptima disminuida", label: "bb7", degreeOffset: 6 }], voicing_rules: { "1": ["1", "bb7", "b5", "b3"], "b3": ["b3", "1", "bb7", "b5"], "b5": ["b5", "b3", "1", "bb7"], "bb7": ["bb7", "b5", "b3", "1"] } }
         };
 
-        const dom = {
-            welcomeModalOverlay: document.getElementById('welcomeModalOverlay'),
-            mainAppContainer: document.getElementById('mainAppContainer'),
-            chordQuestionText: document.getElementById('chordQuestionText'),
-            gridCells: [document.getElementById('gridCell0'), document.getElementById('gridCell1'), document.getElementById('gridCell2'), document.getElementById('gridCell3')],
-            noteBuildingControls: document.getElementById('noteBuildingControls'),
-            naturalNoteButtonsContainer: document.getElementById('naturalNoteButtons'),
-            accidentalButtonsContainer: document.getElementById('accidentalButtons'),
-            musicalStaffCanvas: document.getElementById('musicalStaffCanvas'),
-            confirmAnswerButton: document.getElementById('confirmAnswerButton'),
-            clearAllSelectionButton: document.getElementById('clearAllSelectionButton'),
-            changeQuestionButton: document.getElementById('changeQuestionButton'),
-            hintButton: document.getElementById('hintButton'),
-            showAnswerButton: document.getElementById('showAnswerButton'),
-            evaluationModalOverlay: document.getElementById('evaluationModalOverlay'),
-            evaluationSummary: document.getElementById('evaluationSummary'),
-            adviceList: document.getElementById('adviceList'),
-            continueTrainingButton: document.getElementById('continueTrainingButton'),
-            endSessionButton: document.getElementById('endSessionButton'),
-            finalMessageDisplay: document.getElementById('finalMessageDisplay'),
-            totalExercisesDisplay: document.getElementById('totalExercisesDisplay'),
-            correctAnswersDisplay: document.getElementById('correctAnswersDisplay'),
-            incorrectAnswersDisplay: document.getElementById('incorrectAnswersDisplay'),
-            overallAccuracyDisplay: document.getElementById('overallAccuracyDisplay'),
-            hintsUsedDisplay: document.getElementById('hintsUsedDisplay'),
-            answersUsedDisplay: document.getElementById('answersUsedDisplay'),
-            finalAdviceDisplay: document.getElementById('finalAdviceDisplay'),
-            sessionHistoryContainer: document.getElementById('sessionHistoryContainer'),
-            sessionDateDisplay: document.getElementById('sessionDateDisplay'),
-            sessionTimeDisplay: document.getElementById('sessionTimeDisplay'),
-            sessionDurationDisplay: document.getElementById('sessionDurationDisplay'),
-            userNameInput: document.getElementById('userNameInput'),
-            saveAsPhotoButton: document.getElementById('saveAsPhotoButton'),
-            saveAsPdfButton: document.getElementById('saveAsPdfButton'),
-            resultsContentToCapture: document.getElementById('resultsContentToCapture'),
-            difficultyRadios: document.querySelectorAll('input[name="difficulty"]'),
-            streakCounter: document.getElementById('streakCounter').querySelector('.text-xl'),
-            scoreCounter: document.getElementById('scoreCounter'),
-            settingsButton: document.getElementById('settingsButton'),
-            settingsModalOverlay: document.getElementById('settingsModalOverlay'),
-            saveSettingsButton: document.getElementById('saveSettingsButton'),
-            cancelSettingsButton: document.getElementById('cancelSettingsButton'),
-            chordTypesCheckboxesContainer: document.getElementById('chordTypesCheckboxes'),
-            leadVoicesCheckboxesContainer: document.getElementById('leadVoicesCheckboxes'),
-            leadVoicesSection: document.getElementById('leadVoicesSection'),
-            cifradoToggle: document.getElementById('cifradoToggle'),
-            pianoToggle: document.getElementById('pianoToggle'),
-            pianoContainer: document.getElementById('piano-container'),
-            enharmonicModalOverlay: document.getElementById('enharmonicModalOverlay'),
-            enharmonicChoicesContainer: document.getElementById('enharmonicChoices'),
-            notationRadios: document.querySelectorAll('input[name="notationSystem"]'),
-            infoModalOverlay: document.getElementById('infoModalOverlay'),
-            infoModalTitle: document.getElementById('infoModalTitle'),
-            infoModalBody: document.getElementById('infoModalBody'),
-            infoModalCloseButton: document.getElementById('infoModalCloseButton'),
-            hintModalOverlay: document.getElementById('hintModalOverlay'),
-            hintModalBody: document.getElementById('hintModalBody'),
-            hintModalCloseButton: document.getElementById('hintModalCloseButton'),
-            showTutorialButton: document.getElementById('showTutorialButton'),
-            fullscreenButton: document.getElementById('fullscreenButton'),
-            tutorialEndButton: document.getElementById('tutorialEndButton'),
-            themeToggle: document.getElementById('themeToggle'),
-            harmonizationModeBtn: document.getElementById('harmonizationModeBtn'),
-            earTrainingModeBtn: document.getElementById('earTrainingModeBtn'),
-            chordQuestionWrapper: document.getElementById('chordQuestionWrapper'),
-            earTrainingControls: document.getElementById('earTrainingControls'),
-            playChordBtn: document.getElementById('playChordBtn'),
-            levelValue: document.getElementById('levelValue'),
-            xpValue: document.getElementById('xpValue'),
-            xpBar: document.getElementById('xpBar'),
-            achievementsModalOverlay: document.getElementById('achievementsModalOverlay'),
-            achievementsList: document.getElementById('achievementsList'),
-            closeAchievementsButton: document.getElementById('closeAchievementsButton'),
-            playBlockBtn: document.getElementById('playBlockBtn'),
-            playArpeggioBtn: document.getElementById('playArpeggioBtn'),
-            statsChartCanvas: document.getElementById('statsChartCanvas'),
-        };
+        // DOM element references
+        const welcomeModalOverlay = document.getElementById('welcomeModalOverlay');
+        const mainAppContainer = document.getElementById('mainAppContainer');
+        const chordQuestionText = document.getElementById('chordQuestionText');
+        const gridCells = [
+            document.getElementById('gridCell0'),
+            document.getElementById('gridCell1'),
+            document.getElementById('gridCell2'),
+            document.getElementById('gridCell3')
+        ];
+        const noteBuildingControls = document.getElementById('noteBuildingControls');
+        const naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
+        const accidentalButtonsContainer = document.getElementById('accidentalButtons');
+        const musicalStaffCanvas = document.getElementById('musicalStaffCanvas');
+        const confirmAnswerButton = document.getElementById('confirmAnswerButton');
+        const clearAllSelectionButton = document.getElementById('clearAllSelectionButton');
+        const changeQuestionButton = document.getElementById('changeQuestionButton');
+        const hintButton = document.getElementById('hintButton');
+        const showAnswerButton = document.getElementById('showAnswerButton');
+        const quickFeedbackModalOverlay = document.getElementById('quickFeedbackModalOverlay');
+        const quickFeedbackModalContent = document.getElementById('quickFeedbackModalContent');
+        const evaluationModalOverlay = document.getElementById('evaluationModalOverlay');
+        const evaluationSummary = document.getElementById('evaluationSummary');
+        const adviceList = document.getElementById('adviceList');
+        const continueTrainingButton = document.getElementById('continueTrainingButton');
+        const endSessionButton = document.getElementById('endSessionButton');
+        const finalMessageDisplay = document.getElementById('finalMessageDisplay');
+        const totalExercisesDisplay = document.getElementById('totalExercisesDisplay');
+        const correctAnswersDisplay = document.getElementById('correctAnswersDisplay');
+        const overallAccuracyDisplay = document.getElementById('overallAccuracyDisplay');
+        const hintsUsedDisplay = document.getElementById('hintsUsedDisplay');
+        const answersUsedDisplay = document.getElementById('answersUsedDisplay');
+        const sessionDateDisplay = document.getElementById('sessionDateDisplay');
+        const sessionTimeDisplay = document.getElementById('sessionTimeDisplay');
+        const sessionDurationDisplay = document.getElementById('sessionDurationDisplay');
+        const userNameInput = document.getElementById('userNameInput');
+        const saveAsPhotoButton = document.getElementById('saveAsPhotoButton');
+        const saveAsPdfButton = document.getElementById('saveAsPdfButton');
+        const resultsContentToCapture = document.getElementById('resultsContentToCapture');
+        const difficultyRadios = document.querySelectorAll('input[name="difficulty"]');
+        const streakCounter = document.getElementById('streakCounter').querySelector('.text-xl');
+        const scoreCounter = document.getElementById('scoreCounter');
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsModalOverlay = document.getElementById('settingsModalOverlay');
+        const saveSettingsButton = document.getElementById('saveSettingsButton');
+        const cancelSettingsButton = document.getElementById('cancelSettingsButton');
+        const chordTypesCheckboxesContainer = document.getElementById('chordTypesCheckboxes');
+        const leadVoicesCheckboxesContainer = document.getElementById('leadVoicesCheckboxes');
+        const leadVoicesSection = document.getElementById('leadVoicesSection');
+        const cifradoToggle = document.getElementById('cifradoToggle');
+        const pianoToggle = document.getElementById('pianoToggle');
+        const pianoContainer = document.getElementById('piano-container');
+        const enharmonicModalOverlay = document.getElementById('enharmonicModalOverlay');
+        const enharmonicChoicesContainer = document.getElementById('enharmonicChoices');
+        const notationRadios = document.querySelectorAll('input[name="notationSystem"]');
+        const infoModalOverlay = document.getElementById('infoModalOverlay');
+        const infoModalTitle = document.getElementById('infoModalTitle');
+        const infoModalBody = document.getElementById('infoModalBody');
+        const infoModalCloseButton = document.getElementById('infoModalCloseButton');
+        const infoModalNextButton = document.getElementById('infoModalNextButton');
+        const hintModalOverlay = document.getElementById('hintModalOverlay');
+        const hintModalBody = document.getElementById('hintModalBody');
+        const hintModalCloseButton = document.getElementById('hintModalCloseButton');
+        const showTutorialButton = document.getElementById('showTutorialButton');
+        const fullscreenButton = document.getElementById('fullscreenButton');
+        const fullscreenIconOpen = document.getElementById('fullscreenIconOpen');
+        const fullscreenIconClose = document.getElementById('fullscreenIconClose');
+        const tutorialEndButton = document.getElementById('tutorialEndButton');
         
-        let synth, reverb, statsChart;
+        let synth, reverb;
 
+        // --- Main Logic ---
+
+        /**
+         * Initializes the audio context and the application.
+         */
         async function initializeApp(startWithTutorial) {
-            dom.welcomeModalOverlay.classList.add('hidden');
-            dom.mainAppContainer.classList.remove('hidden');
+            welcomeModalOverlay.classList.add('hidden');
+            mainAppContainer.classList.remove('hidden');
             state.session = { startTime: Date.now() };
 
             try {
                 await Tone.start();
-                synth = new Tone.PolySynth(Tone.FMSynth, { oscillator: { type: "sine" }, envelope: { attack: 0.005, decay: 0.8, sustain: 0.0, release: 1.0 } }).toDestination();
+                synth = new Tone.PolySynth(Tone.FMSynth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.005, decay: 0.8, sustain: 0.0, release: 1.0 },
+                    modulation: { type: "sine" },
+                    modulationEnvelope: { attack: 0.001, decay: 0.2, sustain: 0.0, release: 0.2 },
+                    harmonicity: 3, modulationIndex: 15
+                }).toDestination();
                 reverb = new Tone.Reverb({ decay: 1.5, preDelay: 0.01, wet: 0.3 }).toDestination();
                 synth.connect(reverb);
             } catch (e) {
@@ -426,121 +779,25 @@
                 showCustomMessage("Error de Audio", "No se pudo iniciar el audio.", "error");
             }
             
-            loadState();
-            updateDifficultySelectionUI();
+            updateDifficultySelectionUI(); // Set initial button colors
             generateNoteButtons();
             generatePiano();
             addEventListeners();
-            updateAllDisplays();
+            loadStreakData();
             generateExercise();
 
             if (startWithTutorial) {
-                 if (window.innerWidth > 768 && document.documentElement.requestFullscreen) { openFullscreen(); }
+                 if (window.innerWidth > 768 && document.documentElement.requestFullscreen) {
+                    openFullscreen();
+                }
                 startTutorial();
             } else {
                 localStorage.setItem('harmonicBlockProTutorialCompleted', 'true');
             }
         }
         
-        function addEventListeners() {
-            dom.confirmAnswerButton.addEventListener('click', checkAnswer);
-            dom.clearAllSelectionButton.addEventListener('click', () => clearSelection());
-            dom.changeQuestionButton.addEventListener('click', () => handleExerciseCompletion(false));
-            dom.hintButton.addEventListener('click', giveHint);
-            dom.showAnswerButton.addEventListener('click', showAnswer);
-            dom.showTutorialButton.addEventListener('click', startTutorial);
-            dom.tutorialEndButton.addEventListener('click', endTutorial);
-            document.addEventListener('keydown', handleKeyPress);
-            dom.fullscreenButton.addEventListener('click', toggleFullscreen);
-            document.addEventListener('fullscreenchange', updateFullscreenIcons);
-            
-            dom.difficultyRadios.forEach(radio => radio.addEventListener('change', (e) => { state.difficulty = e.target.value; updateDifficultySelectionUI(); generateExercise(); }));
-            dom.settingsButton.addEventListener('click', openSettingsModal);
-            dom.saveSettingsButton.addEventListener('click', saveSettings);
-            dom.cancelSettingsButton.addEventListener('click', closeSettingsModal);
-            dom.cifradoToggle.addEventListener('click', () => { dom.noteBuildingControls.classList.remove('hidden'); dom.pianoContainer.classList.add('hidden'); dom.cifradoToggle.classList.add('active', 'bg-white', 'text-blue-600', 'shadow-sm'); dom.pianoToggle.classList.remove('active', 'bg-white', 'text-blue-600', 'shadow-sm'); });
-            dom.pianoToggle.addEventListener('click', () => { dom.noteBuildingControls.classList.add('hidden'); dom.pianoContainer.classList.remove('hidden'); dom.pianoToggle.classList.add('active', 'bg-white', 'text-blue-600', 'shadow-sm'); dom.cifradoToggle.classList.remove('active', 'bg-white', 'text-blue-600', 'shadow-sm'); });
-            dom.pianoContainer.addEventListener('click', handlePianoKeyClick);
-            dom.notationRadios.forEach(radio => radio.addEventListener('change', (e) => { state.notationSystem = e.target.value; updateDisplay(); generateNoteButtons(); }));
-            dom.continueTrainingButton.addEventListener('click', () => { dom.evaluationModalOverlay.classList.remove('visible'); generateExercise(); });
-            dom.endSessionButton.addEventListener('click', endSession);
-            dom.saveAsPhotoButton.addEventListener('click', saveAsPhoto);
-            dom.saveAsPdfButton.addEventListener('click', saveAsPdf);
-            window.addEventListener('resize', () => drawMusicalStaff(state.selectedUserNotes));
-            dom.infoModalCloseButton.addEventListener('click', () => dom.infoModalOverlay.classList.remove('visible'));
-            dom.hintModalCloseButton.addEventListener('click', () => dom.hintModalOverlay.classList.remove('visible'));
-            
-            dom.themeToggle.addEventListener('click', toggleTheme);
-            dom.harmonizationModeBtn.addEventListener('click', () => setGameMode('harmonization'));
-            dom.earTrainingModeBtn.addEventListener('click', () => setGameMode('earTraining'));
-            dom.playChordBtn.addEventListener('click', () => playChord(state.correctNotesWithOctave));
-            dom.closeAchievementsButton.addEventListener('click', () => dom.achievementsModalOverlay.classList.remove('visible'));
-            dom.playBlockBtn.addEventListener('click', () => playChord(state.selectedUserNotes, 'block'));
-            dom.playArpeggioBtn.addEventListener('click', () => playChord(state.selectedUserNotes, 'arpeggio'));
-        }
-
-        // --- STATE & DATA PERSISTENCE ---
-        function getTodayDateString() {
-            return new Date().toISOString().split('T')[0];
-        }
-
-        function saveState() {
-            try {
-                const dataToSave = { stats: state.stats, performance: state.evaluation.performance, player: state.player, achievements: Array.from(state.achievements.unlocked), theme: state.theme };
-                localStorage.setItem('harmonicBlockProData', JSON.stringify(dataToSave));
-                const streakData = { streak: state.stats.currentStreak, lastPracticeDate: getTodayDateString() };
-                localStorage.setItem('harmonicBlockProStreak', JSON.stringify(streakData));
-            } catch(e) { console.error("Could not save data", e); }
-        }
-
-        function loadState() {
-            try {
-                const savedData = localStorage.getItem('harmonicBlockProData');
-                if (savedData) {
-                    const d = JSON.parse(savedData);
-                    if (d.stats) state.stats = { ...state.stats, ...d.stats };
-                    if (d.performance) state.evaluation.performance = d.performance;
-                    if (d.player) state.player = d.player;
-                    if (d.achievements) state.achievements.unlocked = new Set(d.achievements);
-                    if (d.theme) state.theme = d.theme;
-                }
-                const streakData = localStorage.getItem('harmonicBlockProStreak');
-                if (streakData) {
-                    const { streak, lastPracticeDate } = JSON.parse(streakData);
-                    const today = getTodayDateString();
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    const yesterdayStr = yesterday.toISOString().split('T')[0];
-                    if (lastPracticeDate === today || lastPracticeDate === yesterdayStr) { state.stats.currentStreak = streak || 0; }
-                    else { state.stats.currentStreak = 0; }
-                }
-            } catch (e) { console.error("Could not load data", e); }
-            applyTheme();
-        }
-        
-        function saveSessionToHistory() {
-            try {
-                let history = JSON.parse(localStorage.getItem('harmonicBlockProHistory')) || [];
-                const { totalAttempts, totalCorrect, hintsUsed, answersUsed } = state.stats;
-                const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
-                
-                const sessionData = {
-                    date: new Date().toISOString(),
-                    attempts: totalAttempts,
-                    correct: totalCorrect,
-                    accuracy: accuracy,
-                    hints: hintsUsed,
-                    answers: answersUsed
-                };
-                history.push(sessionData);
-                if (history.length > 20) { history.shift(); }
-                localStorage.setItem('harmonicBlockProHistory', JSON.stringify(history));
-            } catch(e) { console.error("Could not save session history", e); }
-        }
-
-        // --- UI & DISPLAY ---
         function updateDifficultySelectionUI() {
-            dom.difficultyRadios.forEach(radio => {
+            difficultyRadios.forEach(radio => {
                 const label = document.querySelector(`label[for="${radio.id}"]`);
                 if (label) {
                     if (radio.checked) {
@@ -553,28 +810,103 @@
                 }
             });
         }
-        
-        function updateAllDisplays() {
-            updateScoreDisplay();
-            updateStreakDisplay();
-            updateLevelDisplay();
-            updateDisplay();
+
+        function addEventListeners() {
+            confirmAnswerButton.addEventListener('click', checkAnswer);
+            clearAllSelectionButton.addEventListener('click', clearSelection);
+            changeQuestionButton.addEventListener('click', () => {
+                state.stats.totalAttempts++;
+                updateScoreDisplay();
+                generateExercise();
+            });
+            hintButton.addEventListener('click', giveHint);
+            showAnswerButton.addEventListener('click', showAnswer);
+            showTutorialButton.addEventListener('click', startTutorial);
+            tutorialEndButton.addEventListener('click', endTutorial);
+            document.addEventListener('keydown', handleKeyPress);
+            fullscreenButton.addEventListener('click', toggleFullscreen);
+            document.addEventListener('fullscreenchange', updateFullscreenIcons);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenIcons);
+            
+            difficultyRadios.forEach(radio => radio.addEventListener('change', (event) => {
+                state.difficulty = event.target.value;
+                updateDifficultySelectionUI();
+                generateExercise();
+            }));
+
+            settingsButton.addEventListener('click', openSettingsModal);
+            saveSettingsButton.addEventListener('click', saveSettings);
+            cancelSettingsButton.addEventListener('click', closeSettingsModal);
+
+            cifradoToggle.addEventListener('click', () => {
+                noteBuildingControls.classList.remove('hidden');
+                pianoContainer.classList.add('hidden');
+                cifradoToggle.classList.add('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+                pianoToggle.classList.remove('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+            });
+
+            pianoToggle.addEventListener('click', () => {
+                noteBuildingControls.classList.add('hidden');
+                pianoContainer.classList.remove('hidden');
+                pianoToggle.classList.add('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+                cifradoToggle.classList.remove('bg-white', 'text-blue-600', 'shadow-sm', 'active');
+            });
+
+            pianoContainer.addEventListener('click', handlePianoKeyClick);
+
+            notationRadios.forEach(radio => radio.addEventListener('change', (event) => {
+                state.notationSystem = event.target.value;
+                updateDisplay();
+                generateNoteButtons();
+            }));
+
+            continueTrainingButton.addEventListener('click', () => evaluationModalOverlay.classList.remove('visible'));
+            endSessionButton.addEventListener('click', endSession);
+            saveAsPhotoButton.addEventListener('click', saveAsPhoto);
+            saveAsPdfButton.addEventListener('click', saveAsPdf);
+             // Redraw staff on window resize to ensure it fits
+            window.addEventListener('resize', () => drawMusicalStaff(state.selectedUserNotes));
+            
+            infoModalCloseButton.addEventListener('click', () => {
+                infoModalOverlay.classList.remove('visible');
+            });
+
+            infoModalNextButton.addEventListener('click', () => {
+                infoModalOverlay.classList.remove('visible');
+                generateExercise();
+            });
+            
+            hintModalCloseButton.addEventListener('click', () => {
+                hintModalOverlay.classList.remove('visible');
+            });
+
         }
 
-        function updateScoreDisplay() {
-            const incorrectCount = state.stats.totalAttempts - state.stats.totalCorrect;
-            dom.scoreCounter.innerHTML = `<div class="text-sm text-green-600">✅ ${state.stats.totalCorrect}</div><div class="text-sm text-red-600">❌ ${incorrectCount}</div>`;
+        function showCustomMessage(title, message, type = 'info') {
+            const modal = document.createElement('div');
+            modal.className = `modal-overlay visible`;
+            modal.innerHTML = `
+                <div class="modal-content p-6 rounded-xl shadow-lg feedback ${type === 'success' ? 'correct' : (type === 'error' ? 'incorrect' : '')}">
+                    <h3 class="text-xl font-bold mb-2">${title}</h3>
+                    <p>${message}</p>
+                </div>`;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.remove(), 2500);
         }
 
-        function updateStreakDisplay() { dom.streakCounter.textContent = state.stats.currentStreak; }
-
-        function updateLevelDisplay() {
-            dom.levelValue.textContent = state.player.level;
-            dom.xpValue.textContent = `${state.player.xp}/${state.player.xpToNextLevel} XP`;
-            const xpPercentage = (state.player.xp / state.player.xpToNextLevel) * 100;
-            dom.xpBar.style.width = `${xpPercentage}%`;
+        function normalizeNote(note) {
+            if (!note) return null;
+            let normalizedNote = note.split('/')[0].trim().toUpperCase();
+            if (normalizedNote.length > 1 && normalizedNote.slice(-1) === 'B') {
+                normalizedNote = normalizedNote.slice(0, -1) + 'b';
+            }
+            if (normalizedNote.length > 2 && normalizedNote.slice(-2) === 'BB') {
+                normalizedNote = normalizedNote.slice(0, -2) + 'bb';
+            }
+            const semitone = noteToSemitoneMap[normalizedNote];
+            return semitone !== undefined ? canonicalNotes[semitone] : null;
         }
-        
+
         function displayNote(americanNote) {
             if (!americanNote) return "?";
             const naturalPart = americanNote.match(/[A-G]/i);
@@ -588,76 +920,19 @@
             }
             return americanNote;
         }
-
+        
         function updateQuestionText() {
             if (state.givenNote && state.givenIntervalName) {
                 const noteDisplay = displayNote(state.givenNote);
                 const chordName = chordStructures[state.chordTypeKey].name;
                 const voiceCount = (state.difficulty === 'basic') ? "3 voces" : "4 voces";
-                dom.chordQuestionText.innerHTML = `<strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es <strong class="text-xl sm:text-2xl">${state.givenIntervalName} (${state.givenLabel})</strong> de un acorde <strong class="text-xl sm:text-2xl">${chordName}</strong>.<br>
+                chordQuestionText.innerHTML = `<strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es <strong class="text-xl sm:text-2xl">${state.givenIntervalName} (${state.givenLabel})</strong> de un acorde <strong class="text-xl sm:text-2xl">${chordName}</strong>.<br>
                 <small class="text-sm text-gray-500">Armoniza en bloque cerrado, <span class="font-bold text-indigo-700">${voiceCount}</span>, descendente.</small>`;
-            } else {
-                dom.chordQuestionText.innerHTML = '';
             }
         }
 
-        function updateDisplay() {
-            if (state.gameMode === 'harmonization') {
-                updateQuestionText();
-            } else {
-                 dom.chordQuestionText.innerHTML = '';
-            }
-            dom.gridCells.forEach((cell, index) => {
-                const intervalLabel = cell.querySelector('.interval-label');
-                const noteDisplay = cell.querySelector('.note-display');
-                if (state.orderedLabelsForDisplay[index]) {
-                    cell.classList.remove('hidden');
-                    intervalLabel.textContent = state.orderedLabelsForDisplay[index];
-                    const note = state.selectedUserNotes[index]?.split('/')[0];
-                    noteDisplay.textContent = (index === 0 && state.gameMode === 'harmonization') ? displayNote(state.givenNote) : (note ? displayNote(note) : "?");
-                } else {
-                    cell.classList.add('hidden');
-                }
-            });
-            drawMusicalStaff(state.selectedUserNotes);
-            updateButtonStates();
-        }
-
-        function updateButtonStates() {
-            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
-            dom.confirmAnswerButton.disabled = state.selectedUserNotes.length !== expectedCount;
-            dom.clearAllSelectionButton.disabled = state.selectedUserNotes.length === 0 || (state.gameMode === 'harmonization' && state.selectedUserNotes.length <= 1);
-            
-            document.querySelectorAll('.note-button.active').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.piano-key.selected').forEach(key => key.classList.remove('selected'));
-
-            state.selectedUserNotes.forEach(noteWithOctave => {
-                if (!noteWithOctave) return;
-                const key = document.querySelector(`.piano-key[data-note="${noteWithOctave}"]`);
-                if (key) { key.classList.add('selected'); }
-            });
-            
-            const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
-            if (lastNote) {
-                const noteOnly = lastNote.split('/')[0];
-                const naturalPartMatch = noteOnly.match(/[A-G]/i);
-                if (naturalPartMatch) {
-                    const naturalPart = naturalPartMatch[0].toUpperCase();
-                    const accidentalPart = noteOnly.substring(naturalPart.length);
-                    
-                    const naturalBtn = document.querySelector(`.note-button[data-note="${naturalPart}"]`);
-                    if (naturalBtn) naturalBtn.classList.add('active');
-                    
-                    if (accidentalPart) {
-                        const accidentalBtn = document.querySelector(`.note-button[data-accidental="${accidentalPart}"]`);
-                        if (accidentalBtn) accidentalBtn.classList.add('active');
-                    }
-                }
-            }
-        }
-        
         function drawMusicalStaff(notesWithOctave = []) {
-            const canvas = dom.musicalStaffCanvas;
+            const canvas = musicalStaffCanvas;
             const context = canvas.getContext('2d');
             
             const fixedWidth = 300; 
@@ -694,156 +969,8 @@
             new Formatter().joinVoices([voice]).format([voice], canvas.width - 40);
             voice.draw(ctx, stave);
         }
-        function showCustomMessage(title, message, type = 'info') {
-            const modal = document.createElement('div');
-            modal.className = `modal-overlay visible`;
-            modal.innerHTML = `
-                <div class="modal-content p-6 rounded-xl shadow-lg feedback ${type === 'success' ? 'correct' : (type === 'error' ? 'incorrect' : '')}">
-                    <h3 class="text-xl font-bold mb-2">${title}</h3>
-                    <p>${message}</p>
-                </div>`;
-            document.body.appendChild(modal);
-            setTimeout(() => modal.remove(), 2500);
-        }
-
-        // --- THEME & MODE ---
-        function toggleTheme() {
-            state.theme = state.theme === 'light' ? 'dark' : 'light';
-            applyTheme();
-            saveState();
-        }
-
-        function applyTheme() {
-            if (state.theme === 'dark') {
-                document.body.classList.add('dark-mode');
-                dom.themeToggle.textContent = '☀️';
-            } else {
-                document.body.classList.remove('dark-mode');
-                dom.themeToggle.textContent = '🌙';
-            }
-        }
-
-        function setGameMode(mode) {
-            state.gameMode = mode;
-            if (mode === 'harmonization') {
-                dom.harmonizationModeBtn.classList.add('active', 'bg-white', 'text-blue-600', 'shadow-sm');
-                dom.earTrainingModeBtn.classList.remove('active', 'bg-white', 'text-blue-600', 'shadow-sm');
-                dom.chordQuestionWrapper.classList.remove('hidden');
-                dom.earTrainingControls.classList.add('hidden');
-            } else {
-                dom.earTrainingModeBtn.classList.add('active', 'bg-white', 'text-blue-600', 'shadow-sm');
-                dom.harmonizationModeBtn.classList.remove('active', 'bg-white', 'text-blue-600', 'shadow-sm');
-                dom.chordQuestionWrapper.classList.add('hidden');
-                dom.earTrainingControls.classList.remove('hidden');
-            }
-            generateExercise();
-        }
-        
-        // --- GAMIFICATION ---
-        function addXP(points) {
-            state.player.xp += points;
-            state.player.points += points;
-            while (state.player.xp >= state.player.xpToNextLevel) {
-                state.player.xp -= state.player.xpToNextLevel;
-                state.player.level++;
-                state.player.xpToNextLevel = Math.floor(state.player.xpToNextLevel * 1.5);
-                checkAchievements();
-            }
-            updateLevelDisplay();
-        }
-
-        function calculatePoints(timeTaken) {
-            const basePoints = 50;
-            const timeBonus = Math.max(0, 100 - (timeTaken / 200));
-            return Math.round(basePoints + timeBonus);
-        }
-        
-        function checkAchievements() {
-            state.achievements.justUnlocked = [];
-            for (const id in ALL_ACHIEVEMENTS) {
-                if (!state.achievements.unlocked.has(id) && ALL_ACHIEVEMENTS[id].condition(state)) {
-                    state.achievements.unlocked.add(id);
-                    state.achievements.justUnlocked.push(id);
-                }
-            }
-            if (state.achievements.justUnlocked.length > 0) {
-                showAchievementsModal();
-            }
-        }
-
-        function showAchievementsModal() {
-            dom.achievementsList.innerHTML = state.achievements.justUnlocked.map(id => {
-                const ach = ALL_ACHIEVEMENTS[id];
-                return `<div class="p-2 border rounded-lg">
-                            <p class="font-bold text-lg">${ach.name}</p>
-                            <p class="text-sm">${ach.description}</p>
-                        </div>`;
-            }).join('');
-            dom.achievementsModalOverlay.classList.add('visible');
-        }
-
-        // --- CORE EXERCISE LOGIC ---
-        function noteToPitchClass(noteWithOctave) {
-            if (!noteWithOctave) return null;
-            const noteName = noteWithOctave.split('/')[0];
-            const upperNoteName = noteName.toUpperCase();
-            if (noteToSemitoneMap.hasOwnProperty(upperNoteName)) {
-                return noteToSemitoneMap[upperNoteName];
-            }
-            return null;
-        }
-
-        function getCorrectlySpelledNote(rootNote, interval, previousNoteMidi) {
-            const rootLetterMatch = rootNote.match(/[A-G]/i);
-            if (!rootLetterMatch) return null;
-            const rootLetter = rootLetterMatch[0];
-            const rootLetterNum = letterToNumberMap[rootLetter.toUpperCase()];
-            const targetLetterNum = (rootLetterNum + interval.degreeOffset + 7) % 7;
-            const targetLetter = numberToLetterMap[targetLetterNum];
-            const rootSemitone = noteToPitchClass(rootNote);
-            if (rootSemitone === null) { console.error(`Invalid root note: ${rootNote}`); return null; }
-            const targetSemitone = (rootSemitone + interval.semitones + 12) % 12;
-            const naturalTargetSemitone = naturalLetterSemitone[targetLetter];
-            let semitoneDiff = targetSemitone - naturalTargetSemitone;
-            if (semitoneDiff > 6) semitoneDiff -= 12;
-            if (semitoneDiff < -6) semitoneDiff += 12;
-
-            const accidentalMap = { '2': '##', '1': '#', '0': '', '-1': 'b', '-2': 'bb' };
-            const accidental = accidentalMap[semitoneDiff] || '';
-            const finalNoteName = targetLetter + accidental;
-            
-            let currentOctave = Math.floor(previousNoteMidi / 12);
-            let finalNotePitchClass = noteToPitchClass(finalNoteName);
-            if (finalNotePitchClass === null) { console.error(`Invalid final note: ${finalNoteName}`); return null; }
-
-            let candidateMidi = (currentOctave * 12) + finalNotePitchClass;
-            while (candidateMidi >= previousNoteMidi) {
-                candidateMidi -= 12;
-                currentOctave--;
-            }
-
-            return `${finalNoteName}/${currentOctave}`;
-        }
-        
-        function enableButtons() {
-            [dom.confirmAnswerButton, dom.clearAllSelectionButton, dom.changeQuestionButton, dom.hintButton, dom.showAnswerButton].forEach(btn => btn.disabled = false);
-        }
 
         function generateExercise() {
-            state.exerciseAttempted = false;
-            state.exerciseStartTime = Date.now();
-            clearSelection(true);
-
-            if (state.gameMode === 'harmonization') {
-                generateHarmonizationExercise();
-            } else {
-                generateEarTrainingExercise();
-            }
-            updateDisplay();
-            enableButtons();
-        }
-
-        function generateHarmonizationExercise() {
             const chords = Object.keys(chordStructures).filter(key => {
                 const chord = chordStructures[key];
                 const isBasic = state.difficulty === 'basic' && chord.difficulty === 'basic';
@@ -854,34 +981,61 @@
                 return matchesDifficulty && matchesCustom;
             });
 
-            if (chords.length === 0) { showCustomMessage("Sin Acordes", "No hay acordes disponibles. Revisa tus ajustes.", "warning"); return; }
+            if (chords.length === 0) {
+                showCustomMessage("Sin Acordes", "No hay acordes disponibles. Revisa tus ajustes.", "warning");
+                return;
+            }
             const chordTypeKey = chords[Math.floor(Math.random() * chords.length)];
             const chordData = chordStructures[chordTypeKey];
-
-            if (!state.evaluation.performance[chordTypeKey]) { state.evaluation.performance[chordTypeKey] = { attempts: 0, correct: 0 }; }
             
             const leads = Object.keys(chordData.voicing_rules).filter(label => {
                 const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
                 const isTension = allTensions.includes(label);
+
                 const difficultyMatch = (state.difficulty === 'advanced') ? isTension : !isTension;
                 if (!difficultyMatch) return false;
-                if (state.customPractice.isActive && isTension && state.customPractice.allowedLeads.length > 0) { return state.customPractice.allowedLeads.includes(label); }
+
+                if (state.customPractice.isActive && isTension && state.customPractice.allowedLeads.length > 0) {
+                    return state.customPractice.allowedLeads.includes(label);
+                }
                 return true;
             });
 
-            if (leads.length === 0) { generateExercise(); return; }
+            if (leads.length === 0) {
+                 generateExercise();
+                 return;
+            }
             const givenLabel = leads[Math.floor(Math.random() * leads.length)];
-            const minMidi = 65, maxMidi = 84;
+
+            const minMidi = 65; // F4
+            const maxMidi = 84; // C6
             const randomMidi = Math.floor(Math.random() * (maxMidi - minMidi + 1)) + minMidi;
             const noteFromMidi = new Tone.Midi(randomMidi).toNote();
+            
             let noteName = noteFromMidi.replace(/\d+$/, '');
             const octave = noteFromMidi.match(/\d+/)[0];
+
+            const enharmonic = enharmonicEquivalents[noteName];
+            if (enharmonic && Math.random() < 0.5) {
+                noteName = enharmonic;
+            }
+            
             state.givenNote = noteName;
             state.givenNoteWithOctave = `${noteName}/${octave}`;
+
             const givenInterval = chordData.intervals.find(int => int.label === givenLabel);
+            const givenNoteLetter = state.givenNote.charAt(0);
             
-            const rootNoteName = getCorrectlySpelledNote(noteName, { semitones: -givenInterval.semitones, degreeOffset: -givenInterval.degreeOffset }, randomMidi + 12).split('/')[0];
-            state.chordRoot = rootNoteName;
+            const givenNoteSemitone = noteToSemitoneMap[normalizeNote(state.givenNote)];
+            const rootSemitone = (givenNoteSemitone - givenInterval.semitones + 12) % 12;
+            const rootLetterNum = (((letterToNumberMap[givenNoteLetter] - givenInterval.degreeOffset) % 7) + 7) % 7;
+            const rootLetter = numberToLetterMap[rootLetterNum];
+            
+            const accidentalOffset = (rootSemitone - naturalLetterSemitone[rootLetter] + 12) % 12;
+            const accidentalMap = { 0: '', 1: '#', 2: '##', 10: 'bb', 11: 'b' };
+            const accidentalChar = accidentalMap[accidentalOffset] || '';
+
+            state.chordRoot = `${rootLetter}${accidentalChar}`;
             
             const voicingLabels = chordData.voicing_rules[givenLabel];
             state.orderedLabelsForDisplay = voicingLabels.slice(0, state.difficulty === 'basic' ? 3 : 4);
@@ -893,84 +1047,121 @@
                 const interval = chordData.intervals.find(int => int.label === label);
                 if (!interval) continue;
 
-                const newNoteWithOctave = getCorrectlySpelledNote(state.chordRoot, interval, lastMidi);
-                if (newNoteWithOctave) {
-                    state.correctNotesWithOctave.push(newNoteWithOctave);
-                    lastMidi = Tone.Midi(newNoteWithOctave.replace('/', '')).toMidi();
+                const rootSemitoneVal = noteToSemitoneMap[normalizeNote(state.chordRoot)];
+                const targetSemitone = (rootSemitoneVal + interval.semitones) % 12;
+                
+                let candidateMidi = Math.floor(lastMidi / 12) * 12 + targetSemitone;
+                if (candidateMidi >= lastMidi) {
+                    candidateMidi -= 12;
                 }
+                
+                const newNote = Tone.Midi(candidateMidi).toNote();
+                state.correctNotesWithOctave.push(newNote.replace(/(\d+)$/, '/$1'));
+                lastMidi = candidateMidi;
             }
+
             state.chordTypeKey = chordTypeKey;
             state.givenIntervalName = givenInterval.name;
             state.givenLabel = givenLabel;
             state.selectedUserNotes = [state.givenNoteWithOctave];
+            
+            updateDisplay();
+            enableButtons();
         }
 
-        function generateEarTrainingExercise() {
-            const chords = Object.keys(chordStructures).filter(key => {
-                const chord = chordStructures[key];
-                const matchesDifficulty = chord.difficulty === state.difficulty || (state.difficulty === 'advanced' && chord.difficulty === 'intermediate');
-                const matchesCustom = !state.customPractice.isActive || state.customPractice.allowedChords.includes(key);
-                return matchesDifficulty && matchesCustom;
+        async function playCorrectChord() {
+            if (!synth) return;
+            const notes = state.correctNotesWithOctave.map(n => n.replace('/', '')).filter(Boolean);
+            if (notes.length === 0) return;
+
+            const arpeggioNotes = [...notes].sort((a,b) => Tone.Midi(b).toMidi() - Tone.Midi(a).toMidi());
+            let time = Tone.now();
+            arpeggioNotes.forEach((note) => {
+                synth.triggerAttackRelease(note, "8n", time);
+                time += 0.15;
             });
-            if (chords.length === 0) { return; }
-            
-            const chordTypeKey = chords[Math.floor(Math.random() * chords.length)];
-            const chordData = chordStructures[chordTypeKey];
+            synth.triggerAttackRelease(notes, "2n", time + 0.2);
+        }
 
-            if (!state.evaluation.performance[chordTypeKey]) { state.evaluation.performance[chordTypeKey] = { attempts: 0, correct: 0 }; }
+        function getTodayDateString() {
+            const today = new Date();
+            return today.toISOString().split('T')[0];
+        }
 
-            const rootNote = "C";
-            const rootOctave = 4;
-            state.chordRoot = rootNote;
-            state.chordTypeKey = chordTypeKey;
+        function loadStreakData() {
+            try {
+                const data = localStorage.getItem('harmonicBlockProStreak');
+                if (data) {
+                    const { streak, lastPracticeDate } = JSON.parse(data);
+                    const today = getTodayDateString();
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    
+                    if (lastPracticeDate === today || lastPracticeDate === yesterdayStr) {
+                        state.stats.currentStreak = streak || 0;
+                    } else {
+                        state.stats.currentStreak = 0;
+                        saveStreakData();
+                    }
+                }
+            } catch (e) {
+                console.error("Could not load streak data", e);
+                state.stats.currentStreak = 0;
+            }
+            updateStreakDisplay();
+        }
 
-            const numVoices = state.difficulty === 'basic' ? 3 : 4;
-            const firstVoicingRule = Object.keys(chordData.voicing_rules)[0];
-            const voicingLabels = chordData.voicing_rules[firstVoicingRule];
-            
-            state.orderedLabelsForDisplay = voicingLabels.slice(0, numVoices);
-            state.correctNotesWithOctave = [];
-            
-            let lastMidi = Tone.Midi(`${rootNote}${rootOctave + 2}`).toMidi();
-            for (let i = 0; i < numVoices; i++) {
-                const label = state.orderedLabelsForDisplay[i];
-                const interval = chordData.intervals.find(int => int.label === label);
-                if (!interval) continue;
+        function saveStreakData() {
+            try {
+                const data = {
+                    streak: state.stats.currentStreak,
+                    lastPracticeDate: getTodayDateString()
+                };
+                localStorage.setItem('harmonicBlockProStreak', JSON.stringify(data));
+            } catch (e) {
+                console.error("Could not save streak data", e);
+            }
+        }
+        
+        /**
+         * Converts a note string (e.g., "C##/4") to its pitch class (a number from 0-11).
+         * This allows for enharmonic equivalence checking.
+         * @param {string} noteWithOctave - The note string including octave.
+         * @returns {number|null} The pitch class or null if invalid.
+         */
+        function noteToPitchClass(noteWithOctave) {
+            if (!noteWithOctave) return null;
+            const noteName = noteWithOctave.split('/')[0];
+            const naturalPartMatch = noteName.match(/[A-G]/i);
+            if (!naturalPartMatch) return null;
 
-                const newNoteWithOctave = getCorrectlySpelledNote(state.chordRoot, interval, lastMidi);
-                if (newNoteWithOctave) {
-                    state.correctNotesWithOctave.push(newNoteWithOctave);
-                    lastMidi = Tone.Midi(newNoteWithOctave.replace('/', '')).toMidi();
+            const naturalPart = naturalPartMatch[0].toUpperCase();
+            const accidentalPart = noteName.substring(naturalPart.length);
+
+            let semitone = naturalLetterSemitone[naturalPart];
+
+            for (const char of accidentalPart) {
+                if (char === '#') {
+                    semitone++;
+                } else if (char === 'b') {
+                    semitone--;
                 }
             }
-            state.selectedUserNotes = [];
-            state.orderedLabelsForDisplay = Array(numVoices).fill('?');
+            return (semitone % 12 + 12) % 12; // Handles negative results from flats
         }
 
         function checkAnswer() {
-            if (!state.exerciseAttempted) {
-                state.stats.totalAttempts++;
-                state.evaluation.questionsAttemptedInBatch++;
-                state.evaluation.performance[state.chordTypeKey].attempts++;
-                state.exerciseAttempted = true;
-            }
+            state.stats.totalAttempts++;
+            state.evaluation.questionsAttemptedInBatch++;
             
+            // Convert notes to pitch classes for enharmonic comparison
             const userPitchClasses = state.selectedUserNotes.map(noteToPitchClass).filter(pc => pc !== null).sort((a, b) => a - b);
             const correctPitchClasses = state.correctNotesWithOctave.map(noteToPitchClass).filter(pc => pc !== null).sort((a, b) => a - b);
+            
             const isCorrect = JSON.stringify(userPitchClasses) === JSON.stringify(correctPitchClasses);
             
             if (isCorrect) {
-                state.stats.totalCorrect++;
-                state.evaluation.batchCorrect++;
-                state.evaluation.performance[state.chordTypeKey].correct++;
-                state.stats.noHintsStreak = (state.stats.noHintsStreak || 0) + 1;
-                
-                showCustomMessage("Correcto", "¡Felicidades, tu respuesta es correcta!", "success");
-                playChord(state.correctNotesWithOctave);
-                
-                const timeTaken = Date.now() - state.exerciseStartTime;
-                addXP(calculatePoints(timeTaken));
-                
                 try {
                     const data = localStorage.getItem('harmonicBlockProStreak');
                     const today = getTodayDateString();
@@ -982,69 +1173,55 @@
                         yesterday.setDate(yesterday.getDate() - 1);
                         const yesterdayStr = yesterday.toISOString().split('T')[0];
                         
-                        if (lastDate === yesterdayStr) { state.stats.currentStreak++; } 
-                        else { state.stats.currentStreak = 1; }
+                        if (lastDate === yesterdayStr) {
+                            state.stats.currentStreak++;
+                        } else {
+                            state.stats.currentStreak = 1;
+                        }
+                        saveStreakData();
                     }
-                } catch (e) { console.error("Error updating streak", e); }
+                } catch (e) {
+                    console.error("Error updating streak", e);
+                    state.stats.currentStreak = 1;
+                    saveStreakData();
+                }
                 
-                checkAchievements();
-                handleExerciseCompletion(true);
+                state.stats.totalCorrect++;
+                state.evaluation.batchCorrect++;
+                showCustomMessage("Correcto", "¡Felicidades, tu respuesta es correcta!", "success");
+                playCorrectChord();
+                setTimeout(generateExercise, 2000);
             } else {
-                state.stats.noHintsStreak = 0;
                 showCustomMessage("Incorrecto", "Inténtalo de nuevo. Tus notas no coinciden.", "error");
             }
-            saveState();
-            updateAllDisplays();
-        }
+            updateStatsDisplay();
 
-        function handleExerciseCompletion(isCorrect) {
-            saveState();
-            updateAllDisplays();
-
-            const shouldShowEval = state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval;
-
-            if (isCorrect) {
-                if (shouldShowEval) {
-                    setTimeout(showEvaluationModal, 1500);
-                } else {
-                    setTimeout(generateExercise, 1500);
-                }
-            } else {
-                 if (shouldShowEval) {
-                    showEvaluationModal();
-                 }
+            if (state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval) {
+                showEvaluationModal();
             }
         }
+
+        function updateStatsDisplay() {
+            updateScoreDisplay();
+            updateStreakDisplay();
+        }
         
-        function clearSelection(isSoft = false) {
-            state.selectedUserNotes = state.gameMode === 'harmonization' ? [state.givenNoteWithOctave] : [];
-            if (!isSoft) updateDisplay();
+        function updateScoreDisplay() {
+            const incorrectCount = state.stats.totalAttempts - state.stats.totalCorrect;
+            scoreCounter.innerHTML = `
+                <div class="text-sm text-green-600">✅ ${state.stats.totalCorrect}</div>
+                <div class="text-sm text-red-600">❌ ${incorrectCount}</div>
+            `;
         }
 
-        // --- AUDIO ---
-        function playChord(notesToPlay, style = 'block') {
-            if (!synth || !notesToPlay || notesToPlay.length === 0) return;
-            const notes = notesToPlay.map(n => n.replace('/', '')).filter(Boolean);
-            if (notes.length === 0) return;
-            const now = Tone.now();
-            
-            if (style === 'arpeggio') {
-                const sortedNotes = [...notes].sort((a,b) => Tone.Midi(a).toMidi() - Tone.Midi(b).toMidi());
-                sortedNotes.forEach((note, i) => {
-                    synth.triggerAttackRelease(note, "8n", now + i * 0.15);
-                });
-            } else {
-                synth.triggerAttackRelease(notes, "1n", now);
-            }
+        function updateStreakDisplay() {
+            streakCounter.textContent = state.stats.currentStreak;
         }
-        
-        // --- FINAL RESULTS & MODALS ---
+
         function giveHint() {
             state.stats.hintsUsed++;
             state.evaluation.batchHintsUsed++;
-            state.stats.noHintsStreak = 0;
-            saveState();
-            updateAllDisplays();
+            updateStatsDisplay();
             
             const correctNotes = state.correctNotesWithOctave.map(n => n ? n.split('/')[0] : '').sort();
             const userNotes = state.selectedUserNotes.map(n => n ? n.split('/')[0] : '').sort();
@@ -1052,124 +1229,510 @@
 
             let hintText;
             if (missingNote) {
-                hintText = `La nota <strong>${displayNote(missingNote)}</strong> es parte del acorde.`;
+                const enharmonic = enharmonicEquivalents[missingNote];
+                let noteNameToDisplay = displayNote(missingNote);
+
+                if (enharmonic) {
+                    const enharmonicNameToDisplay = displayNote(enharmonic);
+                    noteNameToDisplay += ` / ${enharmonicNameToDisplay}`;
+                }
+                
+                hintText = `La nota <strong>${noteNameToDisplay}</strong> es parte del acorde.`;
             } else {
                 hintText = "Ya tienes todas las notas correctas. ¡Verifica las alteraciones y las octavas!";
             }
-            dom.hintModalBody.innerHTML = `<p>${hintText}</p>`;
-            dom.hintModalOverlay.classList.add('visible');
+
+            hintModalBody.innerHTML = `<p>${hintText}</p>`;
+            hintModalOverlay.classList.add('visible');
         }
 
         function showAnswer() {
-            if (!state.exerciseAttempted) { handleExerciseCompletion(false); }
             state.stats.answersUsed++;
+            state.stats.totalAttempts++;
+            state.stats.currentStreak = 0;
             state.evaluation.batchAnswersUsed++;
-            state.stats.noHintsStreak = 0;
-            saveState();
-            updateAllDisplays();
+            state.evaluation.questionsAttemptedInBatch++;
+            updateStatsDisplay();
 
-            const voicingLabels = chordStructures[state.chordTypeKey].voicing_rules[state.givenLabel];
-            dom.infoModalTitle.textContent = 'Respuesta Correcta';
-            dom.infoModalBody.innerHTML = `
-                <p>Las notas son: <strong>${state.correctNotesWithOctave.map(n => displayNote(n.split('/')[0])).join(' - ')}</strong></p>
-                <p>Voicing: <strong>${voicingLabels.slice(0, state.difficulty === 'basic' ? 3 : 4).join(' - ')}</strong></p>
-            `;
-            dom.infoModalOverlay.classList.add('visible');
+            state.selectedUserNotes = [...state.correctNotesWithOctave];
+            updateDisplay();
+            playCorrectChord();
+            
+            infoModalTitle.textContent = 'Respuesta Correcta';
+            infoModalBody.innerHTML = '<p>Esta es la solución. Puedes cerrar esta ventana para analizarla o pasar al siguiente ejercicio.</p>';
+            infoModalNextButton.classList.remove('hidden');
+            infoModalOverlay.classList.add('visible');
+
+            if (state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval) {
+                // Future improvement: handle evaluation trigger more gracefully after closing modal
+            }
+        }
+
+        function clearSelection() {
+            state.selectedUserNotes = [state.givenNoteWithOctave];
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            updateQuestionText();
+            gridCells.forEach((cell, index) => {
+                const intervalLabel = cell.querySelector('.interval-label');
+                const noteDisplay = cell.querySelector('.note-display');
+                if (state.orderedLabelsForDisplay[index]) {
+                    cell.classList.remove('hidden');
+                    intervalLabel.textContent = state.orderedLabelsForDisplay[index];
+                    const note = state.selectedUserNotes[index]?.split('/')[0];
+                    noteDisplay.textContent = index === 0 ? displayNote(state.givenNote) : (note ? displayNote(note) : "?");
+                } else {
+                    cell.classList.add('hidden');
+                }
+            });
+            drawMusicalStaff(state.selectedUserNotes);
+            updateButtonStates();
+        }
+        
+        function updateButtonStates() {
+            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
+            confirmAnswerButton.disabled = state.selectedUserNotes.length !== expectedCount;
+            clearAllSelectionButton.disabled = state.selectedUserNotes.length <= 1;
+            
+            document.querySelectorAll('.note-button.active').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.piano-key.selected').forEach(key => key.classList.remove('selected'));
+
+            state.selectedUserNotes.forEach(noteWithOctave => {
+                if (!noteWithOctave) return;
+                const key = document.querySelector(`.piano-key[data-note="${noteWithOctave}"]`);
+                if (key) { key.classList.add('selected'); }
+            });
+            
+            const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
+            if (state.selectedUserNotes.length > 1 && lastNote) {
+                const noteOnly = lastNote.split('/')[0];
+                const naturalPartMatch = noteOnly.match(/[A-G]/i);
+                if (naturalPartMatch) {
+                    const naturalPart = naturalPartMatch[0].toUpperCase();
+                    const accidentalPart = noteOnly.substring(naturalPart.length);
+                    
+                    const naturalBtn = document.querySelector(`.note-button[data-note="${naturalPart}"]`);
+                    if (naturalBtn) naturalBtn.classList.add('active');
+                    
+                    if (accidentalPart) {
+                        const accidentalBtn = document.querySelector(`.note-button[data-accidental="${accidentalPart}"]`);
+                        if (accidentalBtn) accidentalBtn.classList.add('active');
+                    }
+                }
+            }
+        }
+        
+        function handleNaturalNoteClick(e) {
+            const clickedNote = e.target.dataset.note;
+            addNaturalNote(clickedNote);
+        }
+        
+        function addNaturalNote(note) {
+            const lastNoteIndex = state.selectedUserNotes.length - 1;
+            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
+
+            if (lastNoteIndex >= 1) {
+                const lastNote = state.selectedUserNotes[lastNoteIndex];
+                if(lastNote){
+                    const naturalPartOfLastNote = lastNote.match(/[A-G]/i)[0].toUpperCase();
+                    if (naturalPartOfLastNote === note) {
+                        state.selectedUserNotes.pop();
+                        updateDisplay();
+                        return;
+                    }
+                }
+            }
+
+            if (state.selectedUserNotes.length >= expectedCount) {
+                showCustomMessage("Límite de notas", `Ya has seleccionado las ${expectedCount} notas.`, "warning");
+                return;
+            }
+
+            const lastNoteWithOctave = state.selectedUserNotes[lastNoteIndex];
+            const lastMidi = Tone.Midi(lastNoteWithOctave.replace('/', '')).toMidi();
+            
+            let currentOctave = parseInt(lastNoteWithOctave.split('/')[1]);
+            let candidateMidi = Tone.Midi(`${note}${currentOctave}`).toMidi();
+
+            while(candidateMidi >= lastMidi) {
+                currentOctave--;
+                candidateMidi = Tone.Midi(`${note}${currentOctave}`).toMidi();
+            }
+
+            const noteWithOctave = `${note}/${currentOctave}`;
+            state.selectedUserNotes.push(noteWithOctave);
+            updateDisplay();
+        }
+        
+        function handleAccidentalClick(e) {
+            const accidental = e.target.dataset.accidental;
+            addAccidental(accidental);
+        }
+
+        function addAccidental(accidental) {
+            const lastNoteIndex = state.selectedUserNotes.length - 1;
+
+            if (lastNoteIndex < 1) { return; }
+            
+            const lastNote = state.selectedUserNotes[lastNoteIndex];
+            const naturalPartMatch = lastNote.match(/[A-G]/i);
+             if (!naturalPartMatch) return;
+
+            const naturalPart = naturalPartMatch[0];
+            const octavePart = lastNote.match(/\/(\d+)/)[1];
+            state.selectedUserNotes[lastNoteIndex] = `${naturalPart}${accidental}/${octavePart}`;
+            updateDisplay();
+        }
+
+        function handleAccidentalKeyPress(key) {
+            const now = Date.now();
+            const { lastAccidentalKey, lastAccidentalTimestamp, doublePressThreshold } = state.keyboard;
+            
+            let accidental = '';
+
+            if (key === lastAccidentalKey && (now - lastAccidentalTimestamp < doublePressThreshold)) {
+                accidental = key === '+' ? '##' : 'bb';
+                state.keyboard.lastAccidentalKey = null;
+                state.keyboard.lastAccidentalTimestamp = 0;
+            } else {
+                accidental = key === '+' ? '#' : 'b';
+                state.keyboard.lastAccidentalKey = key;
+                state.keyboard.lastAccidentalTimestamp = now;
+            }
+            addAccidental(accidental);
+        }
+
+        function handleKeyPress(e) {
+            if (e.target.tagName === 'INPUT') return;
+            if (document.querySelector('.modal-overlay.visible')) return;
+
+            const key = e.key.toLowerCase();
+            
+            if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(key)) {
+                e.preventDefault();
+                addNaturalNote(key.toUpperCase());
+            }
+
+            if (key === '+' || key === '-') {
+                e.preventDefault();
+                handleAccidentalKeyPress(key);
+            }
+
+            switch(key) {
+                case 'enter':
+                    e.preventDefault();
+                    if(!confirmAnswerButton.disabled) confirmAnswerButton.click();
+                    break;
+                case 'p':
+                    e.preventDefault();
+                    if(!hintButton.disabled) hintButton.click();
+                    break;
+                case 'r':
+                    e.preventDefault();
+                    if(!showAnswerButton.disabled) showAnswerButton.click();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if(!changeQuestionButton.disabled) changeQuestionButton.click();
+                    break;
+                case 'n':
+                    e.preventDefault();
+                    if(!clearAllSelectionButton.disabled) clearAllSelectionButton.click();
+                    break;
+                case 'q':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+            }
+        }
+
+
+        function enableButtons() {
+            [confirmAnswerButton, clearAllSelectionButton, changeQuestionButton, hintButton, showAnswerButton].forEach(btn => btn.disabled = false);
+        }
+        
+        function openFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
+        function closeFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                openFullscreen();
+            } else {
+                closeFullscreen();
+            }
+        }
+        
+        function updateFullscreenIcons() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                fullscreenIconOpen.classList.remove('hidden');
+                fullscreenIconClose.classList.add('hidden');
+            } else {
+                fullscreenIconOpen.classList.add('hidden');
+                fullscreenIconClose.classList.remove('hidden');
+            }
+        }
+
+        // --- Settings and Modal Logic ---
+        function populateSettingsModal() {
+            chordTypesCheckboxesContainer.innerHTML = '';
+            const allChordTypes = Object.keys(chordStructures);
+            let relevantChords = [];
+            if (state.difficulty === 'basic') {
+                relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'basic');
+            } else if (state.difficulty === 'intermediate' || state.difficulty === 'advanced') {
+                relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'intermediate');
+            }
+
+            relevantChords.forEach(key => {
+                const chord = chordStructures[key];
+                const isChecked = !state.customPractice.isActive || state.customPractice.allowedChords.includes(key);
+                chordTypesCheckboxesContainer.innerHTML += `
+                    <div class="flex items-center">
+                        <input type="checkbox" id="chord_${key}" value="${key}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
+                        <label for="chord_${key}" class="ml-2 text-gray-700">${chord.name}</label>
+                    </div>
+                `;
+            });
+            
+            leadVoicesSection.classList.toggle('hidden', state.difficulty !== 'advanced');
+            leadVoicesCheckboxesContainer.innerHTML = '';
+            if (state.difficulty === 'advanced') {
+                const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+                const availableTensions = new Set();
+                relevantChords.forEach(key => {
+                    chordStructures[key].intervals.forEach(interval => {
+                        if (allTensions.includes(interval.label)) {
+                            availableTensions.add(interval.label);
+                        }
+                    });
+                });
+
+                allTensions.forEach(label => {
+                    if (availableTensions.has(label)) {
+                        const isChecked = !state.customPractice.isActive || state.customPractice.allowedLeads.length === 0 || state.customPractice.allowedLeads.includes(label);
+                        leadVoicesCheckboxesContainer.innerHTML += `
+                            <div class="flex items-center">
+                                <input type="checkbox" id="lead_${label}" value="${label}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
+                                <label for="lead_${label}" class="ml-2 text-gray-700">${label}</label>
+                            </div>
+                        `;
+                    }
+                });
+            }
+        }
+        
+        function saveSettings() {
+            const allowedChords = Array.from(chordTypesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+            const allowedLeads = Array.from(leadVoicesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
+            state.customPractice.isActive = true;
+            state.customPractice.allowedChords = allowedChords;
+            state.customPractice.allowedLeads = allowedLeads;
+            closeSettingsModal();
+            generateExercise();
+        }
+
+        function openSettingsModal() {
+            populateSettingsModal();
+            settingsModalOverlay.classList.add('visible');
+        }
+
+        function closeSettingsModal() {
+            settingsModalOverlay.classList.remove('visible');
+        }
+
+        function showEvaluationModal() {
+            const { batchCorrect, exercisesPerEval, batchHintsUsed, batchAnswersUsed } = state.evaluation;
+            const accuracy = exercisesPerEval > 0 ? Math.round((batchCorrect / exercisesPerEval) * 100) : 0;
+            evaluationSummary.textContent = `Has completado ${exercisesPerEval} ejercicios con una precisión del ${accuracy}%. Has usado ${batchHintsUsed} pistas y ${batchAnswersUsed} soluciones.`;
+            adviceList.innerHTML = `<li>Sigue practicando para mejorar tu velocidad y precisión.</li>`;
+            
+            state.evaluation.questionsAttemptedInBatch = 0;
+            state.evaluation.batchCorrect = 0;
+            state.evaluation.batchHintsUsed = 0;
+            state.evaluation.batchAnswersUsed = 0;
+            
+            evaluationModalOverlay.classList.add('visible');
         }
 
         function endSession() {
-            saveSessionToHistory();
-            dom.mainAppContainer.classList.add('hidden');
-            dom.evaluationModalOverlay.classList.remove('visible');
-            dom.finalMessageDisplay.classList.remove('hidden');
+            mainAppContainer.classList.add('hidden');
+            evaluationModalOverlay.classList.remove('visible');
+            finalMessageDisplay.classList.remove('hidden');
 
             const { totalAttempts, totalCorrect, hintsUsed, answersUsed } = state.stats;
-            const incorrectCount = totalAttempts - totalCorrect;
             const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
             
-            dom.totalExercisesDisplay.textContent = totalAttempts;
-            dom.correctAnswersDisplay.textContent = totalCorrect;
-            dom.incorrectAnswersDisplay.textContent = incorrectCount;
-            dom.overallAccuracyDisplay.textContent = `${accuracy}%`;
-            dom.hintsUsedDisplay.textContent = hintsUsed;
-            dom.answersUsedDisplay.textContent = answersUsed;
-            
-            let advice = '';
-            const performanceData = state.evaluation.performance;
-            const chordAccuracies = [];
-
-            for (const chordKey in performanceData) {
-                const data = performanceData[chordKey];
-                if (data.attempts > 2) {
-                    const acc = (data.correct / data.attempts) * 100;
-                    chordAccuracies.push({ name: chordStructures[chordKey].name, accuracy: acc });
-                }
-            }
-
-            if (chordAccuracies.length > 0) {
-                chordAccuracies.sort((a, b) => a.accuracy - b.accuracy);
-                const worstChord = chordAccuracies[0];
-                if (worstChord.accuracy < 70) {
-                    advice += `Notamos que tienes dificultades con acordes de tipo ${worstChord.name}. Prueba una sesión enfocada en ellos desde 'Ajustes de Práctica'. `;
-                }
-            }
-            if (advice === '') advice = '¡Sigue así! La práctica constante es la clave para dominar la armonía.';
-            dom.finalAdviceDisplay.textContent = advice;
-
-            try {
-                const history = JSON.parse(localStorage.getItem('harmonicBlockProHistory')) || [];
-                dom.sessionHistoryContainer.innerHTML = history.reverse().map(s => `
-                    <div class="grid grid-cols-4 gap-2 p-1 border-b">
-                        <span>${new Date(s.date).toLocaleDateString()}</span>
-                        <span>✅ ${s.correct}/${s.attempts}</span>
-                        <span>🎯 ${s.accuracy}%</span>
-                        <span>💡${s.hints}|🔑${s.answers}</span>
-                    </div>
-                `).join('');
-            } catch(e) { dom.sessionHistoryContainer.innerHTML = '<p>No se pudo cargar el historial.</p>' }
+            totalExercisesDisplay.textContent = totalAttempts;
+            correctAnswersDisplay.textContent = totalCorrect;
+            overallAccuracyDisplay.textContent = `${accuracy}%`;
+            hintsUsedDisplay.textContent = hintsUsed;
+            answersUsedDisplay.textContent = answersUsed;
 
             const now = new Date();
-            dom.sessionDateDisplay.textContent = now.toLocaleDateString('es-ES');
-            dom.sessionTimeDisplay.textContent = now.toLocaleTimeString('es-ES');
+            sessionDateDisplay.textContent = now.toLocaleDateString('es-ES');
+            sessionTimeDisplay.textContent = now.toLocaleTimeString('es-ES');
             const durationMs = now.getTime() - state.session.startTime;
             const minutes = Math.floor(durationMs / 60000);
             const seconds = Math.round((durationMs % 60000) / 1000);
-            dom.sessionDurationDisplay.textContent = `Duración: ${minutes}m ${seconds}s`;
-            renderStatsChart();
+            sessionDurationDisplay.textContent = `Duración: ${minutes}m ${seconds}s`;
         }
 
-        function renderStatsChart() {
-            const ctx = dom.statsChartCanvas.getContext('2d');
-            if (statsChart) { statsChart.destroy(); }
-            const performanceData = state.evaluation.performance;
-            const labels = [];
-            const accuracies = [];
-            for (const chordKey in performanceData) {
-                const data = performanceData[chordKey];
-                if (data.attempts > 0) {
-                    labels.push(chordStructures[chordKey].name);
-                    accuracies.push((data.correct / data.attempts) * 100);
-                }
-            }
-            statsChart = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Precisión por Acorde (%)', data: accuracies, backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 1 }] }, options: { scales: { y: { beginAtZero: true, max: 100 } } } });
+        function saveAsPhoto() {
+            html2canvas(resultsContentToCapture).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `resultados-bloque-armonico-${Date.now()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
         }
         
-        // --- TUTORIAL ---
+        function saveAsPdf() {
+            const { jsPDF } = window.jspdf;
+            html2canvas(resultsContentToCapture).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`resultados-bloque-armonico-${Date.now()}.pdf`);
+            });
+        }
+
+        function handlePianoKeyClick(event) {
+            const keyElement = event.target.closest('.piano-key');
+            if (!keyElement) return;
+
+            const noteWithOctave = keyElement.dataset.note;
+            if (!noteWithOctave) return;
+            
+            synth.triggerAttackRelease(noteWithOctave.replace('/', ''), "8n");
+
+            if (noteWithOctave === state.givenNoteWithOctave) {
+                showCustomMessage("Nota fija", "No puedes quitar la nota dada.", "info");
+                return;
+            }
+
+            const isSelected = state.selectedUserNotes.some(n => n === noteWithOctave);
+            if (isSelected) {
+                state.selectedUserNotes = state.selectedUserNotes.filter(n => n !== noteWithOctave);
+            } else {
+                const givenNoteMidi = Tone.Midi(state.givenNoteWithOctave.replace('/', '')).toMidi();
+                const selectedNoteMidi = Tone.Midi(noteWithOctave.replace('/', '')).toMidi();
+                
+                if (selectedNoteMidi >= givenNoteMidi) {
+                    showCustomMessage("Error de armonía", "Las notas deben estar por debajo de la nota dada.", "warning");
+                    return;
+                }
+                const expectedCount = state.difficulty === 'basic' ? 3 : 4;
+                if (state.selectedUserNotes.length < expectedCount) {
+                    const note = noteWithOctave.split('/')[0];
+                    if (note.includes('#') || note.includes('b')) {
+                        showEnharmonicModal(noteWithOctave);
+                    } else {
+                        state.selectedUserNotes.push(noteWithOctave);
+                    }
+                } else {
+                    showCustomMessage("Límite de notas", `Ya has seleccionado ${expectedCount} notas.`, "warning");
+                }
+            }
+            updateDisplay();
+        }
+
+        function showEnharmonicModal(noteWithOctave) {
+            const [note, octave] = noteWithOctave.split('/');
+            const enharmonic = enharmonicEquivalents[note];
+            if (!enharmonic) {
+                 state.selectedUserNotes.push(noteWithOctave);
+                 updateDisplay();
+                 return;
+            }
+            
+            enharmonicChoicesContainer.innerHTML = `
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" data-note="${note}/${octave}">${displayNote(note)}</button>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" data-note="${enharmonic}/${octave}">${displayNote(enharmonic)}</button>
+            `;
+            enharmonicModalOverlay.classList.add('visible');
+
+            const handler = (e) => {
+                const selectedNote = e.target.dataset.note;
+                state.selectedUserNotes.push(selectedNote);
+                enharmonicModalOverlay.classList.remove('visible');
+                enharmonicChoicesContainer.innerHTML = '';
+                updateDisplay();
+            };
+
+            enharmonicChoicesContainer.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', handler, { once: true });
+            });
+        }
+        
+        function generateNoteButtons() {
+            naturalNoteButtonsContainer.innerHTML = naturalNotes.map(n => `<button class="note-button" data-note="${n}">${displayNote(n)}</button>`).join('');
+            accidentalButtonsContainer.innerHTML = accidentals.map(a => `<button class="note-button px-4" data-accidental="${a}">${a}</button>`).join('');
+            naturalNoteButtonsContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleNaturalNoteClick));
+            accidentalButtonsContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleAccidentalClick));
+        }
+
+        function generatePiano() {
+            pianoContainer.innerHTML = '';
+            const whiteNotes = ["C", "D", "E", "F", "G", "A", "B"];
+            for (let octave = 3; octave <= 5; octave++) {
+                whiteNotes.forEach(note => {
+                    const key = document.createElement('div');
+                    key.className = `piano-key white`;
+                    key.dataset.note = `${note}/${octave}`;
+                    pianoContainer.appendChild(key);
+                });
+            }
+            const c6 = document.createElement('div');
+            c6.className = `piano-key white`;
+            c6.dataset.note = `C/6`;
+            pianoContainer.appendChild(c6);
+
+            const blackNotes = {
+                "C#/3": 1, "D#/3": 2, "F#/3": 4, "G#/3": 5, "A#/3": 6,
+                "C#/4": 8, "D#/4": 9, "F#/4": 11, "G#/4": 12, "A#/4": 13,
+                "C#/5": 15, "D#/5": 16, "F#/5": 18, "G#/5": 19, "A#/5": 20
+            };
+            for (const note in blackNotes) {
+                const key = document.createElement('div');
+                key.className = `piano-key black`;
+                key.dataset.note = note;
+                pianoContainer.appendChild(key);
+            }
+        }
+        
+        // --- Tutorial Logic ---
         const tutorialSteps = [
-             { id: 'gameModeToggle', title: 'Paso 1: Elige tu Modo', text: 'Puedes practicar "Armonización" (construir acordes desde una melodía) o entrenar tu "Oído" (identificar acordes que escuchas).' },
-             { id: 'chordQuestionWrapper', title: 'Paso 2: El Ejercicio (Armonización)', text: 'En este modo, se te dará una nota y su función. Tu meta es construir el resto del acorde hacia abajo.' },
-             { id: 'earTrainingControls', title: 'Paso 2: El Ejercicio (Oído)', text: 'En este modo, presiona "Tocar Acorde" y luego constrúyelo en el piano o con los botones de cifrado.' },
-             { id: 'playerLevel', title: 'Paso 3: Sube de Nivel', text: 'Gana puntos y experiencia (XP) por cada acierto. ¡Sube de nivel y desbloquea logros!' },
-             { id: 'displaySection', title: 'Paso 4: Tu Área de Trabajo', text: 'Usa la tabla de notas y el pentagrama para visualizar el acorde que estás construyendo.' },
-             { id: 'inputMethodToggle', title: 'Paso 5: Métodos de Entrada', text: 'Elige entre los botones de "Cifrado" o el "Piano" virtual para introducir las notas.' },
-             { id: 'confirmAnswerButton', title: 'Paso 6: Comprueba tu Respuesta', text: 'Cuando termines, presiona "Confirmar". Cada 5 ejercicios, recibirás una evaluación de tu desempeño.' },
-             { id: null, title: 'Paso 7: Reporte Final y Gráficos', text: 'Al terminar tu sesión, verás un reporte detallado con un gráfico de tu precisión por tipo de acorde.' },
-             { id: 'themeToggle', title: 'Paso 8: Personaliza tu Vista', text: 'Usa los botones de la esquina para cambiar al modo oscuro, ver este tutorial de nuevo o entrar en pantalla completa.' },
-             { id: null, title: '¡Todo Listo!', text: 'Has completado el tutorial. ¡Mucha suerte en tu práctica!' }
+            { id: 'chordQuestionWrapper', title: '¡Bienvenido!', text: 'Aquí se te presentará el ejercicio. Se te dará una nota (melodía) y su función dentro de un acorde específico.' },
+            { id: 'displaySection', title: 'Tu Objetivo', text: 'Tu meta es construir el acorde completo, descendiendo desde la melodía, en la tabla de notas y en el pentagrama.' },
+            { id: 'inputMethodToggle', title: 'Métodos de Entrada', text: 'Puedes elegir cómo introducir las notas: usando los botones de "Cifrado" o el "Piano" virtual.' },
+            { id: null, title: 'Atajos de Teclado', text: '¡Usa el teclado para ir más rápido! <br><b>A-G:</b> Notas Naturales <br><b>+/-:</b> Sostenidos/Bemoles (presiona 2 veces para dobles) <br><b>Enter:</b> Confirmar <br><b>P:</b> Pista <br><b>R:</b> Respuesta <br><b>Espacio:</b> Cambiar <br><b>N:</b> Borrar <br><b>Q:</b> Pantalla Completa'},
+            { id: 'confirmAnswerButton', title: 'Comprueba tu Respuesta', text: 'Una vez que hayas construido el acorde de 3 o 4 voces, presiona "Confirmar". ¡No dudes en usar "Pista" si necesitas ayuda!' },
+            { id: null, title: '¡Todo Listo!', text: 'Has completado el tutorial. ¡Ya puedes comenzar a entrenar! ¡Mucha suerte!' }
         ];
 
         function startTutorial() {
-            if (window.innerWidth > 768 && document.documentElement.requestFullscreen) { openFullscreen(); }
             state.tutorial.isActive = true;
             state.tutorial.currentStep = 0;
             document.getElementById('tutorialOverlay').classList.remove('hidden');
@@ -1178,36 +1741,71 @@
 
         function showTutorialStep() {
             const step = tutorialSteps[state.tutorial.currentStep];
-            if (!step) { endTutorial(); return; }
+            if (!step) {
+                endTutorial();
+                return;
+            }
+
             document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+            
             const titleEl = document.getElementById('tutorialTitle');
             const textEl = document.getElementById('tutorialText');
             const nextButton = document.getElementById('tutorialNextButton');
             const modal = document.getElementById('tutorialModal');
+            
             titleEl.textContent = step.title;
             textEl.innerHTML = step.text;
+
             if (step.id) {
                 const targetElement = document.getElementById(step.id);
                 targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
                 setTimeout(() => {
                     targetElement.classList.add('tutorial-highlight');
+                    
                     const rect = targetElement.getBoundingClientRect();
                     const modalRect = modal.getBoundingClientRect();
-                    let topPos = (rect.bottom + 10 + modalRect.height > window.innerHeight) ? rect.top - modalRect.height - 10 : rect.bottom + 10;
+                    
+                    let topPos;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    const modalHeightWithMargin = modalRect.height + 20;
+
+                    if (spaceBelow >= modalHeightWithMargin || spaceBelow > spaceAbove) {
+                        topPos = rect.bottom + 10;
+                    } else {
+                        topPos = rect.top - modalRect.height - 10;
+                    }
+                    
                     let leftPos = (window.innerWidth / 2) - (modalRect.width / 2);
+                    
+                    if (leftPos < 10) { leftPos = 10; } 
+                    else if (leftPos + modalRect.width > window.innerWidth - 10) {
+                        leftPos = window.innerWidth - modalRect.width - 10;
+                    }
+
                     modal.style.top = `${topPos}px`;
                     modal.style.left = `${leftPos}px`;
+                    modal.style.transform = '';
                 }, 400); 
+
             } else {
                 modal.style.top = '50%';
                 modal.style.left = '50%';
                 modal.style.transform = 'translate(-50%, -50%)';
             }
-            nextButton.textContent = (state.tutorial.currentStep === tutorialSteps.length - 1) ? '¡Comenzar a Practicar!' : 'Siguiente';
+
+            if (state.tutorial.currentStep === tutorialSteps.length - 1) {
+                nextButton.textContent = '¡Comenzar a Practicar!';
+            } else {
+                nextButton.textContent = 'Siguiente';
+            }
         }
 
         function endTutorial() {
-            if (document.fullscreenElement) { closeFullscreen(); }
+            if(document.fullscreenElement) {
+                closeFullscreen();
+            }
             state.tutorial.isActive = false;
             document.getElementById('tutorialOverlay').classList.add('hidden');
             document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
@@ -1219,167 +1817,19 @@
             showTutorialStep();
         });
 
-        // --- All other functions (handlePianoKeyClick, etc.) are below ---
-        function handleNaturalNoteClick(e) {
-            addNaturalNote(e.target.dataset.note);
-        }
-        function handleAccidentalClick(e) {
-            addAccidental(e.target.dataset.accidental);
-        }
-        function openFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) { elem.requestFullscreen(); } 
-            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
-        }
-        function closeFullscreen() {
-            if (document.exitFullscreen) { document.exitFullscreen(); } 
-            else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
-        }
-        function toggleFullscreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) { openFullscreen(); } 
-            else { closeFullscreen(); }
-        }
-        function updateFullscreenIcons() {
-            const isOpen = !document.fullscreenElement && !document.webkitFullscreenElement;
-            document.getElementById('fullscreenIconOpen').classList.toggle('hidden', !isOpen);
-            document.getElementById('fullscreenIconClose').classList.toggle('hidden', isOpen);
-        }
-        function handleKeyPress(e) {
-            if (e.target.tagName === 'INPUT' || document.querySelector('.modal-overlay.visible')) return;
-            const key = e.key.toLowerCase();
-            if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(key)) { e.preventDefault(); addNaturalNote(key.toUpperCase()); }
-            if (key === '+' || key === '-') { e.preventDefault(); handleAccidentalKeyPress(key); }
-            const actions = { 'enter': dom.confirmAnswerButton, 'p': dom.hintButton, 'r': dom.showAnswerButton, ' ': dom.changeQuestionButton, 'n': dom.clearAllSelectionButton };
-            if (actions[key] && !actions[key].disabled) { e.preventDefault(); actions[key].click(); }
-            if (key === 'q') { e.preventDefault(); toggleFullscreen(); }
-        }
-        
-        // --- NOTE INPUT LOGIC ---
-        function addNaturalNote(note) {
-            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
-            const lastNoteIndex = state.selectedUserNotes.length - 1;
-
-            if (state.selectedUserNotes.length >= expectedCount) {
-                showCustomMessage("Límite de notas", `Ya has seleccionado las ${expectedCount} notas.`, "warning");
-                return;
-            }
-
-            const lastNoteWithOctave = state.selectedUserNotes[lastNoteIndex] || state.givenNoteWithOctave;
-            if (!lastNoteWithOctave) return;
-            
-            const lastMidi = Tone.Midi(lastNoteWithOctave.replace('/', '')).toMidi();
-            
-            let currentOctave = parseInt(lastNoteWithOctave.split('/')[1]);
-            let candidateMidi = Tone.Midi(`${note}${currentOctave}`).toMidi();
-
-            while(candidateMidi >= lastMidi) {
-                currentOctave--;
-                candidateMidi = Tone.Midi(`${note}${currentOctave}`).toMidi();
-            }
-
-            state.selectedUserNotes.push(`${note}/${currentOctave}`);
-            updateDisplay();
-        }
-
-        function addAccidental(accidental) {
-            if (state.selectedUserNotes.length === 0 || (state.gameMode === 'harmonization' && state.selectedUserNotes.length <= 1)) return;
-            const lastNoteIndex = state.selectedUserNotes.length - 1;
-            const lastNote = state.selectedUserNotes[lastNoteIndex];
-            const naturalPart = lastNote.match(/[A-G]/i)[0];
-            const octavePart = lastNote.match(/\/(\d+)/)[1];
-            state.selectedUserNotes[lastNoteIndex] = `${naturalPart}${accidental}/${octavePart}`;
-            updateDisplay();
-        }
-
-        function handleAccidentalKeyPress(key) {
-            const now = Date.now();
-            const { lastAccidentalKey, lastAccidentalTimestamp, doublePressThreshold } = state.keyboard;
-            let accidental = (key === lastAccidentalKey && (now - lastAccidentalTimestamp < doublePressThreshold)) ? (key === '+' ? '##' : 'bb') : (key === '+' ? '#' : 'b');
-            state.keyboard.lastAccidentalKey = accidental.length === 1 ? key : null;
-            state.keyboard.lastAccidentalTimestamp = now;
-            addAccidental(accidental);
-        }
-
-        function handlePianoKeyClick(event) {
-            const keyElement = event.target.closest('.piano-key');
-            if (!keyElement) return;
-            const noteWithOctave = keyElement.dataset.note;
-            if (!noteWithOctave) return;
-            synth.triggerAttackRelease(noteWithOctave.replace('/', ''), "8n");
-            if (state.gameMode === 'harmonization' && noteWithOctave === state.givenNoteWithOctave) { return; }
-            const isSelected = state.selectedUserNotes.some(n => noteToPitchClass(n) === noteToPitchClass(noteWithOctave));
-            if (isSelected) {
-                state.selectedUserNotes = state.selectedUserNotes.filter(n => noteToPitchClass(n) !== noteToPitchClass(noteWithOctave));
-            } else {
-                const expectedCount = state.difficulty === 'basic' ? 3 : 4;
-                if (state.selectedUserNotes.length >= expectedCount) { return; }
-                state.selectedUserNotes.push(noteWithOctave);
-            }
-            updateDisplay();
-        }
-        
-        // --- Other utility functions ---
-        function generateNoteButtons() {
-            dom.naturalNoteButtonsContainer.innerHTML = naturalNotes.map(n => `<button class="note-button" data-note="${n}">${displayNote(n)}</button>`).join('');
-            dom.accidentalButtonsContainer.innerHTML = accidentals.map(a => `<button class="note-button px-4" data-accidental="${a}">${a}</button>`).join('');
-            dom.naturalNoteButtonsContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleNaturalNoteClick));
-            dom.accidentalButtonsContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleAccidentalClick));
-        }
-
-        function generatePiano() {
-            dom.pianoContainer.innerHTML = '';
-            const whiteNotes = ["C", "D", "E", "F", "G", "A", "B"];
-            for (let octave = 3; octave <= 5; octave++) {
-                whiteNotes.forEach(note => {
-                    const key = document.createElement('div');
-                    key.className = `piano-key white`;
-                    key.dataset.note = `${note}/${octave}`;
-                    dom.pianoContainer.appendChild(key);
-                });
-            }
-            const c6 = document.createElement('div'); c6.className = `piano-key white`; c6.dataset.note = `C/6`; dom.pianoContainer.appendChild(c6);
-            const blackNotes = { "C#/3": 1, "D#/3": 2, "F#/3": 4, "G#/3": 5, "A#/3": 6, "C#/4": 8, "D#/4": 9, "F#/4": 11, "G#/4": 12, "A#/4": 13, "C#/5": 15, "D#/5": 16, "F#/5": 18, "G#/5": 19, "A#/5": 20 };
-            for (const note in blackNotes) {
-                const key = document.createElement('div');
-                key.className = `piano-key black`;
-                key.dataset.note = note;
-                dom.pianoContainer.appendChild(key);
-            }
-        }
-        function openSettingsModal() { populateSettingsModal(); dom.settingsModalOverlay.classList.add('visible'); }
-        function closeSettingsModal() { dom.settingsModalOverlay.classList.remove('visible'); }
-        function saveSettings() {
-            state.customPractice.allowedChords = Array.from(dom.chordTypesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
-            state.customPractice.allowedLeads = Array.from(dom.leadVoicesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
-            state.customPractice.isActive = true;
-            closeSettingsModal();
-            generateExercise();
-        }
-        function populateSettingsModal() { /* ... similar to before, but using dom references ... */ }
-        function saveAsPhoto() { html2canvas(dom.resultsContentToCapture).then(canvas => { const link = document.createElement('a'); link.download = `resultados-bloque-armonico-${Date.now()}.png`; link.href = canvas.toDataURL(); link.click(); }); }
-        function saveAsPdf() { const { jsPDF } = window.jspdf; html2canvas(dom.resultsContentToCapture).then(canvas => { const imgData = canvas.toDataURL('image/png'); const pdf = new jsPDF('p', 'mm', 'a4'); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = (canvas.height * pdfWidth) / canvas.width; pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight); pdf.save(`resultados-bloque-armonico-${Date.now()}.pdf`); }); }
-        function showEvaluationModal() {
-            const { batchCorrect, exercisesPerEval, batchHintsUsed, batchAnswersUsed } = state.evaluation;
-            const accuracy = exercisesPerEval > 0 ? Math.round((batchCorrect / exercisesPerEval) * 100) : 0;
-            dom.evaluationSummary.textContent = `Has completado ${exercisesPerEval} ejercicios con una precisión del ${accuracy}%.`;
-            dom.adviceList.innerHTML = `<li>Sigue practicando para mejorar tu velocidad y precisión.</li>`;
-            state.evaluation.questionsAttemptedInBatch = 0;
-            state.evaluation.batchCorrect = 0;
-            state.evaluation.batchHintsUsed = 0;
-            state.evaluation.batchAnswersUsed = 0;
-            dom.evaluationModalOverlay.classList.add('visible');
-        }
 
         // --- Initial Events ---
         if (localStorage.getItem('harmonicBlockProTutorialCompleted')) {
-            initializeApp(false);
+            document.getElementById('startTutorialButton').style.display = 'none';
+            document.getElementById('skipTutorialButton').textContent = 'Comenzar Entrenamiento';
+            document.getElementById('skipTutorialButton').addEventListener('click', () => initializeApp(false));
         } else {
-            const startTutorialButton = document.getElementById('startTutorialButton');
-            const skipTutorialButton = document.getElementById('skipTutorialButton');
-            startTutorialButton.addEventListener('click', () => initializeApp(true));
-            skipTutorialButton.addEventListener('click', () => initializeApp(false));
+            document.getElementById('startTutorialButton').addEventListener('click', () => initializeApp(true));
+            document.getElementById('skipTutorialButton').addEventListener('click', () => initializeApp(false));
         }
+        
     </script>
 </body>
 </html>
+
 
