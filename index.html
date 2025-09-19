@@ -264,16 +264,17 @@
         .piano-key.black[data-note*="G#"][data-note*="/5"] { left: calc(100% / 22 * 19); }
         .piano-key.black[data-note*="A#"][data-note*="/5"] { left: calc(100% / 22 * 20); }
         
-        .piano-key.selected {
-            background-color: #3b82f6 !important;
+        .piano-key.white.selected {
+            background-color: #93c5fd !important; /* Lighter blue for better contrast */
+            border: 2px solid #3b82f6;
         }
-        .piano-key.given-note-highlight {
-            background-color: #fde047 !important;
-            border: 2px solid #f59e0b;
-        }
-        .piano-key.black.selected {
+         .piano-key.black.selected {
             background-color: #3b82f6 !important;
             border: 2px solid #93c5fd;
+        }
+        .piano-key.white.given-note-highlight {
+            background-color: #fde047 !important;
+            border: 2px solid #f59e0b;
         }
         .piano-key.black.given-note-highlight {
             background-color: #facc15 !important;
@@ -1455,8 +1456,19 @@
                 key.classList.remove('selected', 'given-note-highlight');
             });
             
+            function findPianoKeyByMidi(noteWithOctave) {
+                if (!noteWithOctave) return null;
+                try {
+                    const midiNumber = Tone.Midi(noteWithOctave.replace('/', '')).toMidi();
+                    return document.querySelector(`.piano-key[data-midi="${midiNumber}"]`);
+                } catch (e) {
+                    console.error(`Invalid note format for MIDI conversion: ${noteWithOctave}`, e);
+                    return null;
+                }
+            }
+            
             if (state.givenNoteWithOctave) {
-                const givenKey = document.querySelector(`.piano-key[data-note="${state.givenNoteWithOctave}"]`);
+                const givenKey = findPianoKeyByMidi(state.givenNoteWithOctave);
                 if (givenKey) {
                     givenKey.classList.add('given-note-highlight');
                 }
@@ -1464,7 +1476,7 @@
             
             state.selectedUserNotes.forEach(noteWithOctave => {
                 if (!noteWithOctave || noteWithOctave === state.givenNoteWithOctave) return;
-                const key = document.querySelector(`.piano-key[data-note="${noteWithOctave}"]`);
+                const key = findPianoKeyByMidi(noteWithOctave);
                 if (key) { key.classList.add('selected'); }
             });
         }
@@ -1996,13 +2008,17 @@
                 whiteNotes.forEach(note => {
                     const key = document.createElement('div');
                     key.className = `piano-key white`;
-                    key.dataset.note = `${note}/${octave}`;
+                    const noteWithOctave = `${note}/${octave}`;
+                    key.dataset.note = noteWithOctave;
+                    key.dataset.midi = Tone.Midi(noteWithOctave.replace('/', '')).toMidi();
                     pianoContainer.appendChild(key);
                 });
             }
             const c6 = document.createElement('div');
             c6.className = `piano-key white`;
-            c6.dataset.note = `C/6`;
+            const c6Note = 'C/6';
+            c6.dataset.note = c6Note;
+            c6.dataset.midi = Tone.Midi(c6Note.replace('/', '')).toMidi();
             pianoContainer.appendChild(c6);
 
             const blackNotesWithOctave = { "C#/3": "C#/3", "D#/3": "D#/3", "F#/3": "F#/3", "G#/3": "G#/3", "A#/3": "A#/3", "C#/4": "C#/4", "D#/4": "D#/4", "F#/4": "F#/4", "G#/4": "G#/4", "A#/4": "A#/4", "C#/5": "C#/5", "D#/5": "D#/5", "F#/5": "F#/5", "G#/5": "G#/5", "A#/5": "A#/5" };
@@ -2010,6 +2026,7 @@
                 const key = document.createElement('div');
                 key.className = `piano-key black`;
                 key.dataset.note = note;
+                key.dataset.midi = Tone.Midi(note.replace('/', '')).toMidi();
                 pianoContainer.appendChild(key);
             }
         }
@@ -2190,8 +2207,7 @@
             }
 
             state.currentUser = username;
-            currentUserName.textContent = username;
-
+            
             if (newUser) {
                 let users = JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]');
                 if (!users.includes(newUser)) {
@@ -2201,6 +2217,7 @@
             }
             
             loadUserData(username);
+            currentUserName.textContent = username;
             welcomeModalOverlay.classList.remove('visible');
 
             if (state.stats.totalExercises === 0) {
