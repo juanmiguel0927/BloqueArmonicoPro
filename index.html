@@ -370,17 +370,25 @@
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center">
-    <!-- Initial welcome modal -->
-    <div id="welcomeModalOverlay" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+    <!-- User selection modal -->
+    <div id="welcomeModalOverlay" class="modal-overlay visible">
         <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-lg w-11/12">
             <h2 class="text-3xl sm:text-4xl font-bold text-blue-800 mb-4">Bienvenido a Bloque Armónico Pro</h2>
-            <p class="text-lg text-gray-700 mb-6">Una herramienta para desarrollar tu técnica de armonización en bloques cerrados (4-way closed).</p>
-            <div id="initial-buttons" class="flex flex-col sm:flex-row gap-4 justify-center">
-                 <button id="startTutorialButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Ver Tutorial</button>
-                 <button id="skipTutorialButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Omitir y Empezar</button>
-                 <button id="startTrainingButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors hidden">Comenzar Entrenamiento</button>
+            <p class="text-lg text-gray-700 mb-6">Para continuar, selecciona tu perfil o crea uno nuevo.</p>
+            <div class="mt-6 w-full max-w-sm mx-auto">
+                <label for="userSelect" class="block text-sm font-medium text-gray-700 text-left">Selecciona tu Perfil</label>
+                <select id="userSelect" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="">-- Cargar Perfil --</option>
+                </select>
+                <p class="text-center my-2 text-gray-500">o</p>
+                <label for="newUserInput" class="block text-sm font-medium text-gray-700 text-left">Crea un Nuevo Perfil</label>
+                <input type="text" id="newUserInput" placeholder="Escribe tu nombre aquí" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
             </div>
-            <div class="text-center mt-8">
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="loginButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Comenzar Sesión</button>
+                <button id="guestLoginButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Entrar como Invitado</button>
+            </div>
+             <div class="text-center mt-8">
                 <p class="text-sm text-gray-600">Una aplicación de</p>
                 <p class="text-lg font-bold text-blue-800 flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-music-note-beamed" viewBox="0 0 16 16">
@@ -393,6 +401,19 @@
             </div>
         </div>
     </div>
+    
+    <!-- Tutorial Prompt Modal -->
+    <div id="tutorialPromptModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4">¡Hola, <span id="tutorialUserName"></span>!</h3>
+            <p class="text-lg text-gray-700 mb-6">Parece que es tu primera vez. ¿Te gustaría ver un rápido tutorial?</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="promptStartTutorial" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Sí, mostrar tutorial</button>
+                <button id="promptSkipTutorial" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">No, gracias</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Interactive Tutorial -->
     <div id="tutorialOverlay" class="hidden">
@@ -424,6 +445,10 @@
                 <div class="text-xs font-medium text-amber-600">🔥 Días de Racha</div>
                 <div class="text-xl font-bold text-amber-800">0</div>
             </div>
+            <div id="userDisplay" class="flex flex-col items-center p-2 rounded-xl bg-indigo-50 border border-indigo-200">
+                <div class="text-xs font-medium text-indigo-600">👤 Usuario</div>
+                <div id="currentUserName" class="text-base font-bold text-indigo-800"></div>
+            </div>
             <div id="scoreCounter" class="flex flex-col items-center p-2 rounded-xl bg-gray-100 border border-gray-200">
                 <div class="text-sm text-green-600">✅ 0</div>
                 <div class="text-sm text-red-600">❌ 0</div>
@@ -436,6 +461,12 @@
                     <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
                     <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50" title="Cifrado Latino">Do,Re,Mi</label>
                 </div>
+                <button id="switchUserButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Cambiar de Usuario (U)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
+                        <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                        <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                    </svg>
+                </button>
                 <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ajustes de Práctica (S)">⚙️</button>
                 <button id="showTutorialButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ver Tutorial (H)">?</button>
                 <button id="fullscreenButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Pantalla Completa (Q)">
@@ -451,7 +482,7 @@
 
         <!-- Difficulty controls -->
         <div id="difficultySelection" class="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <label class="text-blue-800 font-semibold">Nivel de Dificultad (1, 2, 3):</label>
+            <label class="text-blue-800 font-semibold">Nivel de Dificultad:</label>
             <div class="flex gap-2 flex-wrap justify-center">
                 <input type="radio" id="difficultyBasic" name="difficulty" value="basic" class="hidden" checked>
                 <label for="difficultyBasic" class="difficulty-label py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors duration-200">Básico</label>
@@ -592,7 +623,7 @@
         <div id="resultsContentToCapture" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
             <div class="flex flex-col items-center mb-4">
                 <label for="userNameInput" class="text-lg font-semibold text-gray-800 mb-1">Tu Nombre:</label>
-                <input type="text" id="userNameInput" placeholder="Introduce tu nombre aquí" class="text-center p-2 border rounded-lg w-full max-w-sm">
+                <input type="text" id="userNameInput" placeholder="Introduce tu nombre aquí" class="text-center p-2 border rounded-lg w-full max-w-sm" readonly>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
                 <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
@@ -634,7 +665,8 @@
                 <span id="sessionDurationDisplay"></span>
             </div>
         </div>
-        <div class="flex justify-center gap-4 mt-6">
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+            <button id="switchUserFinalButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Cambiar de Usuario</button>
             <button id="saveAsPhotoButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar como Foto (PNG)</button>
             <button id="saveAsPdfButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Guardar como PDF</button>
         </div>
@@ -647,6 +679,7 @@
 
         // Central application state
         const state = {
+            currentUser: null,
             correctNotes: [],
             correctNotesWithOctave: [],
             chordRoot: '',
@@ -657,15 +690,7 @@
             givenNoteWithOctave: '',
             orderedLabelsForDisplay: [],
             selectedUserNotes: [],
-            stats: {
-                totalExercises: 0,
-                totalCorrect: 0,
-                totalIncorrect: 0,
-                currentStreak: 0,
-                hintsUsed: 0,
-                answersUsed: 0,
-                sessionHistory: [],
-            },
+            stats: {},
             evaluation: {
                 questionsAttemptedInBatch: 0,
                 exercisesPerEval: 5,
@@ -673,13 +698,12 @@
             currentExerciseId: null,
             failedCurrentExercise: false,
             answerWasShown: false,
-            userName: '',
             difficulty: 'basic',
             notationSystem: 'american',
             customPractice: {
-                isActive: false,
-                allowedChords: [],
-                allowedLeads: []
+                basic: { isActive: false, allowedChords: [] },
+                intermediate: { isActive: false, allowedChords: [] },
+                advanced: { isActive: false, allowedChords: [], allowedLeads: [] }
             },
             audioContextStarted: false,
             session: {
@@ -813,6 +837,17 @@
         const tutorialEndButton = document.getElementById('tutorialEndButton');
         const sessionHistoryContainer = document.getElementById('sessionHistory');
         const suggestionText = document.getElementById('suggestionText');
+        const userSelect = document.getElementById('userSelect');
+        const newUserInput = document.getElementById('newUserInput');
+        const loginButton = document.getElementById('loginButton');
+        const guestLoginButton = document.getElementById('guestLoginButton');
+        const currentUserName = document.getElementById('currentUserName');
+        const switchUserButton = document.getElementById('switchUserButton');
+        const switchUserFinalButton = document.getElementById('switchUserFinalButton');
+        const tutorialPromptModalOverlay = document.getElementById('tutorialPromptModalOverlay');
+        const tutorialUserName = document.getElementById('tutorialUserName');
+        const promptStartTutorial = document.getElementById('promptStartTutorial');
+        const promptSkipTutorial = document.getElementById('promptSkipTutorial');
         
         let synth, reverb;
 
@@ -822,23 +857,27 @@
          * Initializes the audio context and the application.
          */
         async function initializeApp(startWithTutorial) {
-            welcomeModalOverlay.classList.add('hidden');
+            tutorialPromptModalOverlay.classList.remove('visible');
             mainAppContainer.classList.remove('hidden');
+            
             if (state.session.startTime === 0) {
                  state.session.startTime = Date.now();
             }
 
             try {
-                await Tone.start();
-                synth = new Tone.PolySynth(Tone.FMSynth, {
-                    oscillator: { type: "sine" },
-                    envelope: { attack: 0.005, decay: 0.8, sustain: 0.0, release: 1.0 },
-                    modulation: { type: "sine" },
-                    modulationEnvelope: { attack: 0.001, decay: 0.2, sustain: 0.0, release: 0.2 },
-                    harmonicity: 3, modulationIndex: 15
-                }).toDestination();
-                reverb = new Tone.Reverb({ decay: 1.5, preDelay: 0.01, wet: 0.3 }).toDestination();
-                synth.connect(reverb);
+                if (!state.audioContextStarted) {
+                    await Tone.start();
+                    synth = new Tone.PolySynth(Tone.FMSynth, {
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.005, decay: 0.8, sustain: 0.0, release: 1.0 },
+                        modulation: { type: "sine" },
+                        modulationEnvelope: { attack: 0.001, decay: 0.2, sustain: 0.0, release: 0.2 },
+                        harmonicity: 3, modulationIndex: 15
+                    }).toDestination();
+                    reverb = new Tone.Reverb({ decay: 1.5, preDelay: 0.01, wet: 0.3 }).toDestination();
+                    synth.connect(reverb);
+                    state.audioContextStarted = true;
+                }
             } catch (e) {
                 console.error("Error initializing audio:", e);
                 showCustomMessage("Error de Audio", "No se pudo iniciar el audio.", "error");
@@ -848,13 +887,11 @@
             generateNoteButtons();
             generatePiano();
             addEventListeners();
-            loadStreakData();
+            updateStatsDisplay();
             generateExercise();
 
             if (startWithTutorial) {
                 startTutorial();
-            } else {
-                localStorage.setItem('harmonicBlockProTutorialCompleted', 'true');
             }
         }
         
@@ -940,6 +977,9 @@
             hintModalCloseButton.addEventListener('click', () => {
                 hintModalOverlay.classList.remove('visible');
             });
+
+            switchUserButton.addEventListener('click', handleSwitchUser);
+            switchUserFinalButton.addEventListener('click', handleSwitchUser);
         }
 
         function showCustomMessage(title, message, type = 'info') {
@@ -1066,18 +1106,23 @@
         function generateExercise() {
             state.failedCurrentExercise = false;
             state.answerWasShown = false;
+            
+            const currentPracticeSettings = state.customPractice[state.difficulty];
+
             const chords = Object.keys(chordStructures).filter(key => {
                 const chord = chordStructures[key];
                 const isBasic = state.difficulty === 'basic' && chord.difficulty === 'basic';
                 const isIntermediate = state.difficulty === 'intermediate' && chord.difficulty === 'intermediate';
                 const isAdvanced = state.difficulty === 'advanced' && chord.difficulty === 'intermediate';
                 const matchesDifficulty = isBasic || isIntermediate || isAdvanced;
-                const matchesCustom = !state.customPractice.isActive || state.customPractice.allowedChords.includes(key);
+                
+                const matchesCustom = !currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key);
+
                 return matchesDifficulty && matchesCustom;
             });
 
             if (chords.length === 0) {
-                showCustomMessage("Sin Acordes", "No hay acordes disponibles. Revisa tus ajustes.", "warning");
+                showCustomMessage("Sin Acordes", "No hay acordes disponibles. Revisa tus ajustes (S).", "warning");
                 return;
             }
             const chordTypeKey = chords[Math.floor(Math.random() * chords.length)];
@@ -1090,8 +1135,8 @@
                 const difficultyMatch = (state.difficulty === 'advanced') ? isTension : !isTension;
                 if (!difficultyMatch) return false;
 
-                if (state.customPractice.isActive && isTension && state.customPractice.allowedLeads.length > 0) {
-                    return state.customPractice.allowedLeads.includes(label);
+                if (state.difficulty === 'advanced' && currentPracticeSettings.isActive && currentPracticeSettings.allowedLeads.length > 0) {
+                    return currentPracticeSettings.allowedLeads.includes(label);
                 }
                 return true;
             });
@@ -1186,46 +1231,6 @@
             return todayWithOffset.toISOString().split('T')[0];
         }
 
-        function loadStreakData() {
-            try {
-                const data = localStorage.getItem('harmonicBlockProStreak');
-                if (data) {
-                    const { streak, lastPracticeDate } = JSON.parse(data);
-                    const todayStr = getTodayDateString();
-                    
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    const offset = yesterday.getTimezoneOffset()
-                    const yesterdayWithOffset = new Date(yesterday.getTime() - (offset*60*1000))
-                    const yesterdayStr = yesterdayWithOffset.toISOString().split('T')[0];
-                    
-                    if (lastPracticeDate === todayStr) {
-                         state.stats.currentStreak = streak || 0;
-                    } else if (lastPracticeDate === yesterdayStr) {
-                         state.stats.currentStreak = streak || 0; // Maintain streak if played yesterday
-                    } else {
-                        state.stats.currentStreak = 0; // Reset if older than yesterday
-                    }
-                }
-            } catch (e) {
-                console.error("Could not load streak data", e);
-                state.stats.currentStreak = 0;
-            }
-            updateStreakDisplay();
-        }
-
-        function saveStreakData() {
-            try {
-                const data = {
-                    streak: state.stats.currentStreak,
-                    lastPracticeDate: getTodayDateString()
-                };
-                localStorage.setItem('harmonicBlockProStreak', JSON.stringify(data));
-            } catch (e) {
-                console.error("Could not save streak data", e);
-            }
-        }
-        
         function noteToPitchClass(noteWithOctave) {
             if (!noteWithOctave) return null;
             const noteName = noteWithOctave.split('/')[0];
@@ -1288,30 +1293,19 @@
                     state.stats.totalCorrect++;
                     completeExercise('correct');
                     
-                    try {
-                        const data = localStorage.getItem('harmonicBlockProStreak');
-                        const today = getTodayDateString();
-                        let lastDate = '';
-                        if (data) { lastDate = JSON.parse(data).lastPracticeDate; }
-
-                        if (lastDate !== today) {
-                            const yesterday = new Date();
-                            yesterday.setDate(yesterday.getDate() - 1);
-                            const offset = yesterday.getTimezoneOffset()
-                            const yesterdayWithOffset = new Date(yesterday.getTime() - (offset*60*1000))
-                            const yesterdayStr = yesterdayWithOffset.toISOString().split('T')[0];
-                            
-                            if (lastDate === yesterdayStr) {
-                                state.stats.currentStreak++;
-                            } else {
-                                state.stats.currentStreak = 1;
-                            }
-                            saveStreakData();
+                    const today = getTodayDateString();
+                    if (state.stats.lastPracticeDate !== today) {
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        const offset = yesterday.getTimezoneOffset()
+                        const yesterdayWithOffset = new Date(yesterday.getTime() - (offset*60*1000))
+                        const yesterdayStr = yesterdayWithOffset.toISOString().split('T')[0];
+                        
+                        if (state.stats.lastPracticeDate === yesterdayStr) {
+                            state.stats.currentStreak++;
+                        } else {
+                            state.stats.currentStreak = 1;
                         }
-                    } catch (e) {
-                        console.error("Error updating streak", e);
-                        state.stats.currentStreak = 1;
-                        saveStreakData();
                     }
                     showCustomMessage("Correcto", "¡Felicidades, tu respuesta es correcta!", "success");
                 }
@@ -1366,7 +1360,6 @@
         function showAnswer() {
             state.stats.answersUsed++;
             state.stats.currentStreak = 0; 
-            saveStreakData();
             if (!state.failedCurrentExercise) {
                 state.stats.totalIncorrect++;
                 state.failedCurrentExercise = true;
@@ -1557,7 +1550,6 @@
             
             if (['1', '2', '3'].includes(key)) {
                 e.preventDefault();
-                const difficulties = { '1': 'basic', '2': 'intermediate', '3': 'advanced' };
                 const difficultyId = `difficulty${key === '1' ? 'Basic' : (key === '2' ? 'Intermediate' : 'Advanced')}`;
                 const radio = document.getElementById(difficultyId);
                 if (radio && !radio.checked) {
@@ -1607,6 +1599,10 @@
                     } else {
                         pianoToggle.click();
                     }
+                    break;
+                case 'u':
+                    e.preventDefault();
+                    if(!switchUserButton.disabled) switchUserButton.click();
                     break;
             }
         }
@@ -1691,10 +1687,12 @@
             } else if (state.difficulty === 'intermediate' || state.difficulty === 'advanced') {
                 relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'intermediate');
             }
+            
+            const currentPracticeSettings = state.customPractice[state.difficulty];
 
             relevantChords.forEach(key => {
                 const chord = chordStructures[key];
-                const isChecked = !state.customPractice.isActive || state.customPractice.allowedChords.includes(key);
+                const isChecked = !currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key);
                 chordTypesCheckboxesContainer.innerHTML += `
                     <div class="flex items-center">
                         <input type="checkbox" id="chord_${key}" value="${key}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
@@ -1718,7 +1716,7 @@
 
                 allTensions.forEach(label => {
                     if (availableTensions.has(label)) {
-                        const isChecked = !state.customPractice.isActive || state.customPractice.allowedLeads.length === 0 || state.customPractice.allowedLeads.includes(label);
+                        const isChecked = !currentPracticeSettings.isActive || currentPracticeSettings.allowedLeads.length === 0 || currentPracticeSettings.allowedLeads.includes(label);
                         leadVoicesCheckboxesContainer.innerHTML += `
                             <div class="flex items-center">
                                 <input type="checkbox" id="lead_${label}" value="${label}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
@@ -1733,9 +1731,15 @@
         function saveSettings() {
             const allowedChords = Array.from(chordTypesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
             const allowedLeads = Array.from(leadVoicesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
-            state.customPractice.isActive = true;
-            state.customPractice.allowedChords = allowedChords;
-            state.customPractice.allowedLeads = allowedLeads;
+            
+            const practiceSettings = state.customPractice[state.difficulty];
+            practiceSettings.isActive = true;
+            practiceSettings.allowedChords = allowedChords;
+            
+            if (state.difficulty === 'advanced') {
+                practiceSettings.allowedLeads = allowedLeads;
+            }
+            
             closeSettingsModal();
             generateExercise();
         }
@@ -1769,6 +1773,7 @@
         }
 
         function endSession() {
+            saveUserData();
             mainAppContainer.classList.add('hidden');
             evaluationModalOverlay.classList.remove('visible');
             finalMessageDisplay.classList.remove('hidden');
@@ -1776,6 +1781,7 @@
             const { totalExercises, totalCorrect, totalIncorrect, hintsUsed, answersUsed, sessionHistory } = state.stats;
             const accuracy = (totalCorrect + totalIncorrect) > 0 ? Math.round((totalCorrect / (totalCorrect + totalIncorrect)) * 100) : 0;
             
+            userNameInput.value = state.currentUser;
             totalExercisesDisplay.textContent = totalExercises;
             correctAnswersDisplay.textContent = totalCorrect;
             incorrectAnswersDisplay.textContent = totalIncorrect;
@@ -1785,7 +1791,7 @@
             
             const strugglingChords = getPerformanceAnalysis();
             if (strugglingChords.length > 0) {
-                suggestionText.textContent = `Tu área principal a mejorar son los acordes ${strugglingChords[0].chord}. ¡Enfócate en ellos en tu próxima sesión!`;
+                suggestionText.textContent = `Tu área principal a mejorar son los acordes ${strugglingChords.map(c=>c.chord).join(', ')}. ¡Enfócate en ellos en tu próxima sesión!`;
             } else if (accuracy >= 90) {
                 suggestionText.textContent = "¡Excelente trabajo! Tu precisión es muy alta. Intenta practicar en un nivel de dificultad más alto o con tipos de acordes más complejos.";
             } else if (accuracy >= 70) {
@@ -1856,7 +1862,7 @@
         function saveAsPhoto() {
             html2canvas(resultsContentToCapture).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `resultados-bloque-armonico-${Date.now()}.png`;
+                link.download = `resultados-${state.currentUser}-${Date.now()}.png`;
                 link.href = canvas.toDataURL();
                 link.click();
             });
@@ -1879,7 +1885,7 @@
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
                 pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                pdf.save(`resultados-bloque-armonico-${Date.now()}.pdf`);
+                pdf.save(`resultados-${state.currentUser}-${Date.now()}.pdf`);
             });
         }
 
@@ -1991,7 +1997,7 @@
             { id: 'inputMethodToggle', title: 'Paso 3: Métodos de Entrada', text: 'Puedes usar los botones de "Cifrado" o el "Piano" virtual. ¡Usa la tecla (I) para cambiar entre ellos!' },
             { id: 'difficultySelection', title: 'Paso 4: Cambia la Dificultad', text: 'Puedes cambiar el nivel en cualquier momento usando las teclas (1) para Básico, (2) para Intermedio y (3) para Avanzado.' },
             { id: 'confirmAnswerButton', title: 'Paso 5: Comprueba tu Respuesta', text: 'Una vez que hayas construido el acorde, presiona "Confirmar" (Enter). ¡Usa las herramientas de ayuda si lo necesitas!' },
-            { id: null, title: 'Atajos de Teclado Completos', text: '<b>A-G:</b> Notas Naturales <br><b>+/-:</b> Sostenidos/Bemoles <br><b>Enter:</b> Confirmar <br><b>P:</b> Pista, <b>R:</b> Respuesta <br><b>Espacio:</b> Cambiar, <b>N:</b> Borrar <br><b>Q:</b> Pantalla Completa <br><b>1,2,3:</b> Dificultad <br><b>I:</b> Cifrado/Piano <br><b>S:</b> Ajustes, <b>H:</b> Ayuda' },
+            { id: null, title: 'Atajos de Teclado Completos', text: '<b>A-G:</b> Notas Naturales <br><b>+/-:</b> Sostenidos/Bemoles <br><b>Enter:</b> Confirmar <br><b>P:</b> Pista, <b>R:</b> Respuesta <br><b>Espacio:</b> Cambiar, <b>N:</b> Borrar <br><b>Q:</b> Pantalla Completa <br><b>1,2,3:</b> Dificultad <br><b>I:</b> Cifrado/Piano <br><b>S:</b> Ajustes, <b>H:</b> Ayuda, <b>U:</b> Cambiar Usuario' },
             { id: null, title: '¡Todo Listo!', text: 'Has completado el tutorial. ¡Ya puedes comenzar a entrenar! ¡Mucha suerte!' }
         ];
 
@@ -2043,7 +2049,6 @@
             state.tutorial.isActive = false;
             document.getElementById('tutorialOverlay').classList.add('hidden');
             document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
-            localStorage.setItem('harmonicBlockProTutorialCompleted', 'true');
             if (document.fullscreenElement || document.webkitFullscreenElement) {
                 closeFullscreen();
             }
@@ -2055,29 +2060,149 @@
         });
 
 
-        // --- Initial Events ---
-        function setupInitialScreen() {
-            const tutorialCompleted = localStorage.getItem('harmonicBlockProTutorialCompleted');
-            const startTutorialBtn = document.getElementById('startTutorialButton');
-            const skipTutorialBtn = document.getElementById('skipTutorialButton');
-            const startTrainingBtn = document.getElementById('startTrainingButton');
+        // --- User Management ---
+        function getInitialState() {
+             return {
+                stats: {
+                    totalExercises: 0, totalCorrect: 0, totalIncorrect: 0,
+                    currentStreak: 0, lastPracticeDate: null, hintsUsed: 0,
+                    answersUsed: 0, sessionHistory: []
+                },
+                customPractice: {
+                    basic: { isActive: false, allowedChords: [] },
+                    intermediate: { isActive: false, allowedChords: [] },
+                    advanced: { isActive: false, allowedChords: [], allowedLeads: [] }
+                }
+            };
+        }
 
-            if (tutorialCompleted) {
-                startTutorialBtn.classList.add('hidden');
-                skipTutorialBtn.classList.add('hidden');
-                startTrainingBtn.classList.remove('hidden');
+        function populateUserSelect() {
+            const users = JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]');
+            userSelect.innerHTML = '<option value="">-- Cargar Perfil --</option>';
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user;
+                option.textContent = user;
+                userSelect.appendChild(option);
+            });
+        }
+
+        function loadUserData(username) {
+            const userDataString = localStorage.getItem(`harmonicBlockProData_${username}`);
+            const defaultData = getInitialState();
+            
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                // Merge loaded stats and custom practice, keeping defaults for missing properties
+                state.stats = { ...defaultData.stats, ...userData.stats };
+                state.customPractice = { ...defaultData.customPractice, ...userData.customPractice };
+                
+                // Streak logic
+                const todayStr = getTodayDateString();
+                const lastDate = state.stats.lastPracticeDate;
+                 if (lastDate !== todayStr) {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const offset = yesterday.getTimezoneOffset();
+                    const yesterdayWithOffset = new Date(yesterday.getTime() - (offset*60*1000));
+                    const yesterdayStr = yesterdayWithOffset.toISOString().split('T')[0];
+                    if (lastDate !== yesterdayStr) {
+                        state.stats.currentStreak = 0; // Reset if older than yesterday
+                    }
+                 }
             } else {
-                startTutorialBtn.classList.remove('hidden');
-                skipTutorialBtn.classList.remove('hidden');
-                startTrainingBtn.classList.add('hidden');
+                state.stats = defaultData.stats;
+                state.customPractice = defaultData.customPractice;
+            }
+            state.stats.sessionHistory = []; // Reset session history for the new session
+            state.evaluation.questionsAttemptedInBatch = 0;
+        }
+
+        function saveUserData() {
+            if (!state.currentUser || state.currentUser === "Invitado") return;
+            state.stats.lastPracticeDate = getTodayDateString();
+            const dataToSave = {
+                stats: state.stats,
+                customPractice: state.customPractice
+            };
+            localStorage.setItem(`harmonicBlockProData_${state.currentUser}`, JSON.stringify(dataToSave));
+        }
+
+        function handleLogin() {
+            const selectedUser = userSelect.value;
+            const newUser = newUserInput.value.trim();
+            const username = newUser || selectedUser;
+
+            if (!username) {
+                showCustomMessage("Error", "Por favor, selecciona o crea un perfil.", "error");
+                return;
+            }
+
+            if (username.toLowerCase() === 'invitado') {
+                showCustomMessage("Nombre Reservado", "Elige un nombre de perfil diferente.", "error");
+                newUserInput.value = '';
+                return;
+            }
+
+            state.currentUser = username;
+            currentUserName.textContent = username;
+
+            if (newUser) {
+                let users = JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]');
+                if (!users.includes(newUser)) {
+                    users.push(newUser);
+                    localStorage.setItem('harmonicBlockProUsers', JSON.stringify(users));
+                }
             }
             
-            startTutorialBtn.addEventListener('click', () => initializeApp(true), { once: true });
-            skipTutorialBtn.addEventListener('click', () => initializeApp(false), { once: true });
-            startTrainingBtn.addEventListener('click', () => initializeApp(false), { once: true });
+            loadUserData(username);
+            welcomeModalOverlay.classList.remove('visible');
+
+            if (state.stats.totalExercises === 0) {
+                 tutorialUserName.textContent = username;
+                 tutorialPromptModalOverlay.classList.add('visible');
+            } else {
+                 initializeApp(false);
+            }
         }
+
+        function handleGuestLogin() {
+            state.currentUser = "Invitado";
+            currentUserName.textContent = "Invitado";
+            
+            // Load default state without saving
+            const defaultData = getInitialState();
+            state.stats = defaultData.stats;
+            state.customPractice = defaultData.customPractice;
+            state.stats.sessionHistory = []; // Ensure session history is clean
+            state.evaluation.questionsAttemptedInBatch = 0;
+            
+            welcomeModalOverlay.classList.remove('visible');
+            initializeApp(false); // Start directly, skip tutorial for guest
+        }
+
+        function handleSwitchUser() {
+            saveUserData();
+            mainAppContainer.classList.add('hidden');
+            finalMessageDisplay.classList.add('hidden');
+            showLoginScreen();
+        }
+
+        function showLoginScreen() {
+            mainAppContainer.classList.add('hidden');
+            finalMessageDisplay.classList.add('hidden');
+            welcomeModalOverlay.classList.add('visible');
+            newUserInput.value = '';
+            populateUserSelect();
+        }
+
+        // --- Initial Events ---
+        promptStartTutorial.addEventListener('click', () => initializeApp(true));
+        promptSkipTutorial.addEventListener('click', () => initializeApp(false));
+        loginButton.addEventListener('click', handleLogin);
+        guestLoginButton.addEventListener('click', handleGuestLogin);
         
-        setupInitialScreen();
+        showLoginScreen();
         
     </script>
 </body>
