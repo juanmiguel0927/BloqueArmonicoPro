@@ -271,8 +271,13 @@
             background-color: #fde047 !important;
             border: 2px solid #f59e0b;
         }
+        .piano-key.black.selected {
+            background-color: #3b82f6 !important;
+            border: 2px solid #93c5fd;
+        }
         .piano-key.black.given-note-highlight {
             background-color: #facc15 !important;
+            border: 2px solid #fde047;
         }
 
         /* Tutorial Styles */
@@ -377,9 +382,14 @@
             <p class="text-lg text-gray-700 mb-6">Para continuar, selecciona tu perfil o crea uno nuevo.</p>
             <div class="mt-6 w-full max-w-sm mx-auto">
                 <label for="userSelect" class="block text-sm font-medium text-gray-700 text-left">Selecciona tu Perfil</label>
-                <select id="userSelect" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <option value="">-- Cargar Perfil --</option>
-                </select>
+                <div class="flex items-center gap-2">
+                    <select id="userSelect" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select>
+                    <button id="deleteUserButton" class="mt-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-2 rounded-md shadow-sm disabled:opacity-50" disabled title="Borrar Perfil Seleccionado">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                        </svg>
+                    </button>
+                </div>
                 <p class="text-center my-2 text-gray-500">o</p>
                 <label for="newUserInput" class="block text-sm font-medium text-gray-700 text-left">Crea un Nuevo Perfil</label>
                 <input type="text" id="newUserInput" placeholder="Escribe tu nombre aquí" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
@@ -410,6 +420,18 @@
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <button id="promptStartTutorial" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Sí, mostrar tutorial</button>
                 <button id="promptSkipTutorial" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">No, gracias</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold text-red-700 mb-4">Confirmar Eliminación</h3>
+            <p id="deleteConfirmText" class="text-gray-700 mb-6"></p>
+            <div class="flex gap-4 justify-center">
+                <button id="confirmDeleteButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Sí, Eliminar</button>
+                <button id="cancelDeleteButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cancelar</button>
             </div>
         </div>
     </div>
@@ -461,6 +483,11 @@
                     <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
                     <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50" title="Cifrado Latino">Do,Re,Mi</label>
                 </div>
+                <button id="viewHistoryButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ver Historial de Sesión (V)">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16">
+                        <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2z"/>
+                    </svg>
+                </button>
                 <button id="switchUserButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Cambiar de Usuario (U)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
                         <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
@@ -617,53 +644,26 @@
         </div>
     </div>
 
+    <!-- Session History Modal -->
+    <div id="historyModalOverlay" class="modal-overlay hidden">
+        <div class="container p-6 text-center overflow-y-auto max-h-[90vh]">
+            <h2 id="historyModalTitle" class="text-3xl font-bold text-blue-800 mb-4"></h2>
+            <div id="historyModalContent" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <!-- Content will be populated by JS -->
+            </div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="closeHistoryModalButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Volver a la Práctica</button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Final message and session statistics -->
     <div id="finalMessageDisplay" class="container hidden p-6 text-center">
+        <!-- Content structure identical to history modal, will be populated by JS -->
         <h2 class="text-3xl font-bold text-blue-800 mb-4">¡Sesión Terminada!</h2>
         <div id="resultsContentToCapture" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
-            <div class="flex flex-col items-center mb-4">
-                <label for="userNameInput" class="text-lg font-semibold text-gray-800 mb-1">Tu Nombre:</label>
-                <input type="text" id="userNameInput" placeholder="Introduce tu nombre aquí" class="text-center p-2 border rounded-lg w-full max-w-sm" readonly>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
-                    <span class="text-xs text-gray-500">Ejercicios</span>
-                    <span id="totalExercisesDisplay" class="text-2xl font-bold text-gray-800">0</span>
-                </div>
-                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
-                    <span class="text-xs text-gray-500">Aciertos</span>
-                    <span id="correctAnswersDisplay" class="text-2xl font-bold text-green-600">0</span>
-                </div>
-                 <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
-                    <span class="text-xs text-gray-500">Desaciertos</span>
-                    <span id="incorrectAnswersDisplay" class="text-2xl font-bold text-red-600">0</span>
-                </div>
-                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
-                    <span class="text-xs text-gray-500">Precisión</span>
-                    <span id="overallAccuracyDisplay" class="text-2xl font-bold text-blue-600">0%</span>
-                </div>
-                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
-                    <span class="text-xs text-gray-500">Pistas</span>
-                    <span id="hintsUsedDisplay" class="text-2xl font-bold text-yellow-600">0</span>
-                </div>
-                <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm">
-                    <span class="text-xs text-gray-500">Soluciones</span>
-                    <span id="answersUsedDisplay" class="text-2xl font-bold text-red-600">0</span>
-                </div>
-            </div>
-            <div id="finalSuggestion" class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-r-lg">
-                <p class="font-bold">Sugerencia de Práctica:</p>
-                <p id="suggestionText"></p>
-            </div>
-             <p class="text-lg font-bold text-gray-800 mt-4 mb-2">Historial Estadístico por Acorde</p>
-             <div id="sessionHistory" class="bg-white p-4 rounded-lg w-full h-80 relative">
-                 <canvas id="historyChartCanvas"></canvas>
-             </div>
-            <div class="flex justify-center gap-4 text-sm text-gray-500 mt-4">
-                <span id="sessionDateDisplay"></span>
-                <span id="sessionTimeDisplay"></span>
-                <span id="sessionDurationDisplay"></span>
-            </div>
+             <!-- Content populated by JS -->
         </div>
         <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
             <button id="switchUserFinalButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Cambiar de Usuario</button>
@@ -722,6 +722,7 @@
 
         // Chart instance variable
         let historyChart = null;
+        let historyModalChart = null;
 
         // Constants for musical logic
         const noteToSemitoneMap = {
@@ -794,18 +795,6 @@
         const continueTrainingButton = document.getElementById('continueTrainingButton');
         const endSessionButton = document.getElementById('endSessionButton');
         const finalMessageDisplay = document.getElementById('finalMessageDisplay');
-        const totalExercisesDisplay = document.getElementById('totalExercisesDisplay');
-        const correctAnswersDisplay = document.getElementById('correctAnswersDisplay');
-        const incorrectAnswersDisplay = document.getElementById('incorrectAnswersDisplay');
-        const overallAccuracyDisplay = document.getElementById('overallAccuracyDisplay');
-        const hintsUsedDisplay = document.getElementById('hintsUsedDisplay');
-        const answersUsedDisplay = document.getElementById('answersUsedDisplay');
-        const sessionDateDisplay = document.getElementById('sessionDateDisplay');
-        const sessionTimeDisplay = document.getElementById('sessionTimeDisplay');
-        const sessionDurationDisplay = document.getElementById('sessionDurationDisplay');
-        const userNameInput = document.getElementById('userNameInput');
-        const saveAsPhotoButton = document.getElementById('saveAsPhotoButton');
-        const saveAsPdfButton = document.getElementById('saveAsPdfButton');
         const resultsContentToCapture = document.getElementById('resultsContentToCapture');
         const difficultyRadios = document.querySelectorAll('input[name="difficulty"]');
         const streakCounter = document.getElementById('streakCounter').querySelector('.text-xl');
@@ -835,12 +824,11 @@
         const fullscreenIconOpen = document.getElementById('fullscreenIconOpen');
         const fullscreenIconClose = document.getElementById('fullscreenIconClose');
         const tutorialEndButton = document.getElementById('tutorialEndButton');
-        const sessionHistoryContainer = document.getElementById('sessionHistory');
-        const suggestionText = document.getElementById('suggestionText');
         const userSelect = document.getElementById('userSelect');
         const newUserInput = document.getElementById('newUserInput');
         const loginButton = document.getElementById('loginButton');
         const guestLoginButton = document.getElementById('guestLoginButton');
+        const deleteUserButton = document.getElementById('deleteUserButton');
         const currentUserName = document.getElementById('currentUserName');
         const switchUserButton = document.getElementById('switchUserButton');
         const switchUserFinalButton = document.getElementById('switchUserFinalButton');
@@ -848,6 +836,15 @@
         const tutorialUserName = document.getElementById('tutorialUserName');
         const promptStartTutorial = document.getElementById('promptStartTutorial');
         const promptSkipTutorial = document.getElementById('promptSkipTutorial');
+        const deleteConfirmModalOverlay = document.getElementById('deleteConfirmModalOverlay');
+        const deleteConfirmText = document.getElementById('deleteConfirmText');
+        const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+        const cancelDeleteButton = document.getElementById('cancelDeleteButton');
+        const viewHistoryButton = document.getElementById('viewHistoryButton');
+        const historyModalOverlay = document.getElementById('historyModalOverlay');
+        const historyModalTitle = document.getElementById('historyModalTitle');
+        const historyModalContent = document.getElementById('historyModalContent');
+        const closeHistoryModalButton = document.getElementById('closeHistoryModalButton');
         
         let synth, reverb;
 
@@ -980,6 +977,12 @@
 
             switchUserButton.addEventListener('click', handleSwitchUser);
             switchUserFinalButton.addEventListener('click', handleSwitchUser);
+
+            viewHistoryButton.addEventListener('click', showHistoryModal);
+            closeHistoryModalButton.addEventListener('click', () => historyModalOverlay.classList.remove('visible'));
+
+            deleteUserButton.addEventListener('click', confirmDeleteUser);
+            cancelDeleteButton.addEventListener('click', () => deleteConfirmModalOverlay.classList.remove('visible'));
         }
 
         function showCustomMessage(title, message, type = 'info') {
@@ -1604,6 +1607,10 @@
                     e.preventDefault();
                     if(!switchUserButton.disabled) switchUserButton.click();
                     break;
+                case 'v':
+                    e.preventDefault();
+                    if(!viewHistoryButton.disabled) viewHistoryButton.click();
+                    break;
             }
         }
 
@@ -1772,36 +1779,40 @@
             evaluationModalOverlay.classList.add('visible');
         }
 
-        function endSession() {
-            saveUserData();
-            mainAppContainer.classList.add('hidden');
-            evaluationModalOverlay.classList.remove('visible');
-            finalMessageDisplay.classList.remove('hidden');
+        function populateStatsView(container, chartInstance, isFinalView) {
+            const statsHTML = `
+                <div class="flex flex-col items-center mb-4">
+                    <label class="text-lg font-semibold text-gray-800 mb-1">Nombre:</label>
+                    <input type="text" value="${state.currentUser}" class="text-center p-2 border rounded-lg w-full max-w-sm" readonly>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Ejercicios</span><span class="text-2xl font-bold text-gray-800">${state.stats.totalExercises}</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Aciertos</span><span class="text-2xl font-bold text-green-600">${state.stats.totalCorrect}</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Desaciertos</span><span class="text-2xl font-bold text-red-600">${state.stats.totalIncorrect}</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Precisión</span><span class="text-2xl font-bold text-blue-600">${(state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0}%</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Pistas</span><span class="text-2xl font-bold text-yellow-600">${state.stats.hintsUsed}</span></div>
+                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Soluciones</span><span class="text-2xl font-bold text-red-600">${state.stats.answersUsed}</span></div>
+                </div>
+                <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-r-lg"><p class="font-bold">Sugerencia de Práctica:</p><p id="suggestionText-${isFinalView ? 'final' : 'modal'}"></p></div>
+                <p class="text-lg font-bold text-gray-800 mt-4 mb-2">Historial Estadístico por Acorde</p>
+                <div class="bg-white p-4 rounded-lg w-full h-80 relative"><canvas id="chartCanvas-${isFinalView ? 'final' : 'modal'}"></canvas></div>
+                <div class="flex justify-center gap-4 text-sm text-gray-500 mt-4">
+                    <span id="sessionDateDisplay-${isFinalView ? 'final' : 'modal'}"></span><span id="sessionTimeDisplay-${isFinalView ? 'final' : 'modal'}"></span><span id="sessionDurationDisplay-${isFinalView ? 'final' : 'modal'}"></span>
+                </div>`;
+            container.innerHTML = statsHTML;
 
-            const { totalExercises, totalCorrect, totalIncorrect, hintsUsed, answersUsed, sessionHistory } = state.stats;
-            const accuracy = (totalCorrect + totalIncorrect) > 0 ? Math.round((totalCorrect / (totalCorrect + totalIncorrect)) * 100) : 0;
-            
-            userNameInput.value = state.currentUser;
-            totalExercisesDisplay.textContent = totalExercises;
-            correctAnswersDisplay.textContent = totalCorrect;
-            incorrectAnswersDisplay.textContent = totalIncorrect;
-            overallAccuracyDisplay.textContent = `${accuracy}%`;
-            hintsUsedDisplay.textContent = hintsUsed;
-            answersUsedDisplay.textContent = answersUsed;
-            
+            const suggestionEl = document.getElementById(`suggestionText-${isFinalView ? 'final' : 'modal'}`);
             const strugglingChords = getPerformanceAnalysis();
             if (strugglingChords.length > 0) {
-                suggestionText.textContent = `Tu área principal a mejorar son los acordes ${strugglingChords.map(c=>c.chord).join(', ')}. ¡Enfócate en ellos en tu próxima sesión!`;
-            } else if (accuracy >= 90) {
-                suggestionText.textContent = "¡Excelente trabajo! Tu precisión es muy alta. Intenta practicar en un nivel de dificultad más alto o con tipos de acordes más complejos.";
-            } else if (accuracy >= 70) {
-                suggestionText.textContent = "¡Buen progreso! Sigue así. Para mejorar, intenta usar menos pistas y concéntrate en los acordes que te resultan más difíciles.";
+                suggestionEl.textContent = `Tu área principal a mejorar son los acordes ${strugglingChords.map(c=>c.chord).join(', ')}. ¡Enfócate en ellos en tu próxima sesión!`;
+            } else if (((state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0) >= 90) {
+                suggestionEl.textContent = "¡Excelente trabajo! Tu precisión es muy alta. Intenta practicar en un nivel de dificultad más alto o con tipos de acordes más complejos.";
             } else {
-                suggestionText.textContent = "Sigue practicando para mejorar. Te recomendamos volver al nivel 'Básico' o usar los 'Ajustes' (S) para practicar solo acordes Mayores y menores hasta que te sientas más seguro.";
+                suggestionEl.textContent = "¡Buen progreso! Sigue practicando para mejorar tu velocidad y precisión.";
             }
 
             const historyStats = {};
-            sessionHistory.forEach(item => {
+            state.stats.sessionHistory.forEach(item => {
                 const chordName = `${item.chordRoot}${item.chordCifrado}`;
                 if (!historyStats[chordName]) {
                     historyStats[chordName] = { correct: 0, corrected: 0, solution: 0, skipped: 0 };
@@ -1812,50 +1823,46 @@
                 if (item.status === '⏭️ Omitido') historyStats[chordName].skipped++;
             });
 
-            const chartCanvas = document.getElementById('historyChartCanvas');
-            if (historyChart) {
-                historyChart.destroy();
-            }
-
-            const labels = Object.keys(historyStats);
-            const correctData = labels.map(label => historyStats[label].correct);
-            const correctedData = labels.map(label => historyStats[label].corrected);
-            const solutionData = labels.map(label => historyStats[label].solution);
-            const skippedData = labels.map(label => historyStats[label].skipped);
-
-            historyChart = new Chart(chartCanvas, {
+            const chartCanvas = document.getElementById(`chartCanvas-${isFinalView ? 'final' : 'modal'}`);
+            if (chartInstance) chartInstance.destroy();
+            
+            const newChartInstance = new Chart(chartCanvas, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: Object.keys(historyStats),
                     datasets: [
-                        { label: 'Correcto', data: correctData, backgroundColor: 'rgba(75, 192, 192, 0.7)' },
-                        { label: 'Corregido', data: correctedData, backgroundColor: 'rgba(255, 206, 86, 0.7)' },
-                        { label: 'Solución', data: solutionData, backgroundColor: 'rgba(255, 99, 132, 0.7)' },
-                        { label: 'Omitido', data: skippedData, backgroundColor: 'rgba(153, 102, 255, 0.7)' }
+                        { label: 'Correcto', data: Object.values(historyStats).map(d => d.correct), backgroundColor: 'rgba(75, 192, 192, 0.7)' },
+                        { label: 'Corregido', data: Object.values(historyStats).map(d => d.corrected), backgroundColor: 'rgba(255, 206, 86, 0.7)' },
+                        { label: 'Solución', data: Object.values(historyStats).map(d => d.solution), backgroundColor: 'rgba(255, 99, 132, 0.7)' },
+                        { label: 'Omitido', data: Object.values(historyStats).map(d => d.skipped), backgroundColor: 'rgba(153, 102, 255, 0.7)' }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { stacked: true },
-                        y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
-                    },
-                    plugins: {
-                        title: { display: false },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    animation: false
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } } }
             });
 
             const now = new Date();
-            sessionDateDisplay.textContent = now.toLocaleDateString('es-ES');
-            sessionTimeDisplay.textContent = now.toLocaleTimeString('es-ES');
+            document.getElementById(`sessionDateDisplay-${isFinalView ? 'final' : 'modal'}`).textContent = now.toLocaleDateString('es-ES');
+            document.getElementById(`sessionTimeDisplay-${isFinalView ? 'final' : 'modal'}`).textContent = now.toLocaleTimeString('es-ES');
             const durationMs = now.getTime() - state.session.startTime;
             const minutes = Math.floor(durationMs / 60000);
             const seconds = Math.round((durationMs % 60000) / 1000);
-            sessionDurationDisplay.textContent = `Duración: ${minutes}m ${seconds}s`;
+            document.getElementById(`sessionDurationDisplay-${isFinalView ? 'final' : 'modal'}`).textContent = `Duración: ${minutes}m ${seconds}s`;
+            
+            return newChartInstance;
+        }
+
+        function endSession() {
+            saveUserData();
+            mainAppContainer.classList.add('hidden');
+            evaluationModalOverlay.classList.remove('visible');
+            finalMessageDisplay.classList.remove('hidden');
+            historyChart = populateStatsView(resultsContentToCapture, historyChart, true);
+        }
+        
+        function showHistoryModal() {
+            historyModalTitle.textContent = `Historial de Sesión de ${state.currentUser}`;
+            historyModalChart = populateStatsView(historyModalContent, historyModalChart, false);
+            historyModalOverlay.classList.add('visible');
         }
 
 
@@ -1997,7 +2004,7 @@
             { id: 'inputMethodToggle', title: 'Paso 3: Métodos de Entrada', text: 'Puedes usar los botones de "Cifrado" o el "Piano" virtual. ¡Usa la tecla (I) para cambiar entre ellos!' },
             { id: 'difficultySelection', title: 'Paso 4: Cambia la Dificultad', text: 'Puedes cambiar el nivel en cualquier momento usando las teclas (1) para Básico, (2) para Intermedio y (3) para Avanzado.' },
             { id: 'confirmAnswerButton', title: 'Paso 5: Comprueba tu Respuesta', text: 'Una vez que hayas construido el acorde, presiona "Confirmar" (Enter). ¡Usa las herramientas de ayuda si lo necesitas!' },
-            { id: null, title: 'Atajos de Teclado Completos', text: '<b>A-G:</b> Notas Naturales <br><b>+/-:</b> Sostenidos/Bemoles <br><b>Enter:</b> Confirmar <br><b>P:</b> Pista, <b>R:</b> Respuesta <br><b>Espacio:</b> Cambiar, <b>N:</b> Borrar <br><b>Q:</b> Pantalla Completa <br><b>1,2,3:</b> Dificultad <br><b>I:</b> Cifrado/Piano <br><b>S:</b> Ajustes, <b>H:</b> Ayuda, <b>U:</b> Cambiar Usuario' },
+            { id: null, title: 'Atajos de Teclado Completos', text: '<b>A-G:</b> Notas Naturales <br><b>+/-:</b> Sostenidos/Bemoles <br><b>Enter:</b> Confirmar <br><b>P:</b> Pista, <b>R:</b> Respuesta <br><b>Espacio:</b> Cambiar, <b>N:</b> Borrar <br><b>Q:</b> Pantalla Completa <br><b>1,2,3:</b> Dificultad <br><b>I:</b> Cifrado/Piano <br><b>S:</b> Ajustes, <b>H:</b> Ayuda, <b>U:</b> Cambiar Usuario, <b>V:</b> Ver Historial' },
             { id: null, title: '¡Todo Listo!', text: 'Has completado el tutorial. ¡Ya puedes comenzar a entrenar! ¡Mucha suerte!' }
         ];
 
@@ -2085,6 +2092,9 @@
                 option.textContent = user;
                 userSelect.appendChild(option);
             });
+             userSelect.addEventListener('change', () => {
+                deleteUserButton.disabled = !userSelect.value;
+            });
         }
 
         function loadUserData(username) {
@@ -2126,6 +2136,24 @@
                 customPractice: state.customPractice
             };
             localStorage.setItem(`harmonicBlockProData_${state.currentUser}`, JSON.stringify(dataToSave));
+        }
+
+        function confirmDeleteUser() {
+            const userToDelete = userSelect.value;
+            if (!userToDelete) return;
+            deleteConfirmText.innerHTML = `¿Estás seguro de que quieres eliminar el perfil de <strong>${userToDelete}</strong>? Esta acción no se puede deshacer.`;
+            deleteConfirmModalOverlay.classList.add('visible');
+
+            confirmDeleteButton.onclick = () => {
+                let users = JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]');
+                users = users.filter(user => user !== userToDelete);
+                localStorage.setItem('harmonicBlockProUsers', JSON.stringify(users));
+                localStorage.removeItem(`harmonicBlockProData_${userToDelete}`);
+                
+                populateUserSelect();
+                deleteConfirmModalOverlay.classList.remove('visible');
+                showCustomMessage("Éxito", `El perfil de ${userToDelete} ha sido eliminado.`, "success");
+            };
         }
 
         function handleLogin() {
@@ -2170,15 +2198,14 @@
             state.currentUser = "Invitado";
             currentUserName.textContent = "Invitado";
             
-            // Load default state without saving
             const defaultData = getInitialState();
             state.stats = defaultData.stats;
             state.customPractice = defaultData.customPractice;
-            state.stats.sessionHistory = []; // Ensure session history is clean
+            state.stats.sessionHistory = []; 
             state.evaluation.questionsAttemptedInBatch = 0;
             
             welcomeModalOverlay.classList.remove('visible');
-            initializeApp(false); // Start directly, skip tutorial for guest
+            initializeApp(false); 
         }
 
         function handleSwitchUser() {
