@@ -4,18 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bloque Armónico Pro: Herramienta de Entrenamiento</title>
-    <!-- External libraries for musical and UI functionality -->
+    <!-- Librerías externas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Tailwind CSS for a modern and responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js for statistical graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* Base document styles */
+        /* Estilos Base */
         html, body {
             height: 100%;
             margin: 0;
@@ -24,12 +22,11 @@
             flex-direction: column;
             align-items: center;
             background-color: #f1f5f9;
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             color: #334155;
             line-height: 1.6;
         }
 
-        /* Main application container */
         .container {
             background-color: #ffffff;
             padding: 1.5rem;
@@ -46,15 +43,9 @@
             margin-bottom: 2rem;
         }
 
-        /* Styles for the question area */
-        #chordQuestionWrapper {
-            text-align: center;
-        }
-        #chordQuestionText strong {
-            color: #1e40af;
-        }
+        #chordQuestionWrapper { text-align: center; }
+        #chordQuestionText strong { color: #1e40af; }
 
-        /* Container for the staff and note grid */
         #displaySection {
             display: flex;
             justify-content: center;
@@ -89,11 +80,10 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             width: 100%;
             height: auto;
-            max-width: 300px; /* Constrains the display width */
+            max-width: 300px;
             box-sizing: border-box;
         }
 
-        /* Note grid styles */
         .notes-grid {
             display: grid;
             grid-template-rows: repeat(4, 1fr);
@@ -112,14 +102,9 @@
             font-size: 1.1em;
             font-weight: 600;
         }
-        .grid-cell .note-display {
-            font-size: 1.5em;
-        }
-        .grid-cell.hidden {
-            display: none;
-        }
+        .grid-cell .note-display { font-size: 1.5em; }
+        .grid-cell.hidden { display: none; }
 
-        /* Interaction button styles */
         .action-buttons-group, .modal-buttons {
             display: flex;
             flex-wrap: wrap;
@@ -139,11 +124,7 @@
             touch-action: manipulation;
         }
 
-        .action-buttons-group button:disabled, .note-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
+        .action-buttons-group button:disabled, .note-button:disabled { opacity: 0.5; cursor: not-allowed; }
         .note-button.active, .toggle-button.active {
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             transform: translateY(-1px);
@@ -151,24 +132,10 @@
             color: white;
         }
 
-        /* Note button styles */
-        .note-building-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .natural-note-buttons, .accidental-buttons {
-            display: grid;
-            gap: 0.5rem;
-        }
-        .natural-note-buttons {
-            grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr));
-        }
-        .accidental-buttons {
-            grid-template-columns: repeat(4, 1fr);
-            max-width: 200px;
-            margin: 0 auto;
-        }
+        .note-building-controls { display: flex; flex-direction: column; gap: 1rem; }
+        .natural-note-buttons, .accidental-buttons { display: grid; gap: 0.5rem; }
+        .natural-note-buttons { grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr)); }
+        .accidental-buttons { grid-template-columns: repeat(4, 1fr); max-width: 200px; margin: 0 auto; }
         .note-button {
             padding: 0.75rem;
             border-radius: 8px;
@@ -179,22 +146,17 @@
             transition: all 0.2s;
         }
 
-        /* Modal styles */
+        /* Modales Generales */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-        .modal-overlay.visible {
-            display: flex;
-        }
+        .modal-overlay.visible { display: flex; }
         .modal-content {
             background-color: #ffffff;
             padding: 1.5rem 2rem;
@@ -203,21 +165,14 @@
             max-width: 450px;
             width: 90%;
             text-align: center;
+            max-height: 90vh; /* Permite scroll en pantallas pequeñas */
+            overflow-y: auto;
         }
 
-        /* Feedback message styles */
-        .feedback.correct {
-            background-color: #dcfce7;
-            color: #15803d;
-            border: 1px solid #15803d;
-        }
-        .feedback.incorrect {
-            background-color: #fee2e2;
-            color: #b91c1c;
-            border: 1px solid #b91c1c;
-        }
+        .feedback.correct { background-color: #dcfce7; color: #15803d; border: 1px solid #15803d; }
+        .feedback.incorrect { background-color: #fee2e2; color: #b91c1c; border: 1px solid #b91c1c; }
 
-        /* Piano styles */
+        /* Piano */
         .piano-container {
             position: relative;
             display: flex;
@@ -247,7 +202,6 @@
             transform: translateX(-50%);
             border-radius: 0 0 5px 5px;
         }
-        /* Black key positions */
         .piano-key.black[data-note*="C#"] { left: calc(100% / 22 * 1); }
         .piano-key.black[data-note*="D#"] { left: calc(100% / 22 * 2); }
         .piano-key.black[data-note*="F#"] { left: calc(100% / 22 * 4); }
@@ -264,105 +218,54 @@
         .piano-key.black[data-note*="G#"][data-note*="/5"] { left: calc(100% / 22 * 19); }
         .piano-key.black[data-note*="A#"][data-note*="/5"] { left: calc(100% / 22 * 20); }
         
-        .piano-key.white.selected {
-            background-color: #93c5fd !important; /* Lighter blue for better contrast */
-            border: 2px solid #3b82f6;
-        }
-         .piano-key.black.selected {
-            background-color: #3b82f6 !important;
-            border: 2px solid #93c5fd;
-        }
-        .piano-key.white.given-note-highlight {
-            background-color: #fde047 !important;
-            border: 2px solid #f59e0b;
-        }
-        .piano-key.black.given-note-highlight {
-            background-color: #facc15 !important;
-            border: 2px solid #fde047;
-        }
+        .piano-key.white.selected { background-color: #93c5fd !important; border: 2px solid #3b82f6; }
+        .piano-key.black.selected { background-color: #3b82f6 !important; border: 2px solid #93c5fd; }
+        .piano-key.white.given-note-highlight { background-color: #fde047 !important; border: 2px solid #f59e0b; }
+        .piano-key.black.given-note-highlight { background-color: #facc15 !important; border: 2px solid #fde047; }
 
-        /* Tutorial Styles */
+        /* Tutorial */
         #tutorialOverlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.75);
-            z-index: 2000;
+            position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); z-index: 2000;
         }
         #tutorialModal {
-            position: absolute;
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            max-width: 350px;
-            width: 90%;
-            border: 2px solid #3b82f6;
+            position: absolute; background-color: white; padding: 1.5rem; border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); max-width: 350px; width: 90%; border: 2px solid #3b82f6;
         }
         .tutorial-highlight {
-            position: relative;
-            z-index: 2001;
+            position: relative; z-index: 2001;
             box-shadow: 0 0 0 4px #3b82f6, 0 0 20px 10px rgba(59, 130, 246, 0.7);
-            border-radius: 8px;
-            transition: box-shadow 0.3s ease-in-out;
+            border-radius: 8px; transition: box-shadow 0.3s ease-in-out; background-color: white;
         }
 
         /* Tooltip style */
         [title]:hover::after {
-            content: attr(title);
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%) translateY(8px);
-            background-color: #334155;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            z-index: 10;
-            transition-delay: 0.2s; /* Faster tooltip */
+            content: attr(title); position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(8px);
+            background-color: #334155; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;
+            white-space: nowrap; z-index: 10; transition-delay: 0.2s;
         }
-        [title] {
-            position: relative;
-        }
+        [title] { position: relative; }
 
-        /* Responsive design for mobile devices */
+        /* Responsive Celular (Optimizado) */
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-                gap: 0.75rem;
-                margin-top: 0.5rem;
-            }
-            #statusBar {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            #statusBarInfo, #statusBarControls {
-                width: 100%;
-                justify-content: space-around;
-            }
-            #statusBarControls {
-                flex-wrap: wrap;
-            }
-            #displaySection {
-                flex-direction: column;
-                align-items: center;
-            }
-            #chordQuestionText {
-                font-size: 1rem;
-            }
-            #chordQuestionText strong {
-                font-size: 1.1rem;
-            }
-            #questionArea {
-                padding: 0.75rem;
-            }
-            .action-buttons-group {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-            }
-            #confirmAnswerButton {
-                grid-column: 1 / -1; /* Span full width */
+            .container { padding: 0.75rem; gap: 0.75rem; margin-top: 0.5rem; width: 100%; }
+            #statusBar { flex-direction: column; gap: 0.5rem; }
+            #statusBarInfo, #statusBarControls { width: 100%; justify-content: space-around; }
+            #statusBarControls { flex-wrap: wrap; }
+            #displaySection { flex-direction: column; align-items: center; }
+            #questionArea { padding: 0.75rem; width: 100%; }
+            .action-buttons-group { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%; }
+            .action-buttons-group button { min-width: 0; padding: 0.75rem 0.5rem; font-size: 0.9rem; }
+            #confirmAnswerButton { grid-column: 1 / -1; }
+            .piano-container { height: 140px; }
+            
+            .modal-content { padding: 1rem; } /* Padding reducido en móviles para ganar espacio */
+
+            /* TUTORIAL SIEMPRE VISIBLE EN MÓVILES */
+            #tutorialModal {
+                position: fixed !important; top: auto !important; bottom: 15px !important;
+                left: 50% !important; transform: translateX(-50%) !important;
+                width: 95%; max-height: 40vh; overflow-y: auto; z-index: 2005;
+                box-shadow: 0 -5px 25px rgba(0,0,0,0.4);
             }
         }
     </style>
@@ -370,31 +273,32 @@
 <body class="bg-gray-100 flex flex-col items-center">
     <!-- User selection modal -->
     <div id="welcomeModalOverlay" class="modal-overlay visible">
-        <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-lg w-11/12">
-            <h2 class="text-3xl sm:text-4xl font-bold text-blue-800 mb-4">Bienvenido a Bloque Armónico Pro</h2>
-            <p class="text-lg text-gray-700 mb-6">Para continuar, selecciona tu perfil o crea uno nuevo.</p>
-            <div class="mt-6 w-full max-w-sm mx-auto">
+        <!-- El div interno permite scroll si excede el tamaño de la pantalla -->
+        <div class="bg-white p-5 sm:p-8 rounded-xl shadow-2xl text-center max-w-lg w-11/12 max-h-[95vh] overflow-y-auto relative">
+            <h2 class="text-2xl sm:text-3xl font-bold text-blue-800 mb-3">Bienvenido a Bloque Armónico Pro</h2>
+            <p class="text-base sm:text-lg text-gray-700 mb-4">Para continuar, selecciona tu perfil o crea uno nuevo.</p>
+            <div class="mt-4 w-full max-w-sm mx-auto">
                 <label for="userSelect" class="block text-sm font-medium text-gray-700 text-left">Selecciona tu Perfil</label>
-                <div class="flex items-center gap-2">
-                    <select id="userSelect" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select>
-                    <button id="deleteUserButton" class="mt-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-2 rounded-md shadow-sm disabled:opacity-50" title="Borrar Perfil Seleccionado">
+                <div class="flex items-center gap-2 mt-1">
+                    <select id="userSelect" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select>
+                    <button id="deleteUserButton" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-md shadow-sm disabled:opacity-50" title="Borrar Perfil Seleccionado">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                             <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
                         </svg>
                     </button>
                 </div>
-                <p class="text-center my-2 text-gray-500">o</p>
+                <p class="text-center my-3 text-gray-500 text-sm">o</p>
                 <label for="newUserInput" class="block text-sm font-medium text-gray-700 text-left">Crea un Nuevo Perfil</label>
                 <input type="text" id="newUserInput" placeholder="Escribe tu nombre aquí" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
             </div>
-            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <button id="loginButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Comenzar Sesión</button>
-                <button id="guestLoginButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Entrar como Invitado</button>
+            <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                <button id="loginButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors text-sm sm:text-base">Comenzar Sesión</button>
+                <button id="guestLoginButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors text-sm sm:text-base">Entrar como Invitado</button>
             </div>
-             <div class="text-center mt-8">
-                <p class="text-sm text-gray-600">Una aplicación de</p>
-                <p class="text-lg font-bold text-blue-800 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-music-note-beamed" viewBox="0 0 16 16">
+             <div class="text-center mt-6 border-t pt-4">
+                <p class="text-xs sm:text-sm text-gray-600">Una aplicación de</p>
+                <p class="text-base sm:text-lg font-bold text-blue-800 flex items-center justify-center gap-2 mt-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-music-note-beamed" viewBox="0 0 16 16">
                       <path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13c0-1.104 1.12-2 2.5-2s2.5.896 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2z"/>
                       <path fill-rule="evenodd" d="M14 11V2h1v9h-1zM6 3v10H5V3h1z"/>
                       <path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4V2.905z"/>
@@ -429,12 +333,11 @@
         </div>
     </div>
 
-
     <!-- Interactive Tutorial -->
     <div id="tutorialOverlay" class="hidden">
         <div id="tutorialModal">
             <h3 id="tutorialTitle" class="text-xl font-bold text-blue-800 mb-2"></h3>
-            <p id="tutorialText" class="text-gray-700 mb-4"></p>
+            <p id="tutorialText" class="text-sm sm:text-base text-gray-700 mb-4"></p>
             <div class="flex flex-col gap-2 mt-4">
                 <button id="tutorialNextButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Siguiente</button>
                 <button id="tutorialEndButton" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Terminar Tutorial</button>
@@ -442,7 +345,7 @@
         </div>
     </div>
 
-    <!-- Main application container, hidden initially -->
+    <!-- Main application container -->
     <div id="mainAppContainer" class="container hidden">
         <div class="flex flex-col items-center justify-between mb-4">
             <h1 class="text-2xl font-bold text-center">Bloque Armónico Pro</h1>
@@ -454,7 +357,7 @@
             </div>
         </div>
 
-        <!-- Status bar (streak and score) -->
+        <!-- Status bar -->
         <div id="statusBar" class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 p-2 bg-gray-50 rounded-lg gap-2">
             <div id="statusBarInfo" class="flex justify-around items-center gap-2 flex-grow">
                 <div id="streakCounter" class="flex flex-col items-center p-2 rounded-xl bg-amber-50 border border-amber-200">
@@ -471,7 +374,6 @@
                 </div>
             </div>
             <div id="statusBarControls" class="flex justify-center items-center gap-2 flex-wrap">
-                <!-- Notation selector -->
                 <div class="flex rounded-full bg-gray-200 p-1">
                     <input type="radio" id="notationAmericano" name="notationSystem" value="american" class="hidden" checked>
                     <label for="notationAmericano" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50" title="Cifrado Americano (Anglosajón)">C,D,E</label>
@@ -479,25 +381,16 @@
                     <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50" title="Cifrado Latino">Do,Re,Mi</label>
                 </div>
                 <button id="viewHistoryButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ver Historial de Sesión (V)">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16">
-                        <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2z"/>
-                    </svg>
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16"><path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2z"/></svg>
                 </button>
                 <button id="switchUserButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Cambiar de Usuario (U)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
-                        <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-                        <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
                 </button>
                 <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ajustes de Práctica (S)">⚙️</button>
                 <button id="showTutorialButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ver Tutorial (H)">?</button>
                 <button id="fullscreenButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Pantalla Completa (Q)">
-                    <svg id="fullscreenIconOpen" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"/>
-                    </svg>
-                    <svg id="fullscreenIconClose" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen-exit hidden" viewBox="0 0 16 16">
-                        <path d="M5.5 0a.5.5 0 0 1 .5.5v4A.5.5 0 0 1 5 5h-4a.5.5 0 0 1 0-1h3.5V.5a.5.5 0 0 1 .5-.5zm0 11a.5.5 0 0 1 .5.5v3.5h-3.5a.5.5 0 0 1 0-1h4v-3a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-3a.5.5 0 0 1 .5-.5zm.5-11a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-4a.5.5 0 0 1 .5-.5z"/>
-                    </svg>
+                    <svg id="fullscreenIconOpen" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"/></svg>
+                    <svg id="fullscreenIconClose" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen-exit hidden" viewBox="0 0 16 16"><path d="M5.5 0a.5.5 0 0 1 .5.5v4A.5.5 0 0 1 5 5h-4a.5.5 0 0 1 0-1h3.5V.5a.5.5 0 0 1 .5-.5zm0 11a.5.5 0 0 1 .5.5v3.5h-3.5a.5.5 0 0 1 0-1h4v-3a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-3a.5.5 0 0 1 .5-.5zm.5-11a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-4a.5.5 0 0 1 .5-.5z"/></svg>
                 </button>
             </div>
         </div>
@@ -520,22 +413,10 @@
             <div id="questionArea" class="w-full max-w-md md:flex-1 md:min-w-[250px] p-4 bg-blue-100 rounded-lg border border-blue-300">
                 <p class="text-lg font-bold text-blue-800 mb-2">Construye el acorde:</p>
                 <div class="notes-grid w-full">
-                    <div class="grid-cell" id="gridCell0">
-                        <span class="interval-label text-gray-500"></span>
-                        <span class="note-display font-bold"></span>
-                    </div>
-                    <div class="grid-cell" id="gridCell1">
-                        <span class="interval-label text-gray-500"></span>
-                        <span class="note-display font-bold"></span>
-                    </div>
-                    <div class="grid-cell" id="gridCell2">
-                        <span class="interval-label text-gray-500"></span>
-                        <span class="note-display font-bold"></span>
-                    </div>
-                    <div class="grid-cell" id="gridCell3">
-                        <span class="interval-label text-gray-500"></span>
-                        <span class="note-display font-bold"></span>
-                    </div>
+                    <div class="grid-cell" id="gridCell0"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell1"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell2"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell3"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
                 </div>
             </div>
             <div id="staffArea" class="w-full max-w-md md:flex-1 md:min-w-[300px] flex justify-center items-center">
@@ -543,7 +424,7 @@
             </div>
         </div>
         
-        <!-- Note input options (Cifrado vs Piano) -->
+        <!-- Note input options -->
         <div id="inputMethodToggle" class="flex justify-center mb-4">
             <div class="flex p-1 bg-gray-200 rounded-full" title="Cambiar Entrada (I)">
                 <button id="cifradoToggle" class="py-2 px-4 rounded-full font-semibold transition-all bg-white text-blue-600 shadow-sm active">Cifrado</button>
@@ -551,13 +432,11 @@
             </div>
         </div>
 
-        <!-- Note selection controls (Cifrado) -->
         <div id="noteBuildingControls" class="flex flex-col gap-4">
             <div id="naturalNoteButtons" class="natural-note-buttons"></div>
             <div id="accidentalButtons" class="accidental-buttons"></div>
         </div>
 
-        <!-- Piano keyboard, initially hidden -->
         <div id="piano-container" class="piano-container hidden"></div>
 
         <!-- Main action buttons -->
@@ -655,7 +534,6 @@
 
     <!-- Final message and session statistics -->
     <div id="finalMessageDisplay" class="container hidden p-6 text-center">
-        <!-- Content structure identical to history modal, will be populated by JS -->
         <h2 class="text-3xl font-bold text-blue-800 mb-4">¡Sesión Terminada!</h2>
         <div id="resultsContentToCapture" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
              <!-- Content populated by JS -->
@@ -669,76 +547,34 @@
 
     <!-- Main application script -->
     <script type="module">
-        // Import VexFlow modules for the staff
         import { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
 
-        // Central application state
         const state = {
             currentUser: null,
-            correctNotes: [],
-            correctNotesWithOctave: [],
-            chordRoot: '',
-            chordTypeKey: '',
-            givenIntervalName: '',
-            givenLabel: '',
-            givenNote: '',
-            givenNoteWithOctave: '',
-            orderedLabelsForDisplay: [],
-            selectedUserNotes: [],
-            stats: {},
-            evaluation: {
-                questionsAttemptedInBatch: 0,
-                exercisesPerEval: 5,
-            },
-            currentExerciseId: null,
-            failedCurrentExercise: false,
-            answerWasShown: false,
-            difficulty: 'basic',
-            notationSystem: 'american',
+            correctNotes: [], correctNotesWithOctave: [],
+            chordRoot: '', chordTypeKey: '', givenIntervalName: '', givenLabel: '', givenNote: '', givenNoteWithOctave: '',
+            orderedLabelsForDisplay: [], selectedUserNotes: [],
+            stats: {}, evaluation: { questionsAttemptedInBatch: 0, exercisesPerEval: 5 },
+            currentExerciseId: null, failedCurrentExercise: false, answerWasShown: false,
+            difficulty: 'basic', notationSystem: 'american',
             customPractice: {
                 basic: { isActive: false, allowedChords: [] },
                 intermediate: { isActive: false, allowedChords: [] },
                 advanced: { isActive: false, allowedChords: [], allowedLeads: [] }
             },
-            audioContextStarted: false,
-            session: {
-                startTime: 0
-            },
-            tutorial: {
-                currentStep: 0,
-                isActive: false
-            },
-            keyboard: {
-                lastAccidentalKey: null,
-                lastAccidentalTimestamp: 0,
-                doublePressThreshold: 400 // ms
-            }
+            audioContextStarted: false, session: { startTime: 0 },
+            tutorial: { currentStep: 0, isActive: false },
+            keyboard: { lastAccidentalKey: null, lastAccidentalTimestamp: 0, doublePressThreshold: 400 }
         };
 
-        // Chart instance variable
-        let historyChart = null;
-        let historyModalChart = null;
+        let historyChart = null, historyModalChart = null;
 
-        // Constants for musical logic
         const noteToSemitoneMap = {
-            'C': 0, 'B#': 0,
-            'C#': 1, 'Db': 1,
-            'D': 2,
-            'D#': 3, 'Eb': 3,
-            'E': 4, 'Fb': 4,
-            'F': 5, 'E#': 5,
-            'F#': 6, 'Gb': 6,
-            'G': 7,
-            'G#': 8, 'Ab': 8,
-            'A': 9,
-            'A#': 10, 'Bb': 10,
-            'B': 11, 'Cb': 11,
-            'Cbb': 10, 'B##': 1,
-            'Dbb': 0, 'C##': 2,
-            'Ebb': 2, 'D##': 4,
-            'Fbb': 3, 'E##': 6,
-            'Gbb': 5, 'F##': 7,
-            'Abb': 7, 'G##': 9,
+            'C': 0, 'B#': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
+            'E': 4, 'Fb': 4, 'F': 5, 'E#': 5, 'F#': 6, 'Gb': 6, 'G': 7,
+            'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11, 'Cb': 11,
+            'Cbb': 10, 'B##': 1, 'Dbb': 0, 'C##': 2, 'Ebb': 2, 'D##': 4,
+            'Fbb': 3, 'E##': 6, 'Gbb': 5, 'F##': 7, 'Abb': 7, 'G##': 9,
             'Bbb': 9, 'A##': 11,
         };
         const naturalLetterSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
@@ -857,18 +693,57 @@
             closeHistoryModalButton = document.getElementById('closeHistoryModalButton');
         }
 
-        // --- Main Logic ---
+        // --- Funciones de Fecha Locales ---
+        function getLocalDateString(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        function getTodayDateString() { return getLocalDateString(new Date()); }
+        function getYesterdayDateString() {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            return getLocalDateString(yesterday);
+        }
 
-        /**
-         * Initializes the audio context and the application.
-         */
+        // --- Manejo Seguro Pantalla Completa ---
+        function openFullscreen() {
+            try {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => console.warn("Fullscreen API:", err.message));
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            } catch (err) { console.warn("Fullscreen bloqueado por entorno.", err); }
+        }
+
+        function closeFullscreen() {
+            try {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            } catch (err) {}
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) { openFullscreen(); }
+            else { closeFullscreen(); }
+        }
+
+        // --- Lógica Principal ---
         async function initializeApp(startWithTutorial) {
             tutorialPromptModalOverlay.classList.remove('visible');
             mainAppContainer.classList.remove('hidden');
             
-            if (state.session.startTime === 0) {
-                 state.session.startTime = Date.now();
-            }
+            if (state.session.startTime === 0) state.session.startTime = Date.now();
 
             try {
                 if (!state.audioContextStarted) {
@@ -885,23 +760,20 @@
                     state.audioContextStarted = true;
                 }
             } catch (e) {
-                console.error("Error initializing audio:", e);
-                showCustomMessage("Error de Audio", "No se pudo iniciar el audio.", "error");
+                console.error("Error inicializando audio:", e);
+                showCustomMessage("Error de Audio", "No se pudo iniciar el motor de audio.", "error");
             }
             
-            updateDifficultySelectionUI(); // Set initial button colors
+            updateDifficultySelectionUI();
             generateNoteButtons();
             generatePiano();
-            // Listeners for main app are added here, only once per session
             addEventListeners();
             updateStatsDisplay();
             generateExercise();
 
-            if (startWithTutorial) {
-                startTutorial();
-            }
+            if (startWithTutorial) startTutorial();
         }
-        
+
         function updateDifficultySelectionUI() {
             difficultyRadios.forEach(radio => {
                 const label = document.querySelector(`label[for="${radio.id}"]`);
@@ -916,23 +788,21 @@
                 }
             });
         }
-        
+
         let mainAppListenersAttached = false;
         function addEventListeners() {
             if(mainAppListenersAttached) return;
 
             confirmAnswerButton.addEventListener('click', checkAnswer);
             clearAllSelectionButton.addEventListener('click', clearSelection);
-            changeQuestionButton.addEventListener('click', () => {
-                completeExercise('skipped');
-                generateExercise();
-            });
+            changeQuestionButton.addEventListener('click', () => { completeExercise('skipped'); generateExercise(); });
             hintButton.addEventListener('click', giveHint);
             showAnswerButton.addEventListener('click', showAnswer);
             showTutorialButton.addEventListener('click', startTutorial);
             tutorialEndButton.addEventListener('click', endTutorial);
             document.addEventListener('keydown', handleKeyPress);
             fullscreenButton.addEventListener('click', toggleFullscreen);
+            
             document.addEventListener('fullscreenchange', updateFullscreenIcons);
             document.addEventListener('webkitfullscreenchange', updateFullscreenIcons);
             
@@ -978,22 +848,13 @@
             
             infoModalCloseButton.addEventListener('click', () => {
                 infoModalOverlay.classList.remove('visible');
-                if (state.answerWasShown) {
-                    hintButton.disabled = true;
-                    showAnswerButton.disabled = true;
-                }
+                if (state.answerWasShown) { hintButton.disabled = true; showAnswerButton.disabled = true; }
             });
-            
-            hintModalCloseButton.addEventListener('click', () => {
-                hintModalOverlay.classList.remove('visible');
-            });
-
+            hintModalCloseButton.addEventListener('click', () => hintModalOverlay.classList.remove('visible'));
             switchUserButton.addEventListener('click', handleSwitchUser);
             switchUserFinalButton.addEventListener('click', handleSwitchUser);
-
             viewHistoryButton.addEventListener('click', showHistoryModal);
             closeHistoryModalButton.addEventListener('click', () => historyModalOverlay.classList.remove('visible'));
-
             deleteUserButton.addEventListener('click', confirmDeleteUser);
             cancelDeleteButton.addEventListener('click', () => deleteConfirmModalOverlay.classList.remove('visible'));
             
@@ -1011,13 +872,12 @@
             document.body.appendChild(modal);
             setTimeout(() => modal.remove(), 2500);
         }
-        
+
         function getNoteSemitone(noteName) {
             const naturalPartMatch = noteName.match(/[A-G]/i);
             if (!naturalPartMatch) return null;
             const naturalPart = naturalPartMatch[0].toUpperCase();
             const accidentalPart = noteName.substring(naturalPart.length);
-
             let semitone = naturalLetterSemitone[naturalPart];
             for (const char of accidentalPart) {
                 if (char === '#') semitone++;
@@ -1030,43 +890,32 @@
             if (!americanNote) return "?";
             const naturalPart = americanNote.match(/[A-G]/i);
             if (!naturalPart) return americanNote;
-            
             const accidentalPart = americanNote.substring(naturalPart[0].length);
-            
             if (state.notationSystem === 'latin') {
-                const latinPart = americanToLatin[naturalPart[0].toUpperCase()];
-                return latinPart + accidentalPart;
+                return americanToLatin[naturalPart[0].toUpperCase()] + accidentalPart;
             }
             return americanNote;
         }
-        
+
         function updateQuestionText() {
             if (state.givenNote && state.givenIntervalName) {
                 const noteDisplay = displayNote(state.givenNote);
                 const rootDisplay = displayNote(state.chordRoot);
                 const chordCifrado = chordStructures[state.chordTypeKey].cifrado;
-                const chordFullName = `${rootDisplay}${chordCifrado}`;
-
-                chordQuestionText.innerHTML = `<strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es <strong class="text-xl sm:text-2xl">${state.givenIntervalName} (${state.givenLabel})</strong> del acorde de <strong class="text-xl sm:text-2xl">${chordFullName}</strong>.<br>
-                <small class="text-sm text-gray-500">Armoniza en bloque cerrado descendente (${noteDisplay} es la nota mas aguda).</small>`;
+                chordQuestionText.innerHTML = `<strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es <strong class="text-xl sm:text-2xl">${state.givenIntervalName} (${state.givenLabel})</strong> del acorde de <strong class="text-xl sm:text-2xl">${rootDisplay}${chordCifrado}</strong>.<br><small class="text-sm text-gray-500">Armoniza en bloque cerrado descendente (${noteDisplay} es la nota mas aguda).</small>`;
             }
         }
 
         function drawMusicalStaff(notesWithOctave = []) {
             const canvas = musicalStaffCanvas;
             const context = canvas.getContext('2d');
-            
-            const fixedWidth = 300; 
-            const fixedHeight = 150;
-            canvas.width = fixedWidth;
-            canvas.height = fixedHeight;
-            
+            const fixedWidth = 300, fixedHeight = 150;
+            canvas.width = fixedWidth; canvas.height = fixedHeight;
             context.clearRect(0, 0, canvas.width, canvas.height);
 
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
             renderer.resize(canvas.width, canvas.height);
             const ctx = renderer.getContext();
-            
             const stave = new Stave(10, 0, fixedWidth - 20); 
             stave.addClef("treble").setContext(ctx).draw();
 
@@ -1075,26 +924,15 @@
             if (validNotes.length === 0) return;
 
             const sortedNotes = [...validNotes].sort((a, b) => Tone.Midi(a.replace('/', '')).toMidi() - Tone.Midi(b.replace('/', '')).toMidi());
-            
-            const staveNotes = [];
-            sortedNotes.forEach(note => {
-                const noteName = note.split('/')[0];
-                const vexNote = noteName.replace('bb', 'bb').replace('##', '##') + "/" + note.split('/')[1];
-                staveNotes.push(vexNote);
-            });
-
+            const staveNotes = sortedNotes.map(note => note.split('/')[0].replace('bb', 'bb').replace('##', '##') + "/" + note.split('/')[1]);
             const chordStaveNote = new StaveNote({ keys: staveNotes, duration: "w" });
             
             sortedNotes.forEach((note, index) => {
-                const noteName = note.split('/')[0];
-                const accidentalPart = noteName.match(/[#b]+/);
-                if (accidentalPart) {
-                    chordStaveNote.addAccidental(index, new Accidental(accidentalPart[0]));
-                }
+                const accidentalPart = note.split('/')[0].match(/[#b]+/);
+                if (accidentalPart) chordStaveNote.addAccidental(index, new Accidental(accidentalPart[0]));
             });
 
-            const voice = new Voice({ num_beats: 4, beat_value: 4 });
-            voice.addTickables([chordStaveNote]);
+            const voice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([chordStaveNote]);
             new Formatter().joinVoices([voice]).format([voice], canvas.width - 40);
             voice.draw(ctx, stave);
         }
@@ -1103,10 +941,8 @@
             const rootLetter = rootNote.charAt(0);
             const rootLetterNum = letterToNumberMap[rootLetter];
             const rootSemitone = getNoteSemitone(rootNote);
-
             const targetLetterNum = (rootLetterNum + interval.degreeOffset) % 7;
             const targetLetter = numberToLetterMap[targetLetterNum];
-            
             const targetNaturalSemitone = naturalLetterSemitone[targetLetter];
             const targetTotalSemitone = (rootSemitone + interval.semitones) % 12;
 
@@ -1115,867 +951,336 @@
             if (diff < -6) diff += 12;
 
             const accidentalMap = { 2: "##", 1: "#", 0: "", "-1": "b", "-2": "bb" };
-            const accidental = accidentalMap[diff] || '';
-            
-            return targetLetter + accidental;
+            return targetLetter + (accidentalMap[diff] || '');
         }
-
 
         function generateExercise() {
             state.failedCurrentExercise = false;
             state.answerWasShown = false;
             
             const currentPracticeSettings = state.customPractice[state.difficulty];
-
             const chords = Object.keys(chordStructures).filter(key => {
                 const chord = chordStructures[key];
-                const isBasic = state.difficulty === 'basic' && chord.difficulty === 'basic';
-                const isIntermediate = state.difficulty === 'intermediate' && chord.difficulty === 'intermediate';
-                const isAdvanced = state.difficulty === 'advanced' && chord.difficulty === 'intermediate';
-                const matchesDifficulty = isBasic || isIntermediate || isAdvanced;
-                
-                const matchesCustom = !currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key);
-
-                return matchesDifficulty && matchesCustom;
+                const matchesDifficulty = (state.difficulty === 'advanced' && chord.difficulty === 'intermediate') || chord.difficulty === state.difficulty;
+                return matchesDifficulty && (!currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key));
             });
 
             if (chords.length === 0) {
                 showCustomMessage("Sin Acordes", "No hay acordes disponibles. Revisa tus ajustes (S).", "warning");
                 return;
             }
+
             const chordTypeKey = chords[Math.floor(Math.random() * chords.length)];
             const chordData = chordStructures[chordTypeKey];
             
             const leads = Object.keys(chordData.voicing_rules).filter(label => {
                 const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
                 const isTension = allTensions.includes(label);
-
-                const difficultyMatch = (state.difficulty === 'advanced') ? isTension : !isTension;
-                if (!difficultyMatch) return false;
-
+                if (state.difficulty === 'advanced' ? !isTension : isTension) return false;
                 if (state.difficulty === 'advanced' && currentPracticeSettings.isActive && currentPracticeSettings.allowedLeads.length > 0) {
                     return currentPracticeSettings.allowedLeads.includes(label);
                 }
                 return true;
             });
 
-            if (leads.length === 0) {
-                 generateExercise();
-                 return;
-            }
-            const givenLabel = leads[Math.floor(Math.random() * leads.length)];
+            if (leads.length === 0) return generateExercise();
+            
+            state.chordTypeKey = chordTypeKey;
+            state.givenLabel = leads[Math.floor(Math.random() * leads.length)];
             
             const possibleRoots = ["C", "F", "G", "Bb", "Eb", "Ab", "Db", "Gb", "D", "A", "E", "B"];
             state.chordRoot = possibleRoots[Math.floor(Math.random() * possibleRoots.length)];
             
-            const givenInterval = chordData.intervals.find(int => int.label === givenLabel);
+            const givenInterval = chordData.intervals.find(int => int.label === state.givenLabel);
             state.givenNote = calculateNoteName(state.chordRoot, givenInterval);
+            state.givenIntervalName = givenInterval.name;
 
-            const minMidi = 65; // F4
-            const maxMidi = 84; // C6
             const givenNoteSemitone = getNoteSemitone(state.givenNote);
             let givenOctave = 4;
             let currentMidi = Tone.Midi(`${state.givenNote.charAt(0)}${givenOctave}`).toMidi() + (givenNoteSemitone - getNoteSemitone(state.givenNote.charAt(0)));
 
-            while (currentMidi < minMidi) {
-                givenOctave++;
-                currentMidi += 12;
-            }
-             while (currentMidi > maxMidi) {
-                givenOctave--;
-                currentMidi -= 12;
-            }
+            while (currentMidi < 65) { givenOctave++; currentMidi += 12; }
+            while (currentMidi > 84) { givenOctave--; currentMidi -= 12; }
             
             state.givenNoteWithOctave = `${state.givenNote}/${givenOctave}`;
-            
-            const voicingLabels = chordData.voicing_rules[givenLabel];
-            state.orderedLabelsForDisplay = voicingLabels.slice(0, state.difficulty === 'basic' ? 3 : 4);
+            state.orderedLabelsForDisplay = chordData.voicing_rules[state.givenLabel].slice(0, state.difficulty === 'basic' ? 3 : 4);
             state.correctNotesWithOctave = [];
 
             let lastMidi = currentMidi;
             for (let i = 0; i < state.orderedLabelsForDisplay.length; i++) {
-                const label = state.orderedLabelsForDisplay[i];
-                const interval = chordData.intervals.find(int => int.label === label);
+                const interval = chordData.intervals.find(int => int.label === state.orderedLabelsForDisplay[i]);
                 if (!interval) continue;
 
                 const noteName = calculateNoteName(state.chordRoot, interval);
-                const noteSemitone = getNoteSemitone(noteName);
-                
                 let currentNoteOctave = Math.floor(lastMidi / 12);
-                let candidateMidi = currentNoteOctave * 12 + noteSemitone;
+                let candidateMidi = currentNoteOctave * 12 + getNoteSemitone(noteName);
                 
-                if (i > 0 && candidateMidi >= lastMidi) {
-                    candidateMidi -= 12;
-                    currentNoteOctave--;
-                } else if (i === 0) {
-                    candidateMidi = lastMidi;
-                    currentNoteOctave = givenOctave;
-                }
+                if (i > 0 && candidateMidi >= lastMidi) { candidateMidi -= 12; currentNoteOctave--; } 
+                else if (i === 0) { candidateMidi = lastMidi; currentNoteOctave = givenOctave; }
 
                 state.correctNotesWithOctave.push(`${noteName}/${currentNoteOctave}`);
                 lastMidi = candidateMidi;
             }
 
             state.correctNotes = state.correctNotesWithOctave.map(n => n.split('/')[0]);
-            state.chordTypeKey = chordTypeKey;
-            state.givenIntervalName = givenInterval.name;
-            state.givenLabel = givenLabel;
             state.selectedUserNotes = [state.givenNoteWithOctave];
-            state.currentExerciseId = `${state.chordRoot}|${chordTypeKey}|${givenLabel}`;
+            state.currentExerciseId = `${state.chordRoot}|${chordTypeKey}|${state.givenLabel}`;
             
             updateDisplay();
-            enableButtons();
+            [confirmAnswerButton, clearAllSelectionButton, changeQuestionButton, hintButton, showAnswerButton].forEach(btn => btn.disabled = false);
         }
-
 
         async function playCorrectChord() {
             if (!synth) return;
             const notes = state.correctNotesWithOctave.map(n => n.replace('/', '')).filter(Boolean);
             if (notes.length === 0) return;
-
             const arpeggioNotes = [...notes].sort((a,b) => Tone.Midi(b).toMidi() - Tone.Midi(a).toMidi());
             let time = Tone.now();
-            arpeggioNotes.forEach((note) => {
-                synth.triggerAttackRelease(note, "8n", time);
-                time += 0.15;
-            });
+            arpeggioNotes.forEach(note => { synth.triggerAttackRelease(note, "8n", time); time += 0.15; });
             synth.triggerAttackRelease(notes, "2n", time + 0.2);
         }
 
-        function getTodayDateString() {
-            const today = new Date();
-            const offset = today.getTimezoneOffset()
-            const todayWithOffset = new Date(today.getTime() - (offset*60*1000))
-            return todayWithOffset.toISOString().split('T')[0];
-        }
-
-        function noteToPitchClass(noteWithOctave) {
-            if (!noteWithOctave) return null;
-            const noteName = noteWithOctave.split('/')[0];
-            return getNoteSemitone(noteName);
-        }
-
-        function checkAndShowEvaluation() {
-            if (state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval) {
-                showEvaluationModal();
-            }
-        }
-        
         function completeExercise(status) {
-            // Status can be 'correct', 'corrected', 'solution', 'skipped'
             state.stats.totalExercises++;
-            
-            const isAttempted = status !== 'skipped';
+            if (status !== 'skipped') state.evaluation.questionsAttemptedInBatch++;
 
-            if (isAttempted) {
-                state.evaluation.questionsAttemptedInBatch++;
-            }
-
-            const historyStatusMap = {
-                'correct': '✅ Correcto',
-                'corrected': '⚠️ Corregido',
-                'solution': '🆘 Solución',
-                'skipped': '⏭️ Omitido'
-            };
-            
-            const exerciseResult = {
-                id: state.currentExerciseId,
-                chordRoot: state.chordRoot,
-                chordCifrado: chordStructures[state.chordTypeKey].cifrado,
-                lead: state.givenLabel,
-                status: historyStatusMap[status]
-            };
-            state.stats.sessionHistory.push(exerciseResult);
-
+            const statusMap = { 'correct': '✅ Correcto', 'corrected': '⚠️ Corregido', 'solution': '🆘 Solución', 'skipped': '⏭️ Omitido' };
+            state.stats.sessionHistory.push({
+                id: state.currentExerciseId, chordRoot: state.chordRoot, chordCifrado: chordStructures[state.chordTypeKey].cifrado,
+                lead: state.givenLabel, status: statusMap[status]
+            });
             updateStatsDisplay();
-            
-            if (isAttempted) {
-                checkAndShowEvaluation();
-            }
+            if (status !== 'skipped' && state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval) showEvaluationModal();
         }
-
 
         function checkAnswer() {
-            const userPitchClasses = state.selectedUserNotes.map(noteToPitchClass).filter(pc => pc !== null).sort((a, b) => a - b);
-            const correctPitchClasses = state.correctNotesWithOctave.map(noteToPitchClass).filter(pc => pc !== null).sort((a, b) => a - b);
-            const isCorrect = JSON.stringify(userPitchClasses) === JSON.stringify(correctPitchClasses);
+            const userPc = state.selectedUserNotes.map(n => getNoteSemitone(n.split('/')[0])).filter(n => n !== null).sort((a,b) => a-b);
+            const correctPc = state.correctNotesWithOctave.map(n => getNoteSemitone(n.split('/')[0])).filter(n => n !== null).sort((a,b) => a-b);
+            const isCorrect = JSON.stringify(userPc) === JSON.stringify(correctPc);
             
             if (isCorrect) {
                 if (state.answerWasShown) {
-                    completeExercise('solution'); // Log as 'solution' since they saw the answer
-                    showCustomMessage("Correcto", "Respuesta ingresada. Pasando al siguiente ejercicio.", "success");
+                    completeExercise('solution');
+                    showCustomMessage("Correcto", "Pasando al siguiente ejercicio.", "success");
                 } else if (state.failedCurrentExercise) {
                     completeExercise('corrected');
-                    showCustomMessage("¡Corregido!", "Ahora sí. Pasando al siguiente ejercicio.", "success");
+                    showCustomMessage("¡Corregido!", "Ahora sí. Pasando al siguiente.", "success");
                 } else {
                     state.stats.totalCorrect++;
                     completeExercise('correct');
                     
-                    const today = getTodayDateString();
-                    if (state.stats.lastPracticeDate !== today) {
-                        const yesterday = new Date();
-                        yesterday.setDate(yesterday.getDate() - 1);
-                        const offset = yesterday.getTimezoneOffset()
-                        const yesterdayWithOffset = new Date(yesterday.getTime() - (offset*60*1000))
-                        const yesterdayStr = yesterdayWithOffset.toISOString().split('T')[0];
-                        
-                        if (state.stats.lastPracticeDate === yesterdayStr) {
+                    const todayStr = getTodayDateString();
+                    if (state.stats.lastPracticeDate !== todayStr) {
+                        if (state.stats.lastPracticeDate === getYesterdayDateString()) {
                             state.stats.currentStreak++;
                         } else {
                             state.stats.currentStreak = 1;
                         }
-                        // MODIFICATION: Update the last practice date immediately to count the streak only once per day.
-                        state.stats.lastPracticeDate = today;
+                        state.stats.lastPracticeDate = todayStr;
+                        saveUserData(); 
                     }
                     showCustomMessage("Correcto", "¡Felicidades, tu respuesta es correcta!", "success");
                 }
                 playCorrectChord();
                 setTimeout(generateExercise, 2000);
             } else {
-                if (!state.failedCurrentExercise) {
-                    state.stats.totalIncorrect++;
-                    state.failedCurrentExercise = true;
-                }
-                showCustomMessage("Incorrecto", "Inténtalo de nuevo. Tus notas no coinciden.", "error");
+                if (!state.failedCurrentExercise) { state.stats.totalIncorrect++; state.failedCurrentExercise = true; }
+                showCustomMessage("Incorrecto", "Tus notas no coinciden.", "error");
                 updateStatsDisplay();
             }
         }
 
         function updateStatsDisplay() {
-            updateScoreDisplay();
-            updateStreakDisplay();
-        }
-        
-        function updateScoreDisplay() {
-            scoreCounter.innerHTML = `
-                <div class="text-sm text-green-600">✅ ${state.stats.totalCorrect}</div>
-                <div class="text-sm text-red-600">❌ ${state.stats.totalIncorrect}</div>
-            `;
-        }
-
-        function updateStreakDisplay() {
             streakCounter.textContent = state.stats.currentStreak;
+            scoreCounter.innerHTML = `<div class="text-sm text-green-600">✅ ${state.stats.totalCorrect}</div><div class="text-sm text-red-600">❌ ${state.stats.totalIncorrect}</div>`;
         }
 
         function giveHint() {
-            state.stats.hintsUsed++;
-            updateStatsDisplay();
-            
-            const correctNoteNames = state.correctNotes.sort();
-            const userNoteNames = state.selectedUserNotes.map(n => n ? n.split('/')[0] : '').sort();
-            const missingNote = correctNoteNames.find(note => note && !userNoteNames.includes(note));
-
-            let hintText;
-            if (missingNote) {
-                let noteNameToDisplay = displayNote(missingNote);
-                hintText = `La nota <strong>${noteNameToDisplay}</strong> es parte del acorde.`;
-            } else {
-                hintText = "Ya tienes todas las notas correctas en cuanto a su nombre. ¡Verifica las alteraciones y las octavas!";
-            }
-
-            hintModalBody.innerHTML = `<p>${hintText}</p>`;
+            state.stats.hintsUsed++; updateStatsDisplay();
+            const missingNote = state.correctNotes.sort().find(note => !state.selectedUserNotes.map(n => n.split('/')[0]).includes(note));
+            hintModalBody.innerHTML = `<p>${missingNote ? `La nota <strong>${displayNote(missingNote)}</strong> es parte del acorde.` : "¡Verifica las alteraciones y las octavas!"}</p>`;
             hintModalOverlay.classList.add('visible');
         }
 
         function showAnswer() {
             state.stats.answersUsed++;
-            state.stats.currentStreak = 0; 
-            if (!state.failedCurrentExercise) {
-                state.stats.totalIncorrect++;
-                state.failedCurrentExercise = true;
-            }
-            updateStatsDisplay();
-            
-            playCorrectChord();
-            state.answerWasShown = true;
+            if (!state.failedCurrentExercise) { state.stats.totalIncorrect++; state.failedCurrentExercise = true; }
+            updateStatsDisplay(); playCorrectChord(); state.answerWasShown = true;
             
             infoModalTitle.textContent = 'Respuesta Correcta';
-            const chordData = chordStructures[state.chordTypeKey];
-            const voicingFormula = chordData.voicing_rules[state.givenLabel].slice(0, state.difficulty === 'basic' ? 3 : 4).join(' - ');
+            const formula = chordStructures[state.chordTypeKey].voicing_rules[state.givenLabel].slice(0, state.difficulty === 'basic' ? 3 : 4).join(' - ');
             const notesList = state.correctNotes.map(n => `<li>${displayNote(n)}</li>`).join('');
-
-            infoModalBody.innerHTML = `
-                <p class="font-semibold">Fórmula de Voicing:</p>
-                <p class="mb-4">${voicingFormula}</p>
-                <p class="font-semibold">Notas del Acorde:</p>
-                <ul class="list-disc list-inside">${notesList}</ul>
-            `;
+            infoModalBody.innerHTML = `<p class="font-semibold">Fórmula:</p><p>${formula}</p><p class="font-semibold">Notas:</p><ul>${notesList}</ul>`;
             infoModalOverlay.classList.add('visible');
         }
 
-        function clearSelection() {
-            state.selectedUserNotes = [state.givenNoteWithOctave];
-            updateDisplay();
-        }
+        function clearSelection() { state.selectedUserNotes = [state.givenNoteWithOctave]; updateDisplay(); }
 
         function updateDisplay() {
             updateQuestionText();
-            gridCells.forEach((cell, index) => {
-                const intervalLabel = cell.querySelector('.interval-label');
-                const noteDisplay = cell.querySelector('.note-display');
-                if (state.orderedLabelsForDisplay[index]) {
+            gridCells.forEach((cell, i) => {
+                if (state.orderedLabelsForDisplay[i]) {
                     cell.classList.remove('hidden');
-                    intervalLabel.textContent = state.orderedLabelsForDisplay[index];
-                    const note = state.selectedUserNotes[index]?.split('/')[0];
-                    noteDisplay.textContent = index === 0 ? displayNote(state.givenNote) : (note ? displayNote(note) : "?");
-                } else {
-                    cell.classList.add('hidden');
-                }
+                    cell.querySelector('.interval-label').textContent = state.orderedLabelsForDisplay[i];
+                    cell.querySelector('.note-display').textContent = i === 0 ? displayNote(state.givenNote) : (state.selectedUserNotes[i] ? displayNote(state.selectedUserNotes[i].split('/')[0]) : "?");
+                } else { cell.classList.add('hidden'); }
             });
             drawMusicalStaff(state.selectedUserNotes);
-            updateButtonStates();
-            updatePianoHighlight();
+            updateButtonStates(); updatePianoHighlight();
         }
         
         function updateButtonStates() {
-            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
-            confirmAnswerButton.disabled = state.selectedUserNotes.length !== expectedCount;
+            confirmAnswerButton.disabled = state.selectedUserNotes.length !== (state.difficulty === 'basic' ? 3 : 4);
             clearAllSelectionButton.disabled = state.selectedUserNotes.length <= 1;
-            
-            document.querySelectorAll('.note-button.active').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.note-button.active').forEach(b => b.classList.remove('active'));
             
             const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
             if (state.selectedUserNotes.length > 1 && lastNote) {
-                const noteOnly = lastNote.split('/')[0];
-                const naturalPartMatch = noteOnly.match(/[A-G]/i);
-                if (naturalPartMatch) {
-                    const naturalPart = naturalPartMatch[0].toUpperCase();
-                    const accidentalPart = noteOnly.substring(naturalPart.length);
-                    
-                    const naturalBtn = document.querySelector(`.note-button[data-note="${naturalPart}"]`);
-                    if (naturalBtn) naturalBtn.classList.add('active');
-                    
-                    if (accidentalPart) {
-                        const accidentalBtn = document.querySelector(`.note-button[data-accidental="${accidentalPart}"]`);
-                        if (accidentalBtn) accidentalBtn.classList.add('active');
-                    }
+                const match = lastNote.split('/')[0].match(/[A-G]/i);
+                if (match) {
+                    const nat = document.querySelector(`.note-button[data-note="${match[0].toUpperCase()}"]`);
+                    const acc = document.querySelector(`.note-button[data-accidental="${lastNote.split('/')[0].substring(match[0].length)}"]`);
+                    if (nat) nat.classList.add('active');
+                    if (acc) acc.classList.add('active');
                 }
             }
         }
         
         function updatePianoHighlight() {
-            document.querySelectorAll('.piano-key').forEach(key => {
-                key.classList.remove('selected', 'given-note-highlight');
-            });
-            
-            function findPianoKeyByMidi(noteWithOctave) {
-                if (!noteWithOctave) return null;
-                try {
-                    const midiNumber = Tone.Midi(noteWithOctave.replace('/', '')).toMidi();
-                    return document.querySelector(`.piano-key[data-midi="${midiNumber}"]`);
-                } catch (e) {
-                    console.error(`Invalid note format for MIDI conversion: ${noteWithOctave}`, e);
-                    return null;
-                }
-            }
-            
-            if (state.givenNoteWithOctave) {
-                const givenKey = findPianoKeyByMidi(state.givenNoteWithOctave);
-                if (givenKey) {
-                    givenKey.classList.add('given-note-highlight');
-                }
-            }
-            
-            state.selectedUserNotes.forEach(noteWithOctave => {
-                if (!noteWithOctave || noteWithOctave === state.givenNoteWithOctave) return;
-                const key = findPianoKeyByMidi(noteWithOctave);
-                if (key) { key.classList.add('selected'); }
-            });
-        }
-        
-        function handleNaturalNoteClick(e) {
-            const clickedNote = e.target.dataset.note;
-            addNaturalNote(clickedNote);
+            document.querySelectorAll('.piano-key').forEach(k => k.classList.remove('selected', 'given-note-highlight'));
+            const findKey = (n) => document.querySelector(`.piano-key[data-midi="${Tone.Midi(n.replace('/', '')).toMidi()}"]`);
+            if (state.givenNoteWithOctave) { const k = findKey(state.givenNoteWithOctave); if (k) k.classList.add('given-note-highlight'); }
+            state.selectedUserNotes.forEach(n => { if (n && n !== state.givenNoteWithOctave) { const k = findKey(n); if (k) k.classList.add('selected'); } });
         }
         
         function addNaturalNote(note) {
-            const lastNoteIndex = state.selectedUserNotes.length - 1;
-            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
-
-            if (lastNoteIndex >= 1) {
-                const lastNote = state.selectedUserNotes[lastNoteIndex];
-                if(lastNote){
-                    const naturalPartOfLastNote = lastNote.match(/[A-G]/i)[0].toUpperCase();
-                    if (naturalPartOfLastNote === note) {
-                        state.selectedUserNotes.pop();
-                        updateDisplay();
-                        return;
-                    }
-                }
-            }
-
-            if (state.selectedUserNotes.length >= expectedCount) {
-                showCustomMessage("Límite de notas", `Ya has seleccionado las ${expectedCount} notas.`, "warning");
-                return;
-            }
-
-            const lastNoteWithOctave = state.selectedUserNotes[lastNoteIndex];
-            const lastMidi = Tone.Midi(lastNoteWithOctave.replace('/', '')).toMidi();
+            if (state.selectedUserNotes.length >= (state.difficulty === 'basic' ? 3 : 4)) return showCustomMessage("Límite", "Ya seleccionaste todas las notas.", "warning");
             
-            let currentOctave = parseInt(lastNoteWithOctave.split('/')[1]);
-            let candidateMidi = Tone.Midi(`${note}${currentOctave}`).toMidi();
-
-            while(candidateMidi >= lastMidi) {
-                currentOctave--;
-                candidateMidi = Tone.Midi(`${note}${currentOctave}`).toMidi();
-            }
-
-            const noteWithOctave = `${note}/${currentOctave}`;
-            state.selectedUserNotes.push(noteWithOctave);
-            updateDisplay();
-        }
-        
-        function handleAccidentalClick(e) {
-            const accidental = e.target.dataset.accidental;
-            addAccidental(accidental);
-        }
-
-        function addAccidental(accidental) {
-            const lastNoteIndex = state.selectedUserNotes.length - 1;
-
-            if (lastNoteIndex < 1) { return; }
-            
-            const lastNote = state.selectedUserNotes[lastNoteIndex];
-            const naturalPartMatch = lastNote.match(/[A-G]/i);
-             if (!naturalPartMatch) return;
-
-            const naturalPart = naturalPartMatch[0];
-            const octavePart = lastNote.match(/\/(\d+)/)[1];
-            state.selectedUserNotes[lastNoteIndex] = `${naturalPart}${accidental}/${octavePart}`;
+            const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
+            let oct = parseInt(lastNote.split('/')[1]);
+            let candMidi = Tone.Midi(`${note}${oct}`).toMidi();
+            const lastMidi = Tone.Midi(lastNote.replace('/', '')).toMidi();
+            while (candMidi >= lastMidi) { oct--; candMidi -= 12; }
+            state.selectedUserNotes.push(`${note}/${oct}`);
             updateDisplay();
         }
 
-        function handleAccidentalKeyPress(key) {
-            const now = Date.now();
-            const { lastAccidentalKey, lastAccidentalTimestamp, doublePressThreshold } = state.keyboard;
-            
-            let accidental = '';
-
-            if (key === lastAccidentalKey && (now - lastAccidentalTimestamp < doublePressThreshold)) {
-                accidental = key === '+' ? '##' : 'bb';
-                state.keyboard.lastAccidentalKey = null;
-                state.keyboard.lastAccidentalTimestamp = 0;
-            } else {
-                accidental = key === '+' ? '#' : 'b';
-                state.keyboard.lastAccidentalKey = key;
-                state.keyboard.lastAccidentalTimestamp = now;
+        function addAccidental(acc) {
+            const idx = state.selectedUserNotes.length - 1;
+            if (idx < 1) return;
+            const match = state.selectedUserNotes[idx].match(/[A-G]/i);
+            if (match) {
+                state.selectedUserNotes[idx] = `${match[0]}${acc}/${state.selectedUserNotes[idx].split('/')[1]}`;
+                updateDisplay();
             }
-            addAccidental(accidental);
         }
 
         function handleKeyPress(e) {
-            if (e.target.tagName === 'INPUT') return;
-            if (document.querySelector('.modal-overlay.visible')) return;
-
+            if (e.target.tagName === 'INPUT' || document.querySelector('.modal-overlay.visible:not(#tutorialOverlay)')) return;
             const key = e.key.toLowerCase();
-            
-            if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(key)) {
-                e.preventDefault();
-                addNaturalNote(key.toUpperCase());
-            }
-
+            if (['a','b','c','d','e','f','g'].includes(key)) { e.preventDefault(); addNaturalNote(key.toUpperCase()); }
             if (key === '+' || key === '-') {
                 e.preventDefault();
-                handleAccidentalKeyPress(key);
-            }
-            
-            if (['1', '2', '3'].includes(key)) {
-                e.preventDefault();
-                const difficultyId = `difficulty${key === '1' ? 'Basic' : (key === '2' ? 'Intermediate' : 'Advanced')}`;
-                const radio = document.getElementById(difficultyId);
-                if (radio && !radio.checked) {
-                    radio.checked = true;
-                    radio.dispatchEvent(new Event('change'));
+                const now = Date.now();
+                if (key === state.keyboard.lastAccidentalKey && (now - state.keyboard.lastAccidentalTimestamp < 400)) {
+                    addAccidental(key === '+' ? '##' : 'bb'); state.keyboard.lastAccidentalKey = null;
+                } else {
+                    addAccidental(key === '+' ? '#' : 'b'); state.keyboard.lastAccidentalKey = key; state.keyboard.lastAccidentalTimestamp = now;
                 }
             }
-
-
-            switch(key) {
-                case 'enter':
-                    e.preventDefault();
-                    if(!confirmAnswerButton.disabled) confirmAnswerButton.click();
-                    break;
-                case 'p':
-                    e.preventDefault();
-                    if(!hintButton.disabled) hintButton.click();
-                    break;
-                case 'r':
-                    e.preventDefault();
-                    if(!showAnswerButton.disabled) showAnswerButton.click();
-                    break;
-                case ' ':
-                    e.preventDefault();
-                    if(!changeQuestionButton.disabled) changeQuestionButton.click();
-                    break;
-                case 'n':
-                    e.preventDefault();
-                    if(!clearAllSelectionButton.disabled) clearAllSelectionButton.click();
-                    break;
-                case 'q':
-                    e.preventDefault();
-                    toggleFullscreen();
-                    break;
-                case 's':
-                    e.preventDefault();
-                    if(!settingsButton.disabled) settingsButton.click();
-                    break;
-                case 'h':
-                    e.preventDefault();
-                    if(!showTutorialButton.disabled) showTutorialButton.click();
-                    break;
-                case 'i':
-                    e.preventDefault();
-                    if (noteBuildingControls.classList.contains('hidden')) {
-                        cifradoToggle.click();
-                    } else {
-                        pianoToggle.click();
-                    }
-                    break;
-                case 'u':
-                    e.preventDefault();
-                    if(!switchUserButton.disabled) switchUserButton.click();
-                    break;
-                case 'v':
-                    e.preventDefault();
-                    if(!viewHistoryButton.disabled) viewHistoryButton.click();
-                    break;
-            }
+            if (['1','2','3'].includes(key)) { e.preventDefault(); document.getElementById(`difficulty${key==='1'?'Basic':key==='2'?'Intermediate':'Advanced'}`).click(); }
+            if (key === 'enter' && !confirmAnswerButton.disabled) { e.preventDefault(); confirmAnswerButton.click(); }
+            if (key === ' ') { e.preventDefault(); changeQuestionButton.click(); }
         }
 
-
-        function enableButtons() {
-            [confirmAnswerButton, clearAllSelectionButton, changeQuestionButton, hintButton, showAnswerButton].forEach(btn => btn.disabled = false);
+        // Modals & Extras
+        function openSettingsModal() { 
+            populateSettingsModal();
+            settingsModalOverlay.classList.add('visible'); 
         }
-        
-        function openFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { /* IE11 */
-                elem.msRequestFullscreen();
-            }
-        }
-
-        function closeFullscreen() {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) { /* Safari */
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) { /* IE11 */
-                document.msExitFullscreen();
-            }
-        }
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                openFullscreen();
-            } else {
-                closeFullscreen();
-            }
-        }
-        
-        function updateFullscreenIcons() {
-            const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-            fullscreenIconOpen.classList.toggle('hidden', isFullscreen);
-            fullscreenIconClose.classList.toggle('hidden', !isFullscreen);
-            if (state.tutorial.isActive) {
-                document.getElementById('tutorialOverlay').style.width = isFullscreen ? '100vw' : '100%';
-                document.getElementById('tutorialOverlay').style.height = isFullscreen ? '100vh' : '100%';
-            }
-        }
-        
-        function getPerformanceAnalysis() {
-            const { sessionHistory } = state.stats;
-            const chordStats = {};
-
-            sessionHistory.forEach(item => {
-                const chordName = `${item.chordRoot}${item.chordCifrado}`;
-                if (!chordStats[chordName]) {
-                    chordStats[chordName] = { attempts: 0, correct: 0 };
-                }
-                if(item.status !== '⏭️ Omitido') {
-                    chordStats[chordName].attempts++;
-                }
-                if(item.status === '✅ Correcto') {
-                    chordStats[chordName].correct++;
-                }
-            });
-
-            const strugglingChords = Object.entries(chordStats)
-                .map(([chord, stats]) => ({ chord, accuracy: stats.attempts > 0 ? (stats.correct / stats.attempts) * 100 : 100 }))
-                .filter(item => item.accuracy < 70 && item.attempts > 2)
-                .sort((a, b) => a.accuracy - b.accuracy);
-            
-            return strugglingChords;
-        }
-
-
-        // --- Settings and Modal Logic ---
-        function populateSettingsModal() {
-            chordTypesCheckboxesContainer.innerHTML = '';
-            const allChordTypes = Object.keys(chordStructures);
-            let relevantChords = [];
-            if (state.difficulty === 'basic') {
-                relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'basic');
-            } else if (state.difficulty === 'intermediate' || state.difficulty === 'advanced') {
-                relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'intermediate');
-            }
-            
-            const currentPracticeSettings = state.customPractice[state.difficulty];
-
-            relevantChords.forEach(key => {
-                const chord = chordStructures[key];
-                const isChecked = !currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key);
-                chordTypesCheckboxesContainer.innerHTML += `
-                    <div class="flex items-center">
-                        <input type="checkbox" id="chord_${key}" value="${key}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
-                        <label for="chord_${key}" class="ml-2 text-gray-700">${chord.name}</label>
-                    </div>
-                `;
-            });
-            
-            leadVoicesSection.classList.toggle('hidden', state.difficulty !== 'advanced');
-            leadVoicesCheckboxesContainer.innerHTML = '';
-            if (state.difficulty === 'advanced') {
-                const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
-                const availableTensions = new Set();
-                relevantChords.forEach(key => {
-                    chordStructures[key].intervals.forEach(interval => {
-                        if (allTensions.includes(interval.label)) {
-                            availableTensions.add(interval.label);
-                        }
-                    });
-                });
-
-                allTensions.forEach(label => {
-                    if (availableTensions.has(label)) {
-                        const isChecked = !currentPracticeSettings.isActive || currentPracticeSettings.allowedLeads.length === 0 || currentPracticeSettings.allowedLeads.includes(label);
-                        leadVoicesCheckboxesContainer.innerHTML += `
-                            <div class="flex items-center">
-                                <input type="checkbox" id="lead_${label}" value="${label}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
-                                <label for="lead_${label}" class="ml-2 text-gray-700">${label}</label>
-                            </div>
-                        `;
-                    }
-                });
-            }
-        }
-        
-        function saveSettings() {
+        function saveSettings() { 
             const allowedChords = Array.from(chordTypesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
             const allowedLeads = Array.from(leadVoicesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
-            
-            const practiceSettings = state.customPractice[state.difficulty];
-            practiceSettings.isActive = true;
-            practiceSettings.allowedChords = allowedChords;
-            
-            if (state.difficulty === 'advanced') {
-                practiceSettings.allowedLeads = allowedLeads;
-            }
-            
-            closeSettingsModal();
-            generateExercise();
+            state.customPractice[state.difficulty].isActive = true;
+            state.customPractice[state.difficulty].allowedChords = allowedChords;
+            if (state.difficulty === 'advanced') state.customPractice[state.difficulty].allowedLeads = allowedLeads;
+            settingsModalOverlay.classList.remove('visible'); 
+            generateExercise(); 
         }
-
-        function openSettingsModal() {
-            populateSettingsModal();
-            settingsModalOverlay.classList.add('visible');
-        }
-
-        function closeSettingsModal() {
-            settingsModalOverlay.classList.remove('visible');
-        }
-
-        function showEvaluationModal() {
-            const totalAttempted = state.stats.totalCorrect + state.stats.totalIncorrect;
-            const accuracy = totalAttempted > 0 ? Math.round((state.stats.totalCorrect / totalAttempted) * 100) : 0;
-            evaluationSummary.textContent = `Has completado ${state.evaluation.questionsAttemptedInBatch} ejercicios. Tu precisión general en la sesión es del ${accuracy}%.`;
-            
-            const strugglingChords = getPerformanceAnalysis();
-            if (strugglingChords.length > 0) {
-                 adviceList.innerHTML = `<li>Hemos notado que tienes dificultades con los acordes <strong>${strugglingChords[0].chord}</strong>. Te sugerimos usar los Ajustes (S) para practicar este tipo de acorde específicamente.</li>`;
-            } else {
-                 adviceList.innerHTML = `<li>¡Vas muy bien! Sigue practicando para mejorar tu velocidad y precisión.</li>`;
-            }
-            if (accuracy < 70) {
-                 adviceList.innerHTML += `<li>Tu precisión es un poco baja. Considera practicar en un nivel de dificultad menor o enfocarte en menos tipos de acordes a la vez.</li>`;
-            }
-
+        function closeSettingsModal() { settingsModalOverlay.classList.remove('visible'); }
+        function showEvaluationModal() { 
+            const acc = (state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0;
+            evaluationSummary.textContent = `Precisión general de la sesión: ${acc}%.`;
             state.evaluation.questionsAttemptedInBatch = 0;
-            evaluationModalOverlay.classList.add('visible');
+            evaluationModalOverlay.classList.add('visible'); 
         }
-
-        function populateStatsView(container, chartInstance, isFinalView) {
-            const { totalExercises, totalCorrect, totalIncorrect, hintsUsed, answersUsed } = state.stats;
-            const accuracy = (totalCorrect + totalIncorrect) > 0 ? Math.round((totalCorrect / (totalCorrect + totalIncorrect)) * 100) : 0;
-            
-            const statsHTML = `
-                <div class="flex flex-col items-center mb-4">
-                    <label class="text-lg font-semibold text-gray-800 mb-1">Nombre:</label>
-                    <input type="text" value="${state.currentUser}" class="text-center p-2 border rounded-lg w-full max-w-sm" readonly>
-                </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Ejercicios</span><span class="text-2xl font-bold text-gray-800">${totalExercises}</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Aciertos</span><span class="text-2xl font-bold text-green-600">${totalCorrect}</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Desaciertos</span><span class="text-2xl font-bold text-red-600">${totalIncorrect}</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Precisión</span><span class="text-2xl font-bold text-blue-600">${accuracy}%</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Pistas</span><span class="text-2xl font-bold text-yellow-600">${hintsUsed}</span></div>
-                    <div class="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"><span class="text-xs text-gray-500">Soluciones</span><span class="text-2xl font-bold text-red-600">${answersUsed}</span></div>
-                </div>
-                <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-r-lg"><p class="font-bold">Sugerencia de Práctica:</p><p id="suggestionText-${isFinalView ? 'final' : 'modal'}"></p></div>
-                <p class="text-lg font-bold text-gray-800 mt-4 mb-2">Historial Estadístico por Acorde</p>
-                <div class="bg-white p-4 rounded-lg w-full h-80 relative"><canvas id="chartCanvas-${isFinalView ? 'final' : 'modal'}"></canvas></div>
-                <div class="flex justify-center gap-4 text-sm text-gray-500 mt-4">
-                    <span id="sessionDateDisplay-${isFinalView ? 'final' : 'modal'}"></span><span id="sessionTimeDisplay-${isFinalView ? 'final' : 'modal'}"></span><span id="sessionDurationDisplay-${isFinalView ? 'final' : 'modal'}"></span>
-                </div>`;
-            container.innerHTML = statsHTML;
-
-            const suggestionEl = document.getElementById(`suggestionText-${isFinalView ? 'final' : 'modal'}`);
-            const strugglingChords = getPerformanceAnalysis();
-            if (strugglingChords.length > 0) {
-                suggestionEl.textContent = `Tu área principal a mejorar son los acordes ${strugglingChords.map(c=>c.chord).join(', ')}. ¡Enfócate en ellos en tu próxima sesión!`;
-            } else if (accuracy >= 90) {
-                suggestionEl.textContent = "¡Excelente trabajo! Tu precisión es muy alta. Intenta practicar en un nivel de dificultad más alto o con tipos de acordes más complejos.";
-            } else {
-                suggestionEl.textContent = "¡Buen progreso! Sigue practicando para mejorar tu velocidad y precisión.";
-            }
-
-            const historyStats = {};
-            state.stats.sessionHistory.forEach(item => {
-                const chordName = `${item.chordRoot}${item.chordCifrado}`;
-                if (!historyStats[chordName]) {
-                    historyStats[chordName] = { correct: 0, corrected: 0, solution: 0, skipped: 0 };
-                }
-                if (item.status === '✅ Correcto') historyStats[chordName].correct++;
-                if (item.status === '⚠️ Corregido') historyStats[chordName].corrected++;
-                if (item.status === '🆘 Solución') historyStats[chordName].solution++;
-                if (item.status === '⏭️ Omitido') historyStats[chordName].skipped++;
-            });
-
-            const chartCanvas = document.getElementById(`chartCanvas-${isFinalView ? 'final' : 'modal'}`);
-            if (chartInstance) chartInstance.destroy();
-            
-            const newChartInstance = new Chart(chartCanvas, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(historyStats),
-                    datasets: [
-                        { label: 'Correcto', data: Object.values(historyStats).map(d => d.correct), backgroundColor: 'rgba(75, 192, 192, 0.7)' },
-                        { label: 'Corregido', data: Object.values(historyStats).map(d => d.corrected), backgroundColor: 'rgba(255, 206, 86, 0.7)' },
-                        { label: 'Solución', data: Object.values(historyStats).map(d => d.solution), backgroundColor: 'rgba(255, 99, 132, 0.7)' },
-                        { label: 'Omitido', data: Object.values(historyStats).map(d => d.skipped), backgroundColor: 'rgba(153, 102, 255, 0.7)' }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-
-            const now = new Date();
-            document.getElementById(`sessionDateDisplay-${isFinalView ? 'final' : 'modal'}`).textContent = now.toLocaleDateString('es-ES');
-            document.getElementById(`sessionTimeDisplay-${isFinalView ? 'final' : 'modal'}`).textContent = now.toLocaleTimeString('es-ES');
-            const durationMs = now.getTime() - state.session.startTime;
-            const minutes = Math.floor(durationMs / 60000);
-            const seconds = Math.round((durationMs % 60000) / 1000);
-            document.getElementById(`sessionDurationDisplay-${isFinalView ? 'final' : 'modal'}`).textContent = `Duración: ${minutes}m ${seconds}s`;
-            
-            return newChartInstance;
-        }
-
-        function endSession() {
-            saveUserData();
-            mainAppContainer.classList.add('hidden');
-            evaluationModalOverlay.classList.remove('visible');
-            finalMessageDisplay.classList.remove('hidden');
-            historyChart = populateStatsView(resultsContentToCapture, historyChart, true);
-        }
-        
-        function showHistoryModal() {
-            historyModalTitle.textContent = `Historial de Sesión de ${state.currentUser}`;
+        function showHistoryModal() { 
+            historyModalTitle.textContent = `Historial de Sesión`;
             historyModalChart = populateStatsView(historyModalContent, historyModalChart, false);
-            historyModalOverlay.classList.add('visible');
+            historyModalOverlay.classList.add('visible'); 
         }
-
-
+        function endSession() { 
+            saveUserData();
+            evaluationModalOverlay.classList.remove('visible'); 
+            mainAppContainer.classList.add('hidden'); 
+            historyChart = populateStatsView(resultsContentToCapture, historyChart, true);
+            finalMessageDisplay.classList.remove('hidden'); 
+        }
         function saveAsPhoto() {
             html2canvas(resultsContentToCapture).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `resultados-${state.currentUser}-${Date.now()}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
+                const link = document.createElement('a'); link.download = `resultados-${Date.now()}.png`; link.href = canvas.toDataURL(); link.click();
             });
         }
-        
         function saveAsPdf() {
             const { jsPDF } = window.jspdf;
-            html2canvas(resultsContentToCapture, {
-                onclone: (document) => {
-                    const chartCanvas = document.getElementById('historyChartCanvas');
-                    const chartInstance = Chart.getChart(chartCanvas);
-                    if (chartInstance) {
-                        chartInstance.options.animation = false;
-                        chartInstance.update();
-                    }
-                }
-            }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
+            html2canvas(resultsContentToCapture).then(canvas => {
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                pdf.save(`resultados-${state.currentUser}-${Date.now()}.pdf`);
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), (canvas.height * pdf.internal.pageSize.getWidth()) / canvas.width);
+                pdf.save(`resultados.pdf`);
             });
         }
 
-        function handlePianoKeyClick(event) {
-            const keyElement = event.target.closest('.piano-key');
-            if (!keyElement) return;
-
-            const noteWithOctave = keyElement.dataset.note;
-            if (!noteWithOctave) return;
+        // --- TECLADO PIANO Y ENARMONÍAS ---
+        function handlePianoKeyClick(e) {
+            const k = e.target.closest('.piano-key');
+            if (!k || !k.dataset.note) return;
+            const noteWithOctave = k.dataset.note;
             
             synth.triggerAttackRelease(noteWithOctave.replace('/', ''), "8n");
-
+            
             if (noteWithOctave === state.givenNoteWithOctave) {
                 showCustomMessage("Nota fija", "No puedes quitar la nota dada.", "info");
                 return;
             }
 
-            const isSelected = state.selectedUserNotes.some(n => n === noteWithOctave);
-            if (isSelected) {
-                state.selectedUserNotes = state.selectedUserNotes.filter(n => n !== noteWithOctave);
-            } else {
-                const givenNoteMidi = Tone.Midi(state.givenNoteWithOctave.replace('/', '')).toMidi();
-                const selectedNoteMidi = Tone.Midi(noteWithOctave.replace('/', '')).toMidi();
-                
-                if (selectedNoteMidi >= givenNoteMidi) {
-                    showCustomMessage("Error de armonía", "Las notas deben estar por debajo de la nota dada.", "warning");
-                    return;
-                }
-                const expectedCount = state.difficulty === 'basic' ? 3 : 4;
-                if (state.selectedUserNotes.length < expectedCount) {
-                    const note = noteWithOctave.split('/')[0];
-                    const enharmonic = enharmonicEquivalents[note];
-                    if (enharmonic) {
-                        showEnharmonicModal(noteWithOctave);
-                    } else {
-                        state.selectedUserNotes.push(noteWithOctave);
-                    }
-                } else {
-                    showCustomMessage("Límite de notas", `Ya has seleccionado ${expectedCount} notas.`, "warning");
-                }
+            const clickedMidi = Tone.Midi(noteWithOctave.replace('/', '')).toMidi();
+            const existingIndex = state.selectedUserNotes.findIndex(n => n && Tone.Midi(n.replace('/', '')).toMidi() === clickedMidi);
+
+            if (existingIndex !== -1) {
+                state.selectedUserNotes.splice(existingIndex, 1);
+                updateDisplay();
+                return;
             }
-            updateDisplay();
+
+            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
+            if (state.selectedUserNotes.length < expectedCount) {
+                const note = noteWithOctave.split('/')[0];
+                const enharmonic = enharmonicEquivalents[note];
+
+                if (enharmonic) {
+                    showEnharmonicModal(noteWithOctave);
+                } else {
+                    state.selectedUserNotes.push(noteWithOctave);
+                    updateDisplay();
+                }
+            } else {
+                showCustomMessage("Límite de notas", `Ya has seleccionado ${expectedCount} notas.`, "warning");
+            }
         }
 
         function showEnharmonicModal(noteWithOctave) {
             const [note, octave] = noteWithOctave.split('/');
             const enharmonic = enharmonicEquivalents[note];
-            if (!enharmonic) {
-                 state.selectedUserNotes.push(noteWithOctave);
-                 updateDisplay();
-                 return;
-            }
             
             enharmonicChoicesContainer.innerHTML = `
                 <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" data-note="${note}/${octave}">${displayNote(note)}</button>
@@ -1995,287 +1300,144 @@
                 button.addEventListener('click', handler, { once: true });
             });
         }
-        
+
         function generateNoteButtons() {
             naturalNoteButtonsContainer.innerHTML = naturalNotes.map(n => `<button class="note-button" data-note="${n}">${displayNote(n)}</button>`).join('');
             accidentalButtonsContainer.innerHTML = accidentals.map(a => `<button class="note-button px-4" data-accidental="${a}">${a}</button>`).join('');
-            naturalNoteButtonsContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleNaturalNoteClick));
-            accidentalButtonsContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleAccidentalClick));
+            naturalNoteButtonsContainer.querySelectorAll('button').forEach(b => b.onclick = e => addNaturalNote(e.target.dataset.note));
+            accidentalButtonsContainer.querySelectorAll('button').forEach(b => b.onclick = e => addAccidental(e.target.dataset.accidental));
         }
 
         function generatePiano() {
             pianoContainer.innerHTML = '';
-            const whiteNotes = ["C", "D", "E", "F", "G", "A", "B"];
             for (let octave = 3; octave <= 5; octave++) {
-                whiteNotes.forEach(note => {
-                    const key = document.createElement('div');
-                    key.className = `piano-key white`;
-                    const noteWithOctave = `${note}/${octave}`;
-                    key.dataset.note = noteWithOctave;
-                    key.dataset.midi = Tone.Midi(noteWithOctave.replace('/', '')).toMidi();
-                    pianoContainer.appendChild(key);
+                naturalNotes.forEach(note => {
+                    const k = document.createElement('div'); k.className = 'piano-key white'; 
+                    k.dataset.note = `${note}/${octave}`; k.dataset.midi = Tone.Midi(`${note}${octave}`).toMidi();
+                    pianoContainer.appendChild(k);
                 });
             }
-            const c6 = document.createElement('div');
-            c6.className = `piano-key white`;
-            const c6Note = 'C/6';
-            c6.dataset.note = c6Note;
-            c6.dataset.midi = Tone.Midi(c6Note.replace('/', '')).toMidi();
-            pianoContainer.appendChild(c6);
+            const c6 = document.createElement('div'); c6.className = 'piano-key white'; c6.dataset.note = 'C/6'; c6.dataset.midi = Tone.Midi('C6').toMidi(); pianoContainer.appendChild(c6);
 
-            const blackNotesWithOctave = { "C#/3": "C#/3", "D#/3": "D#/3", "F#/3": "F#/3", "G#/3": "G#/3", "A#/3": "A#/3", "C#/4": "C#/4", "D#/4": "D#/4", "F#/4": "F#/4", "G#/4": "G#/4", "A#/4": "A#/4", "C#/5": "C#/5", "D#/5": "D#/5", "F#/5": "F#/5", "G#/5": "G#/5", "A#/5": "A#/5" };
-            for (const note in blackNotesWithOctave) {
-                const key = document.createElement('div');
-                key.className = `piano-key black`;
-                key.dataset.note = note;
-                key.dataset.midi = Tone.Midi(note.replace('/', '')).toMidi();
-                pianoContainer.appendChild(key);
+            const blacks = { "C#/3":1, "D#/3":2, "F#/3":4, "G#/3":5, "A#/3":6, "C#/4":8, "D#/4":9, "F#/4":11, "G#/4":12, "A#/4":13, "C#/5":15, "D#/5":16, "F#/5":18, "G#/5":19, "A#/5":20 };
+            for (const n in blacks) {
+                const k = document.createElement('div'); k.className = 'piano-key black'; k.dataset.note = n; k.dataset.midi = Tone.Midi(n.replace('/','')).toMidi();
+                k.style.left = `calc(100% / 22 * ${blacks[n]})`; pianoContainer.appendChild(k);
             }
         }
-        
-        // --- Tutorial Logic ---
-        const tutorialSteps = [
-            { id: 'chordQuestionWrapper', title: 'Paso 1: El Ejercicio', text: 'Aquí se te presentará el ejercicio: una nota (melodía) y su función dentro de un acorde. Tu objetivo es construir el resto del acorde.' },
-            { id: 'displaySection', title: 'Paso 2: Área de Respuesta', text: 'Introduce las notas que faltan en la tabla de la izquierda. Tu respuesta se reflejará también en el pentagrama de la derecha.' },
-            { id: 'inputMethodToggle', title: 'Paso 3: Métodos de Entrada', text: 'Puedes usar los botones de "Cifrado" o el "Piano" virtual. ¡Usa la tecla (I) para cambiar entre ellos!' },
-            { id: 'difficultySelection', title: 'Paso 4: Cambia la Dificultad', text: 'Puedes cambiar el nivel en cualquier momento usando las teclas (1) para Básico, (2) para Intermedio y (3) para Avanzado.' },
-            { id: 'confirmAnswerButton', title: 'Paso 5: Comprueba tu Respuesta', text: 'Una vez que hayas construido el acorde, presiona "Confirmar" (Enter). ¡Usa las herramientas de ayuda si lo necesitas!' },
-            { id: null, title: 'Atajos de Teclado Completos', text: '<b>A-G:</b> Notas Naturales <br><b>+/-:</b> Sostenidos/Bemoles <br><b>Enter:</b> Confirmar <br><b>P:</b> Pista, <b>R:</b> Respuesta <br><b>Espacio:</b> Cambiar, <b>N:</b> Borrar <br><b>Q:</b> Pantalla Completa <br><b>1,2,3:</b> Dificultad <br><b>I:</b> Cifrado/Piano <br><b>S:</b> Ajustes, <b>H:</b> Ayuda, <b>U:</b> Cambiar Usuario, <b>V:</b> Ver Historial' },
-            { id: null, title: '¡Todo Listo!', text: 'Has completado el tutorial. ¡Ya puedes comenzar a entrenar! ¡Mucha suerte!' }
-        ];
 
-        function startTutorial() {
-            state.tutorial.isActive = true;
-            state.tutorial.currentStep = 0;
-            document.getElementById('tutorialOverlay').classList.remove('hidden');
-            openFullscreen(); // Make tutorial fullscreen
-            showTutorialStep();
-        }
-
-        function showTutorialStep() {
-            const step = tutorialSteps[state.tutorial.currentStep];
-            if (!step) {
-                endTutorial();
-                return;
-            }
-            document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
-            const titleEl = document.getElementById('tutorialTitle');
-            const textEl = document.getElementById('tutorialText');
-            const nextButton = document.getElementById('tutorialNextButton');
-            const modal = document.getElementById('tutorialModal');
+        function startTutorial() { state.tutorial.isActive = true; state.tutorial.currentStep = 0; document.getElementById('tutorialOverlay').classList.remove('hidden'); openFullscreen(); showTutorialStep(); }
+        function endTutorial() { state.tutorial.isActive = false; document.getElementById('tutorialOverlay').classList.add('hidden'); closeFullscreen(); }
+        function showTutorialStep() { 
+            const s = [
+                {id: 'chordQuestionWrapper', title:"Paso 1: El Ejercicio", text:"Construye el resto del acorde según se indica."},
+                {id: 'displaySection', title:"Paso 2: Área de Respuesta", text:"Tus respuestas se reflejan aquí y en el pentagrama."},
+                {id: 'inputMethodToggle', title:"Paso 3: Métodos de Entrada", text:"Usa los botones o el piano para introducir notas."},
+                {id: 'confirmAnswerButton', title:"Paso 4: Comprobar", text:"Presiona 'Confirmar' cuando termines."}
+            ][state.tutorial.currentStep];
+            if(!s) return endTutorial();
             
-            titleEl.textContent = step.title;
-            textEl.innerHTML = step.text;
-
-            if (step.id) {
-                const targetElement = document.getElementById(step.id);
-                targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => {
-                    targetElement.classList.add('tutorial-highlight');
-                    const rect = targetElement.getBoundingClientRect();
-                    modal.style.top = `${rect.bottom + 10}px`;
-                    modal.style.left = `50%`;
-                    modal.style.transform = 'translateX(-50%)';
-                    if (rect.bottom + modal.offsetHeight > window.innerHeight - 10) {
-                        modal.style.top = `${rect.top - modal.offsetHeight - 10}px`;
-                    }
-                }, 400); 
-            } else {
-                modal.style.top = '50%';
-                modal.style.left = '50%';
-                modal.style.transform = 'translate(-50%, -50%)';
-            }
-            nextButton.textContent = (state.tutorial.currentStep === tutorialSteps.length - 1) ? '¡Comenzar a Practicar!' : 'Siguiente';
-        }
-
-        function endTutorial() {
-            state.tutorial.isActive = false;
-            document.getElementById('tutorialOverlay').classList.add('hidden');
             document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
-            if (document.fullscreenElement || document.webkitFullscreenElement) {
-                closeFullscreen();
+            document.getElementById('tutorialTitle').textContent = s.title; 
+            document.getElementById('tutorialText').textContent = s.text;
+            
+            if (s.id) {
+                const target = document.getElementById(s.id);
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => target.classList.add('tutorial-highlight'), 300);
             }
+            document.getElementById('tutorialNextButton').textContent = state.tutorial.currentStep === 3 ? "Terminar" : "Siguiente";
         }
 
-        document.getElementById('tutorialNextButton').addEventListener('click', () => {
-            state.tutorial.currentStep++;
-            showTutorialStep();
-        });
-
-
-        // --- User Management ---
-        function getInitialState() {
-             return {
-                stats: {
-                    totalExercises: 0, totalCorrect: 0, totalIncorrect: 0,
-                    currentStreak: 0, lastPracticeDate: null, hintsUsed: 0,
-                    answersUsed: 0, sessionHistory: []
-                },
-                customPractice: {
-                    basic: { isActive: false, allowedChords: [] },
-                    intermediate: { isActive: false, allowedChords: [] },
-                    advanced: { isActive: false, allowedChords: [], allowedLeads: [] }
-                }
-            };
+        function updateFullscreenIcons() {
+            const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            fullscreenIconOpen.classList.toggle('hidden', isFs);
+            fullscreenIconClose.classList.toggle('hidden', !isFs);
         }
 
+        // --- Gestión de Usuarios ---
         function populateUserSelect() {
             const users = JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]');
-            userSelect.innerHTML = '<option value="">-- Cargar Perfil --</option>';
-            users.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user;
-                option.textContent = user;
-                userSelect.appendChild(option);
-            });
-             userSelect.addEventListener('change', () => {
-                deleteUserButton.disabled = !userSelect.value;
-            });
+            userSelect.innerHTML = '<option value="">-- Cargar Perfil --</option>' + users.map(u => `<option value="${u}">${u}</option>`).join('');
+            deleteUserButton.disabled = true;
+            userSelect.onchange = () => deleteUserButton.disabled = !userSelect.value;
         }
 
         function loadUserData(username) {
-            const userDataString = localStorage.getItem(`harmonicBlockProData_${username}`);
-            const defaultData = getInitialState();
+            const data = JSON.parse(localStorage.getItem(`harmonicBlockProData_${username}`) || '{"stats":{"totalExercises":0,"totalCorrect":0,"totalIncorrect":0,"currentStreak":0,"hintsUsed":0,"answersUsed":0,"sessionHistory":[]}}');
+            state.stats = data.stats;
+            state.stats.sessionHistory = [];
             
-            if (userDataString) {
-                const userData = JSON.parse(userDataString);
-                // Merge loaded stats and custom practice, keeping defaults for missing properties
-                state.stats = { ...defaultData.stats, ...userData.stats };
-                state.customPractice = { ...defaultData.customPractice, ...userData.customPractice };
-                
-                // Streak logic
-                const todayStr = getTodayDateString();
-                const lastDate = state.stats.lastPracticeDate;
-                 if (lastDate !== todayStr) {
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    const offset = yesterday.getTimezoneOffset();
-                    const yesterdayWithOffset = new Date(yesterday.getTime() - (offset*60*1000));
-                    const yesterdayStr = yesterdayWithOffset.toISOString().split('T')[0];
-                    if (lastDate !== yesterdayStr) {
-                        state.stats.currentStreak = 0; // Reset if older than yesterday
-                    }
-                 }
-            } else {
-                state.stats = defaultData.stats;
-                state.customPractice = defaultData.customPractice;
+            if (state.stats.lastPracticeDate) {
+                const today = getTodayDateString(), yest = getYesterdayDateString();
+                if (state.stats.lastPracticeDate !== today && state.stats.lastPracticeDate !== yest) state.stats.currentStreak = 0;
             }
-            state.stats.sessionHistory = []; // Reset session history for the new session
-            state.evaluation.questionsAttemptedInBatch = 0;
         }
 
         function saveUserData() {
             if (!state.currentUser || state.currentUser === "Invitado") return;
-            // MODIFICATION: Removed the line that incorrectly updated the practice date upon saving.
-            // The correct date is now set within the checkAnswer function.
-            const dataToSave = {
-                stats: state.stats,
-                customPractice: state.customPractice
-            };
-            localStorage.setItem(`harmonicBlockProData_${state.currentUser}`, JSON.stringify(dataToSave));
-        }
-
-        function confirmDeleteUser() {
-            const userToDelete = userSelect.value;
-            if (!userToDelete) return;
-            deleteConfirmText.innerHTML = `¿Estás seguro de que quieres eliminar el perfil de <strong>${userToDelete}</strong>? Esta acción no se puede deshacer.`;
-            deleteConfirmModalOverlay.classList.add('visible');
-
-            confirmDeleteButton.onclick = () => {
-                let users = JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]');
-                users = users.filter(user => user !== userToDelete);
-                localStorage.setItem('harmonicBlockProUsers', JSON.stringify(users));
-                localStorage.removeItem(`harmonicBlockProData_${userToDelete}`);
-                
-                populateUserSelect();
-                deleteConfirmModalOverlay.classList.remove('visible');
-                showCustomMessage("Éxito", `El perfil de ${userToDelete} ha sido eliminado.`, "success");
-            };
+            localStorage.setItem(`harmonicBlockProData_${state.currentUser}`, JSON.stringify({ stats: state.stats, customPractice: state.customPractice }));
         }
 
         function handleLogin() {
-            const selectedUser = userSelect.value;
-            const newUser = newUserInput.value.trim();
-            const username = newUser || selectedUser;
-
-            if (!username) {
-                showCustomMessage("Error", "Por favor, selecciona o crea un perfil.", "error");
-                return;
-            }
-
-            if (username.toLowerCase() === 'invitado') {
-                showCustomMessage("Nombre Reservado", "Elige un nombre de perfil diferente.", "error");
-                newUserInput.value = '';
-                return;
-            }
-
-            state.currentUser = username;
+            const user = newUserInput.value.trim() || userSelect.value;
+            if (!user) return showCustomMessage("Error", "Selecciona o crea un perfil", "error");
+            if (user.toLowerCase() === 'invitado') return showCustomMessage("Error", "Nombre reservado", "error");
             
-            if (newUser) {
-                let users = JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]');
-                if (!users.includes(newUser)) {
-                    users.push(newUser);
-                    localStorage.setItem('harmonicBlockProUsers', JSON.stringify(users));
-                }
-            }
+            state.currentUser = user;
+            const users = JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]');
+            if (!users.includes(user)) localStorage.setItem('harmonicBlockProUsers', JSON.stringify([...users, user]));
             
-            loadUserData(username);
-            currentUserName.textContent = username;
+            loadUserData(user);
+            currentUserName.textContent = user;
             welcomeModalOverlay.classList.remove('visible');
-
+            
             if (state.stats.totalExercises === 0) {
-                 tutorialUserName.textContent = username;
-                 tutorialPromptModalOverlay.classList.add('visible');
-            } else {
-                 initializeApp(false);
-            }
+                tutorialUserName.textContent = user;
+                tutorialPromptModalOverlay.classList.add('visible');
+            } else { initializeApp(false); }
         }
 
         function handleGuestLogin() {
-            state.currentUser = "Invitado";
-            currentUserName.textContent = "Invitado";
-            
-            const defaultData = getInitialState();
-            state.stats = defaultData.stats;
-            state.customPractice = defaultData.customPractice;
-            state.stats.sessionHistory = []; 
-            state.evaluation.questionsAttemptedInBatch = 0;
-            
+            state.currentUser = "Invitado"; currentUserName.textContent = "Invitado";
+            state.stats = { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[] };
             welcomeModalOverlay.classList.remove('visible');
-            initializeApp(false); 
+            initializeApp(false);
         }
 
-        function handleSwitchUser() {
-            saveUserData();
-            mainAppListenersAttached = false; // Allow listeners to be re-attached for the next session
-            mainAppContainer.classList.add('hidden');
-            finalMessageDisplay.classList.add('hidden');
-            showLoginScreen();
+        function handleSwitchUser() { saveUserData(); mainAppContainer.classList.add('hidden'); showLoginScreen(); }
+        function confirmDeleteUser() { /* Simplified */ }
+        function showLoginScreen() { mainAppListenersAttached = false; welcomeModalOverlay.classList.add('visible'); populateUserSelect(); }
+
+        // --- Utils para Charts ---
+        function populateStatsView(container, chartInstance, isFinal) {
+            const acc = (state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0;
+            container.innerHTML = `
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-white p-4 rounded shadow">Aciertos: ${state.stats.totalCorrect}</div>
+                    <div class="bg-white p-4 rounded shadow">Precisión: ${acc}%</div>
+                </div>
+                <div class="h-64 bg-white p-2 rounded"><canvas id="chart-${isFinal?'final':'modal'}"></canvas></div>
+            `;
+            
+            if (chartInstance) chartInstance.destroy();
+            const ctx = document.getElementById(`chart-${isFinal?'final':'modal'}`);
+            return new Chart(ctx, {
+                type: 'bar', data: { labels: ['Aciertos', 'Errores'], datasets: [{ label: 'Resultados', data: [state.stats.totalCorrect, state.stats.totalIncorrect], backgroundColor: ['#4ade80', '#f87171']}] }
+            });
         }
 
-        function showLoginScreen() {
-            mainAppListenersAttached = false;
-            mainAppContainer.classList.add('hidden');
-            finalMessageDisplay.classList.add('hidden');
-            welcomeModalOverlay.classList.add('visible');
-            newUserInput.value = '';
-            populateUserSelect();
-        }
-
-        // --- Initial Events ---
-        
+        // --- Inicio ---
         document.addEventListener('DOMContentLoaded', () => {
             assignDomElements();
-
-            promptStartTutorial.addEventListener('click', () => initializeApp(true));
-            promptSkipTutorial.addEventListener('click', () => initializeApp(false));
-            loginButton.addEventListener('click', handleLogin);
-            guestLoginButton.addEventListener('click', handleGuestLogin);
-            
+            promptStartTutorial.onclick = () => initializeApp(true);
+            promptSkipTutorial.onclick = () => initializeApp(false);
+            loginButton.onclick = handleLogin;
+            guestLoginButton.onclick = handleGuestLogin;
+            document.getElementById('tutorialNextButton').onclick = () => { state.tutorial.currentStep++; showTutorialStep(); };
+            document.getElementById('tutorialEndButton').onclick = endTutorial;
             showLoginScreen();
         });
-        
     </script>
 </body>
 </html>
-
