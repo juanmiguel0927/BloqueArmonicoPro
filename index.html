@@ -1069,6 +1069,7 @@
                     state.stats.totalCorrect++;
                     completeExercise('correct');
                     
+                    // --- Lógica de Racha ---
                     const todayStr = getTodayDateString();
                     if (state.stats.lastPracticeDate !== todayStr) {
                         if (state.stats.lastPracticeDate === getYesterdayDateString()) {
@@ -1198,6 +1199,57 @@
             populateSettingsModal();
             settingsModalOverlay.classList.add('visible'); 
         }
+        
+        function populateSettingsModal() {
+            chordTypesCheckboxesContainer.innerHTML = '';
+            const allChordTypes = Object.keys(chordStructures);
+            let relevantChords = [];
+            if (state.difficulty === 'basic') {
+                relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'basic');
+            } else if (state.difficulty === 'intermediate' || state.difficulty === 'advanced') {
+                relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'intermediate');
+            }
+            
+            const currentPracticeSettings = state.customPractice[state.difficulty];
+
+            relevantChords.forEach(key => {
+                const chord = chordStructures[key];
+                const isChecked = !currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key);
+                chordTypesCheckboxesContainer.innerHTML += `
+                    <div class="flex items-center">
+                        <input type="checkbox" id="chord_${key}" value="${key}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
+                        <label for="chord_${key}" class="ml-2 text-gray-700">${chord.name}</label>
+                    </div>
+                `;
+            });
+            
+            leadVoicesSection.classList.toggle('hidden', state.difficulty !== 'advanced');
+            leadVoicesCheckboxesContainer.innerHTML = '';
+            if (state.difficulty === 'advanced') {
+                const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+                const availableTensions = new Set();
+                relevantChords.forEach(key => {
+                    chordStructures[key].intervals.forEach(interval => {
+                        if (allTensions.includes(interval.label)) {
+                            availableTensions.add(interval.label);
+                        }
+                    });
+                });
+
+                allTensions.forEach(label => {
+                    if (availableTensions.has(label)) {
+                        const isChecked = !currentPracticeSettings.isActive || currentPracticeSettings.allowedLeads.length === 0 || currentPracticeSettings.allowedLeads.includes(label);
+                        leadVoicesCheckboxesContainer.innerHTML += `
+                            <div class="flex items-center">
+                                <input type="checkbox" id="lead_${label}" value="${label}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
+                                <label for="lead_${label}" class="ml-2 text-gray-700">${label}</label>
+                            </div>
+                        `;
+                    }
+                });
+            }
+        }
+
         function saveSettings() { 
             const allowedChords = Array.from(chordTypesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
             const allowedLeads = Array.from(leadVoicesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
@@ -1440,4 +1492,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
