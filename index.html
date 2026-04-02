@@ -1079,6 +1079,13 @@
                         if (state.stats.lastPracticeDate === getYesterdayDateString()) {
                             state.stats.currentStreak++;
                         } else {
+                            if (state.stats.currentStreak > 0 && state.stats.lastPracticeDate) {
+                                if (!state.stats.pastStreaks) state.stats.pastStreaks = [];
+                                state.stats.pastStreaks.push({
+                                    streak: state.stats.currentStreak,
+                                    endDate: state.stats.lastPracticeDate
+                                });
+                            }
                             state.stats.currentStreak = 1;
                         }
                         state.stats.lastPracticeDate = todayStr;
@@ -1244,10 +1251,30 @@
                 });
             }
 
+            // Streak History UI
+            const pastStreaks = state.stats.pastStreaks || [];
+            let maxStreak = state.stats.currentStreak || 0;
+            pastStreaks.forEach(s => { if(s.streak > maxStreak) maxStreak = s.streak; });
+
+            let streaksHTML = '';
+            if (pastStreaks.length > 0) {
+                streaksHTML = `
+                    <div class="mt-4 text-left w-full">
+                        <h3 class="text-[13px] uppercase font-bold text-gray-500 mb-2">Rachas Anteriores</h3>
+                        <div class="flex flex-wrap gap-2">
+                            ${[...pastStreaks].reverse().slice(0, 5).map(s => {
+                                const formattedDate = s.endDate.split('-').reverse().join('/');
+                                return `<span class="bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-1 rounded border border-amber-200">🔥 ${s.streak} días (hasta ${formattedDate})</span>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
             const pastSessions = state.stats.pastSessions || [];
             let tableHTML = `
                 <div class="mt-4 text-left w-full">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">Registro de Sesiones</h3>
+                    <h3 class="text-[13px] uppercase font-bold text-gray-500 mb-2">Registro de Sesiones</h3>
                     <div class="max-h-40 overflow-y-auto bg-white rounded shadow border border-gray-200">
                         <table class="w-full text-xs sm:text-sm text-left text-gray-500">
                             <thead class="text-gray-700 uppercase bg-gray-100 sticky top-0 shadow-sm">
@@ -1284,20 +1311,25 @@
             tableHTML += `</tbody></table></div></div>`;
 
             container.innerHTML = `
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="bg-white p-3 rounded shadow text-center">
-                        <div class="text-xs text-gray-500 uppercase font-bold">Total Aciertos</div>
-                        <div class="text-2xl font-bold text-green-600">${state.stats.totalCorrect}</div>
+                <div class="grid grid-cols-3 gap-2 mb-2">
+                    <div class="bg-white p-2 rounded shadow text-center">
+                        <div class="text-[10px] text-gray-500 uppercase font-bold">Total Aciertos</div>
+                        <div class="text-xl font-bold text-green-600">${state.stats.totalCorrect}</div>
                     </div>
-                    <div class="bg-white p-3 rounded shadow text-center">
-                        <div class="text-xs text-gray-500 uppercase font-bold">Precisión Global</div>
-                        <div class="text-2xl font-bold text-blue-600">${acc}%</div>
+                    <div class="bg-white p-2 rounded shadow text-center">
+                        <div class="text-[10px] text-gray-500 uppercase font-bold">Precisión Global</div>
+                        <div class="text-xl font-bold text-blue-600">${acc}%</div>
+                    </div>
+                    <div class="bg-white p-2 rounded shadow text-center">
+                        <div class="text-[10px] text-gray-500 uppercase font-bold">Mejor Racha</div>
+                        <div class="text-xl font-bold text-amber-500">🔥 ${maxStreak}</div>
                     </div>
                 </div>
+                ${streaksHTML}
                 ${tableHTML}
             `;
             
-            return null; // Quitamos el gráfico anterior en favor de la tabla de registros, más útil visualmente en móviles.
+            return null;
         }
 
         // Modals & Extras
@@ -1527,15 +1559,24 @@
             let data = {};
             if (dataStr) { try { data = JSON.parse(dataStr); } catch (e) {} }
             
-            state.stats = data.stats || { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[], pastSessions:[] };
+            state.stats = data.stats || { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[], pastSessions:[], pastStreaks:[] };
             
             if (!state.stats.pastSessions) state.stats.pastSessions = [];
+            if (!state.stats.pastStreaks) state.stats.pastStreaks = [];
             state.stats.sessionHistory = [];
             state.session.startTime = Date.now();
             
             if (state.stats.lastPracticeDate) {
                 const today = getTodayDateString(), yest = getYesterdayDateString();
-                if (state.stats.lastPracticeDate !== today && state.stats.lastPracticeDate !== yest) state.stats.currentStreak = 0;
+                if (state.stats.lastPracticeDate !== today && state.stats.lastPracticeDate !== yest) {
+                    if (state.stats.currentStreak > 0) {
+                        state.stats.pastStreaks.push({
+                            streak: state.stats.currentStreak,
+                            endDate: state.stats.lastPracticeDate
+                        });
+                    }
+                    state.stats.currentStreak = 0;
+                }
             }
         }
 
@@ -1565,7 +1606,7 @@
 
         function handleGuestLogin() {
             state.currentUser = "Invitado"; currentUserName.textContent = "Invitado";
-            state.stats = { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[], pastSessions: [] };
+            state.stats = { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[], pastSessions: [], pastStreaks: [] };
             state.session.startTime = Date.now();
             welcomeModalOverlay.classList.remove('visible');
             initializeApp(false);
