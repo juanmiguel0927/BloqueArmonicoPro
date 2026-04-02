@@ -258,7 +258,7 @@
             #confirmAnswerButton { grid-column: 1 / -1; }
             .piano-container { height: 140px; }
             
-            .modal-content { padding: 1rem; } /* Padding reducido en móviles para ganar espacio */
+            .modal-content { padding: 1rem; } 
 
             /* TUTORIAL SIEMPRE VISIBLE EN MÓVILES */
             #tutorialModal {
@@ -374,6 +374,7 @@
                 </div>
             </div>
             <div id="statusBarControls" class="flex justify-center items-center gap-2 flex-wrap">
+                <!-- Notation selector -->
                 <div class="flex rounded-full bg-gray-200 p-1">
                     <input type="radio" id="notationAmericano" name="notationSystem" value="american" class="hidden" checked>
                     <label for="notationAmericano" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50" title="Cifrado Americano (Anglosajón)">C,D,E</label>
@@ -424,7 +425,7 @@
             </div>
         </div>
         
-        <!-- Note input options -->
+        <!-- Note input options (Cifrado vs Piano) -->
         <div id="inputMethodToggle" class="flex justify-center mb-4">
             <div class="flex p-1 bg-gray-200 rounded-full" title="Cambiar Entrada (I)">
                 <button id="cifradoToggle" class="py-2 px-4 rounded-full font-semibold transition-all bg-white text-blue-600 shadow-sm active">Cifrado</button>
@@ -432,11 +433,13 @@
             </div>
         </div>
 
+        <!-- Note selection controls (Cifrado) -->
         <div id="noteBuildingControls" class="flex flex-col gap-4">
             <div id="naturalNoteButtons" class="natural-note-buttons"></div>
             <div id="accidentalButtons" class="accidental-buttons"></div>
         </div>
 
+        <!-- Piano keyboard, initially hidden -->
         <div id="piano-container" class="piano-container hidden"></div>
 
         <!-- Main action buttons -->
@@ -520,13 +523,13 @@
 
     <!-- Session History Modal -->
     <div id="historyModalOverlay" class="modal-overlay hidden">
-        <div class="container p-6 text-center overflow-y-auto max-h-[90vh]">
+        <div class="container p-6 text-center w-full max-w-2xl">
             <h2 id="historyModalTitle" class="text-3xl font-bold text-blue-800 mb-4"></h2>
-            <div id="historyModalContent" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+            <div id="historyModalContent">
                 <!-- Content will be populated by JS -->
             </div>
             <div class="flex justify-center gap-4 mt-6">
-                <button id="closeHistoryModalButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Volver a la Práctica</button>
+                <button id="closeHistoryModalButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors">Volver a la Práctica</button>
             </div>
         </div>
     </div>
@@ -535,7 +538,7 @@
     <!-- Final message and session statistics -->
     <div id="finalMessageDisplay" class="container hidden p-6 text-center">
         <h2 class="text-3xl font-bold text-blue-800 mb-4">¡Sesión Terminada!</h2>
-        <div id="resultsContentToCapture" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+        <div id="resultsContentToCapture">
              <!-- Content populated by JS -->
         </div>
         <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
@@ -549,6 +552,7 @@
     <script type="module">
         import { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } from "https://cdn.jsdelivr.net/npm/vexflow/build/esm/vexflow.js";
 
+        // Central application state
         const state = {
             currentUser: null,
             correctNotes: [], correctNotesWithOctave: [],
@@ -1194,6 +1198,108 @@
             if (key === ' ') { e.preventDefault(); changeQuestionButton.click(); }
         }
 
+        // --- Historial de Sesiones (Fechas y Duración) ---
+        function recordCurrentSession() {
+            if (!state.stats.sessionHistory || state.stats.sessionHistory.length === 0) return;
+            
+            let sessionCorrect = 0, sessionIncorrect = 0;
+            state.stats.sessionHistory.forEach(item => {
+                if (item.status === '✅ Correcto') sessionCorrect++;
+                else if (item.status !== '⏭️ Omitido') sessionIncorrect++;
+            });
+
+            if (sessionCorrect === 0 && sessionIncorrect === 0) return;
+
+            const durationMs = Date.now() - state.session.startTime;
+            const minutes = Math.floor(durationMs / 60000);
+            const seconds = Math.floor((durationMs % 60000) / 1000);
+            
+            const now = new Date();
+            const sessionData = {
+                date: getLocalDateString(now),
+                time: now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                duration: `${minutes}m ${seconds}s`,
+                correct: sessionCorrect,
+                incorrect: sessionIncorrect
+            };
+
+            if (!state.stats.pastSessions) state.stats.pastSessions = [];
+            state.stats.pastSessions.push(sessionData);
+            state.stats.sessionHistory = []; // Limpiamos para no duplicar si se continúa navegando
+            state.session.startTime = Date.now(); // Reiniciamos el reloj para una posible nueva sesión
+        }
+
+        function populateStatsView(container, chartInstance, isFinal) {
+            const acc = (state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0;
+            
+            const currentDurationMs = Date.now() - state.session.startTime;
+            const curMin = Math.floor(currentDurationMs / 60000);
+            const curSec = Math.floor((currentDurationMs % 60000) / 1000);
+            
+            let curCorrect = 0, curIncorrect = 0;
+            if(state.stats.sessionHistory) {
+                state.stats.sessionHistory.forEach(item => {
+                    if (item.status === '✅ Correcto') curCorrect++;
+                    else if (item.status !== '⏭️ Omitido') curIncorrect++;
+                });
+            }
+
+            const pastSessions = state.stats.pastSessions || [];
+            let tableHTML = `
+                <div class="mt-4 text-left w-full">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Registro de Sesiones</h3>
+                    <div class="max-h-40 overflow-y-auto bg-white rounded shadow border border-gray-200">
+                        <table class="w-full text-xs sm:text-sm text-left text-gray-500">
+                            <thead class="text-gray-700 uppercase bg-gray-100 sticky top-0 shadow-sm">
+                                <tr>
+                                    <th class="px-2 sm:px-4 py-2">Fecha/Hora</th>
+                                    <th class="px-2 sm:px-4 py-2">Duración</th>
+                                    <th class="px-2 sm:px-4 py-2">Aciertos</th>
+                                    <th class="px-2 sm:px-4 py-2">Errores</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+            
+            if (!isFinal && (curCorrect > 0 || curIncorrect > 0)) {
+                tableHTML += `<tr class="border-b bg-blue-50">
+                    <td class="px-2 sm:px-4 py-2 font-bold text-blue-800">Sesión Actual</td>
+                    <td class="px-2 sm:px-4 py-2 font-bold text-blue-800">${curMin}m ${curSec}s</td>
+                    <td class="px-2 sm:px-4 py-2 text-green-600 font-bold">${curCorrect}</td>
+                    <td class="px-2 sm:px-4 py-2 text-red-600 font-bold">${curIncorrect}</td>
+                </tr>`;
+            }
+
+            if (pastSessions.length === 0 && curCorrect === 0 && curIncorrect === 0 && isFinal) {
+                tableHTML += `<tr><td colspan="4" class="px-2 sm:px-4 py-4 text-center">No hay sesiones registradas</td></tr>`;
+            } else {
+                [...pastSessions].reverse().forEach(s => {
+                    tableHTML += `<tr class="border-b hover:bg-gray-50">
+                        <td class="px-2 sm:px-4 py-2">${s.date} <span class="text-xs text-gray-400 block sm:inline">${s.time}</span></td>
+                        <td class="px-2 sm:px-4 py-2">${s.duration}</td>
+                        <td class="px-2 sm:px-4 py-2 text-green-600 font-bold">${s.correct}</td>
+                        <td class="px-2 sm:px-4 py-2 text-red-600 font-bold">${s.incorrect}</td>
+                    </tr>`;
+                });
+            }
+            tableHTML += `</tbody></table></div></div>`;
+
+            container.innerHTML = `
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-white p-3 rounded shadow text-center">
+                        <div class="text-xs text-gray-500 uppercase font-bold">Total Aciertos</div>
+                        <div class="text-2xl font-bold text-green-600">${state.stats.totalCorrect}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow text-center">
+                        <div class="text-xs text-gray-500 uppercase font-bold">Precisión Global</div>
+                        <div class="text-2xl font-bold text-blue-600">${acc}%</div>
+                    </div>
+                </div>
+                ${tableHTML}
+            `;
+            
+            return null; // Quitamos el gráfico anterior en favor de la tabla de registros, más útil visualmente en móviles.
+        }
+
         // Modals & Extras
         function openSettingsModal() { 
             populateSettingsModal();
@@ -1262,16 +1368,17 @@
         function closeSettingsModal() { settingsModalOverlay.classList.remove('visible'); }
         function showEvaluationModal() { 
             const acc = (state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0;
-            evaluationSummary.textContent = `Precisión general de la sesión: ${acc}%.`;
+            evaluationSummary.textContent = `Precisión de la tanda: ${acc}%.`;
             state.evaluation.questionsAttemptedInBatch = 0;
             evaluationModalOverlay.classList.add('visible'); 
         }
         function showHistoryModal() { 
-            historyModalTitle.textContent = `Historial de Sesión`;
+            historyModalTitle.textContent = `Estadísticas`;
             historyModalChart = populateStatsView(historyModalContent, historyModalChart, false);
             historyModalOverlay.classList.add('visible'); 
         }
         function endSession() { 
+            recordCurrentSession();
             saveUserData();
             evaluationModalOverlay.classList.remove('visible'); 
             mainAppContainer.classList.add('hidden'); 
@@ -1416,9 +1523,15 @@
         }
 
         function loadUserData(username) {
-            const data = JSON.parse(localStorage.getItem(`harmonicBlockProData_${username}`) || '{"stats":{"totalExercises":0,"totalCorrect":0,"totalIncorrect":0,"currentStreak":0,"hintsUsed":0,"answersUsed":0,"sessionHistory":[]}}');
-            state.stats = data.stats;
+            const dataStr = localStorage.getItem(`harmonicBlockProData_${username}`);
+            let data = {};
+            if (dataStr) { try { data = JSON.parse(dataStr); } catch (e) {} }
+            
+            state.stats = data.stats || { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[], pastSessions:[] };
+            
+            if (!state.stats.pastSessions) state.stats.pastSessions = [];
             state.stats.sessionHistory = [];
+            state.session.startTime = Date.now();
             
             if (state.stats.lastPracticeDate) {
                 const today = getTodayDateString(), yest = getYesterdayDateString();
@@ -1452,32 +1565,15 @@
 
         function handleGuestLogin() {
             state.currentUser = "Invitado"; currentUserName.textContent = "Invitado";
-            state.stats = { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[] };
+            state.stats = { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[], pastSessions: [] };
+            state.session.startTime = Date.now();
             welcomeModalOverlay.classList.remove('visible');
             initializeApp(false);
         }
 
-        function handleSwitchUser() { saveUserData(); mainAppContainer.classList.add('hidden'); showLoginScreen(); }
+        function handleSwitchUser() { recordCurrentSession(); saveUserData(); mainAppContainer.classList.add('hidden'); showLoginScreen(); }
         function confirmDeleteUser() { /* Simplified */ }
         function showLoginScreen() { mainAppListenersAttached = false; welcomeModalOverlay.classList.add('visible'); populateUserSelect(); }
-
-        // --- Utils para Charts ---
-        function populateStatsView(container, chartInstance, isFinal) {
-            const acc = (state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0;
-            container.innerHTML = `
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="bg-white p-4 rounded shadow">Aciertos: ${state.stats.totalCorrect}</div>
-                    <div class="bg-white p-4 rounded shadow">Precisión: ${acc}%</div>
-                </div>
-                <div class="h-64 bg-white p-2 rounded"><canvas id="chart-${isFinal?'final':'modal'}"></canvas></div>
-            `;
-            
-            if (chartInstance) chartInstance.destroy();
-            const ctx = document.getElementById(`chart-${isFinal?'final':'modal'}`);
-            return new Chart(ctx, {
-                type: 'bar', data: { labels: ['Aciertos', 'Errores'], datasets: [{ label: 'Resultados', data: [state.stats.totalCorrect, state.stats.totalIncorrect], backgroundColor: ['#4ade80', '#f87171']}] }
-            });
-        }
 
         // --- Inicio ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -1492,4 +1588,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
