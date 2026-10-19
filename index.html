@@ -90,22 +90,27 @@
         }
         #musicalStaffCanvas {
             background-color: var(--canvas-bg); border: 1px solid var(--border-color); border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 100%; height: auto; max-width: 320px; box-sizing: border-box;
-            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 100%; height: auto; max-width: 330px; box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.2s ease;
+            cursor: pointer;
+        }
+        #musicalStaffCanvas:hover {
+            border-color: #3b82f6;
         }
 
         .notes-grid {
-            display: grid; grid-template-rows: repeat(4, 1fr); gap: 6px; width: 100%; max-width: 220px;
+            display: grid; grid-auto-rows: minmax(42px, auto); gap: 6px; width: 100%; max-width: 245px;
         }
         .grid-cell {
-            background-color: var(--cell-bg); border: 1px solid var(--border-color); padding: 0.65rem 0.85rem; border-radius: 6px;
-            display: flex; justify-content: space-between; align-items: center; font-size: 1.05em; font-weight: 600;
+            background-color: var(--cell-bg); border: 1px solid var(--border-color); padding: 0.55rem 0.85rem; border-radius: 6px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 1.02em; font-weight: 600;
             transition: all 0.2s ease; position: relative;
         }
         .grid-cell.selectable-cell { cursor: pointer; }
         .grid-cell.selectable-cell:hover { filter: brightness(0.96); border-color: #94a3b8; }
         .grid-cell.cell-correct { border-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
         .grid-cell.cell-error { border-color: #ef4444; background-color: rgba(239, 68, 68, 0.12); }
+        .grid-cell.cell-enharmonic-warn { border-color: #f59e0b; background-color: rgba(245, 158, 11, 0.15); }
         .grid-cell.cell-editing {
             border: 2px solid #3b82f6 !important;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
@@ -115,14 +120,30 @@
             border: 2px solid #ef4444 !important;
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35);
         }
+        .grid-cell.cell-enharmonic-warn.cell-editing {
+            border: 2px solid #f59e0b !important;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+        }
         .grid-cell .edit-badge {
             font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
             padding: 1px 5px; border-radius: 4px; background-color: #3b82f6; color: #ffffff;
             margin-left: 6px;
         }
         .grid-cell.cell-error .edit-badge { background-color: #ef4444; }
+        .grid-cell.cell-enharmonic-warn .edit-badge { background-color: #d97706; }
         .grid-cell .note-display { font-size: 1.4em; }
         .grid-cell.hidden { display: none; }
+
+        @keyframes pulseUrgent {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        .timer-urgent {
+            animation: pulseUrgent 0.6s infinite;
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            border-color: #ef4444 !important;
+            color: #ef4444 !important;
+        }
 
         .action-buttons-group, .modal-buttons {
             display: flex; flex-wrap: wrap; justify-content: center; gap: 0.65rem;
@@ -240,17 +261,22 @@
                 <button id="loginButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors text-sm sm:text-base">Comenzar Sesión</button>
                 <button id="guestLoginButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors text-sm sm:text-base">Entrar como Invitado</button>
             </div>
+            <div class="mt-4 pt-3 border-t border-slate-500/20 flex justify-center gap-3 flex-wrap">
+                <button id="welcomeExportJsonBtn" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-500/15 hover:bg-slate-500/25 transition-colors">💾 Exportar Respaldo (.JSON)</button>
+                <button id="welcomeImportJsonBtn" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-500/15 hover:bg-slate-500/25 transition-colors">📂 Cargar Respaldo (.JSON)</button>
+                <input type="file" id="profileJsonInput" accept=".json" class="hidden">
+            </div>
         </div>
     </div>
-    
+
     <!-- Tutorial Prompt Modal -->
     <div id="tutorialPromptModalOverlay" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 class="text-2xl font-bold text-blue-600 mb-4">¡Hola, <span id="tutorialUserName"></span>!</h3>
-            <p class="text-lg opacity-80 mb-6">Parece que es tu primera vez. ¿Te gustaría ver el recorrido interactivo con todas las funciones?</p>
+            <p class="text-base opacity-80 mb-6">Parece que es tu primera vez en Bloque Armónico Pro. ¿Te gustaría ver un rápido recorrido interactivo?</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button id="promptStartTutorial" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Sí, mostrar tutorial</button>
-                <button id="promptSkipTutorial" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">No, gracias</button>
+                <button id="promptStartTutorial" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md transition-colors">Sí, mostrar tutorial</button>
+                <button id="promptSkipTutorial" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-md transition-colors">No, ir a la práctica</button>
             </div>
         </div>
     </div>
@@ -287,9 +313,12 @@
     <!-- Main application container -->
     <div id="mainAppContainer" class="container hidden">
         <div class="flex flex-col items-center justify-between mb-1">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap justify-center">
                 <h1 class="text-2xl font-bold text-center">Bloque Armónico Pro</h1>
-                <span id="customModeBadge" class="hidden bg-purple-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">Modo Reto a Medida</span>
+                <span id="customModeBadge" class="hidden bg-purple-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">🎯 Reto a Medida</span>
+                <span id="progressionModeBadge" class="hidden bg-indigo-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">🔗 II - V - I</span>
+                <span id="dictationModeBadge" class="hidden bg-pink-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">👂 Modo Dictado</span>
+                <span id="errorReviewModeBadge" class="hidden bg-rose-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">🔄 Repaso de Errores</span>
             </div>
             <div id="chordQuestionWrapper" class="text-lg mt-1">
                 <p id="chordQuestionText">
@@ -301,7 +330,7 @@
 
         <!-- Status bar -->
         <div id="statusBar" class="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2.5 bg-slate-500/10 rounded-xl gap-2 border border-slate-500/20">
-            <div id="statusBarInfo" class="flex justify-around items-center gap-2 flex-grow">
+            <div id="statusBarInfo" class="flex justify-around items-center gap-2 flex-grow flex-wrap">
                 <div id="streakCounterContainer" class="flex flex-col items-center px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
                     <div class="text-[11px] font-semibold text-amber-600">🔥 Racha</div>
                     <div id="streakCounter" class="text-lg font-bold text-amber-600">0</div>
@@ -313,6 +342,10 @@
                 <div id="scoreCounter" class="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-slate-500/10 border border-slate-500/20">
                     <div class="text-sm font-bold text-green-600">✅ <span id="valCorrect">0</span></div>
                     <div class="text-sm font-bold text-red-500">❌ <span id="valIncorrect">0</span></div>
+                </div>
+                <div id="timerStatusBadge" class="flex flex-col items-center px-2.5 py-1.5 rounded-xl bg-sky-500/10 border border-sky-500/30 transition-all" title="Tiempo de respuesta del acorde actual">
+                    <div class="text-[10px] font-semibold text-sky-600 dark:text-sky-400">⏱️ Tiempo</div>
+                    <div id="liveTimerText" class="text-xs font-mono font-bold text-sky-600 dark:text-sky-400">0.0s</div>
                 </div>
                 <div id="midiStatusBadge" class="hidden lg:flex flex-col items-center px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30" title="Estado de Teclado Web MIDI">
                     <div class="text-[10px] font-semibold text-emerald-600">🎹 MIDI</div>
@@ -327,6 +360,9 @@
                     <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
                     <label for="notationLatino" class="py-1 px-2.5 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/40" title="Cifrado Latino">Do,Re,Mi</label>
                 </div>
+                <button id="errorBankButton" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-2.5 h-9 flex items-center justify-center gap-1 rounded-full shadow-sm transition-colors text-xs" title="Banco Inteligente de Repaso de Errores (W)">
+                    🔄 <span id="errorBankCount">0</span>
+                </button>
                 <button id="darkModeButton" class="bg-slate-700 hover:bg-slate-800 text-amber-300 font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Alternar Modo Oscuro (D)">🌙</button>
                 <button id="badgesButton" class="bg-amber-500 hover:bg-amber-600 text-white font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Mis Logros y Medallas (L)">🏆</button>
                 <button id="customChallengeButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Creador de Retos a Medida (E)">🎯</button>
@@ -354,16 +390,65 @@
                 <label for="difficultyAdvanced" class="difficulty-label py-1.5 px-3.5 rounded-full font-semibold text-xs sm:text-sm cursor-pointer transition-colors duration-200">Avanzado</label>
             </div>
 
-            <!-- Control de Dirección de Arpegio y Audio -->
+            <!-- Control de Timbre, Dirección de Arpegio y Audio -->
             <div class="flex items-center gap-2 flex-wrap justify-center">
-                <label for="arpeggioDirectionSelect" class="text-xs font-semibold opacity-80">Audio:</label>
-                <select id="arpeggioDirectionSelect" class="py-1 px-2.5 text-xs font-semibold rounded-lg border border-slate-400/40 bg-white text-slate-800">
+                <select id="instrumentSelect" class="py-1 px-2 text-xs font-semibold rounded-lg border border-slate-400/40 bg-white text-slate-800" title="Seleccionar Timbre Instrumental">
+                    <option value="piano">🎹 Piano Acústico</option>
+                    <option value="rhodes">⚡ Piano Rhodes</option>
+                    <option value="sax">🎷 Saxofones (Soli)</option>
+                    <option value="strings">🎻 Cuerdas (Strings)</option>
+                </select>
+                <select id="arpeggioDirectionSelect" class="py-1 px-2 text-xs font-semibold rounded-lg border border-slate-400/40 bg-white text-slate-800" title="Dirección de reproducción">
                     <option value="descending">📉 Descendente + Bloque</option>
                     <option value="ascending">📈 Ascendente + Bloque</option>
                     <option value="block">🎹 Solo Bloque Armónico</option>
                 </select>
                 <button id="replayAudioButton" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm transition-colors" title="Escuchar Nota Guía / Acorde (O)">
                     🔊 Escuchar
+                </button>
+            </div>
+        </div>
+
+        <!-- Barra de Herramientas Pedagógicas y Modos de Estudio -->
+        <div id="advancedModesToolbar" class="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-slate-500/5 rounded-xl border border-slate-500/20 text-xs">
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <div class="flex items-center gap-1">
+                    <label for="voicingSelect" class="font-bold opacity-80">Voicing:</label>
+                    <select id="voicingSelect" class="py-1 px-2 font-semibold rounded-lg border border-slate-400/40 bg-white text-slate-800" title="Disposición de las voces del bloque">
+                        <option value="close">Bloque Cerrado</option>
+                        <option value="drop2">Drop 2 (Abierto)</option>
+                    </select>
+                </div>
+                <button id="addBassBtn" class="px-2.5 py-1 rounded-lg font-bold border border-slate-400/40 bg-slate-500/10 hover:bg-slate-500/20 transition-all" title="Agregar Fundamental en el Bajo a la estructura de 3, 4 o 5 voces (B)">
+                    🎸 + Bajo (Raíz)
+                </button>
+                <div class="flex items-center gap-1">
+                    <label for="staffModeSelect" class="font-bold opacity-80">Clave:</label>
+                    <select id="staffModeSelect" class="py-1 px-2 font-semibold rounded-lg border border-slate-400/40 bg-white text-slate-800" title="Modo de Pentagrama (G)">
+                        <option value="auto">Auto (Sol / Gran Pentagrama)</option>
+                        <option value="treble">Solo Clave de Sol</option>
+                        <option value="grand">Gran Pentagrama (Sol + Fa)</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-1">
+                    <label for="timerModeSelect" class="font-bold opacity-80">Reloj:</label>
+                    <select id="timerModeSelect" class="py-1 px-2 font-semibold rounded-lg border border-slate-400/40 bg-white text-slate-800" title="Modo Contrarreloj por acorde">
+                        <option value="0">⏱️ Cronómetro Libre</option>
+                        <option value="15">⚡ Contrarreloj 15s</option>
+                        <option value="30">🔥 Contrarreloj 30s</option>
+                        <option value="45">⏳ Contrarreloj 45s</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap justify-center">
+                <button id="progressionModeBtn" class="px-2.5 py-1 rounded-lg font-bold border border-slate-400/40 bg-slate-500/10 hover:bg-slate-500/20 transition-all" title="Modo Progresiones Encadenadas II - V - I (M)">
+                    🔗 Progresión II-V-I
+                </button>
+                <button id="dictationModeBtn" class="px-2.5 py-1 rounded-lg font-bold border border-slate-400/40 bg-slate-500/10 hover:bg-slate-500/20 transition-all" title="Modo Dictado Armónico a Oído (Y)">
+                    👂 Dictado Auditivo
+                </button>
+                <button id="strictEnharmonicBtn" class="px-2.5 py-1 rounded-lg font-bold border border-slate-400/40 bg-slate-500/10 hover:bg-slate-500/20 transition-all" title="Ortografía Enarmónica Estricta (X)">
+                    ♯♭ Enarmonía Estricta
                 </button>
             </div>
         </div>
@@ -378,23 +463,30 @@
         <!-- Exercise display area -->
         <div id="displaySection" class="flex justify-center items-start gap-4">
             <div id="questionArea" class="w-full max-w-md md:flex-1 md:min-w-[250px] p-4 rounded-xl">
-                <p class="text-base font-bold text-blue-600 mb-2">Construye el acorde:</p>
+                <p class="text-base font-bold text-blue-600 mb-2">Construye el acorde (agudo ➔ grave):</p>
                 <div class="notes-grid w-full">
                     <div class="grid-cell" id="gridCell0" title="Nota guía fija (haz clic para escucharla)"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
                     <div class="grid-cell" id="gridCell1" title="Haz clic para seleccionar y cambiar esta voz"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
                     <div class="grid-cell" id="gridCell2" title="Haz clic para seleccionar y cambiar esta voz"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
                     <div class="grid-cell" id="gridCell3" title="Haz clic para seleccionar y cambiar esta voz"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell hidden" id="gridCell4" title="Haz clic para seleccionar y cambiar esta voz"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell hidden" id="gridCell5" title="Haz clic para seleccionar y cambiar esta voz"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
                 </div>
                 <p id="voiceEditHelper" class="text-[11px] opacity-75 mt-2.5 text-center leading-tight">
                     💡 Haz clic en cualquier voz ingresada (o usa <kbd class="px-1 bg-slate-500/20 rounded font-mono">↑</kbd> <kbd class="px-1 bg-slate-500/20 rounded font-mono">↓</kbd>) para cambiarla.
                 </p>
             </div>
             <div id="staffArea" class="w-full max-w-md md:flex-1 md:min-w-[300px] flex flex-col justify-center items-center">
-                <canvas id="musicalStaffCanvas"></canvas>
-                <div id="staffFeedbackLegend" class="hidden mt-2 text-xs font-semibold flex gap-3 items-center">
-                    <span class="flex items-center gap-1 text-blue-500"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Nota Guía</span>
+                <canvas id="musicalStaffCanvas" title="Haz clic sobre una línea o espacio para ingresar esa nota"></canvas>
+                <div class="flex items-center justify-between w-full max-w-[320px] mt-1 px-1 text-[11px] opacity-75">
+                    <span>🖱️ Clic en pentagrama para poner nota</span>
+                    <span id="staffHoverNoteLabel" class="font-mono font-bold text-blue-500"></span>
+                </div>
+                <div id="staffFeedbackLegend" class="hidden mt-1.5 text-xs font-semibold flex flex-wrap justify-center gap-2.5 items-center">
+                    <span class="flex items-center gap-1 text-blue-500"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Guía</span>
                     <span class="flex items-center gap-1 text-green-500"><span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span> Correcta</span>
-                    <span class="flex items-center gap-1 text-red-500"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> Incorrecta</span>
+                    <span class="flex items-center gap-1 text-amber-500"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Enarmonía</span>
+                    <span class="flex items-center gap-1 text-red-500"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> Error</span>
                 </div>
             </div>
         </div>
@@ -546,6 +638,10 @@
             <div class="mb-3">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1.5">Herramientas Pro y Navegación</h4>
                 <div class="space-y-1.5 text-xs sm:text-sm">
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>🎸 Activar / Desactivar + Bajo (Raíz)</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">T</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>🔗 Progresión II-V-I / 👂 Modo Dictado</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">M / Y</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>♯♭ Enarmonía Estricta / 🔄 Repasar Errores</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">X / W</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>🎼 Alternar Clave Sol / Gran Pentagrama</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">G</kbd></div>
                     <div class="flex justify-between py-1 border-b border-slate-500/20"><span>🌙 Modo Oscuro / 🏆 Sala de Logros</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">D / L</kbd></div>
                     <div class="flex justify-between py-1 border-b border-slate-500/20"><span>🎯 Creador de Retos / 📊 Estadísticas</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">E / V</kbd></div>
                     <div class="flex justify-between py-1"><span>⚙️ Ajustes / ? Tutorial / ⛶ Pantalla Completa</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">S / H / Q</kbd></div>
@@ -588,9 +684,11 @@
         <div class="modal-content p-6 text-center w-full max-w-3xl">
             <h2 id="historyModalTitle" class="text-2xl sm:text-3xl font-bold text-blue-500 mb-4">Estadísticas y Progreso</h2>
             <div id="historyModalContent"></div>
-            <div class="flex flex-wrap justify-center gap-3 mt-6">
-                <button id="exportTeacherCsvButton" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors text-sm">📥 Exportar Reporte Docente (CSV)</button>
-                <button id="closeHistoryModalButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-colors text-sm">Volver a la Práctica</button>
+            <div class="flex flex-wrap justify-center gap-2.5 mt-6">
+                <button id="exportTeacherCsvButton" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3.5 rounded-lg shadow-md transition-colors text-xs sm:text-sm">📥 Exportar CSV Docente</button>
+                <button id="exportProfileJsonButton" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-3.5 rounded-lg shadow-md transition-colors text-xs sm:text-sm">💾 Descargar Perfil (.JSON)</button>
+                <button id="importProfileJsonButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3.5 rounded-lg shadow-md transition-colors text-xs sm:text-sm">📂 Cargar Perfil (.JSON)</button>
+                <button id="closeHistoryModalButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-colors text-xs sm:text-sm">Volver a la Práctica</button>
             </div>
         </div>
     </div>
@@ -620,13 +718,24 @@
             chordRoot: '', chordTypeKey: '', givenIntervalName: '', givenLabel: '', givenNote: '', givenNoteWithOctave: '',
             orderedLabelsForDisplay: [], selectedUserNotes: [],
             editingCellIndex: null,
-            validatedCells: [null, null, null, null],
+            validatedCells: [null, null, null, null, null, null],
             stats: {},
             evaluation: { questionsAttemptedInBatch: 0, exercisesPerEval: 5, batchCorrectFirstTry: 0, batchHintsUsed: 0 },
             currentExerciseId: null, failedCurrentExercise: false, answerWasShown: false,
-            staffValidationMode: null, // null | 'error' | 'solution' | 'correct'
+            staffValidationMode: null, // null | 'error' | 'enharmonic' | 'solution' | 'correct'
             difficulty: 'basic', notationSystem: 'american',
             arpeggioDirection: 'descending',
+            instrument: 'piano',
+            voicingType: 'close', // 'close' | 'drop2' | 'drop3' | 'drop24' | 'double_lead'
+            includeBass: false,   // Agrega el bajo fundamental a la estructura de 3, 4 o 5 voces
+            staffMode: 'auto', // 'auto' | 'treble' | 'grand'
+            strictEnharmonic: false,
+            dictationMode: false,
+            progressionMode: false,
+            progression: { keyRoot: 'C', step: 0, flawlessCount: 0 },
+            errorReviewMode: false,
+            timer: { limitSeconds: 0, exerciseStartTime: 0, intervalId: null, timedOut: false },
+            lastRenderedStaves: { treble: null, bass: null, useGrand: false },
             darkMode: false,
             isCustomChallenge: false,
             customPractice: {
@@ -645,7 +754,11 @@
             { id: 'perfect_batch', icon: '🎯', title: 'Precisión Perfecta', desc: 'Completa una tanda de 5 ejercicios sin errores ni pistas.' },
             { id: 'streak_3', icon: '🔥', title: 'Constancia Armónica', desc: 'Alcanza una racha de 3 o más días practicando.' },
             { id: 'tension_explorer', icon: '🚀', title: 'Domador de Tensiones', desc: 'Resuelve correctamente un acorde en nivel Avanzado.' },
-            { id: 'custom_creator', icon: '🛠️', title: 'Estudio de Repertorio', desc: 'Crea y resuelve un ejercicio con el Creador de Retos a Medida.' }
+            { id: 'custom_creator', icon: '🛠️', title: 'Estudio de Repertorio', desc: 'Crea y resuelve un ejercicio con el Creador de Retos a Medida.' },
+            { id: 'ear_master', icon: '👂', title: 'Oído Armónico', desc: 'Resuelve un acorde en Modo Dictado Auditivo al primer intento.' },
+            { id: 'progression_pro', icon: '🔗', title: 'Maestro del II-V-I', desc: 'Completa los 3 pasos de una cadencia II-V-I sin errores.' },
+            { id: 'drop_arranger', icon: '🎷', title: 'Arreglista Moderno', desc: 'Resuelve un acorde en disposición abierta (Drop 2, Drop 3 o Bajo+Bloque).' },
+            { id: 'speed_demon', icon: '⚡', title: 'Reflejos de Jazz', desc: 'Resuelve un acorde correctamente en menos de 6 segundos.' }
         ];
 
         let activeChartInstance = null;
@@ -691,7 +804,10 @@
             arpeggioDirectionSelect, replayAudioButton, shortcutsButton, shortcutsModalOverlay, closeShortcutsButton,
             badgesButton, badgesModalOverlay, closeBadgesButton, badgesGridContainer, customChallengeButton,
             customChallengeModalOverlay, closeCustomChallengeButton, applyCustomChallengeButton, customRootSelect,
-            customChordTypeSelect, customLeadSelect, exportTeacherCsvButton, exportCsvFinalButton, staffFeedbackLegend;
+            customChordTypeSelect, customLeadSelect, exportTeacherCsvButton, exportCsvFinalButton, staffFeedbackLegend,
+            voicingSelect, addBassBtn, staffModeSelect, instrumentSelect, timerModeSelect, progressionModeBtn, dictationModeBtn,
+            strictEnharmonicBtn, errorBankButton, errorBankCount, liveTimerText, timerStatusBadge, staffHoverNoteLabel,
+            exportProfileJsonButton, importProfileJsonButton, welcomeExportJsonBtn, welcomeImportJsonBtn, profileJsonInput;
         
         let synth, reverb, feedbackSynth;
 
@@ -701,7 +817,8 @@
             chordQuestionText = document.getElementById('chordQuestionText');
             gridCells = [
                 document.getElementById('gridCell0'), document.getElementById('gridCell1'),
-                document.getElementById('gridCell2'), document.getElementById('gridCell3')
+                document.getElementById('gridCell2'), document.getElementById('gridCell3'),
+                document.getElementById('gridCell4'), document.getElementById('gridCell5')
             ];
             noteBuildingControls = document.getElementById('noteBuildingControls');
             naturalNoteButtonsContainer = document.getElementById('naturalNoteButtons');
@@ -793,6 +910,24 @@
             exportTeacherCsvButton = document.getElementById('exportTeacherCsvButton');
             exportCsvFinalButton = document.getElementById('exportCsvFinalButton');
             staffFeedbackLegend = document.getElementById('staffFeedbackLegend');
+            voicingSelect = document.getElementById('voicingSelect');
+            addBassBtn = document.getElementById('addBassBtn');
+            staffModeSelect = document.getElementById('staffModeSelect');
+            instrumentSelect = document.getElementById('instrumentSelect');
+            timerModeSelect = document.getElementById('timerModeSelect');
+            progressionModeBtn = document.getElementById('progressionModeBtn');
+            dictationModeBtn = document.getElementById('dictationModeBtn');
+            strictEnharmonicBtn = document.getElementById('strictEnharmonicBtn');
+            errorBankButton = document.getElementById('errorBankButton');
+            errorBankCount = document.getElementById('errorBankCount');
+            liveTimerText = document.getElementById('liveTimerText');
+            timerStatusBadge = document.getElementById('timerStatusBadge');
+            staffHoverNoteLabel = document.getElementById('staffHoverNoteLabel');
+            exportProfileJsonButton = document.getElementById('exportProfileJsonButton');
+            importProfileJsonButton = document.getElementById('importProfileJsonButton');
+            welcomeExportJsonBtn = document.getElementById('welcomeExportJsonBtn');
+            welcomeImportJsonBtn = document.getElementById('welcomeImportJsonBtn');
+            profileJsonInput = document.getElementById('profileJsonInput');
         }
 
         // ==========================================
@@ -998,6 +1133,94 @@
         // ==========================================
         // 6. AUDIO E INTERFAZ (UI + VexFlow Colorido)
         // ==========================================
+        function applyInstrumentPreset(presetName) {
+            state.instrument = presetName || 'piano';
+            if (!state.audioContextStarted || typeof Tone === 'undefined') return;
+            try {
+                if (synth) synth.dispose();
+                if (presetName === 'rhodes') {
+                    synth = new Tone.PolySynth(Tone.FMSynth, {
+                        harmonicity: 1, modulationIndex: 3.5,
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.008, decay: 1.4, sustain: 0.25, release: 1.6 },
+                        modulation: { type: "triangle" },
+                        modulationEnvelope: { attack: 0.005, decay: 0.5, sustain: 0.1, release: 0.5 }
+                    });
+                } else if (presetName === 'sax') {
+                    synth = new Tone.PolySynth(Tone.AMSynth, {
+                        harmonicity: 1.5,
+                        oscillator: { type: "sawtooth" },
+                        envelope: { attack: 0.045, decay: 0.3, sustain: 0.75, release: 0.35 },
+                        modulation: { type: "square" },
+                        modulationEnvelope: { attack: 0.05, decay: 0.2, sustain: 0.5, release: 0.2 }
+                    });
+                    synth.volume.value = -4;
+                } else if (presetName === 'strings') {
+                    synth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: "fatsawtooth", count: 3, spread: 22 },
+                        envelope: { attack: 0.18, decay: 0.5, sustain: 0.8, release: 1.4 }
+                    });
+                    synth.volume.value = -6;
+                } else {
+                    synth = new Tone.PolySynth(Tone.FMSynth, {
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.005, decay: 0.85, sustain: 0.05, release: 1.1 },
+                        modulation: { type: "sine" },
+                        modulationEnvelope: { attack: 0.001, decay: 0.2, sustain: 0.0, release: 0.2 },
+                        harmonicity: 3, modulationIndex: 14
+                    });
+                }
+                if (reverb) synth.connect(reverb);
+                else synth.toDestination();
+            } catch (err) {}
+        }
+
+        function startExerciseTimer() {
+            if (state.timer.intervalId) clearInterval(state.timer.intervalId);
+            state.timer.exerciseStartTime = Date.now();
+            state.timer.timedOut = false;
+            timerStatusBadge.classList.remove('timer-urgent');
+
+            state.timer.intervalId = setInterval(() => {
+                if (state.staffValidationMode === 'correct' || state.staffValidationMode === 'solution' || state.timer.timedOut) return;
+                const elapsed = (Date.now() - state.timer.exerciseStartTime) / 1000;
+                if (state.timer.limitSeconds > 0) {
+                    const remaining = Math.max(0, state.timer.limitSeconds - elapsed);
+                    liveTimerText.textContent = `${remaining.toFixed(1)}s`;
+                    timerStatusBadge.classList.toggle('timer-urgent', remaining <= 5.0 && remaining > 0);
+                    if (remaining <= 0 && !state.timer.timedOut) {
+                        handleTimerExpired();
+                    }
+                } else {
+                    liveTimerText.textContent = `${elapsed.toFixed(1)}s`;
+                }
+            }, 150);
+        }
+
+        function stopExerciseTimer() {
+            if (state.timer.intervalId) {
+                clearInterval(state.timer.intervalId);
+                state.timer.intervalId = null;
+            }
+            timerStatusBadge.classList.remove('timer-urgent');
+            return (Date.now() - state.timer.exerciseStartTime) / 1000;
+        }
+
+        function handleTimerExpired() {
+            state.timer.timedOut = true;
+            stopExerciseTimer();
+            playErrorSound();
+            if (!state.failedCurrentExercise) {
+                state.stats.totalIncorrect++;
+                state.failedCurrentExercise = true;
+                recordChordStat(false, state.timer.limitSeconds);
+                addCurrentExerciseToErrorBank();
+                saveUserData();
+            }
+            updateStatsDisplay();
+            showCustomMessage("⏰ ¡Tiempo Agotado!", "Se cumplió el límite de contrarreloj. Completa el acorde o pasa al siguiente.", "error");
+        }
+
         function showCustomMessage(title, message, type = 'info') {
             const modal = document.createElement('div');
             modal.className = `modal-overlay visible`;
@@ -1007,7 +1230,7 @@
                     <p>${message}</p>
                 </div>`;
             document.body.appendChild(modal);
-            setTimeout(() => modal.remove(), 2000);
+            setTimeout(() => modal.remove(), 2200);
         }
 
         function displayNote(americanNote) {
@@ -1038,13 +1261,57 @@
             return targetLetter + (accidentalMap[diff] || '');
         }
 
+        function updateVoicingSelectOptions() {
+            if (!voicingSelect) return;
+            const isTriad = state.difficulty === 'basic';
+            const currentVal = state.voicingType;
+
+            if (isTriad) {
+                voicingSelect.innerHTML = `
+                    <option value="close">Tríada Cerrada (3 voces)</option>
+                    <option value="drop2">Drop 2 (Tríada Abierta)</option>
+                `;
+                if (currentVal !== 'close' && currentVal !== 'drop2') {
+                    state.voicingType = 'close';
+                }
+            } else {
+                voicingSelect.innerHTML = `
+                    <option value="close">4-Way Close (Bloque Cerrado)</option>
+                    <option value="double_lead">4-Way Close Double Lead (5 voces)</option>
+                    <option value="drop2">Drop 2 (Abierto a 4 partes)</option>
+                    <option value="drop3">Drop 3 (Abierto a 4 partes)</option>
+                    <option value="drop24">Drop 2 & 4 (Abierto a 4 partes)</option>
+                `;
+            }
+            voicingSelect.value = state.voicingType;
+        }
+
         function updateQuestionText() {
-            if (state.givenNote && state.givenIntervalName) {
-                const noteDisplay = displayNote(state.givenNote);
-                const rootDisplay = displayNote(state.chordRoot);
-                const chordCifrado = chordStructures[state.chordTypeKey].cifrado;
-                const voicesCount = state.orderedLabelsForDisplay.length === 3 ? '3 voces' : '4 voces';
-                chordQuestionText.innerHTML = `<strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es <strong class="text-xl sm:text-2xl">${state.givenIntervalName} (${state.givenLabel})</strong> del acorde de <strong class="text-xl sm:text-2xl">${rootDisplay}${chordCifrado}</strong>.<br><small class="text-sm opacity-80">Armoniza en bloque cerrado descendente a <strong>${voicesCount}</strong> (${noteDisplay} es la voz líder).</small>`;
+            if (!state.givenNote || !state.givenIntervalName) return;
+            const noteDisplay = displayNote(state.givenNote);
+            const rootDisplay = displayNote(state.chordRoot);
+            const chordCifrado = chordStructures[state.chordTypeKey].cifrado;
+            const totalVoices = state.orderedLabelsForDisplay.length;
+            const upperVoices = state.includeBass ? totalVoices - 1 : totalVoices;
+
+            const isTriad = chordStructures[state.chordTypeKey].difficulty === 'basic';
+            const voicingNames = {
+                close: isTriad ? 'tríada cerrada descendente' : 'bloque cerrado (4-Way Close)',
+                double_lead: '4-Way Close Double Lead (melodía duplicada 8va abajo)',
+                drop2: isTriad ? 'tríada abierta (Drop 2)' : 'disposición abierta Drop 2',
+                drop3: 'disposición abierta Drop 3',
+                drop24: 'disposición abierta Drop 2 & 4'
+            };
+            let voicingDesc = voicingNames[state.voicingType] || 'bloque cerrado descendente';
+            const voicesSummary = state.includeBass
+                ? `${upperVoices} voces superiores + Bajo (${totalVoices} notas en total)`
+                : `${totalVoices} voces`;
+
+            const hideIdentity = state.dictationMode && !state.answerWasShown && state.staffValidationMode !== 'correct';
+            if (hideIdentity) {
+                chordQuestionText.innerHTML = `👂 <strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es la voz superior de un <strong class="text-xl sm:text-2xl text-pink-500">Acorde en Dictado (?)</strong>.<br><small class="text-sm opacity-85">Escucha el audio (🔊) y descubre las <strong>${voicesSummary}</strong> en <strong>${voicingDesc}</strong> (siempre de agudo a grave).</small>`;
+            } else {
+                chordQuestionText.innerHTML = `<strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es <strong class="text-xl sm:text-2xl">${state.givenIntervalName} (${state.givenLabel})</strong> del acorde de <strong class="text-xl sm:text-2xl">${rootDisplay}${chordCifrado}</strong>.<br><small class="text-sm opacity-80">Armoniza en <strong>${voicingDesc}</strong>: <strong>${voicesSummary}</strong> de agudo hacia grave (${noteDisplay} es la voz líder).</small>`;
             }
         }
 
@@ -1054,9 +1321,15 @@
             void canvas.offsetWidth; 
             canvas.classList.add('fade-in');
 
+            const validNotes = notesWithOctave.filter(note => note && note.includes('/'));
+            const hasLowNotes = validNotes.some(n => getNoteWithOctaveMidi(n) < 60) || state.correctNotesWithOctave.some(n => getNoteWithOctaveMidi(n) < 60);
+            const useGrandStaff = state.staffMode === 'grand' || (state.staffMode === 'auto' && (state.voicingType !== 'close' || state.includeBass || hasLowNotes));
+
             const context = canvas.getContext('2d');
-            const fixedWidth = 310, fixedHeight = 155;
-            canvas.width = fixedWidth; canvas.height = fixedHeight;
+            const fixedWidth = 320;
+            const fixedHeight = useGrandStaff ? 245 : 155;
+            canvas.width = fixedWidth;
+            canvas.height = fixedHeight;
             context.clearRect(0, 0, canvas.width, canvas.height);
 
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
@@ -1067,42 +1340,127 @@
             ctx.setFillStyle(defaultStroke);
             ctx.setStrokeStyle(defaultStroke);
 
-            const stave = new Stave(10, 10, fixedWidth - 20); 
-            stave.addClef("treble").setContext(ctx).draw();
+            const trebleStave = new Stave(14, 6, fixedWidth - 28);
+            trebleStave.addClef("treble").setContext(ctx).draw();
 
-            if (notesWithOctave.length === 0) return;
-            const validNotes = notesWithOctave.filter(note => note && note.includes('/'));
+            let bassStave = null;
+            if (useGrandStaff) {
+                bassStave = new Stave(14, 115, fixedWidth - 28);
+                bassStave.addClef("bass").setContext(ctx).draw();
+                // Conector lateral izquierdo del Gran Pentagrama
+                ctx.beginPath();
+                ctx.strokeStyle = defaultStroke;
+                ctx.lineWidth = 2;
+                ctx.moveTo(14, trebleStave.getYForLine(0));
+                ctx.lineTo(14, bassStave.getYForLine(4));
+                ctx.stroke();
+            }
+
+            state.lastRenderedStaves = { treble: trebleStave, bass: bassStave, useGrand: useGrandStaff };
+
             if (validNotes.length === 0) return;
 
             const sortedNotes = [...validNotes].sort((a, b) => getNoteWithOctaveMidi(a) - getNoteWithOctaveMidi(b));
-            const staveNotes = sortedNotes.map(note => note.split('/')[0] + "/" + note.split('/')[1]);
-            const chordStaveNote = new StaveNote({ keys: staveNotes, duration: "w" });
-            chordStaveNote.setStyle({ fillStyle: defaultStroke, strokeStyle: defaultStroke });
 
-            sortedNotes.forEach((note, index) => {
-                const accidentalPart = note.split('/')[0].match(/[#b]+/);
-                if (accidentalPart) chordStaveNote.addAccidental(index, new Accidental(accidentalPart[0]));
+            const styleNoteGroup = (chordStaveNote, notesSubset) => {
+                chordStaveNote.setStyle({ fillStyle: defaultStroke, strokeStyle: defaultStroke });
+                notesSubset.forEach((note, index) => {
+                    const accidentalPart = note.split('/')[0].match(/[#b]+/);
+                    if (accidentalPart) chordStaveNote.addAccidental(index, new Accidental(accidentalPart[0]));
 
-                const voiceIdx = state.selectedUserNotes.indexOf(note);
-                if (note === state.givenNoteWithOctave || voiceIdx === 0) {
-                    chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" });
-                } else if (voiceIdx > 0 && state.validatedCells[voiceIdx]) {
-                    const isNoteCorrect = state.validatedCells[voiceIdx] === 'correct';
-                    const color = isNoteCorrect ? "#16a34a" : "#dc2626";
-                    chordStaveNote.setKeyStyle(index, { fillStyle: color, strokeStyle: color });
-                } else if (state.staffValidationMode === 'solution' || state.staffValidationMode === 'correct') {
-                    chordStaveNote.setKeyStyle(index, { fillStyle: "#16a34a", strokeStyle: "#16a34a" });
-                } else if (voiceIdx > 0 && voiceIdx === state.editingCellIndex) {
-                    chordStaveNote.setKeyStyle(index, { fillStyle: "#3b82f6", strokeStyle: "#3b82f6" });
+                    const voiceIdx = state.selectedUserNotes.indexOf(note);
+                    if (note === state.givenNoteWithOctave || voiceIdx === 0) {
+                        chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" });
+                    } else if (voiceIdx > 0 && state.validatedCells[voiceIdx]) {
+                        const status = state.validatedCells[voiceIdx];
+                        const color = status === 'correct' ? "#16a34a" : (status === 'enharmonic' ? "#d97706" : "#dc2626");
+                        chordStaveNote.setKeyStyle(index, { fillStyle: color, strokeStyle: color });
+                    } else if (state.staffValidationMode === 'solution' || state.staffValidationMode === 'correct') {
+                        chordStaveNote.setKeyStyle(index, { fillStyle: "#16a34a", strokeStyle: "#16a34a" });
+                    } else if (voiceIdx > 0 && voiceIdx === state.editingCellIndex) {
+                        chordStaveNote.setKeyStyle(index, { fillStyle: "#3b82f6", strokeStyle: "#3b82f6" });
+                    }
+                });
+            };
+
+            if (!useGrandStaff) {
+                const staveNotes = sortedNotes.map(note => note.split('/')[0] + "/" + note.split('/')[1]);
+                const chordStaveNote = new StaveNote({ keys: staveNotes, duration: "w", clef: "treble" });
+                styleNoteGroup(chordStaveNote, sortedNotes);
+                const voice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([chordStaveNote]);
+                new Formatter().joinVoices([voice]).format([voice], canvas.width - 55);
+                voice.draw(ctx, trebleStave);
+            } else {
+                const trebleNotes = sortedNotes.filter(n => getNoteWithOctaveMidi(n) >= 60);
+                const bassNotes = sortedNotes.filter(n => getNoteWithOctaveMidi(n) < 60);
+
+                if (trebleNotes.length > 0) {
+                    const tKeys = trebleNotes.map(n => n.split('/')[0] + "/" + n.split('/')[1]);
+                    const tNote = new StaveNote({ keys: tKeys, duration: "w", clef: "treble" });
+                    styleNoteGroup(tNote, trebleNotes);
+                    const tVoice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([tNote]);
+                    new Formatter().joinVoices([tVoice]).format([tVoice], canvas.width - 55);
+                    tVoice.draw(ctx, trebleStave);
                 }
-            });
+                if (bassNotes.length > 0 && bassStave) {
+                    const bKeys = bassNotes.map(n => n.split('/')[0] + "/" + n.split('/')[1]);
+                    const bNote = new StaveNote({ keys: bKeys, duration: "w", clef: "bass" });
+                    styleNoteGroup(bNote, bassNotes);
+                    const bVoice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([bNote]);
+                    new Formatter().joinVoices([bVoice]).format([bVoice], canvas.width - 55);
+                    bVoice.draw(ctx, bassStave);
+                }
+            }
 
             const anyValidated = state.validatedCells.some(v => v !== null) || !!state.staffValidationMode;
             staffFeedbackLegend.classList.toggle('hidden', !anyValidated);
+        }
 
-            const voice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([chordStaveNote]);
-            new Formatter().joinVoices([voice]).format([voice], canvas.width - 45);
-            voice.draw(ctx, stave);
+        function getNoteFromStaffCoordinates(clientX, clientY) {
+            const canvas = musicalStaffCanvas;
+            const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height) return null;
+            const y = (clientY - rect.top) * (canvas.height / rect.height);
+
+            const { treble, bass, useGrand } = state.lastRenderedStaves;
+            if (!treble) return null;
+
+            let targetStave = treble;
+            let topLineDiatonicIndex = 5 * 7 + 3; // F5 en Clave de Sol (C0 = 0 -> F5 = 38)
+
+            if (useGrand && bass && y >= 102) {
+                targetStave = bass;
+                topLineDiatonicIndex = 3 * 7 + 5; // A3 en Clave de Fa (A3 = 26)
+            }
+
+            const topLineY = targetStave.getYForLine(0);
+            const halfSpaces = Math.round((y - topLineY) / 5);
+            const diatonicIndex = topLineDiatonicIndex - halfSpaces;
+            const octave = Math.floor(diatonicIndex / 7);
+            const letterIdx = ((diatonicIndex % 7) + 7) % 7;
+            const letter = numberToLetterMap[letterIdx];
+
+            if (octave < 1 || octave > 6) return null;
+            return { letter, octave, noteWithOctave: `${letter}/${octave}` };
+        }
+
+        function handleStaffCanvasMove(e) {
+            const info = getNoteFromStaffCoordinates(e.clientX, e.clientY);
+            if (info && staffHoverNoteLabel) {
+                staffHoverNoteLabel.textContent = `Nota: ${displayNote(info.letter)}${info.octave}`;
+            }
+        }
+
+        function handleStaffCanvasClick(e) {
+            const info = getNoteFromStaffCoordinates(e.clientX, e.clientY);
+            if (!info) return;
+            // Si estamos en modo Cifrado, agregamos la letra natural (o en la octava exacta si es edicion/piano)
+            const maxVoices = state.orderedLabelsForDisplay.length;
+            if (state.editingCellIndex === null && state.selectedUserNotes.length >= maxVoices) {
+                const firstIssue = state.validatedCells.findIndex((val, idx) => idx > 0 && (val === 'error' || val === 'enharmonic'));
+                if (firstIssue !== -1) state.editingCellIndex = firstIssue;
+            }
+            addNaturalNote(info.letter);
         }
 
         function updateDifficultySelectionUI() {
@@ -1158,29 +1516,30 @@
         function updateDisplay() {
             updateQuestionText();
             const helperEl = document.getElementById('voiceEditHelper');
+            const hideIntervals = state.dictationMode && !state.answerWasShown && state.staffValidationMode !== 'correct';
 
             gridCells.forEach((cell, i) => {
-                cell.classList.remove('cell-correct', 'cell-error', 'cell-editing', 'selectable-cell');
+                cell.classList.remove('cell-correct', 'cell-error', 'cell-enharmonic-warn', 'cell-editing', 'selectable-cell');
                 const oldBadge = cell.querySelector('.edit-badge');
                 if (oldBadge) oldBadge.remove();
 
                 if (state.orderedLabelsForDisplay[i]) {
                     cell.classList.remove('hidden');
                     const intervalSpan = cell.querySelector('.interval-label');
-                    intervalSpan.textContent = state.orderedLabelsForDisplay[i];
+                    intervalSpan.textContent = hideIntervals ? (i === 0 ? 'Voz 1 (Guía)' : `Voz ${i + 1} (?)`) : state.orderedLabelsForDisplay[i];
                     
                     const userNote = state.selectedUserNotes[i];
                     cell.querySelector('.note-display').textContent = i === 0 ? displayNote(state.givenNote) : (userNote ? displayNote(userNote.split('/')[0]) : "?");
                     
-                    if (i === 0) {
-                        cell.classList.add('selectable-cell');
-                    } else if (userNote) {
+                    if (i === 0 || userNote) {
                         cell.classList.add('selectable-cell');
                     }
 
                     if (i > 0 && userNote) {
                         if (state.validatedCells[i] === 'correct' || state.staffValidationMode === 'correct' || state.staffValidationMode === 'solution') {
                             cell.classList.add('cell-correct');
+                        } else if (state.validatedCells[i] === 'enharmonic') {
+                            cell.classList.add('cell-enharmonic-warn');
                         } else if (state.validatedCells[i] === 'error') {
                             cell.classList.add('cell-error');
                         }
@@ -1190,7 +1549,8 @@
                         cell.classList.add('cell-editing');
                         const badge = document.createElement('span');
                         badge.className = 'edit-badge';
-                        badge.textContent = state.validatedCells[i] === 'error' ? '✎ Corregir' : '✎ Editando';
+                        const vState = state.validatedCells[i];
+                        badge.textContent = vState === 'error' ? '✎ Corregir' : (vState === 'enharmonic' ? '♯♭ Enarmonía' : '✎ Editando');
                         intervalSpan.insertAdjacentElement('afterend', badge);
                     }
                 } else {
@@ -1200,12 +1560,19 @@
 
             if (helperEl) {
                 if (state.editingCellIndex !== null && state.orderedLabelsForDisplay[state.editingCellIndex]) {
-                    const label = state.orderedLabelsForDisplay[state.editingCellIndex];
-                    const isErr = state.validatedCells[state.editingCellIndex] === 'error';
-                    helperEl.className = `text-xs font-semibold mt-2.5 text-center leading-tight ${isErr ? 'text-red-500' : 'text-blue-600 dark:text-blue-400'}`;
-                    helperEl.innerHTML = isErr
-                        ? `⚠️ Voz <strong>${label}</strong> seleccionada — Elige la nota correcta o haz clic en otra voz`
-                        : `✎ Editando voz <strong>${label}</strong> — Elige la nueva nota/alteración (clic de nuevo para salir)`;
+                    const label = hideIntervals ? `Voz ${state.editingCellIndex + 1}` : state.orderedLabelsForDisplay[state.editingCellIndex];
+                    const vState = state.validatedCells[state.editingCellIndex];
+                    if (vState === 'enharmonic') {
+                        const expectedName = displayNote(state.correctNotes[state.editingCellIndex]);
+                        helperEl.className = 'text-xs font-semibold mt-2.5 text-center leading-tight text-amber-600 dark:text-amber-400';
+                        helperEl.innerHTML = `♯♭ Sonido correcto en <strong>${label}</strong>, pero corrige su ortografía enarmónica para este grado.`;
+                    } else if (vState === 'error') {
+                        helperEl.className = 'text-xs font-semibold mt-2.5 text-center leading-tight text-red-500';
+                        helperEl.innerHTML = `⚠️ Voz <strong>${label}</strong> seleccionada — Elige la nota correcta o haz clic en otra voz`;
+                    } else {
+                        helperEl.className = 'text-xs font-semibold mt-2.5 text-center leading-tight text-blue-600 dark:text-blue-400';
+                        helperEl.innerHTML = `✎ Editando voz <strong>${label}</strong> — Elige la nueva nota/alteración (clic de nuevo para salir)`;
+                    }
                 } else {
                     helperEl.className = 'text-[11px] opacity-75 mt-2.5 text-center leading-tight';
                     helperEl.innerHTML = '💡 Haz clic en cualquier voz ingresada (o usa <kbd class="px-1 bg-slate-500/20 rounded font-mono">↑</kbd> <kbd class="px-1 bg-slate-500/20 rounded font-mono">↓</kbd>) para cambiarla.';
@@ -1221,6 +1588,8 @@
             streakCounter.textContent = state.stats.currentStreak || 0;
             document.getElementById('valCorrect').textContent = state.stats.totalCorrect || 0;
             document.getElementById('valIncorrect').textContent = state.stats.totalIncorrect || 0;
+            const errCount = (state.stats.errorBank || []).length;
+            if (errorBankCount) errorBankCount.textContent = errCount;
         }
 
         async function playNotesList(notesWithOctaveList) {
@@ -1257,6 +1626,11 @@
 
         function playPreviewAudio() {
             if (!synth) return;
+            // En modo dictado, el botón Escuchar reproduce el acorde objetivo completo para que el estudiante lo transcriba de oído
+            if (state.dictationMode && state.selectedUserNotes.length <= 1) {
+                playCorrectChord();
+                return;
+            }
             if (state.selectedUserNotes.length > 1) {
                 playNotesList(state.selectedUserNotes);
             } else if (state.givenNoteWithOctave) {
@@ -1313,11 +1687,14 @@
             state.answerWasShown = false;
             state.staffValidationMode = null;
             state.editingCellIndex = null;
-            state.validatedCells = [null, null, null, null];
+            state.validatedCells = [null, null, null, null, null, null];
             state.isCustomChallenge = isCustom;
             document.getElementById('customModeBadge').classList.toggle('hidden', !isCustom);
 
+            updateVoicingSelectOptions();
+
             const chordData = chordStructures[chordTypeKey];
+            const isTriad = chordData.difficulty === 'basic';
             state.chordRoot = rootNote;
             state.chordTypeKey = chordTypeKey;
             state.givenLabel = leadLabel;
@@ -1330,17 +1707,20 @@
             let givenOctave = 4;
             let currentMidi = Tone.Midi(`${state.givenNote.charAt(0)}${givenOctave}`).toMidi() + (givenNoteSemitone - getNoteSemitone(state.givenNote.charAt(0)));
 
-            while (currentMidi < 65) { givenOctave++; currentMidi += 12; }
+            while (currentMidi < 67) { givenOctave++; currentMidi += 12; }
             while (currentMidi > 84) { givenOctave--; currentMidi -= 12; }
             
             state.givenNoteWithOctave = `${state.givenNote}/${givenOctave}`;
-            const numVoices = (chordData.difficulty === 'basic' && !isCustom) || (isCustom && chordData.difficulty === 'basic') ? 3 : 4;
-            state.orderedLabelsForDisplay = chordData.voicing_rules[state.givenLabel].slice(0, numVoices);
-            state.correctNotesWithOctave = [];
 
+            // En tríadas solo usamos las 3 notas de la tríada; en acordes de 4 partes usamos las 4 voces base
+            const baseVoicesCount = isTriad ? 3 : 4;
+            const closeLabels = chordData.voicing_rules[state.givenLabel].slice(0, baseVoicesCount);
+
+            // 1. Calcular primero las voces en posición cerrada estricta descendente (agudo -> grave)
+            const closeNotesWithOctave = [];
             let lastMidi = currentMidi;
-            for (let i = 0; i < state.orderedLabelsForDisplay.length; i++) {
-                const interval = chordData.intervals.find(int => int.label === state.orderedLabelsForDisplay[i]);
+            for (let i = 0; i < closeLabels.length; i++) {
+                const interval = chordData.intervals.find(int => int.label === closeLabels[i]);
                 if (!interval) continue;
 
                 const noteName = calculateNoteName(state.chordRoot, interval);
@@ -1350,21 +1730,217 @@
                 while (i > 0 && candidateMidi >= lastMidi) { currentNoteOctave--; candidateMidi = getNoteWithOctaveMidi(`${noteName}/${currentNoteOctave}`); }
                 if (i === 0) { candidateMidi = lastMidi; currentNoteOctave = givenOctave; }
 
-                state.correctNotesWithOctave.push(`${noteName}/${currentNoteOctave}`);
+                closeNotesWithOctave.push(`${noteName}/${currentNoteOctave}`);
                 lastMidi = candidateMidi;
             }
 
+            const dropOneOctave = (noteWithOct) => {
+                const [nName, nOct] = noteWithOct.split('/');
+                return `${nName}/${parseInt(nOct, 10) - 1}`;
+            };
+
+            let structureLabels = [];
+            let structureNotesWithOctave = [];
+
+            // 2. Transformar estructura superior según el Voicing elegido (siempre ordenado de agudo hacia grave)
+            if (isTriad) {
+                // En tríada solo existe Cerrada (ej. C - G - E) o Drop 2 / Tríada Abierta (ej. C - E - G)
+                if (state.voicingType === 'drop2' && closeNotesWithOctave.length === 3) {
+                    structureLabels = [
+                        closeLabels[0],
+                        closeLabels[2],
+                        `${closeLabels[1]} (Drop 2)`
+                    ];
+                    structureNotesWithOctave = [
+                        closeNotesWithOctave[0],
+                        closeNotesWithOctave[2],
+                        dropOneOctave(closeNotesWithOctave[1])
+                    ];
+                } else {
+                    structureLabels = [...closeLabels];
+                    structureNotesWithOctave = [...closeNotesWithOctave];
+                }
+            } else {
+                // Acordes a 4 partes: 4-Way Close, Double Lead (5 voces), Drop 2, Drop 3, Drop 2 & 4
+                if (state.voicingType === 'double_lead' && closeNotesWithOctave.length === 4) {
+                    structureLabels = [
+                        closeLabels[0],
+                        closeLabels[1],
+                        closeLabels[2],
+                        closeLabels[3],
+                        `${closeLabels[0]} (8va b.)`
+                    ];
+                    structureNotesWithOctave = [
+                        closeNotesWithOctave[0],
+                        closeNotesWithOctave[1],
+                        closeNotesWithOctave[2],
+                        closeNotesWithOctave[3],
+                        dropOneOctave(closeNotesWithOctave[0])
+                    ];
+                } else if (state.voicingType === 'drop2' && closeNotesWithOctave.length === 4) {
+                    structureLabels = [
+                        closeLabels[0],
+                        closeLabels[2],
+                        closeLabels[3],
+                        `${closeLabels[1]} (Drop 2)`
+                    ];
+                    structureNotesWithOctave = [
+                        closeNotesWithOctave[0],
+                        closeNotesWithOctave[2],
+                        closeNotesWithOctave[3],
+                        dropOneOctave(closeNotesWithOctave[1])
+                    ];
+                } else if (state.voicingType === 'drop3' && closeNotesWithOctave.length === 4) {
+                    structureLabels = [
+                        closeLabels[0],
+                        closeLabels[1],
+                        closeLabels[3],
+                        `${closeLabels[2]} (Drop 3)`
+                    ];
+                    structureNotesWithOctave = [
+                        closeNotesWithOctave[0],
+                        closeNotesWithOctave[1],
+                        closeNotesWithOctave[3],
+                        dropOneOctave(closeNotesWithOctave[2])
+                    ];
+                } else if (state.voicingType === 'drop24' && closeNotesWithOctave.length === 4) {
+                    structureLabels = [
+                        closeLabels[0],
+                        closeLabels[2],
+                        `${closeLabels[1]} (Drop 2)`,
+                        `${closeLabels[3]} (Drop 4)`
+                    ];
+                    structureNotesWithOctave = [
+                        closeNotesWithOctave[0],
+                        closeNotesWithOctave[2],
+                        dropOneOctave(closeNotesWithOctave[1]),
+                        dropOneOctave(closeNotesWithOctave[3])
+                    ];
+                } else {
+                    structureLabels = [...closeLabels];
+                    structureNotesWithOctave = [...closeNotesWithOctave];
+                }
+            }
+
+            // 3. Si está activa la opción "+ Bajo", agregar la Fundamental al final de la estructura de 3, 4 o 5 voces
+            if (state.includeBass && structureNotesWithOctave.length > 0) {
+                const rootInterval = chordData.intervals[0];
+                const rootNoteName = calculateNoteName(state.chordRoot, rootInterval);
+                const lowestUpperMidi = getNoteWithOctaveMidi(structureNotesWithOctave[structureNotesWithOctave.length - 1]);
+                let bassOct = Math.floor(lowestUpperMidi / 12) - 1;
+                let bassMidi = getNoteWithOctaveMidi(`${rootNoteName}/${bassOct}`);
+                while (bassMidi >= lowestUpperMidi) { bassOct--; bassMidi -= 12; }
+                while (bassMidi > 55 && bassMidi - 12 >= 36) { bassOct--; bassMidi -= 12; }
+                while (bassMidi < 36) { bassOct++; bassMidi += 12; }
+
+                structureLabels.push('1 (Bajo)');
+                structureNotesWithOctave.push(`${rootNoteName}/${bassOct}`);
+            }
+
+            state.orderedLabelsForDisplay = structureLabels;
+            state.correctNotesWithOctave = structureNotesWithOctave;
             state.correctNotes = state.correctNotesWithOctave.map(n => n.split('/')[0]);
             state.selectedUserNotes = [state.givenNoteWithOctave];
-            state.currentExerciseId = `${state.chordRoot}|${chordTypeKey}|${state.givenLabel}`;
+            state.currentExerciseId = `${state.chordRoot}|${chordTypeKey}|${state.givenLabel}|${state.voicingType}|${state.includeBass ? 'bass' : 'nobass'}`;
             
             triggerTransitionAnimation();
             updateDisplay();
             [confirmAnswerButton, undoLastNoteButton, clearAllSelectionButton, changeQuestionButton, hintButton, showAnswerButton].forEach(btn => btn.disabled = false);
             updateButtonStates();
+            startExerciseTimer();
+
+            if (state.dictationMode) {
+                setTimeout(() => playCorrectChord(), 320);
+            }
+        }
+
+        function generateProgressionExercise() {
+            const possibleKeys = ["C", "F", "G", "Bb", "Eb", "Ab", "D", "A"];
+            if (state.progression.step === 0 || !state.progression.keyRoot) {
+                state.progression.keyRoot = possibleKeys[Math.floor(Math.random() * possibleKeys.length)];
+                state.progression.flawlessCount = 0;
+            }
+            const keyRoot = state.progression.keyRoot;
+            const step = state.progression.step;
+
+            // Calcular la raíz de II, V o I en la tonalidad actual
+            const stepIntervals = [
+                { semitones: 2, degreeOffset: 1, roman: 'IIm' },
+                { semitones: 7, degreeOffset: 4, roman: 'V7' },
+                { semitones: 0, degreeOffset: 0, roman: 'Imaj' }
+            ];
+            const chordRoot = calculateNoteName(keyRoot, stepIntervals[step]);
+
+            let chordTypeKey = 'm7';
+            if (state.difficulty === 'basic') {
+                chordTypeKey = step === 0 ? 'minor' : 'major';
+            } else {
+                chordTypeKey = step === 0 ? 'm7' : (step === 1 ? '7' : 'maj7');
+            }
+
+            const chordData = chordStructures[chordTypeKey];
+            const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+            let candidateLeads = Object.keys(chordData.voicing_rules).filter(l => {
+                return state.difficulty === 'advanced' ? allTensions.includes(l) : !allTensions.includes(l);
+            });
+            if (candidateLeads.length === 0) candidateLeads = Object.keys(chordData.voicing_rules);
+
+            // Conducción de voces: elegir la nota guía más cercana en semitonos a la nota guía anterior
+            let chosenLead = candidateLeads[Math.floor(Math.random() * candidateLeads.length)];
+            if (state.givenNote && step > 0) {
+                const prevPc = getNoteSemitone(state.givenNote);
+                let bestDist = 99;
+                candidateLeads.forEach(l => {
+                    const intObj = chordData.intervals.find(i => i.label === l);
+                    if (!intObj) return;
+                    const candNote = calculateNoteName(chordRoot, intObj);
+                    const candPc = getNoteSemitone(candNote);
+                    const dist = Math.min(Math.abs(candPc - prevPc), 12 - Math.abs(candPc - prevPc));
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        chosenLead = l;
+                    }
+                });
+            }
+
+            const badge = document.getElementById('progressionModeBadge');
+            badge.classList.remove('hidden');
+            badge.textContent = `🔗 Cadencia II-V-I en ${displayNote(keyRoot)} (Paso ${step + 1}/3: ${stepIntervals[step].roman})`;
+
+            state.progression.step = (step + 1) % 3;
+            buildExerciseFromParams(chordRoot, chordTypeKey, chosenLead, false);
         }
 
         function generateExercise() {
+            // 1. Si está activo el Modo Repaso de Errores y hay elementos en la cola
+            if (state.errorReviewMode && state.stats.errorBank && state.stats.errorBank.length > 0) {
+                const item = state.stats.errorBank[0];
+                if (item.voicingType) {
+                    state.voicingType = item.voicingType;
+                }
+                if (typeof item.includeBass === 'boolean') {
+                    state.includeBass = item.includeBass;
+                    addBassBtn.classList.toggle('bg-amber-600', state.includeBass);
+                    addBassBtn.classList.toggle('text-white', state.includeBass);
+                }
+                updateVoicingSelectOptions();
+                document.getElementById('errorReviewModeBadge').classList.remove('hidden');
+                buildExerciseFromParams(item.root, item.chordTypeKey, item.leadLabel, false);
+                return;
+            } else if (state.errorReviewMode) {
+                state.errorReviewMode = false;
+                document.getElementById('errorReviewModeBadge').classList.add('hidden');
+                errorBankButton.classList.remove('ring-2', 'ring-white');
+                showCustomMessage("¡Banco Completado!", "Has dominado todos los acordes pendientes de tu banco de errores.", "success");
+            }
+
+            // 2. Si está activo el Modo Progresiones II - V - I
+            if (state.progressionMode) {
+                generateProgressionExercise();
+                return;
+            }
+            document.getElementById('progressionModeBadge').classList.add('hidden');
+
             const currentPracticeSettings = state.customPractice[state.difficulty];
             const chords = Object.keys(chordStructures).filter(key => {
                 const chord = chordStructures[key];
@@ -1447,6 +2023,18 @@
                 let candMidi = getNoteWithOctaveMidi(`${noteName}/${oct}`);
                 while (candMidi >= prevMidi) { oct--; candMidi -= 12; }
                 while (candMidi < prevMidi - 12) { oct++; candMidi += 12; }
+
+                // Si esta voz corresponde a una voz caída (Drop) o al Bajo final, usamos la octava real esperada si coincide la nota, o aseguramos el salto de registro
+                const isLastVoice = i === state.orderedLabelsForDisplay.length - 1;
+                if (state.includeBass && isLastVoice) {
+                    while (candMidi > 55 && candMidi - 12 >= 36) { oct--; candMidi -= 12; }
+                    while (candMidi >= prevMidi) { oct--; candMidi -= 12; }
+                } else if (state.correctNotesWithOctave[i]) {
+                    const targetMidi = getNoteWithOctaveMidi(state.correctNotesWithOctave[i]);
+                    if (getNoteSemitone(noteName) === (targetMidi % 12 + 12) % 12) {
+                        oct = parseInt(state.correctNotesWithOctave[i].split('/')[1], 10);
+                    }
+                }
                 state.selectedUserNotes[i] = `${noteName}/${oct}`;
             }
         }
@@ -1493,11 +2081,11 @@
         function addNaturalNote(note) {
             const maxVoices = state.orderedLabelsForDisplay.length;
 
-            // Si todas las voces están llenas y no hay casilla activa pero sí una casilla con error, seleccionarla automáticamente
+            // Si todas las voces están llenas y no hay casilla activa pero sí una casilla con error o alerta enarmónica, seleccionarla automáticamente
             if (state.editingCellIndex === null && state.selectedUserNotes.length >= maxVoices) {
-                const firstErr = state.validatedCells.findIndex((val, idx) => idx > 0 && val === 'error');
-                if (firstErr !== -1) {
-                    state.editingCellIndex = firstErr;
+                const firstIssue = state.validatedCells.findIndex((val, idx) => idx > 0 && (val === 'error' || val === 'enharmonic'));
+                if (firstIssue !== -1) {
+                    state.editingCellIndex = firstIssue;
                 }
             }
 
@@ -1507,7 +2095,7 @@
                 state.selectedUserNotes[targetIdx] = `${note}/4`;
                 recalculateDescendingOctaves();
                 state.validatedCells[targetIdx] = null;
-                if (!state.validatedCells.includes('error')) {
+                if (!state.validatedCells.includes('error') && !state.validatedCells.includes('enharmonic')) {
                     state.staffValidationMode = null;
                 }
                 playSingleNoteWithOctave(state.selectedUserNotes[targetIdx], "8n");
@@ -1519,14 +2107,9 @@
                 return showCustomMessage("Voz Completa", "Haz clic sobre la nota que deseas cambiar o usa ⬅️ Borrar Última.", "warning");
             }
             
-            const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
-            let oct = parseInt(lastNote.split('/')[1], 10);
-            let candMidi = getNoteWithOctaveMidi(`${note}/${oct}`);
-            const lastMidi = getNoteWithOctaveMidi(lastNote);
-            while (candMidi >= lastMidi) { oct--; candMidi -= 12; }
-            while (candMidi < lastMidi - 12) { oct++; candMidi += 12; }
-            const newNoteWithOctave = `${note}/${oct}`;
-            state.selectedUserNotes.push(newNoteWithOctave);
+            state.selectedUserNotes.push(`${note}/4`);
+            recalculateDescendingOctaves();
+            const newNoteWithOctave = state.selectedUserNotes[state.selectedUserNotes.length - 1];
             
             playSingleNoteWithOctave(newNoteWithOctave, "8n");
             updateDisplay();
@@ -1580,7 +2163,7 @@
         function clearSelection() { 
             state.staffValidationMode = null;
             state.editingCellIndex = null;
-            state.validatedCells = [null, null, null, null];
+            state.validatedCells = [null, null, null, null, null, null];
             state.selectedUserNotes = [state.givenNoteWithOctave]; 
             updateDisplay(); 
         }
@@ -1617,7 +2200,7 @@
 
             if (existingIndex !== -1) {
                 state.selectedUserNotes.splice(existingIndex, 1);
-                state.validatedCells = [null, null, null, null];
+                state.validatedCells = [null, null, null, null, null, null];
                 state.editingCellIndex = null;
                 state.staffValidationMode = null;
                 updateDisplay();
@@ -1681,11 +2264,13 @@
         }
 
         function showAnswer() {
+            stopExerciseTimer();
             state.stats.answersUsed++;
             if (!state.failedCurrentExercise) {
                 state.stats.totalIncorrect++;
                 state.failedCurrentExercise = true;
-                recordChordStat(false);
+                recordChordStat(false, 0);
+                addCurrentExerciseToErrorBank();
             }
             updateStatsDisplay();
             playCorrectChord();
@@ -1707,36 +2292,95 @@
             infoModalOverlay.classList.add('visible');
         }
 
-        function recordChordStat(isCorrect) {
+        function addCurrentExerciseToErrorBank() {
+            if (!state.stats.errorBank) state.stats.errorBank = [];
+            const exists = state.stats.errorBank.some(item => item.id === state.currentExerciseId);
+            if (!exists && state.chordRoot && state.chordTypeKey && state.givenLabel) {
+                state.stats.errorBank.push({
+                    id: state.currentExerciseId,
+                    root: state.chordRoot,
+                    chordTypeKey: state.chordTypeKey,
+                    leadLabel: state.givenLabel,
+                    voicingType: state.voicingType,
+                    includeBass: state.includeBass
+                });
+            }
+            updateStatsDisplay();
+        }
+
+        function () {
+            if (!state.stats.errorBank) return;
+            state.stats.errorBank = state.stats.errorBank.filter(item => item.id !== state.currentExerciseId);
+            updateStatsDisplay();
+        }
+
+        function recordChordStat(isCorrect, elapsedSec = 0) {
             if (!state.stats.chordBreakdown) state.stats.chordBreakdown = {};
             const key = chordStructures[state.chordTypeKey].name;
-            if (!state.stats.chordBreakdown[key]) state.stats.chordBreakdown[key] = { correct: 0, incorrect: 0 };
-            if (isCorrect) state.stats.chordBreakdown[key].correct++;
-            else state.stats.chordBreakdown[key].incorrect++;
+            if (!state.stats.chordBreakdown[key]) {
+                state.stats.chordBreakdown[key] = { correct: 0, incorrect: 0, totalTimeSec: 0, timedCount: 0 };
+            }
+            if (isCorrect) {
+                state.stats.chordBreakdown[key].correct++;
+                if (elapsedSec > 0 && elapsedSec < 180) {
+                    state.stats.chordBreakdown[key].totalTimeSec = (state.stats.chordBreakdown[key].totalTimeSec || 0) + elapsedSec;
+                    state.stats.chordBreakdown[key].timedCount = (state.stats.chordBreakdown[key].timedCount || 0) + 1;
+                    state.stats.totalResponseTimeSec = (state.stats.totalResponseTimeSec || 0) + elapsedSec;
+                    state.stats.timedExercisesCount = (state.stats.timedExercisesCount || 0) + 1;
+                }
+            } else {
+                state.stats.chordBreakdown[key].incorrect++;
+            }
         }
 
         function checkAnswer() {
-            const userPc = state.selectedUserNotes.map(n => getNoteSemitone(n.split('/')[0]));
-            const correctPc = state.correctNotesWithOctave.map(n => getNoteSemitone(n.split('/')[0]));
-            const isCorrect = JSON.stringify([...userPc].sort((a,b)=>a-b)) === JSON.stringify([...correctPc].sort((a,b)=>a-b));
+            const expectedCount = state.orderedLabelsForDisplay.length;
+            const userPc = state.selectedUserNotes.slice(0, expectedCount).map(n => n ? getNoteSemitone(n.split('/')[0]) : null);
+            const correctPc = state.correctNotesWithOctave.slice(0, expectedCount).map(n => getNoteSemitone(n.split('/')[0]));
+            // Validar estrictamente de agudo hacia grave (voz por voz) para que Cerrado (C-G-E) sea distinto de Abierto/Drop (C-E-G)
+            const isPitchCorrect = userPc.length === correctPc.length && userPc.every((pc, idx) => pc === correctPc[idx]);
             
-            if (isCorrect) {
+            if (isPitchCorrect) {
+                // Verificar Ortografía Enarmónica Estricta si está activada
+                if (state.strictEnharmonic) {
+                    let firstEnharmonicIdx = null;
+                    for (let i = 1; i < state.orderedLabelsForDisplay.length; i++) {
+                        const userNoteName = state.selectedUserNotes[i] ? state.selectedUserNotes[i].split('/')[0] : '';
+                        const expectedNoteName = state.correctNotes[i];
+                        if (userNoteName === expectedNoteName) {
+                            state.validatedCells[i] = 'correct';
+                        } else {
+                            state.validatedCells[i] = 'enharmonic';
+                            if (firstEnharmonicIdx === null) firstEnharmonicIdx = i;
+                        }
+                    }
+                    if (firstEnharmonicIdx !== null) {
+                        state.staffValidationMode = 'enharmonic';
+                        state.editingCellIndex = firstEnharmonicIdx;
+                        updateDisplay();
+                        showCustomMessage("♯♭ Ortografía Enarmónica", "El sonido es correcto, pero ajusta la escritura enarmónica de las casillas en ámbar según el grado del acorde.", "warning");
+                        return;
+                    }
+                }
+
+                const elapsedSec = stopExerciseTimer();
                 state.staffValidationMode = 'correct';
                 state.editingCellIndex = null;
                 state.validatedCells = state.orderedLabelsForDisplay.map((_, i) => i > 0 ? 'correct' : null);
                 updateDisplay();
 
                 if (state.answerWasShown) {
-                    completeExercise('solution');
+                    completeExercise('solution', elapsedSec);
                     showCustomMessage("Correcto", "Pasando al siguiente ejercicio...", "success");
                 } else if (state.failedCurrentExercise) {
-                    completeExercise('corrected');
+                    completeExercise('corrected', elapsedSec);
                     showCustomMessage("¡Corregido!", "Excelente corrección. Avanzando...", "success");
                 } else {
                     state.stats.totalCorrect++;
                     state.evaluation.batchCorrectFirstTry++;
-                    recordChordStat(true);
-                    completeExercise('correct');
+                    recordChordStat(true, elapsedSec);
+                    ();
+                    completeExercise('correct', elapsedSec);
                     playSuccessSound();
                     
                     const todayStr = getTodayDateString();
@@ -1755,36 +2399,53 @@
                         }
                         state.stats.lastPracticeDate = todayStr;
                     }
+
+                    // Nuevos Logros de la Fase de Evolución
+                    if (state.dictationMode) unlockBadge('ear_master');
+                    if (state.voicingType !== 'close' || state.includeBass) unlockBadge('drop_arranger');
+                    if (elapsedSec > 0 && elapsedSec <= 6.0) unlockBadge('speed_demon');
+                    if (state.progressionMode) {
+                        state.progression.flawlessCount = (state.progression.flawlessCount || 0) + 1;
+                        if (state.progression.flawlessCount >= 3) unlockBadge('progression_pro');
+                    }
+
                     checkAchievements(true);
                     saveUserData();
-                    showCustomMessage("¡Correcto!", "¡Excelente construcción armónica!", "success");
+                    showCustomMessage("¡Correcto!", `¡Excelente construcción armónica en ${elapsedSec.toFixed(1)}s!`, "success");
                 }
                 playCorrectChord();
                 setTimeout(generateExercise, 1900);
             } else {
                 playErrorSound();
                 state.staffValidationMode = 'error';
+                if (state.progressionMode) state.progression.flawlessCount = 0;
 
                 let firstErrorIndex = null;
                 for (let i = 1; i < state.orderedLabelsForDisplay.length; i++) {
                     const uNote = state.selectedUserNotes[i];
-                    const pc = uNote ? getNoteSemitone(uNote.split('/')[0]) : null;
+                    const uName = uNote ? uNote.split('/')[0] : '';
+                    const pc = uName ? getNoteSemitone(uName) : null;
                     const expectedPc = getNoteSemitone(state.correctNotes[i]);
                     if (pc === expectedPc) {
-                        state.validatedCells[i] = 'correct';
+                        if (state.strictEnharmonic && uName !== state.correctNotes[i]) {
+                            state.validatedCells[i] = 'enharmonic';
+                            if (firstErrorIndex === null) firstErrorIndex = i;
+                        } else {
+                            state.validatedCells[i] = 'correct';
+                        }
                     } else {
                         state.validatedCells[i] = 'error';
                         if (firstErrorIndex === null) firstErrorIndex = i;
                     }
                 }
-                // Seleccionar automáticamente la primera nota errada para que el usuario pueda cambiarla de inmediato
                 state.editingCellIndex = firstErrorIndex !== null ? firstErrorIndex : 1;
 
                 updateDisplay();
                 if (!state.failedCurrentExercise) {
                     state.stats.totalIncorrect++;
                     state.failedCurrentExercise = true;
-                    recordChordStat(false);
+                    recordChordStat(false, 0);
+                    addCurrentExerciseToErrorBank();
                     saveUserData();
                 }
                 showCustomMessage("Nota Errada Seleccionada", "Ingresa directamente la nota correcta o haz clic en cualquier voz en rojo para cambiarla.", "error");
@@ -1792,7 +2453,7 @@
             }
         }
 
-        function completeExercise(status) {
+        function completeExercise(status, elapsedSec = 0) {
             state.stats.totalExercises++;
             if (status !== 'skipped') state.evaluation.questionsAttemptedInBatch++;
 
@@ -1803,7 +2464,9 @@
                 chordName: chordStructures[state.chordTypeKey].name,
                 chordCifrado: chordStructures[state.chordTypeKey].cifrado,
                 lead: state.givenLabel,
+                voicing: state.voicingType,
                 difficulty: state.difficulty,
+                timeSec: elapsedSec ? Number(elapsedSec.toFixed(1)) : 0,
                 status: statusMap[status],
                 timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
             });
@@ -1855,6 +2518,22 @@
             if (key === 'p') { e.preventDefault(); if (!hintButton.disabled) giveHint(); return; }
             if (key === 'r') { e.preventDefault(); if (!showAnswerButton.disabled) showAnswer(); return; }
             if (key === 'i') { e.preventDefault(); toggleInputMethod(); return; }
+            if (key === 't') { e.preventDefault(); addBassBtn.click(); return; }
+            if (key === 'm') { e.preventDefault(); progressionModeBtn.click(); return; }
+            if (key === 'y') { e.preventDefault(); dictationModeBtn.click(); return; }
+            if (key === 'x') { e.preventDefault(); strictEnharmonicBtn.click(); return; }
+            if (key === 'w') { e.preventDefault(); errorBankButton.click(); return; }
+            if (key === 'g') {
+                e.preventDefault();
+                const modes = ['auto', 'treble', 'grand'];
+                const next = modes[(modes.indexOf(state.staffMode) + 1) % modes.length];
+                state.staffMode = next;
+                staffModeSelect.value = next;
+                drawMusicalStaff(state.selectedUserNotes);
+                return;
+            }
+            if (key === 'd') { e.preventDefault(); toggleDarkMode(); return; }
+            if (key === 'e') { e.preventDefault(); openCustomChallengeModal(); return; }
             if (key === 'k') { e.preventDefault(); shortcutsModalOverlay.classList.add('visible'); return; }
             if (key === 'l') { e.preventDefault(); openBadgesModal(); return; }
             if (key === 'v') { e.preventDefault(); showHistoryModal(); return; }
@@ -1971,8 +2650,8 @@
             const minutes = Math.floor(durationMs / 60000);
             const seconds = Math.floor((durationMs % 60000) / 1000);
             const startDateTime = new Date(state.session.startTime);
-            const totalS = sessionCorrect + sessionIncorrect;
-            const accuracy = totalS > 0 ? Math.round((sessionCorrect / totalS) * 100) : 0;
+            const total = sessionCorrect + sessionIncorrect;
+            const accuracy = total > 0 ? Math.round((sessionCorrect / total) * 100) : 0;
 
             const sessionData = {
                 date: getLocalDateString(startDateTime),
@@ -1980,8 +2659,7 @@
                 duration: `${minutes}m ${seconds}s`,
                 correct: sessionCorrect,
                 incorrect: sessionIncorrect,
-                accuracy: accuracy,
-                details: [...state.stats.sessionHistory]
+                accuracy: accuracy
             };
 
             if (!state.stats.pastSessions) state.stats.pastSessions = [];
@@ -1992,38 +2670,102 @@
         }
 
         function exportTeacherCSV() {
-            const pastSessions = state.stats.pastSessions || [];
-            const currentHistory = state.stats.sessionHistory || [];
+            recordCurrentSession();
+            const user = state.currentUser || 'Invitado';
             const rows = [
-                ["Estudiante", "Fecha", "Hora", "Acorde Raiz", "Especie", "Voz Guia", "Nivel", "Resultado"]
+                ['Reporte Docente - Bloque Armonico Pro'],
+                ['Estudiante', user],
+                ['Fecha de Exportacion', getTodayDateString()],
+                ['Total Aciertos', state.stats.totalCorrect || 0],
+                ['Total Errores', state.stats.totalIncorrect || 0],
+                ['Racha Actual (Dias)', state.stats.currentStreak || 0],
+                [],
+                ['DESGLOSE POR TIPO DE ACORDE'],
+                ['Tipo de Acorde', 'Aciertos', 'Errores', 'Precision (%)', 'Tiempo Promedio (s)']
             ];
 
-            pastSessions.forEach(s => {
-                (s.details || []).forEach(d => {
-                    rows.push([state.currentUser || "Invitado", s.date, d.timestamp || s.time, d.chordRoot, d.chordName || d.chordCifrado, d.lead, d.difficulty || "", d.status]);
-                });
+            const breakdown = state.stats.chordBreakdown || {};
+            Object.entries(breakdown).forEach(([chordName, counts]) => {
+                const tot = counts.correct + counts.incorrect;
+                const acc = tot > 0 ? Math.round((counts.correct / tot) * 100) : 0;
+                const avgT = counts.timedCount > 0 ? (counts.totalTimeSec / counts.timedCount).toFixed(1) : '-';
+                rows.push([chordName, counts.correct, counts.incorrect, `${acc}%`, avgT]);
             });
 
-            const today = getTodayDateString();
-            currentHistory.forEach(d => {
-                rows.push([state.currentUser || "Invitado", today, d.timestamp || "", d.chordRoot, d.chordName || d.chordCifrado, d.lead, d.difficulty || "", d.status]);
+            rows.push([], ['HISTORIAL DE SESIONES'], ['Fecha', 'Hora', 'Duracion', 'Aciertos', 'Errores', 'Precision (%)']);
+            (state.stats.pastSessions || []).forEach(s => {
+                const tot = s.correct + s.incorrect;
+                const acc = s.accuracy !== undefined ? s.accuracy : (tot > 0 ? Math.round((s.correct / tot) * 100) : 0);
+                rows.push([s.date, s.time, s.duration, s.correct, s.incorrect, `${acc}%`]);
             });
-
-            if (rows.length === 1) {
-                const breakdown = state.stats.chordBreakdown || {};
-                Object.entries(breakdown).forEach(([chordName, counts]) => {
-                    rows.push([state.currentUser || "Invitado", today, "-", "-", chordName, "-", "-", `Aciertos: ${counts.correct} | Errores: ${counts.incorrect}`]);
-                });
-            }
 
             const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + rows.map(e => e.join(",")).join("\n");
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `reporte_armonico_${state.currentUser || 'invitado'}_${getTodayDateString()}.csv`);
+            link.setAttribute("download", `reporte_${user.replace(/\s+/g, '_')}_${getTodayDateString()}.csv`);
             document.body.appendChild(link);
             link.click();
             link.remove();
+        }
+
+        function exportProfileJSON() {
+            const payload = {
+                app: "Bloque Armónico Pro",
+                version: "2.0",
+                exportDate: getTodayDateString(),
+                currentUser: state.currentUser || "Invitado",
+                usersList: JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]'),
+                profiles: {}
+            };
+            payload.usersList.forEach(u => {
+                const raw = localStorage.getItem(`harmonicBlockProData_${u}`);
+                if (raw) {
+                    try { payload.profiles[u] = JSON.parse(raw); } catch (e) {}
+                }
+            });
+            if (state.currentUser && state.currentUser !== "Invitado") {
+                payload.profiles[state.currentUser] = { stats: state.stats, customPractice: state.customPractice };
+            }
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `respaldo_bloque_armonico_${state.currentUser || 'perfiles'}_${getTodayDateString()}.json`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function importProfileJSON(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data || !data.profiles) throw new Error("Formato inválido");
+                    const existingUsers = new Set(JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]'));
+                    Object.entries(data.profiles).forEach(([username, profileObj]) => {
+                        if (username && username !== "Invitado") {
+                            existingUsers.add(username);
+                            localStorage.setItem(`harmonicBlockProData_${username}`, JSON.stringify(profileObj));
+                        }
+                    });
+                    localStorage.setItem('harmonicBlockProUsers', JSON.stringify(Array.from(existingUsers)));
+                    populateUserSelect();
+                    if (state.currentUser && data.profiles[state.currentUser]) {
+                        loadUserData(state.currentUser);
+                        updateStatsDisplay();
+                    }
+                    showCustomMessage("Respaldo Cargado", "Los perfiles y medallas se han restaurado correctamente.", "success");
+                } catch (err) {
+                    showCustomMessage("Error de Archivo", "El archivo .JSON seleccionado no es un respaldo válido.", "error");
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
         }
 
         function populateStatsView(container, isFinal) {
@@ -2034,6 +2776,10 @@
             let maxStreak = state.stats.currentStreak || 0;
             pastStreaks.forEach(s => { if(s.streak > maxStreak) maxStreak = s.streak; });
 
+            const avgTimeSec = (state.stats.timedExercisesCount > 0)
+                ? (state.stats.totalResponseTimeSec / state.stats.timedExercisesCount).toFixed(1) + 's'
+                : '-';
+
             const pastSessions = state.stats.pastSessions || [];
             const breakdown = state.stats.chordBreakdown || {};
 
@@ -2041,14 +2787,15 @@
             if (Object.keys(breakdown).length > 0) {
                 breakdownHTML = `
                     <div class="mt-4 text-left w-full">
-                        <h3 class="text-xs uppercase font-bold opacity-70 mb-2">Rendimiento por Especie de Acorde (Diagnóstico Docente)</h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <h3 class="text-xs uppercase font-bold opacity-70 mb-2">Rendimiento y Velocidad por Especie de Acorde</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                             ${Object.entries(breakdown).map(([name, c]) => {
                                 const tot = c.correct + c.incorrect;
                                 const pct = tot > 0 ? Math.round((c.correct / tot) * 100) : 0;
+                                const cAvg = c.timedCount > 0 ? `${(c.totalTimeSec / c.timedCount).toFixed(1)}s` : '';
                                 return `<div class="p-2 rounded border border-slate-500/20 bg-slate-500/5 text-xs flex justify-between items-center">
                                     <span class="font-bold">${name}</span>
-                                    <span class="${pct >= 75 ? 'text-green-500' : 'text-amber-500'} font-extrabold">${pct}% (${c.correct}/${tot})</span>
+                                    <span class="${pct >= 75 ? 'text-green-500' : 'text-amber-500'} font-extrabold">${pct}% (${c.correct}/${tot}) ${cAvg ? `<span class="opacity-70 font-mono text-[10px]">⏱️${cAvg}</span>` : ''}</span>
                                 </div>`;
                             }).join('')}
                         </div>
@@ -2091,7 +2838,7 @@
             const chartCanvasId = isFinal ? 'finalEvolutionChart' : 'modalEvolutionChart';
 
             container.innerHTML = `
-                <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                     <div class="bg-slate-500/10 p-2.5 rounded-xl border border-slate-500/20 text-center">
                         <div class="text-[10px] opacity-70 uppercase font-bold">Total Aciertos</div>
                         <div class="text-xl font-bold text-green-500">${state.stats.totalCorrect}</div>
@@ -2099,6 +2846,10 @@
                     <div class="bg-slate-500/10 p-2.5 rounded-xl border border-slate-500/20 text-center">
                         <div class="text-[10px] opacity-70 uppercase font-bold">Precisión Global</div>
                         <div class="text-xl font-bold text-blue-500">${acc}%</div>
+                    </div>
+                    <div class="bg-slate-500/10 p-2.5 rounded-xl border border-slate-500/20 text-center">
+                        <div class="text-[10px] opacity-70 uppercase font-bold">Velocidad Media</div>
+                        <div class="text-xl font-bold text-sky-500">⏱️ ${avgTimeSec}</div>
                     </div>
                     <div class="bg-slate-500/10 p-2.5 rounded-xl border border-slate-500/20 text-center">
                         <div class="text-[10px] opacity-70 uppercase font-bold">Mejor Racha</div>
@@ -2189,33 +2940,33 @@
         const TUTORIAL_STEPS = [
             {
                 id: 'chordQuestionWrapper',
-                title: "1. El Reto Armónico",
-                text: "Observa la nota líder dada y qué intervalo ocupa dentro del acorde. Tu objetivo es completar el acorde en bloque cerrado descendente (de agudo a grave)."
+                title: "1. El Reto Armónico y Dictado",
+                text: "Observa la nota guía superior y completa el acorde. Puedes practicar en Bloque Cerrado o activar el Modo Dictado Auditivo (👂) para deducir el acorde puramente de oído."
+            },
+            {
+                id: 'advancedModesToolbar',
+                title: "2. Disposiciones Abiertas, Claves y II-V-I",
+                text: "Elige entre Bloque Cerrado, Drop 2, Drop 3 o Bajo + Bloque, alterna al Gran Pentagrama (Sol + Fa), activa Progresiones encadenadas II-V-I (🔗), Enarmonía Estricta (♯♭) o el Reloj Contrarreloj."
             },
             {
                 id: 'displaySection',
-                title: "2. Selección y Corrección de Voces",
-                text: "Los aciertos se marcan en verde y los errores en rojo. Si una nota es errada, se selecciona automáticamente (o puedes hacer clic en cualquier voz / usar ↑ ↓) para cambiarla directamente por la correcta."
+                title: "3. Pentagrama Interactivo y Edición de Voces",
+                text: "¡Haz clic directamente sobre las líneas o espacios del pentagrama para colocar notas! También puedes hacer clic en cualquier voz (o usar ↑ ↓) para corregir errores o enarmonías."
             },
             {
                 id: 'noteBuildingControls',
-                title: "3. Notas, Becuadro (♮) y MIDI",
-                text: "Usa los botones, el Piano Virtual o un teclado MIDI USB. Si pones una alteración por error (#, b, ##, bb), presiona Becuadro (♮) o vuelve a pulsar la misma alteración para quitarla."
-            },
-            {
-                id: 'actionButtonsGroup',
-                title: "4. Borrar Última vs Borrar Todo",
-                text: "Usa '⬅️ Borrar Última' (Backspace o Z) para corregir solo la última nota puesta, o '🗑️ Borrar Todo' (N) para reiniciar el acorde."
+                title: "4. Notas, Becuadro (♮) y MIDI",
+                text: "Usa los botones, el Piano Virtual o un teclado MIDI USB. Presiona Becuadro (♮) o repite la alteración activa para quitarla."
             },
             {
                 id: 'difficultySelection',
-                title: "5. Niveles y Reproducción de Audio",
-                text: "Elige entre nivel Básico (tríadas), Intermedio (séptimas) o Avanzado (tensiones), y cambia la dirección del arpegio (Descendente, Ascendente o Bloque) con el botón 🔊 Escuchar."
+                title: "5. Timbres Instrumentales y Arpegio",
+                text: "Prueba los 4 timbres (Piano Acústico, Rhodes, Saxofones Soli y Cuerdas) y elige la dirección del arpegio con el botón 🔊 Escuchar."
             },
             {
                 id: 'statusBarControls',
-                title: "6. Funciones Pro y Atajos",
-                text: "En la barra superior tienes Modo Oscuro (🌙), Logros (🏆), Creador de Retos a Medida (🎯), Estadísticas con exportación CSV (📊), Ajustes de intervalos (⚙️) y la Guía de Atajos (⌨️)."
+                title: "6. Banco de Errores, Logros y Respaldo JSON",
+                text: "En la barra superior tienes el Banco Inteligente de Errores (🔄), Modo Oscuro (🌙), 10 Medallas (🏆), Retos a Medida (🎯) y Estadísticas (📊) con exportación CSV y respaldo .JSON."
             }
         ];
 
@@ -2269,13 +3020,17 @@
             state.stats = data.stats || {
                 totalExercises: 0, totalCorrect: 0, totalIncorrect: 0, currentStreak: 0,
                 hintsUsed: 0, answersUsed: 0, sessionHistory: [], pastSessions: [],
-                pastStreaks: [], unlockedBadges: [], chordBreakdown: {}
+                pastStreaks: [], unlockedBadges: [], chordBreakdown: {}, errorBank: [],
+                totalResponseTimeSec: 0, timedExercisesCount: 0
             };
             
             if (!state.stats.pastSessions) state.stats.pastSessions = [];
             if (!state.stats.pastStreaks) state.stats.pastStreaks = [];
             if (!state.stats.unlockedBadges) state.stats.unlockedBadges = [];
             if (!state.stats.chordBreakdown) state.stats.chordBreakdown = {};
+            if (!state.stats.errorBank) state.stats.errorBank = [];
+            if (!state.stats.totalResponseTimeSec) state.stats.totalResponseTimeSec = 0;
+            if (!state.stats.timedExercisesCount) state.stats.timedExercisesCount = 0;
             state.stats.sessionHistory = [];
             
             if (data.customPractice) {
@@ -2331,7 +3086,8 @@
             state.stats = {
                 totalExercises: 0, totalCorrect: 0, totalIncorrect: 0, currentStreak: 0,
                 hintsUsed: 0, answersUsed: 0, sessionHistory: [], pastSessions: [],
-                pastStreaks: [], unlockedBadges: [], chordBreakdown: {}
+                pastStreaks: [], unlockedBadges: [], chordBreakdown: {}, errorBank: [],
+                totalResponseTimeSec: 0, timedExercisesCount: 0
             };
             state.session.startTime = Date.now();
             welcomeModalOverlay.classList.remove('visible');
@@ -2396,6 +3152,7 @@
             
             initWebMIDI();
             updateDifficultySelectionUI();
+            updateVoicingSelectOptions();
             generateNoteButtons();
             generatePiano();
             addEventListeners();
@@ -2411,6 +3168,84 @@
             gridCells.forEach((cell, idx) => {
                 cell.addEventListener('click', () => selectCellForEditing(idx));
             });
+
+            musicalStaffCanvas.addEventListener('mousemove', handleStaffCanvasMove);
+            musicalStaffCanvas.addEventListener('mouseleave', () => {
+                if (staffHoverNoteLabel) staffHoverNoteLabel.textContent = '';
+            });
+            musicalStaffCanvas.addEventListener('click', handleStaffCanvasClick);
+
+            voicingSelect.addEventListener('change', (e) => {
+                state.voicingType = e.target.value;
+                generateExercise();
+            });
+
+            addBassBtn.addEventListener('click', () => {
+                state.includeBass = !state.includeBass;
+                addBassBtn.classList.toggle('bg-amber-600', state.includeBass);
+                addBassBtn.classList.toggle('text-white', state.includeBass);
+                generateExercise();
+            });
+
+            staffModeSelect.addEventListener('change', (e) => {
+                state.staffMode = e.target.value;
+                drawMusicalStaff(state.selectedUserNotes);
+            });
+
+            instrumentSelect.addEventListener('change', (e) => {
+                applyInstrumentPreset(e.target.value);
+                playPreviewAudio();
+            });
+
+            timerModeSelect.addEventListener('change', (e) => {
+                state.timer.limitSeconds = parseInt(e.target.value, 10) || 0;
+                startExerciseTimer();
+            });
+
+            progressionModeBtn.addEventListener('click', () => {
+                state.progressionMode = !state.progressionMode;
+                state.progression.step = 0;
+                progressionModeBtn.classList.toggle('bg-indigo-600', state.progressionMode);
+                progressionModeBtn.classList.toggle('text-white', state.progressionMode);
+                document.getElementById('progressionModeBadge').classList.toggle('hidden', !state.progressionMode);
+                generateExercise();
+            });
+
+            dictationModeBtn.addEventListener('click', () => {
+                state.dictationMode = !state.dictationMode;
+                dictationModeBtn.classList.toggle('bg-pink-600', state.dictationMode);
+                dictationModeBtn.classList.toggle('text-white', state.dictationMode);
+                document.getElementById('dictationModeBadge').classList.toggle('hidden', !state.dictationMode);
+                updateDisplay();
+                if (state.dictationMode) playCorrectChord();
+            });
+
+            strictEnharmonicBtn.addEventListener('click', () => {
+                state.strictEnharmonic = !state.strictEnharmonic;
+                strictEnharmonicBtn.classList.toggle('bg-amber-500', state.strictEnharmonic);
+                strictEnharmonicBtn.classList.toggle('text-white', state.strictEnharmonic);
+                showCustomMessage(
+                    state.strictEnharmonic ? "♯♭ Enarmonía Estricta Activa" : "Enarmonía Estándar",
+                    state.strictEnharmonic ? "Se exigirá la ortografía exacta de cada grado (ej. Eb en lugar de D#)." : "Se aceptará cualquier enarmonía con la altura sonora correcta.",
+                    "info"
+                );
+            });
+
+            errorBankButton.addEventListener('click', () => {
+                const count = (state.stats.errorBank || []).length;
+                if (!state.errorReviewMode && count === 0) {
+                    showCustomMessage("Banco de Errores Vacío", "¡No tienes acordes pendientes por repasar! Los acordes donde falles se guardarán aquí automáticamente.", "info");
+                    return;
+                }
+                state.errorReviewMode = !state.errorReviewMode;
+                document.getElementById('errorReviewModeBadge').classList.toggle('hidden', !state.errorReviewMode);
+                errorBankButton.classList.toggle('ring-2', state.errorReviewMode);
+                errorBankButton.classList.toggle('ring-white', state.errorReviewMode);
+                generateExercise();
+            });
+
+            exportProfileJsonButton.addEventListener('click', exportProfileJSON);
+            importProfileJsonButton.addEventListener('click', () => profileJsonInput.click());
 
             confirmAnswerButton.addEventListener('click', checkAnswer);
             undoLastNoteButton.addEventListener('click', deleteLastNote);
@@ -2459,6 +3294,7 @@
             difficultyRadios.forEach(radio => radio.addEventListener('change', (event) => {
                 state.difficulty = event.target.value;
                 updateDifficultySelectionUI();
+                updateVoicingSelectOptions();
                 generateExercise();
             }));
 
@@ -2535,6 +3371,9 @@
             document.getElementById('guestLoginButton').addEventListener('click', handleGuestLogin);
             document.getElementById('tutorialNextButton').addEventListener('click', () => { state.tutorial.currentStep++; showTutorialStep(); });
             document.getElementById('tutorialEndButton').addEventListener('click', endTutorial);
+            welcomeExportJsonBtn.addEventListener('click', exportProfileJSON);
+            welcomeImportJsonBtn.addEventListener('click', () => profileJsonInput.click());
+            profileJsonInput.addEventListener('change', importProfileJSON);
             showLoginScreen();
         });
     </script>
