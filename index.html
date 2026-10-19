@@ -13,138 +13,164 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-container: #ffffff;
+            --text-main: #334155;
+            --border-color: #e2e8f0;
+            --question-bg: #eff6ff;
+            --question-border: #dbeafe;
+            --cell-bg: #f8fafc;
+            --btn-note-bg: #e2e8f0;
+            --btn-note-text: #475569;
+            --canvas-bg: #ffffff;
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-container: #1e293b;
+            --text-main: #f1f5f9;
+            --border-color: #334155;
+            --question-bg: #1e3a8a33;
+            --question-border: #1d4ed866;
+            --cell-bg: #0f172a;
+            --btn-note-bg: #334155;
+            --btn-note-text: #f8fafc;
+            --canvas-bg: #0f172a;
+        }
+
         /* Estilos Base */
         html, body {
-            height: 100%; margin: 0; padding: 0;
+            min-height: 100%; margin: 0; padding: 0;
             display: flex; flex-direction: column; align-items: center;
-            background-color: #f1f5f9;
+            background-color: var(--bg-body);
             font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            color: #334155; line-height: 1.6;
+            color: var(--text-main); line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
-            background-color: #ffffff; padding: 1.5rem; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            max-width: 800px; width: 98%; box-sizing: border-box;
-            border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 1rem;
+            background-color: var(--bg-container); padding: 1.5rem; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            max-width: 850px; width: 98%; box-sizing: border-box;
+            border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1rem;
             margin-top: 1rem; margin-bottom: 2rem;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
-        /* Animación Fade-in para el Pentagrama */
+        /* Animaciones de Transición y Pentagrama */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-2px); }
+            from { opacity: 0; transform: translateY(-4px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes slideTransition {
+            0% { opacity: 0; transform: translateX(15px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
         .fade-in { animation: fadeIn 0.3s ease-out; }
+        .exercise-transition { animation: slideTransition 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
 
         #chordQuestionWrapper { text-align: center; }
-        #chordQuestionText strong { color: #1e40af; }
+        #chordQuestionText strong { color: #2563eb; }
+        body.dark-mode #chordQuestionText strong { color: #60a5fa; }
+        body.dark-mode #chordQuestionText { color: #e2e8f0; }
 
         #displaySection {
-            display: flex; justify-content: center; align-items: flex-start; flex-wrap: wrap; gap: 1rem;
+            display: flex; justify-content: center; align-items: stretch; flex-wrap: wrap; gap: 1rem;
         }
 
         #questionArea {
-            background-color: #eff6ff; padding: 1rem; border-radius: 10px;
-            border: 1px solid #dbeafe; display: flex; flex-direction: column;
+            background-color: var(--question-bg); padding: 1rem; border-radius: 10px;
+            border: 1px solid var(--question-border); display: flex; flex-direction: column;
             align-items: center; justify-content: center; flex: 1 1 250px;
         }
 
         #staffArea {
-            flex: 1 1 300px; display: flex; justify-content: center; align-items: center; padding: 0.5rem;
+            flex: 1 1 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0.5rem;
         }
         #musicalStaffCanvas {
-            background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 100%; height: auto; max-width: 300px; box-sizing: border-box;
+            background-color: var(--canvas-bg); border: 1px solid var(--border-color); border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 100%; height: auto; max-width: 320px; box-sizing: border-box;
+            transition: background-color 0.3s ease;
         }
 
         .notes-grid {
-            display: grid; grid-template-rows: repeat(4, 1fr); gap: 4px; width: 100%; max-width: 200px;
+            display: grid; grid-template-rows: repeat(4, 1fr); gap: 6px; width: 100%; max-width: 220px;
         }
         .grid-cell {
-            background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 0.75rem; border-radius: 6px;
-            display: flex; justify-content: space-between; align-items: center; font-size: 1.1em; font-weight: 600;
+            background-color: var(--cell-bg); border: 1px solid var(--border-color); padding: 0.65rem 0.85rem; border-radius: 6px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 1.05em; font-weight: 600;
+            transition: all 0.2s ease;
         }
-        .grid-cell .note-display { font-size: 1.5em; }
+        .grid-cell.cell-correct { border-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
+        .grid-cell.cell-error { border-color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
+        .grid-cell .note-display { font-size: 1.4em; }
         .grid-cell.hidden { display: none; }
 
         .action-buttons-group, .modal-buttons {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 0.65rem;
         }
         .action-buttons-group button, .modal-buttons button {
-            flex: 1 1 auto; min-width: 120px; padding: 0.75rem 1.5rem; border: none; border-radius: 8px;
+            flex: 1 1 auto; min-width: 110px; padding: 0.65rem 1rem; border: none; border-radius: 8px;
             font-weight: 600; cursor: pointer; transition: all 0.2s ease-in-out; box-shadow: 0 4px 6px rgba(0,0,0,0.1); touch-action: manipulation;
         }
 
-        .action-buttons-group button:disabled, .note-button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .action-buttons-group button:disabled, .note-button:disabled { opacity: 0.45; cursor: not-allowed; }
         .note-button.active, .toggle-button.active {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); transform: translateY(-1px); background-color: #3b82f6; color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); transform: translateY(-1px); background-color: #3b82f6 !important; color: white !important;
         }
 
         .note-building-controls { display: flex; flex-direction: column; gap: 1rem; }
         .natural-note-buttons, .accidental-buttons { display: grid; gap: 0.5rem; }
         .natural-note-buttons { grid-template-columns: repeat(auto-fit, minmax(3.5rem, 1fr)); }
-        .accidental-buttons { grid-template-columns: repeat(4, 1fr); max-width: 200px; margin: 0 auto; }
+        .accidental-buttons { grid-template-columns: repeat(5, 1fr); max-width: 290px; margin: 0 auto; width: 100%; }
         .note-button {
-            padding: 0.75rem; border-radius: 8px; font-weight: 600; background-color: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; transition: all 0.2s;
+            padding: 0.75rem 0.5rem; border-radius: 8px; font-weight: 600;
+            background-color: var(--btn-note-bg); border: 1px solid var(--border-color); color: var(--btn-note-text);
+            transition: all 0.2s; cursor: pointer;
         }
+        .note-button:hover:not(:disabled) { filter: brightness(0.95); }
 
         /* Modales Generales */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000;
+            backdrop-filter: blur(2px);
         }
         .modal-overlay.visible { display: flex; }
         .modal-content {
-            background-color: #ffffff; padding: 1.5rem 2rem; border-radius: 12px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2); max-width: 450px; width: 90%; text-align: center;
-            max-height: 90vh; overflow-y: auto;
+            background-color: var(--bg-container); color: var(--text-main); padding: 1.5rem 2rem; border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3); max-width: 520px; width: 92%; text-align: center;
+            max-height: 90vh; overflow-y: auto; border: 1px solid var(--border-color);
         }
 
         .feedback.correct { background-color: #dcfce7; color: #15803d; border: 1px solid #15803d; }
         .feedback.incorrect { background-color: #fee2e2; color: #b91c1c; border: 1px solid #b91c1c; }
 
         /* Piano */
-        .piano-container { position: relative; display: flex; height: 200px; width: 100%; max-width: 800px; margin: 0 auto; }
+        .piano-container { position: relative; display: flex; height: 190px; width: 100%; max-width: 800px; margin: 0 auto; user-select: none; }
         .piano-key { border: 1px solid #64748b; box-sizing: border-box; cursor: pointer; transition: background-color 0.1s ease; }
         .piano-key.white { background-color: #ffffff; width: calc(100% / 22); height: 100%; border-radius: 0 0 5px 5px; }
-        .piano-key.black { background-color: #334155; width: 3%; height: 65%; position: absolute; z-index: 2; transform: translateX(-50%); border-radius: 0 0 5px 5px; }
+        .piano-key.black { background-color: #1e293b; width: 3%; height: 65%; position: absolute; z-index: 2; transform: translateX(-50%); border-radius: 0 0 5px 5px; }
         
-        .piano-key.black[data-note*="C#"] { left: calc(100% / 22 * 1); }
-        .piano-key.black[data-note*="D#"] { left: calc(100% / 22 * 2); }
-        .piano-key.black[data-note*="F#"] { left: calc(100% / 22 * 4); }
-        .piano-key.black[data-note*="G#"] { left: calc(100% / 22 * 5); }
-        .piano-key.black[data-note*="A#"] { left: calc(100% / 22 * 6); }
-        .piano-key.black[data-note*="C#"][data-note*="/4"] { left: calc(100% / 22 * 8); }
-        .piano-key.black[data-note*="D#"][data-note*="/4"] { left: calc(100% / 22 * 9); }
-        .piano-key.black[data-note*="F#"][data-note*="/4"] { left: calc(100% / 22 * 11); }
-        .piano-key.black[data-note*="G#"][data-note*="/4"] { left: calc(100% / 22 * 12); }
-        .piano-key.black[data-note*="A#"][data-note*="/4"] { left: calc(100% / 22 * 13); }
-        .piano-key.black[data-note*="C#"][data-note*="/5"] { left: calc(100% / 22 * 15); }
-        .piano-key.black[data-note*="D#"][data-note*="/5"] { left: calc(100% / 22 * 16); }
-        .piano-key.black[data-note*="F#"][data-note*="/5"] { left: calc(100% / 22 * 18); }
-        .piano-key.black[data-note*="G#"][data-note*="/5"] { left: calc(100% / 22 * 19); }
-        .piano-key.black[data-note*="A#"][data-note*="/5"] { left: calc(100% / 22 * 20); }
-        
-        .piano-key.white.selected { background-color: #93c5fd !important; border: 2px solid #3b82f6; }
+        .piano-key.white.selected { background-color: #93c5fd !important; border: 2px solid #2563eb; }
         .piano-key.black.selected { background-color: #3b82f6 !important; border: 2px solid #93c5fd; }
         .piano-key.white.given-note-highlight { background-color: #fde047 !important; border: 2px solid #f59e0b; }
-        .piano-key.black.given-note-highlight { background-color: #facc15 !important; border: 2px solid #fde047; }
+        .piano-key.black.given-note-highlight { background-color: #eab308 !important; border: 2px solid #fde047; }
 
         /* Tutorial */
         #tutorialOverlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); z-index: 2000; }
-        #tutorialModal { position: absolute; background-color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.5); max-width: 350px; width: 90%; border: 2px solid #3b82f6; }
-        .tutorial-highlight { position: relative; z-index: 2001; box-shadow: 0 0 0 4px #3b82f6, 0 0 20px 10px rgba(59, 130, 246, 0.7); border-radius: 8px; transition: box-shadow 0.3s ease-in-out; background-color: white; }
+        #tutorialModal { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--bg-container); color: var(--text-main); padding: 1.25rem 1.5rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 420px; width: 92%; border: 2px solid #3b82f6; z-index: 2005; }
+        .tutorial-highlight { position: relative; z-index: 2001; box-shadow: 0 0 0 4px #3b82f6, 0 0 20px 10px rgba(59, 130, 246, 0.7); border-radius: 8px; transition: box-shadow 0.3s ease-in-out; background-color: var(--bg-container); }
 
-        /* Tooltip style */
-        [title]:hover::after {
-            content: attr(title); position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(8px);
-            background-color: #334155; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;
-            white-space: nowrap; z-index: 10; transition-delay: 0.2s;
+        /* Toast de Logros */
+        #badgeToast {
+            position: fixed; bottom: 20px; right: 20px; z-index: 3000;
+            transform: translateY(150%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        [title] { position: relative; }
+        #badgeToast.show { transform: translateY(0); }
 
-        /* Responsive Celular (Optimizado) */
+        /* Responsive Celular (Optimizado con Pestañas Adaptables) */
         @media (max-width: 768px) {
             .container { padding: 0.75rem; gap: 0.75rem; margin-top: 0.5rem; width: 100%; }
             #statusBar { flex-direction: column; gap: 0.5rem; }
@@ -153,39 +179,45 @@
             #displaySection { flex-direction: column; align-items: center; }
             #questionArea { padding: 0.75rem; width: 100%; }
             .action-buttons-group { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%; }
-            .action-buttons-group button { min-width: 0; padding: 0.75rem 0.5rem; font-size: 0.9rem; }
+            .action-buttons-group button { min-width: 0; padding: 0.7rem 0.4rem; font-size: 0.85rem; }
             #confirmAnswerButton { grid-column: 1 / -1; }
+            #changeQuestionButton { grid-column: 1 / -1; }
             .piano-container { height: 140px; }
-            
-            .modal-content { padding: 1rem; } 
+            .modal-content { padding: 1.1rem; } 
 
-            /* TUTORIAL SIEMPRE VISIBLE EN MÓVILES */
             #tutorialModal {
-                position: fixed !important; top: auto !important; bottom: 15px !important;
-                left: 50% !important; transform: translateX(-50%) !important;
-                width: 95%; max-height: 40vh; overflow-y: auto; z-index: 2005;
-                box-shadow: 0 -5px 25px rgba(0,0,0,0.4);
+                bottom: 12px !important;
+                width: 95%; max-height: 45vh; overflow-y: auto;
             }
         }
     </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center">
+<body class="flex flex-col items-center">
+    <!-- Toast de Notificación de Logros -->
+    <div id="badgeToast" class="bg-amber-500 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border-2 border-amber-300">
+        <div id="badgeToastIcon" class="text-3xl">🏆</div>
+        <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-100">¡Logro Desbloqueado!</div>
+            <div id="badgeToastTitle" class="font-extrabold text-base">Maestro de las Tríadas</div>
+        </div>
+    </div>
+
     <!-- User selection modal -->
     <div id="welcomeModalOverlay" class="modal-overlay visible">
-        <div class="bg-white p-5 sm:p-8 rounded-xl shadow-2xl text-center max-w-lg w-11/12 max-h-[95vh] overflow-y-auto relative">
-            <h2 class="text-2xl sm:text-3xl font-bold text-blue-800 mb-3">Bienvenido a Bloque Armónico Pro</h2>
-            <p class="text-base sm:text-lg text-gray-700 mb-4">Para continuar, selecciona tu perfil o crea uno nuevo.</p>
+        <div class="modal-content max-w-lg">
+            <h2 class="text-2xl sm:text-3xl font-bold text-blue-600 mb-3">Bienvenido a Bloque Armónico Pro</h2>
+            <p class="text-base sm:text-lg opacity-80 mb-4">Selecciona tu perfil o crea uno nuevo para guardar tus rachas, gráficos y logros.</p>
             <div class="mt-4 w-full max-w-sm mx-auto">
-                <label for="userSelect" class="block text-sm font-medium text-gray-700 text-left">Selecciona tu Perfil</label>
+                <label for="userSelect" class="block text-sm font-medium opacity-80 text-left">Selecciona tu Perfil</label>
                 <div class="flex items-center gap-2 mt-1">
-                    <select id="userSelect" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select>
+                    <select id="userSelect" class="block w-full py-2 px-3 border border-gray-300 bg-white text-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></select>
                     <button id="deleteUserButton" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-md shadow-sm disabled:opacity-50" title="Borrar Perfil Seleccionado">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16"><path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/></svg>
+                        🗑️
                     </button>
                 </div>
-                <p class="text-center my-3 text-gray-500 text-sm">o</p>
-                <label for="newUserInput" class="block text-sm font-medium text-gray-700 text-left">Crea un Nuevo Perfil</label>
-                <input type="text" id="newUserInput" placeholder="Escribe tu nombre aquí" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                <p class="text-center my-3 opacity-60 text-sm">o</p>
+                <label for="newUserInput" class="block text-sm font-medium opacity-80 text-left">Crea un Nuevo Perfil</label>
+                <input type="text" id="newUserInput" placeholder="Escribe tu nombre aquí" class="mt-1 block w-full p-2 border border-gray-300 bg-white text-gray-800 rounded-md shadow-sm">
             </div>
             <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                 <button id="loginButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors text-sm sm:text-base">Comenzar Sesión</button>
@@ -197,8 +229,8 @@
     <!-- Tutorial Prompt Modal -->
     <div id="tutorialPromptModalOverlay" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4">¡Hola, <span id="tutorialUserName"></span>!</h3>
-            <p class="text-lg text-gray-700 mb-6">Parece que es tu primera vez. ¿Te gustaría ver un rápido tutorial?</p>
+            <h3 class="text-2xl font-bold text-blue-600 mb-4">¡Hola, <span id="tutorialUserName"></span>!</h3>
+            <p class="text-lg opacity-80 mb-6">Parece que es tu primera vez. ¿Te gustaría ver el recorrido interactivo con todas las funciones?</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <button id="promptStartTutorial" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">Sí, mostrar tutorial</button>
                 <button id="promptSkipTutorial" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors">No, gracias</button>
@@ -209,8 +241,8 @@
     <!-- Delete Confirmation Modal -->
     <div id="deleteConfirmModalOverlay" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3 class="text-xl font-bold text-red-700 mb-4">Confirmar Eliminación</h3>
-            <p id="deleteConfirmText" class="text-gray-700 mb-6"></p>
+            <h3 class="text-xl font-bold text-red-600 mb-4">Confirmar Eliminación</h3>
+            <p id="deleteConfirmText" class="opacity-80 mb-6"></p>
             <div class="flex gap-4 justify-center">
                 <button id="confirmDeleteButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Sí, Eliminar</button>
                 <button id="cancelDeleteButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cancelar</button>
@@ -218,137 +250,173 @@
         </div>
     </div>
 
-    <!-- Interactive Tutorial -->
+    <!-- Interactive Tutorial / Help Menu -->
     <div id="tutorialOverlay" class="hidden">
         <div id="tutorialModal">
-            <h3 id="tutorialTitle" class="text-xl font-bold text-blue-800 mb-2"></h3>
-            <p id="tutorialText" class="text-sm sm:text-base text-gray-700 mb-4"></p>
-            <div class="flex flex-col gap-2 mt-4">
-                <button id="tutorialNextButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Siguiente</button>
-                <button id="tutorialEndButton" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Terminar Tutorial</button>
+            <div class="flex justify-between items-center mb-1">
+                <span id="tutorialStepBadge" class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-500">Paso 1 de 6</span>
+                <button id="tutorialOpenShortcutsBtn" class="text-xs font-semibold text-teal-500 hover:underline">⌨️ Ver Atajos</button>
+            </div>
+            <h3 id="tutorialTitle" class="text-lg sm:text-xl font-bold text-blue-500 mb-1.5"></h3>
+            <p id="tutorialText" class="text-xs sm:text-sm opacity-90 mb-4 text-left leading-relaxed"></p>
+            <div class="flex gap-2 mt-2">
+                <button id="tutorialPrevButton" class="flex-1 bg-slate-500/30 hover:bg-slate-500/40 font-bold py-2 px-3 rounded-lg text-sm disabled:opacity-40">Anterior</button>
+                <button id="tutorialNextButton" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg text-sm">Siguiente</button>
+                <button id="tutorialEndButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-3 rounded-lg text-sm">Cerrar</button>
             </div>
         </div>
     </div>
 
     <!-- Main application container -->
     <div id="mainAppContainer" class="container hidden">
-        <div class="flex flex-col items-center justify-between mb-4">
-            <h1 class="text-2xl font-bold text-center">Bloque Armónico Pro</h1>
-            <div id="chordQuestionWrapper" class="text-lg text-gray-700 mt-2">
+        <div class="flex flex-col items-center justify-between mb-1">
+            <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-bold text-center">Bloque Armónico Pro</h1>
+                <span id="customModeBadge" class="hidden bg-purple-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">Modo Reto a Medida</span>
+            </div>
+            <div id="chordQuestionWrapper" class="text-lg mt-1">
                 <p id="chordQuestionText">
                     <strong class="text-xl sm:text-2xl"></strong> es <strong class="text-xl sm:text-2xl"></strong> de un acorde <strong class="text-xl sm:text-2xl"></strong>.<br>
-                    <small class="text-sm text-gray-500">Armoniza en bloque cerrado, <span class="font-bold text-indigo-700">4 voces</span>, descendente.</small>
+                    <small class="text-sm opacity-75">Armoniza en bloque cerrado, <span class="font-bold text-indigo-500">4 voces</span>, descendente.</small>
                 </p>
             </div>
         </div>
 
         <!-- Status bar -->
-        <div id="statusBar" class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 p-2 bg-gray-50 rounded-lg gap-2">
+        <div id="statusBar" class="flex flex-col sm:flex-row sm:justify-between sm:items-center p-2.5 bg-slate-500/10 rounded-xl gap-2 border border-slate-500/20">
             <div id="statusBarInfo" class="flex justify-around items-center gap-2 flex-grow">
-                <div id="streakCounterContainer" class="flex flex-col items-center p-2 rounded-xl bg-amber-50 border border-amber-200">
-                    <div class="text-xs font-medium text-amber-600">🔥 Días de Racha</div>
-                    <div id="streakCounter" class="text-xl font-bold text-amber-800">0</div>
+                <div id="streakCounterContainer" class="flex flex-col items-center px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                    <div class="text-[11px] font-semibold text-amber-600">🔥 Racha</div>
+                    <div id="streakCounter" class="text-lg font-bold text-amber-600">0</div>
                 </div>
-                <div id="userDisplay" class="flex flex-col items-center p-2 rounded-xl bg-indigo-50 border border-indigo-200">
-                    <div class="text-xs font-medium text-indigo-600">👤 Usuario</div>
-                    <div id="currentUserName" class="text-base font-bold text-indigo-800"></div>
+                <div id="userDisplay" class="flex flex-col items-center px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30">
+                    <div class="text-[11px] font-semibold text-indigo-500">👤 Usuario</div>
+                    <div id="currentUserName" class="text-sm font-bold text-indigo-500 truncate max-w-[100px]"></div>
                 </div>
-                <div id="scoreCounter" class="flex flex-col items-center p-2 rounded-xl bg-gray-100 border border-gray-200">
-                    <div class="text-sm text-green-600">✅ <span id="valCorrect">0</span></div>
-                    <div class="text-sm text-red-600">❌ <span id="valIncorrect">0</span></div>
+                <div id="scoreCounter" class="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-slate-500/10 border border-slate-500/20">
+                    <div class="text-sm font-bold text-green-600">✅ <span id="valCorrect">0</span></div>
+                    <div class="text-sm font-bold text-red-500">❌ <span id="valIncorrect">0</span></div>
+                </div>
+                <div id="midiStatusBadge" class="hidden lg:flex flex-col items-center px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30" title="Estado de Teclado Web MIDI">
+                    <div class="text-[10px] font-semibold text-emerald-600">🎹 MIDI</div>
+                    <div id="midiStatusText" class="text-xs font-bold text-emerald-600">Off</div>
                 </div>
             </div>
-            <div id="statusBarControls" class="flex justify-center items-center gap-2 flex-wrap">
+            <div id="statusBarControls" class="flex justify-center items-center gap-1.5 flex-wrap">
                 <!-- Notation selector -->
-                <div class="flex rounded-full bg-gray-200 p-1">
+                <div class="flex rounded-full bg-slate-500/20 p-1">
                     <input type="radio" id="notationAmericano" name="notationSystem" value="american" class="hidden" checked>
-                    <label for="notationAmericano" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50" title="Cifrado Americano (Anglosajón)">C,D,E</label>
+                    <label for="notationAmericano" class="py-1 px-2.5 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/40" title="Cifrado Americano">C,D,E</label>
                     <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
-                    <label for="notationLatino" class="py-1 px-3 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/50" title="Cifrado Latino">Do,Re,Mi</label>
+                    <label for="notationLatino" class="py-1 px-2.5 text-xs font-semibold rounded-full cursor-pointer transition-colors hover:bg-white/40" title="Cifrado Latino">Do,Re,Mi</label>
                 </div>
-                <button id="viewHistoryButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ver Historial de Sesión (V)">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16"><path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2z"/></svg>
-                </button>
-                <button id="switchUserButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Cambiar de Usuario (U)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
-                </button>
-                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ajustes de Práctica (S)">⚙️</button>
-                <button id="showTutorialButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Ver Tutorial (H)">?</button>
-                <button id="fullscreenButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-sm transition-colors text-lg" title="Pantalla Completa (Q)">
-                    <svg id="fullscreenIconOpen" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"/></svg>
-                    <svg id="fullscreenIconClose" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen-exit hidden" viewBox="0 0 16 16"><path d="M5.5 0a.5.5 0 0 1 .5.5v4A.5.5 0 0 1 5 5h-4a.5.5 0 0 1 0-1h3.5V.5a.5.5 0 0 1 .5-.5zm0 11a.5.5 0 0 1 .5.5v3.5h-3.5a.5.5 0 0 1 0-1h4v-3a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-3a.5.5 0 0 1 .5-.5zm.5-11a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-4a.5.5 0 0 1 .5-.5z"/></svg>
+                <button id="darkModeButton" class="bg-slate-700 hover:bg-slate-800 text-amber-300 font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Alternar Modo Oscuro (D)">🌙</button>
+                <button id="badgesButton" class="bg-amber-500 hover:bg-amber-600 text-white font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Mis Logros y Medallas (L)">🏆</button>
+                <button id="customChallengeButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Creador de Retos a Medida (E)">🎯</button>
+                <button id="viewHistoryButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Ver Estadísticas y Gráficos (V)">📊</button>
+                <button id="shortcutsButton" class="bg-teal-600 hover:bg-teal-700 text-white font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Atajos de Teclado y Ayuda (K)">⌨️</button>
+                <button id="switchUserButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Cambiar de Usuario (U)">👥</button>
+                <button id="settingsButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Ajustes de Práctica (S)">⚙️</button>
+                <button id="showTutorialButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Tutorial Interactivo y Ayuda (H)">?</button>
+                <button id="fullscreenButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-9 h-9 flex items-center justify-center rounded-full shadow-sm transition-colors text-base" title="Pantalla Completa (Q)">
+                    <svg id="fullscreenIconOpen" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z"/></svg>
+                    <svg id="fullscreenIconClose" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="hidden" viewBox="0 0 16 16"><path d="M5.5 0a.5.5 0 0 1 .5.5v4A.5.5 0 0 1 5 5h-4a.5.5 0 0 1 0-1h3.5V.5a.5.5 0 0 1 .5-.5zm0 11a.5.5 0 0 1 .5.5v3.5h-3.5a.5.5 0 0 1 0-1h4v-3a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-3a.5.5 0 0 1 .5-.5zm.5-11a.5.5 0 0 1 .5.5v3.5h3.5a.5.5 0 0 1 0 1h-4v-4a.5.5 0 0 1 .5-.5z"/></svg>
                 </button>
             </div>
         </div>
 
-        <!-- Difficulty controls -->
-        <div id="difficultySelection" class="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <label class="text-blue-800 font-semibold">Nivel de Dificultad:</label>
-            <div class="flex gap-2 flex-wrap justify-center">
+        <!-- Difficulty & Playback Mode Bar -->
+        <div id="difficultySelection" class="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">Nivel:</span>
                 <input type="radio" id="difficultyBasic" name="difficulty" value="basic" class="hidden" checked>
-                <label for="difficultyBasic" class="difficulty-label py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors duration-200">Básico</label>
+                <label for="difficultyBasic" class="difficulty-label py-1.5 px-3.5 rounded-full font-semibold text-xs sm:text-sm cursor-pointer transition-colors duration-200">Básico</label>
                 <input type="radio" id="difficultyIntermediate" name="difficulty" value="intermediate" class="hidden">
-                <label for="difficultyIntermediate" class="difficulty-label py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors duration-200">Intermedio</label>
+                <label for="difficultyIntermediate" class="difficulty-label py-1.5 px-3.5 rounded-full font-semibold text-xs sm:text-sm cursor-pointer transition-colors duration-200">Intermedio</label>
                 <input type="radio" id="difficultyAdvanced" name="difficulty" value="advanced" class="hidden">
-                <label for="difficultyAdvanced" class="difficulty-label py-2 px-4 rounded-full font-semibold text-sm cursor-pointer transition-colors duration-200">Avanzado</label>
+                <label for="difficultyAdvanced" class="difficulty-label py-1.5 px-3.5 rounded-full font-semibold text-xs sm:text-sm cursor-pointer transition-colors duration-200">Avanzado</label>
             </div>
+
+            <!-- Control de Dirección de Arpegio y Audio -->
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <label for="arpeggioDirectionSelect" class="text-xs font-semibold opacity-80">Audio:</label>
+                <select id="arpeggioDirectionSelect" class="py-1 px-2.5 text-xs font-semibold rounded-lg border border-slate-400/40 bg-white text-slate-800">
+                    <option value="descending">📉 Descendente + Bloque</option>
+                    <option value="ascending">📈 Ascendente + Bloque</option>
+                    <option value="block">🎹 Solo Bloque Armónico</option>
+                </select>
+                <button id="replayAudioButton" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm transition-colors" title="Escuchar Nota Guía / Acorde (O)">
+                    🔊 Escuchar
+                </button>
+            </div>
+        </div>
+
+        <!-- Selector de Pestañas Móvil (Diseño Responsivo Avanzado) -->
+        <div id="mobileViewTabs" class="flex md:hidden justify-center bg-slate-500/15 p-1 rounded-lg text-xs font-bold">
+            <button data-view="both" class="mobile-tab-btn flex-1 py-1.5 rounded-md bg-blue-600 text-white">Vista Completa</button>
+            <button data-view="grid" class="mobile-tab-btn flex-1 py-1.5 rounded-md">Solo Voces</button>
+            <button data-view="staff" class="mobile-tab-btn flex-1 py-1.5 rounded-md">Solo Pentagrama</button>
         </div>
         
         <!-- Exercise display area -->
         <div id="displaySection" class="flex justify-center items-start gap-4">
-            <div id="questionArea" class="w-full max-w-md md:flex-1 md:min-w-[250px] p-4 bg-blue-100 rounded-lg border border-blue-300">
-                <p class="text-lg font-bold text-blue-800 mb-2">Construye el acorde:</p>
+            <div id="questionArea" class="w-full max-w-md md:flex-1 md:min-w-[250px] p-4 rounded-xl">
+                <p class="text-base font-bold text-blue-600 mb-2">Construye el acorde:</p>
                 <div class="notes-grid w-full">
-                    <div class="grid-cell" id="gridCell0"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
-                    <div class="grid-cell" id="gridCell1"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
-                    <div class="grid-cell" id="gridCell2"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
-                    <div class="grid-cell" id="gridCell3"><span class="interval-label text-gray-500"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell0"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell1"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell2"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell3"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
                 </div>
             </div>
-            <div id="staffArea" class="w-full max-w-md md:flex-1 md:min-w-[300px] flex justify-center items-center">
+            <div id="staffArea" class="w-full max-w-md md:flex-1 md:min-w-[300px] flex flex-col justify-center items-center">
                 <canvas id="musicalStaffCanvas"></canvas>
+                <div id="staffFeedbackLegend" class="hidden mt-2 text-xs font-semibold flex gap-3 items-center">
+                    <span class="flex items-center gap-1 text-blue-500"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Nota Guía</span>
+                    <span class="flex items-center gap-1 text-green-500"><span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span> Correcta</span>
+                    <span class="flex items-center gap-1 text-red-500"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> Incorrecta</span>
+                </div>
             </div>
         </div>
         
         <!-- Note input options (Cifrado vs Piano) -->
-        <div id="inputMethodToggle" class="flex justify-center mb-4">
-            <div class="flex p-1 bg-gray-200 rounded-full" title="Cambiar Entrada (I)">
-                <button id="cifradoToggle" class="py-2 px-4 rounded-full font-semibold transition-all bg-white text-blue-600 shadow-sm active">Cifrado</button>
-                <button id="pianoToggle" class="py-2 px-4 rounded-full font-semibold transition-all text-gray-700">Piano</button>
+        <div id="inputMethodToggle" class="flex justify-center">
+            <div class="flex p-1 bg-slate-500/20 rounded-full" title="Alternar método de entrada (I)">
+                <button id="cifradoToggle" class="py-1.5 px-5 rounded-full text-sm font-semibold transition-all bg-white text-blue-600 shadow-sm active">Botones / Cifrado</button>
+                <button id="pianoToggle" class="py-1.5 px-5 rounded-full text-sm font-semibold transition-all opacity-80">Teclado Piano</button>
             </div>
         </div>
 
         <!-- Note selection controls (Cifrado) -->
-        <div id="noteBuildingControls" class="flex flex-col gap-4">
+        <div id="noteBuildingControls" class="flex flex-col gap-3">
             <div id="naturalNoteButtons" class="natural-note-buttons"></div>
-            <div id="accidentalButtons" class="accidental-buttons"></div>
+            <div class="flex flex-col items-center gap-1">
+                <div id="accidentalButtons" class="accidental-buttons"></div>
+                <span class="text-[11px] opacity-65">Tip: Presiona <strong>♮</strong> o repite la alteración activa para quitarla</span>
+            </div>
         </div>
 
         <!-- Piano keyboard, initially hidden -->
         <div id="piano-container" class="piano-container hidden"></div>
 
         <!-- Main action buttons -->
-        <div class="action-buttons-group mt-4">
-            <button id="confirmAnswerButton" class="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50" title="Confirmar (Enter)">Confirmar</button>
-            <button id="hintButton" class="bg-yellow-500 hover:bg-yellow-600 text-white disabled:opacity-50" title="Pista (P)">Pista</button>
+        <div id="actionButtonsGroup" class="action-buttons-group mt-2">
+            <button id="confirmAnswerButton" class="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50" title="Confirmar respuesta (Enter)">Confirmar</button>
+            <button id="undoLastNoteButton" class="bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50" title="Borrar solo la última nota ingresada (Backspace o Z)">⬅️ Borrar Última</button>
+            <button id="clearAllSelectionButton" class="bg-gray-500 hover:bg-gray-600 text-white disabled:opacity-50" title="Borrar todas las notas ingresadas (N o Supr)">🗑️ Borrar Todo</button>
+            <button id="hintButton" class="bg-yellow-500 hover:bg-yellow-600 text-white disabled:opacity-50" title="Pedir Pista (P)">Pista</button>
             <button id="showAnswerButton" class="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50" title="Mostrar Respuesta (R)">Mostrar Respuesta</button>
-            <button id="clearAllSelectionButton" class="bg-gray-400 hover:bg-gray-500 text-white disabled:opacity-50" title="Borrar (N)">Borrar</button>
-            <button id="changeQuestionButton" class="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50" title="Cambiar Ejercicio (Espacio)">Cambiar Ejercicio</button>
+            <button id="changeQuestionButton" class="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50" title="Pasar al Siguiente Ejercicio (Espacio)">Siguiente Ejercicio</button>
         </div>
-    </div>
-    
-    <!-- Modal for instant feedback -->
-    <div id="quickFeedbackModalOverlay" class="modal-overlay hidden">
-        <div id="quickFeedbackModalContent" class="modal-content feedback p-6 rounded-xl shadow-lg"></div>
     </div>
     
     <!-- Modal for Hint -->
     <div id="hintModalOverlay" class="modal-overlay hidden">
-        <div class="modal-content p-6 rounded-xl shadow-lg bg-yellow-50 border-yellow-300 border">
-            <h3 id="hintModalTitle" class="text-2xl font-bold text-yellow-800 text-center mb-4">Pista</h3>
-            <div id="hintModalBody" class="text-yellow-900 mb-6"></div>
+        <div class="modal-content p-6 rounded-xl shadow-lg">
+            <h3 id="hintModalTitle" class="text-2xl font-bold text-amber-500 text-center mb-4">💡 Pista</h3>
+            <div id="hintModalBody" class="mb-6 text-lg"></div>
             <div class="flex justify-center">
-                <button id="hintModalCloseButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">Entendido</button>
+                <button id="hintModalCloseButton" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg">Entendido</button>
             </div>
         </div>
     </div>
@@ -356,10 +424,10 @@
     <!-- Modal for Answer -->
     <div id="infoModalOverlay" class="modal-overlay hidden">
         <div class="modal-content p-6 rounded-xl shadow-lg">
-            <h3 id="infoModalTitle" class="text-2xl font-bold text-blue-800 text-center mb-4"></h3>
-            <div id="infoModalBody" class="text-gray-700 mb-6 text-left"></div>
+            <h3 id="infoModalTitle" class="text-2xl font-bold text-blue-500 text-center mb-4"></h3>
+            <div id="infoModalBody" class="mb-6 text-left space-y-2"></div>
             <div class="flex justify-center gap-4 mt-6">
-                <button id="infoModalCloseButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cerrar</button>
+                <button id="infoModalCloseButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Cerrar y Ver en Pentagrama</button>
             </div>
         </div>
     </div>
@@ -367,10 +435,10 @@
     <!-- Modal for session evaluation -->
     <div id="evaluationModalOverlay" class="modal-overlay hidden">
         <div id="evaluationModalContent" class="modal-content p-6 rounded-xl shadow-lg text-left">
-            <h3 class="text-2xl font-bold text-blue-800 text-center mb-4">Resultados de la Evaluación</h3>
-            <p id="evaluationSummary" class="text-gray-700 mb-2"></p>
-            <p class="text-lg font-bold text-gray-800 mt-4 mb-2">Áreas a trabajar:</p>
-            <ul id="adviceList" class="list-disc list-inside text-gray-600 space-y-1"></ul>
+            <h3 class="text-2xl font-bold text-blue-500 text-center mb-4">Resultados de la Tanda</h3>
+            <p id="evaluationSummary" class="mb-2 font-semibold text-lg text-center"></p>
+            <p class="text-base font-bold mt-4 mb-2">Recomendaciones pedagógicas:</p>
+            <ul id="adviceList" class="list-disc list-inside opacity-85 space-y-1 text-sm"></ul>
             <div class="flex justify-center gap-4 mt-6">
                 <button id="continueTrainingButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Continuar Entrenamiento</button>
                 <button id="endSessionButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Terminar Sesión</button>
@@ -378,21 +446,109 @@
         </div>
     </div>
 
-    <!-- Modal for practice settings -->
+    <!-- Modal for practice settings (Improved with Lead Voices for all levels) -->
     <div id="settingsModalOverlay" class="modal-overlay hidden">
         <div id="settingsModalContent" class="modal-content p-6 rounded-xl shadow-lg text-left">
-            <h3 class="text-2xl font-bold text-blue-800 text-center mb-4">Ajustes de Práctica</h3>
+            <h3 class="text-2xl font-bold text-blue-500 text-center mb-4">Ajustes de Práctica</h3>
             <div class="mb-4">
-                <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-2">Tipos de Acorde</h4>
-                <div id="chordTypesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                <h4 class="text-base font-semibold border-b border-slate-500/30 pb-2 mb-2">Tipos de Acorde (<span id="settingsLevelLabel"></span>)</h4>
+                <div id="chordTypesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm"></div>
             </div>
-            <div id="leadVoicesSection" class="mb-4 hidden">
-                <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-2">Voces Principales (Tensiones)</h4>
-                <div id="leadVoicesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            <div id="leadVoicesSection" class="mb-4">
+                <h4 class="text-base font-semibold border-b border-slate-500/30 pb-2 mb-2">Filtrar por Voz Superior (Intervalo Guía)</h4>
+                <div id="leadVoicesCheckboxes" class="grid grid-cols-3 sm:grid-cols-4 gap-2 text-sm"></div>
             </div>
             <div class="flex justify-center gap-4 mt-6">
-                <button id="saveSettingsButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar y Reiniciar</button>
-                <button id="cancelSettingsButton" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Cancelar</button>
+                <button id="saveSettingsButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar y Aplicar</button>
+                <button id="cancelSettingsButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Custom Challenge Builder (Creador de Retos a Medida) -->
+    <div id="customChallengeModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content p-6 rounded-xl shadow-lg text-left">
+            <h3 class="text-2xl font-bold text-purple-500 text-center mb-2">🎯 Creador de Retos a Medida</h3>
+            <p class="text-xs opacity-75 text-center mb-4">Configura un acorde específico de una obra o pasaje que estés estudiando.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold mb-1">1. Nota Fundamental (Raíz del Acorde):</label>
+                    <select id="customRootSelect" class="w-full p-2 rounded-lg border border-slate-400 bg-white text-slate-800 font-semibold"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">2. Especie / Tipo de Acorde:</label>
+                    <select id="customChordTypeSelect" class="w-full p-2 rounded-lg border border-slate-400 bg-white text-slate-800 font-semibold"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">3. Voz Superior (Melodía / Lead Voice):</label>
+                    <select id="customLeadSelect" class="w-full p-2 rounded-lg border border-slate-400 bg-white text-slate-800 font-semibold"></select>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-3 mt-6">
+                <button id="applyCustomChallengeButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-lg">Practicar este Acorde</button>
+                <button id="closeCustomChallengeButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Keyboard Shortcuts & Complete Help Guide -->
+    <div id="shortcutsModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content p-6 rounded-xl shadow-lg text-left max-w-lg">
+            <h3 class="text-2xl font-bold text-teal-500 text-center mb-3">⌨️ Atajos de Teclado y Guía Rápida</h3>
+            
+            <div class="mb-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1.5">Construcción y Edición de Notas</h4>
+                <div class="space-y-1.5 text-xs sm:text-sm">
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Ingresar notas naturales</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">A B C D E F G</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Sostenido (#) / Doble (##) <em class="opacity-70">(repetir quita)</em></span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">+ / ++</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Bemol (b) / Doble (bb) <em class="opacity-70">(repetir quita)</em></span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">- / --</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Becuadro (♮) — Quitar alteración</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">0 / =</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>⬅️ Borrar solo la <strong>última nota</strong> puesta</span><kbd class="px-2 py-0.5 bg-amber-500/20 text-amber-600 dark:text-amber-300 rounded font-mono font-bold">Backspace / Z</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>🗑️ Borrar <strong>todas</strong> las notas puestas</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">N / Supr</kbd></div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1.5">Control del Ejercicio y Audio</h4>
+                <div class="space-y-1.5 text-xs sm:text-sm">
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Confirmar respuesta</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">Enter</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Siguiente ejercicio</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">Espacio</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>🔊 Escuchar nota guía / acorde</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">O</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Pedir Pista / Mostrar Solución</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">P / R</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Alternar Botones vs Teclado Piano</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">I</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Cambiar Nivel (Básico, Intermedio, Avanzado)</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">1 / 2 / 3</kbd></div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1.5">Herramientas Pro y Navegación</h4>
+                <div class="space-y-1.5 text-xs sm:text-sm">
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>🌙 Modo Oscuro / 🏆 Sala de Logros</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">D / L</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>🎯 Creador de Retos / 📊 Estadísticas</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">E / V</kbd></div>
+                    <div class="flex justify-between py-1"><span>⚙️ Ajustes / ? Tutorial / ⛶ Pantalla Completa</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">S / H / Q</kbd></div>
+                </div>
+            </div>
+
+            <div class="mt-3 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs">
+                🎹 <strong>Soporte Web MIDI Activo:</strong> Conecta un controlador MIDI USB para ingresar o quitar notas tocando directamente desde tu instrumento.
+            </div>
+            <div class="flex justify-center gap-3 mt-4">
+                <button id="openTutorialFromShortcutsBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Ver Tutorial Paso a Paso</button>
+                <button id="closeShortcutsButton" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-5 rounded-lg text-sm">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Achievements / Badges (Logros) -->
+    <div id="badgesModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content p-6 rounded-xl shadow-lg max-w-xl">
+            <h3 class="text-2xl font-bold text-amber-500 text-center mb-2">🏆 Sala de Logros y Medallas</h3>
+            <p class="text-xs opacity-75 mb-4">Supera hitos de práctica para desbloquear todas las insignias.</p>
+            <div id="badgesGridContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left"></div>
+            <div class="flex justify-center mt-6">
+                <button id="closeBadgesButton" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg">Volver</button>
             </div>
         </div>
     </div>
@@ -400,35 +556,33 @@
     <!-- Modal for enharmonic selection -->
     <div id="enharmonicModalOverlay" class="modal-overlay hidden">
         <div id="enharmonicModalContent" class="modal-content p-6 rounded-xl shadow-lg">
-            <h3 class="text-xl font-bold text-blue-800 mb-2">Seleccionar Alteración</h3>
-            <p class="text-gray-700 mb-4">¿Cómo deseas escribir esta nota?</p>
+            <h3 class="text-xl font-bold text-blue-500 mb-2">Seleccionar Enarmonía</h3>
+            <p class="opacity-80 mb-4">¿Cómo corresponde escribir esta nota en este acorde?</p>
             <div id="enharmonicChoices" class="flex justify-center gap-4"></div>
         </div>
     </div>
 
-    <!-- Session History Modal -->
+    <!-- Session History & Analytics Modal -->
     <div id="historyModalOverlay" class="modal-overlay hidden">
-        <div class="container p-6 text-center w-full max-w-2xl">
-            <h2 id="historyModalTitle" class="text-3xl font-bold text-blue-800 mb-4">Estadísticas de Sesión</h2>
-            <div id="historyModalContent">
-                <!-- Content will be populated by JS -->
-            </div>
-            <div class="flex justify-center gap-4 mt-6">
-                <button id="closeHistoryModalButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors">Volver a la Práctica</button>
+        <div class="modal-content p-6 text-center w-full max-w-3xl">
+            <h2 id="historyModalTitle" class="text-2xl sm:text-3xl font-bold text-blue-500 mb-4">Estadísticas y Progreso</h2>
+            <div id="historyModalContent"></div>
+            <div class="flex flex-wrap justify-center gap-3 mt-6">
+                <button id="exportTeacherCsvButton" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors text-sm">📥 Exportar Reporte Docente (CSV)</button>
+                <button id="closeHistoryModalButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition-colors text-sm">Volver a la Práctica</button>
             </div>
         </div>
     </div>
 
     <!-- Final message and session statistics -->
     <div id="finalMessageDisplay" class="container hidden p-6 text-center">
-        <h2 class="text-3xl font-bold text-blue-800 mb-4">¡Sesión Terminada!</h2>
-        <div id="resultsContentToCapture">
-             <!-- Content populated by JS -->
-        </div>
-        <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+        <h2 class="text-3xl font-bold text-blue-500 mb-4">¡Sesión Terminada!</h2>
+        <div id="resultsContentToCapture" class="p-2"></div>
+        <div class="flex flex-col sm:flex-row justify-center gap-3 mt-6 flex-wrap">
             <button id="switchUserFinalButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Cambiar de Usuario</button>
-            <button id="saveAsPhotoButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar como Foto (PNG)</button>
-            <button id="saveAsPdfButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Guardar como PDF</button>
+            <button id="exportCsvFinalButton" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg">📥 Exportar CSV Docente</button>
+            <button id="saveAsPhotoButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Guardar Foto (PNG)</button>
+            <button id="saveAsPdfButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Guardar PDF</button>
         </div>
     </div>
 
@@ -444,12 +598,17 @@
             correctNotes: [], correctNotesWithOctave: [],
             chordRoot: '', chordTypeKey: '', givenIntervalName: '', givenLabel: '', givenNote: '', givenNoteWithOctave: '',
             orderedLabelsForDisplay: [], selectedUserNotes: [],
-            stats: {}, evaluation: { questionsAttemptedInBatch: 0, exercisesPerEval: 5 },
+            stats: {},
+            evaluation: { questionsAttemptedInBatch: 0, exercisesPerEval: 5, batchCorrectFirstTry: 0, batchHintsUsed: 0 },
             currentExerciseId: null, failedCurrentExercise: false, answerWasShown: false,
+            staffValidationMode: null, // null | 'error' | 'solution' | 'correct'
             difficulty: 'basic', notationSystem: 'american',
+            arpeggioDirection: 'descending',
+            darkMode: false,
+            isCustomChallenge: false,
             customPractice: {
-                basic: { isActive: false, allowedChords: [] },
-                intermediate: { isActive: false, allowedChords: [] },
+                basic: { isActive: false, allowedChords: [], allowedLeads: [] },
+                intermediate: { isActive: false, allowedChords: [], allowedLeads: [] },
                 advanced: { isActive: false, allowedChords: [], allowedLeads: [] }
             },
             audioContextStarted: false, session: { startTime: 0 },
@@ -457,22 +616,24 @@
             keyboard: { lastAccidentalKey: null, lastAccidentalTimestamp: 0, doublePressThreshold: 400 }
         };
 
-        let historyChart = null, historyModalChart = null;
-        let mainAppListenersAttached = false; // <--- FIX FOR REFERENCE ERROR
+        const BADGES_CATALOG = [
+            { id: 'first_chord', icon: '🎵', title: 'Primer Bloque', desc: 'Armoniza tu primer acorde correctamente al primer intento.' },
+            { id: 'triad_master', icon: '🎹', title: 'Maestro de las Tríadas', desc: 'Acumula 10 aciertos en total.' },
+            { id: 'perfect_batch', icon: '🎯', title: 'Precisión Perfecta', desc: 'Completa una tanda de 5 ejercicios sin errores ni pistas.' },
+            { id: 'streak_3', icon: '🔥', title: 'Constancia Armónica', desc: 'Alcanza una racha de 3 o más días practicando.' },
+            { id: 'tension_explorer', icon: '🚀', title: 'Domador de Tensiones', desc: 'Resuelve correctamente un acorde en nivel Avanzado.' },
+            { id: 'custom_creator', icon: '🛠️', title: 'Estudio de Repertorio', desc: 'Crea y resuelve un ejercicio con el Creador de Retos a Medida.' }
+        ];
 
-        const noteToSemitoneMap = {
-            'C': 0, 'B#': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
-            'E': 4, 'Fb': 4, 'F': 5, 'E#': 5, 'F#': 6, 'Gb': 6, 'G': 7,
-            'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11, 'Cb': 11,
-            'Cbb': 10, 'B##': 1, 'Dbb': 0, 'C##': 2, 'Ebb': 2, 'D##': 4,
-            'Fbb': 3, 'E##': 6, 'Gbb': 5, 'F##': 7, 'Abb': 7, 'G##': 9,
-            'Bbb': 9, 'A##': 11,
-        };
+        let activeChartInstance = null;
+        let mainAppListenersAttached = false;
+
         const naturalLetterSemitone = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
         const numberToLetterMap = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
         const letterToNumberMap = { 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6 };
         const naturalNotes = ["C", "D", "E", "F", "G", "A", "B"];
-        const accidentals = ["#", "b", "##", "bb"];
+        const accidentals = ["#", "b", "♮", "##", "bb"];
+        const allRoots = ["C", "F", "G", "Bb", "Eb", "Ab", "Db", "Gb", "D", "A", "E", "B", "F#", "C#"];
         const enharmonicEquivalents = { "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab", "A#": "Bb", "Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#" };
         const americanToLatin = { "C": "Do", "D": "Re", "E": "Mi", "F": "Fa", "G": "Sol", "A": "La", "B": "Si" };
 
@@ -484,7 +645,7 @@
             "sus2": { name: "Sus2", cifrado: "sus2", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 2, name: "segunda mayor", label: "2", degreeOffset: 1 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "2", "1"], "2": ["2", "1", "5", "2"], "5": ["5", "2", "1", "5"] } },
             "sus4": { name: "Sus4", cifrado: "sus4", difficulty: "basic", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 5, name: "cuarta justa", label: "4", degreeOffset: 3 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }], voicing_rules: { "1": ["1", "5", "4", "1"], "4": ["4", "1", "5", "4"], "5": ["5", "4", "1", "5"] } },
             "maj7": { name: "Mayor 7", cifrado: "maj7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }, { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 }, { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }], voicing_rules: { "1": ["1", "7", "5", "3"], "3": ["3", "1", "7", "5"], "5": ["5", "3", "1", "7"], "7": ["7", "5", "3", "1"], "9": ["9", "7", "5", "3"], "#11": ["#11", "3", "1", "7"] } },
-            "m7": { name: "Menor 7", cifrado: "m7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", "label": "5", degreeOffset: 4 }, { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 }, { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }], voicing_rules: { "1": ["1", "b7", "5", "b3"], "b3": ["b3", "1", "b7", "5"], "5": ["5", "b3", "1", "b7"], "b7": ["b7", "5", "b3", "1"], "9": ["9", "b7", "5", "b3"], "11": ["11", "b3", "1", "b7"] } },
+            "m7": { name: "Menor 7", cifrado: "m7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }, { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 }, { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }], voicing_rules: { "1": ["1", "b7", "5", "b3"], "b3": ["b3", "1", "b7", "5"], "5": ["5", "b3", "1", "b7"], "b7": ["b7", "5", "b3", "1"], "9": ["9", "b7", "5", "b3"], "11": ["11", "b3", "1", "b7"] } },
             "7": { name: "7 (Dominante)", cifrado: "7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 }, { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }, { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 }, { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }, { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 }, { semitones: 3, name: "novena aumentada", label: "#9", degreeOffset: 1 }, { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }, { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 }, { semitones: 8, name: "trecena menor", label: "b13", degreeOffset: 5 }, { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }], voicing_rules: { "1": ["1", "b7", "5", "3"], "3": ["3", "1", "b7", "5"], "5": ["5", "3", "1", "b7"], "b7": ["b7", "5", "3", "1"], "9": ["9", "b7", "5", "3"], "b9": ["b9", "b7", "5", "3"], "#9": ["#9", "b7", "5", "3"], "11": ["11", "1", "b7", "5"], "#11": ["#11", "3", "1", "b7"], "13": ["13", "3", "1", "b7"], "b13": ["b13", "3", "1", "b7"] } },
             "m7b5": { name: "Menor 7(b5)", cifrado: "m7(b5)", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }, { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 }, { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }, { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 }], voicing_rules: { "1": ["1", "b7", "b5", "b3"], "b3": ["b3", "1", "b7", "b5"], "b5": ["b5", "b3", "1", "b7"], "b7": ["b7", "b5", "b3", "1"], "b9": ["b9", "b7", "b5", "b3"], "11": ["11", "b3", "b7", "b5"] } },
             "dim7": { name: "Disminuido 7", cifrado: "º7", difficulty: "intermediate", intervals: [{ semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 }, { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 }, { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }, { semitones: 9, name: "séptima disminuida", label: "bb7", degreeOffset: 6 }], voicing_rules: { "1": ["1", "bb7", "b5", "b3"], "b3": ["b3", "1", "bb7", "b5"], "b5": ["b5", "b3", "1", "bb7"], "bb7": ["bb7", "b5", "b3", "1"] } }
@@ -492,18 +653,22 @@
 
         // DOM element references
         let welcomeModalOverlay, mainAppContainer, chordQuestionText, gridCells, noteBuildingControls, naturalNoteButtonsContainer, 
-            accidentalButtonsContainer, musicalStaffCanvas, confirmAnswerButton, clearAllSelectionButton, changeQuestionButton, 
-            hintButton, showAnswerButton, quickFeedbackModalOverlay, quickFeedbackModalContent, evaluationModalOverlay, 
-            evaluationSummary, adviceList, continueTrainingButton, endSessionButton, finalMessageDisplay, resultsContentToCapture, 
-            difficultyRadios, streakCounter, scoreCounter, settingsButton, settingsModalOverlay, saveSettingsButton, 
-            cancelSettingsButton, chordTypesCheckboxesContainer, leadVoicesCheckboxesContainer, leadVoicesSection, cifradoToggle, 
-            pianoToggle, pianoContainer, enharmonicModalOverlay, enharmonicChoicesContainer, notationRadios, infoModalOverlay, 
-            infoModalTitle, infoModalBody, infoModalCloseButton, hintModalOverlay, hintModalBody, hintModalCloseButton, 
-            showTutorialButton, fullscreenButton, fullscreenIconOpen, fullscreenIconClose, tutorialEndButton, userSelect, 
-            newUserInput, loginButton, guestLoginButton, deleteUserButton, currentUserName, switchUserButton, 
+            accidentalButtonsContainer, musicalStaffCanvas, confirmAnswerButton, undoLastNoteButton, clearAllSelectionButton, changeQuestionButton, 
+            hintButton, showAnswerButton, evaluationModalOverlay, evaluationSummary, adviceList, continueTrainingButton, 
+            endSessionButton, finalMessageDisplay, resultsContentToCapture, difficultyRadios, streakCounter, settingsButton, 
+            settingsModalOverlay, saveSettingsButton, cancelSettingsButton, chordTypesCheckboxesContainer, leadVoicesCheckboxesContainer, 
+            leadVoicesSection, cifradoToggle, pianoToggle, pianoContainer, enharmonicModalOverlay, enharmonicChoicesContainer, 
+            notationRadios, infoModalOverlay, infoModalTitle, infoModalBody, infoModalCloseButton, hintModalOverlay, hintModalBody, 
+            hintModalCloseButton, showTutorialButton, fullscreenButton, fullscreenIconOpen, fullscreenIconClose, tutorialEndButton,
+            tutorialPrevButton, tutorialNextButton, tutorialStepBadge, tutorialOpenShortcutsBtn, openTutorialFromShortcutsBtn,
+            userSelect, newUserInput, loginButton, guestLoginButton, deleteUserButton, currentUserName, switchUserButton, 
             switchUserFinalButton, tutorialPromptModalOverlay, tutorialUserName, promptStartTutorial, promptSkipTutorial, 
             deleteConfirmModalOverlay, deleteConfirmText, confirmDeleteButton, cancelDeleteButton, viewHistoryButton, 
-            historyModalOverlay, historyModalTitle, historyModalContent, closeHistoryModalButton;
+            historyModalOverlay, historyModalTitle, historyModalContent, closeHistoryModalButton, darkModeButton,
+            arpeggioDirectionSelect, replayAudioButton, shortcutsButton, shortcutsModalOverlay, closeShortcutsButton,
+            badgesButton, badgesModalOverlay, closeBadgesButton, badgesGridContainer, customChallengeButton,
+            customChallengeModalOverlay, closeCustomChallengeButton, applyCustomChallengeButton, customRootSelect,
+            customChordTypeSelect, customLeadSelect, exportTeacherCsvButton, exportCsvFinalButton, staffFeedbackLegend;
         
         let synth, reverb, feedbackSynth;
 
@@ -520,12 +685,11 @@
             accidentalButtonsContainer = document.getElementById('accidentalButtons');
             musicalStaffCanvas = document.getElementById('musicalStaffCanvas');
             confirmAnswerButton = document.getElementById('confirmAnswerButton');
+            undoLastNoteButton = document.getElementById('undoLastNoteButton');
             clearAllSelectionButton = document.getElementById('clearAllSelectionButton');
             changeQuestionButton = document.getElementById('changeQuestionButton');
             hintButton = document.getElementById('hintButton');
             showAnswerButton = document.getElementById('showAnswerButton');
-            quickFeedbackModalOverlay = document.getElementById('quickFeedbackModalOverlay');
-            quickFeedbackModalContent = document.getElementById('quickFeedbackModalContent');
             evaluationModalOverlay = document.getElementById('evaluationModalOverlay');
             evaluationSummary = document.getElementById('evaluationSummary');
             adviceList = document.getElementById('adviceList');
@@ -535,7 +699,6 @@
             resultsContentToCapture = document.getElementById('resultsContentToCapture');
             difficultyRadios = document.querySelectorAll('input[name="difficulty"]');
             streakCounter = document.getElementById('streakCounter');
-            scoreCounter = document.getElementById('scoreCounter');
             settingsButton = document.getElementById('settingsButton');
             settingsModalOverlay = document.getElementById('settingsModalOverlay');
             saveSettingsButton = document.getElementById('saveSettingsButton');
@@ -561,6 +724,11 @@
             fullscreenIconOpen = document.getElementById('fullscreenIconOpen');
             fullscreenIconClose = document.getElementById('fullscreenIconClose');
             tutorialEndButton = document.getElementById('tutorialEndButton');
+            tutorialPrevButton = document.getElementById('tutorialPrevButton');
+            tutorialNextButton = document.getElementById('tutorialNextButton');
+            tutorialStepBadge = document.getElementById('tutorialStepBadge');
+            tutorialOpenShortcutsBtn = document.getElementById('tutorialOpenShortcutsBtn');
+            openTutorialFromShortcutsBtn = document.getElementById('openTutorialFromShortcutsBtn');
             userSelect = document.getElementById('userSelect');
             newUserInput = document.getElementById('newUserInput');
             loginButton = document.getElementById('loginButton');
@@ -582,10 +750,30 @@
             historyModalTitle = document.getElementById('historyModalTitle');
             historyModalContent = document.getElementById('historyModalContent');
             closeHistoryModalButton = document.getElementById('closeHistoryModalButton');
+            darkModeButton = document.getElementById('darkModeButton');
+            arpeggioDirectionSelect = document.getElementById('arpeggioDirectionSelect');
+            replayAudioButton = document.getElementById('replayAudioButton');
+            shortcutsButton = document.getElementById('shortcutsButton');
+            shortcutsModalOverlay = document.getElementById('shortcutsModalOverlay');
+            closeShortcutsButton = document.getElementById('closeShortcutsButton');
+            badgesButton = document.getElementById('badgesButton');
+            badgesModalOverlay = document.getElementById('badgesModalOverlay');
+            closeBadgesButton = document.getElementById('closeBadgesButton');
+            badgesGridContainer = document.getElementById('badgesGridContainer');
+            customChallengeButton = document.getElementById('customChallengeButton');
+            customChallengeModalOverlay = document.getElementById('customChallengeModalOverlay');
+            closeCustomChallengeButton = document.getElementById('closeCustomChallengeButton');
+            applyCustomChallengeButton = document.getElementById('applyCustomChallengeButton');
+            customRootSelect = document.getElementById('customRootSelect');
+            customChordTypeSelect = document.getElementById('customChordTypeSelect');
+            customLeadSelect = document.getElementById('customLeadSelect');
+            exportTeacherCsvButton = document.getElementById('exportTeacherCsvButton');
+            exportCsvFinalButton = document.getElementById('exportCsvFinalButton');
+            staffFeedbackLegend = document.getElementById('staffFeedbackLegend');
         }
 
         // ==========================================
-        // 2. UTILIDADES DE FECHA
+        // 2. UTILIDADES DE FECHA, MIDI Y TEMA OSCURO
         // ==========================================
         function getLocalDateString(date) {
             const year = date.getFullYear();
@@ -600,22 +788,66 @@
             return getLocalDateString(yesterday);
         }
 
+        function getNoteSemitone(noteName) {
+            const naturalPartMatch = noteName.match(/[A-G]/i);
+            if (!naturalPartMatch) return null;
+            const naturalPart = naturalPartMatch[0].toUpperCase();
+            const accidentalPart = noteName.substring(naturalPart.length);
+            let semitone = naturalLetterSemitone[naturalPart];
+            for (const char of accidentalPart) {
+                if (char === '#') semitone++;
+                else if (char === 'b') semitone--;
+            }
+            return (semitone % 12 + 12) % 12;
+        }
+
+        function getNoteWithOctaveMidi(noteWithOctave) {
+            if (!noteWithOctave || !noteWithOctave.includes('/')) return 60;
+            const [noteName, octStr] = noteWithOctave.split('/');
+            const oct = parseInt(octStr, 10);
+            const match = noteName.match(/^[A-G]/i);
+            if (!match) return 60;
+            const baseLetter = match[0].toUpperCase();
+            const accPart = noteName.substring(baseLetter.length);
+            let accOffset = 0;
+            for (const char of accPart) {
+                if (char === '#') accOffset++;
+                else if (char === 'b') accOffset--;
+            }
+            return (oct + 1) * 12 + naturalLetterSemitone[baseLetter] + accOffset;
+        }
+
+        function playSingleNoteWithOctave(noteWithOctave, duration = "8n") {
+            if (!synth || !noteWithOctave) return;
+            try {
+                const midiVal = getNoteWithOctaveMidi(noteWithOctave);
+                const freqNote = Tone.Frequency(midiVal, "midi").toNote();
+                synth.triggerAttackRelease(freqNote, duration);
+            } catch (e) {}
+        }
+
+        function toggleDarkMode() {
+            state.darkMode = !state.darkMode;
+            document.body.classList.toggle('dark-mode', state.darkMode);
+            darkModeButton.textContent = state.darkMode ? '☀️' : '🌙';
+            localStorage.setItem('harmonicBlockProDarkMode', state.darkMode ? '1' : '0');
+            drawMusicalStaff(state.selectedUserNotes);
+        }
+
         // ==========================================
-        // 3. PANTALLA COMPLETA
+        // 3. PANTALLA COMPLETA Y VISTAS MÓVILES
         // ==========================================
         function openFullscreen() {
             try {
                 const elem = document.documentElement;
-                if (elem.requestFullscreen) { elem.requestFullscreen().catch(err => console.warn(err.message)); } 
+                if (elem.requestFullscreen) { elem.requestFullscreen().catch(() => {}); } 
                 else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } 
-                else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
             } catch (err) {}
         }
         function closeFullscreen() {
             try {
                 if (document.exitFullscreen) { document.exitFullscreen().catch(() => {}); } 
                 else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } 
-                else if (document.msExitFullscreen) { document.msExitFullscreen(); }
             } catch (err) {}
         }
         function toggleFullscreen() {
@@ -628,8 +860,120 @@
             fullscreenIconClose.classList.toggle('hidden', !isFs);
         }
 
+        function setupMobileViewTabs() {
+            const tabButtons = document.querySelectorAll('.mobile-tab-btn');
+            const qArea = document.getElementById('questionArea');
+            const sArea = document.getElementById('staffArea');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
+                    btn.classList.add('bg-blue-600', 'text-white');
+                    const view = btn.dataset.view;
+                    if (view === 'both') {
+                        qArea.classList.remove('hidden');
+                        sArea.classList.remove('hidden');
+                    } else if (view === 'grid') {
+                        qArea.classList.remove('hidden');
+                        sArea.classList.add('hidden');
+                    } else if (view === 'staff') {
+                        qArea.classList.add('hidden');
+                        sArea.classList.remove('hidden');
+                        drawMusicalStaff(state.selectedUserNotes);
+                    }
+                });
+            });
+        }
+
         // ==========================================
-        // 4. AUDIO E INTERFAZ (UI)
+        // 4. LOGROS Y GAMIFICACIÓN (BADGES)
+        // ==========================================
+        function unlockBadge(badgeId) {
+            if (!state.stats.unlockedBadges) state.stats.unlockedBadges = [];
+            if (state.stats.unlockedBadges.includes(badgeId)) return;
+
+            state.stats.unlockedBadges.push(badgeId);
+            saveUserData();
+
+            const badge = BADGES_CATALOG.find(b => b.id === badgeId);
+            if (!badge) return;
+
+            const toast = document.getElementById('badgeToast');
+            document.getElementById('badgeToastIcon').textContent = badge.icon;
+            document.getElementById('badgeToastTitle').textContent = badge.title;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3800);
+        }
+
+        function checkAchievements(wasFirstTryCorrect) {
+            if (wasFirstTryCorrect) {
+                unlockBadge('first_chord');
+                if (state.difficulty === 'advanced') unlockBadge('tension_explorer');
+                if (state.isCustomChallenge) unlockBadge('custom_creator');
+            }
+            if (state.stats.totalCorrect >= 10) unlockBadge('triad_master');
+            if (state.stats.currentStreak >= 3) unlockBadge('streak_3');
+        }
+
+        function openBadgesModal() {
+            const unlocked = state.stats.unlockedBadges || [];
+            badgesGridContainer.innerHTML = BADGES_CATALOG.map(b => {
+                const isUnlocked = unlocked.includes(b.id);
+                return `
+                    <div class="p-3 rounded-xl border flex items-center gap-3 transition-all ${isUnlocked ? 'bg-amber-500/10 border-amber-500/40' : 'opacity-40 grayscale border-slate-500/20'}">
+                        <div class="text-3xl">${b.icon}</div>
+                        <div>
+                            <div class="font-bold text-sm flex items-center gap-1.5">
+                                ${b.title}
+                                ${isUnlocked ? '<span class="text-[10px] bg-amber-500 text-white px-1.5 py-0.2 rounded">Obtenido</span>' : ''}
+                            </div>
+                            <div class="text-xs opacity-80">${b.desc}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            badgesModalOverlay.classList.add('visible');
+        }
+
+        // ==========================================
+        // 5. SOPORTE DE AUDIO WEB MIDI
+        // ==========================================
+        function initWebMIDI() {
+            const badge = document.getElementById('midiStatusBadge');
+            const text = document.getElementById('midiStatusText');
+            if (!navigator.requestMIDIAccess) return;
+
+            navigator.requestMIDIAccess().then(midiAccess => {
+                badge.classList.remove('hidden');
+                const updateDevices = () => {
+                    const inputs = Array.from(midiAccess.inputs.values());
+                    if (inputs.length > 0) {
+                        text.textContent = "Conectado";
+                        inputs.forEach(input => {
+                            input.onmidimessage = handleMIDIMessage;
+                        });
+                    } else {
+                        text.textContent = "Listo";
+                    }
+                };
+                updateDevices();
+                midiAccess.onstatechange = updateDevices;
+            }).catch(() => {});
+        }
+
+        function handleMIDIMessage(message) {
+            const [command, midiNote, velocity] = message.data;
+            if (command === 144 && velocity > 0) {
+                const freqNote = Tone.Frequency(midiNote, "midi").toNote();
+                const match = freqNote.match(/^([A-G]#?)(\d+)$/);
+                if (!match) return;
+                const noteWithOctave = `${match[1]}/${match[2]}`;
+                handleDirectNoteInput(noteWithOctave);
+            }
+        }
+
+        // ==========================================
+        // 6. AUDIO E INTERFAZ (UI + VexFlow Colorido)
         // ==========================================
         function showCustomMessage(title, message, type = 'info') {
             const modal = document.createElement('div');
@@ -640,20 +984,7 @@
                     <p>${message}</p>
                 </div>`;
             document.body.appendChild(modal);
-            setTimeout(() => modal.remove(), 2500);
-        }
-
-        function getNoteSemitone(noteName) {
-            const naturalPartMatch = noteName.match(/[A-G]/i);
-            if (!naturalPartMatch) return null;
-            const naturalPart = naturalPartMatch[0].toUpperCase();
-            const accidentalPart = noteName.substring(naturalPart.length);
-            let semitone = naturalLetterSemitone[naturalPart];
-            for (const char of accidentalPart) {
-                if (char === '#') semitone++;
-                else if (char === 'b') semitone--;
-            }
-            return (semitone % 12 + 12) % 12;
+            setTimeout(() => modal.remove(), 2000);
         }
 
         function displayNote(americanNote) {
@@ -689,43 +1020,62 @@
                 const noteDisplay = displayNote(state.givenNote);
                 const rootDisplay = displayNote(state.chordRoot);
                 const chordCifrado = chordStructures[state.chordTypeKey].cifrado;
-                chordQuestionText.innerHTML = `<strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es <strong class="text-xl sm:text-2xl">${state.givenIntervalName} (${state.givenLabel})</strong> del acorde de <strong class="text-xl sm:text-2xl">${rootDisplay}${chordCifrado}</strong>.<br><small class="text-sm text-gray-500">Armoniza en bloque cerrado descendente (${noteDisplay} es la nota mas aguda).</small>`;
+                const voicesCount = state.orderedLabelsForDisplay.length === 3 ? '3 voces' : '4 voces';
+                chordQuestionText.innerHTML = `<strong class="text-xl sm:text-2xl">${noteDisplay}</strong> es <strong class="text-xl sm:text-2xl">${state.givenIntervalName} (${state.givenLabel})</strong> del acorde de <strong class="text-xl sm:text-2xl">${rootDisplay}${chordCifrado}</strong>.<br><small class="text-sm opacity-80">Armoniza en bloque cerrado descendente a <strong>${voicesCount}</strong> (${noteDisplay} es la voz líder).</small>`;
             }
         }
 
         function drawMusicalStaff(notesWithOctave = []) {
             const canvas = musicalStaffCanvas;
-            
             canvas.classList.remove('fade-in');
             void canvas.offsetWidth; 
             canvas.classList.add('fade-in');
 
             const context = canvas.getContext('2d');
-            const fixedWidth = 300, fixedHeight = 150;
+            const fixedWidth = 310, fixedHeight = 155;
             canvas.width = fixedWidth; canvas.height = fixedHeight;
             context.clearRect(0, 0, canvas.width, canvas.height);
 
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
             renderer.resize(canvas.width, canvas.height);
             const ctx = renderer.getContext();
-            const stave = new Stave(10, 0, fixedWidth - 20); 
+
+            const defaultStroke = state.darkMode ? '#e2e8f0' : '#1e293b';
+            ctx.setFillStyle(defaultStroke);
+            ctx.setStrokeStyle(defaultStroke);
+
+            const stave = new Stave(10, 10, fixedWidth - 20); 
             stave.addClef("treble").setContext(ctx).draw();
 
             if (notesWithOctave.length === 0) return;
             const validNotes = notesWithOctave.filter(note => note && note.includes('/'));
             if (validNotes.length === 0) return;
 
-            const sortedNotes = [...validNotes].sort((a, b) => Tone.Midi(a.replace('/', '')).toMidi() - Tone.Midi(b.replace('/', '')).toMidi());
-            const staveNotes = sortedNotes.map(note => note.split('/')[0].replace('bb', 'bb').replace('##', '##') + "/" + note.split('/')[1]);
+            const sortedNotes = [...validNotes].sort((a, b) => getNoteWithOctaveMidi(a) - getNoteWithOctaveMidi(b));
+            const staveNotes = sortedNotes.map(note => note.split('/')[0] + "/" + note.split('/')[1]);
             const chordStaveNote = new StaveNote({ keys: staveNotes, duration: "w" });
-            
+            chordStaveNote.setStyle({ fillStyle: defaultStroke, strokeStyle: defaultStroke });
+
+            const correctPitchClasses = state.correctNotesWithOctave.map(n => getNoteSemitone(n.split('/')[0]));
+
             sortedNotes.forEach((note, index) => {
                 const accidentalPart = note.split('/')[0].match(/[#b]+/);
                 if (accidentalPart) chordStaveNote.addAccidental(index, new Accidental(accidentalPart[0]));
+
+                if (note === state.givenNoteWithOctave) {
+                    chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" });
+                } else if (state.staffValidationMode) {
+                    const pc = getNoteSemitone(note.split('/')[0]);
+                    const isNoteCorrect = correctPitchClasses.includes(pc);
+                    const color = isNoteCorrect ? "#16a34a" : "#dc2626";
+                    chordStaveNote.setKeyStyle(index, { fillStyle: color, strokeStyle: color });
+                }
             });
 
+            staffFeedbackLegend.classList.toggle('hidden', !state.staffValidationMode);
+
             const voice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([chordStaveNote]);
-            new Formatter().joinVoices([voice]).format([voice], canvas.width - 40);
+            new Formatter().joinVoices([voice]).format([voice], canvas.width - 45);
             voice.draw(ctx, stave);
         }
 
@@ -734,27 +1084,33 @@
                 const label = document.querySelector(`label[for="${radio.id}"]`);
                 if (label) {
                     if (radio.checked) {
-                        label.classList.add('bg-green-500', 'text-white', 'shadow-md');
-                        label.classList.remove('bg-gray-300', 'text-gray-900');
+                        label.classList.add('bg-green-600', 'text-white', 'shadow-md');
+                        label.classList.remove('bg-slate-300', 'text-slate-900');
                     } else {
-                        label.classList.add('bg-gray-300', 'text-gray-900');
-                        label.classList.remove('bg-green-500', 'text-white', 'shadow-md');
+                        label.classList.add('bg-slate-300', 'text-slate-900');
+                        label.classList.remove('bg-green-600', 'text-white', 'shadow-md');
                     }
                 }
             });
         }
 
         function updateButtonStates() {
-            confirmAnswerButton.disabled = state.selectedUserNotes.length !== (state.difficulty === 'basic' ? 3 : 4);
+            const expectedCount = state.orderedLabelsForDisplay.length || (state.difficulty === 'basic' ? 3 : 4);
+            confirmAnswerButton.disabled = state.selectedUserNotes.length !== expectedCount;
+            undoLastNoteButton.disabled = state.selectedUserNotes.length <= 1;
             clearAllSelectionButton.disabled = state.selectedUserNotes.length <= 1;
             document.querySelectorAll('.note-button.active').forEach(b => b.classList.remove('active'));
             
             const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
             if (state.selectedUserNotes.length > 1 && lastNote) {
-                const match = lastNote.split('/')[0].match(/[A-G]/i);
+                const notePart = lastNote.split('/')[0];
+                const match = notePart.match(/^[A-G]/i);
                 if (match) {
-                    const nat = document.querySelector(`.note-button[data-note="${match[0].toUpperCase()}"]`);
-                    const acc = document.querySelector(`.note-button[data-accidental="${lastNote.split('/')[0].substring(match[0].length)}"]`);
+                    const baseLetter = match[0].toUpperCase();
+                    const currentAcc = notePart.substring(baseLetter.length);
+                    const nat = document.querySelector(`.note-button[data-note="${baseLetter}"]`);
+                    const targetAccSelector = currentAcc === '' ? '♮' : currentAcc;
+                    const acc = document.querySelector(`.note-button[data-accidental="${targetAccSelector}"]`);
                     if (nat) nat.classList.add('active');
                     if (acc) acc.classList.add('active');
                 }
@@ -763,7 +1119,7 @@
         
         function updatePianoHighlight() {
             document.querySelectorAll('.piano-key').forEach(k => k.classList.remove('selected', 'given-note-highlight'));
-            const findKey = (n) => document.querySelector(`.piano-key[data-midi="${Tone.Midi(n.replace('/', '')).toMidi()}"]`);
+            const findKey = (n) => document.querySelector(`.piano-key[data-midi="${getNoteWithOctaveMidi(n)}"]`);
             if (state.givenNoteWithOctave) { const k = findKey(state.givenNoteWithOctave); if (k) k.classList.add('given-note-highlight'); }
             state.selectedUserNotes.forEach(n => { if (n && n !== state.givenNoteWithOctave) { const k = findKey(n); if (k) k.classList.add('selected'); } });
         }
@@ -771,10 +1127,18 @@
         function updateDisplay() {
             updateQuestionText();
             gridCells.forEach((cell, i) => {
+                cell.classList.remove('cell-correct', 'cell-error');
                 if (state.orderedLabelsForDisplay[i]) {
                     cell.classList.remove('hidden');
                     cell.querySelector('.interval-label').textContent = state.orderedLabelsForDisplay[i];
-                    cell.querySelector('.note-display').textContent = i === 0 ? displayNote(state.givenNote) : (state.selectedUserNotes[i] ? displayNote(state.selectedUserNotes[i].split('/')[0]) : "?");
+                    const userNote = state.selectedUserNotes[i];
+                    cell.querySelector('.note-display').textContent = i === 0 ? displayNote(state.givenNote) : (userNote ? displayNote(userNote.split('/')[0]) : "?");
+                    
+                    if (i > 0 && userNote && state.staffValidationMode) {
+                        const pc = getNoteSemitone(userNote.split('/')[0]);
+                        const expectedPc = getNoteSemitone(state.correctNotes[i]);
+                        cell.classList.add(pc === expectedPc ? 'cell-correct' : 'cell-error');
+                    }
                 } else { cell.classList.add('hidden'); }
             });
             drawMusicalStaff(state.selectedUserNotes);
@@ -783,33 +1147,66 @@
         }
 
         function updateStatsDisplay() {
-            streakCounter.textContent = state.stats.currentStreak;
-            document.getElementById('valCorrect').textContent = state.stats.totalCorrect;
-            document.getElementById('valIncorrect').textContent = state.stats.totalIncorrect;
+            streakCounter.textContent = state.stats.currentStreak || 0;
+            document.getElementById('valCorrect').textContent = state.stats.totalCorrect || 0;
+            document.getElementById('valIncorrect').textContent = state.stats.totalIncorrect || 0;
+        }
+
+        async function playNotesList(notesWithOctaveList) {
+            if (!synth || !notesWithOctaveList || notesWithOctaveList.length === 0) return;
+            const validList = notesWithOctaveList.filter(Boolean);
+            if (validList.length === 0) return;
+
+            const direction = arpeggioDirectionSelect.value;
+            let time = Tone.now();
+
+            const toFreq = (n) => Tone.Frequency(getNoteWithOctaveMidi(n), "midi").toNote();
+            const allFreqs = validList.map(toFreq);
+
+            if (direction === 'block') {
+                synth.triggerAttackRelease(allFreqs, "2n", time);
+                return;
+            }
+
+            const sortedNotes = [...validList].sort((a, b) => {
+                const diff = getNoteWithOctaveMidi(b) - getNoteWithOctaveMidi(a);
+                return direction === 'descending' ? diff : -diff;
+            });
+
+            sortedNotes.forEach(note => {
+                synth.triggerAttackRelease(toFreq(note), "8n", time);
+                time += 0.16;
+            });
+            synth.triggerAttackRelease(allFreqs, "2n", time + 0.18);
         }
 
         async function playCorrectChord() {
+            await playNotesList(state.correctNotesWithOctave);
+        }
+
+        function playPreviewAudio() {
             if (!synth) return;
-            const notes = state.correctNotesWithOctave.map(n => n.replace('/', '')).filter(Boolean);
-            if (notes.length === 0) return;
-            const arpeggioNotes = [...notes].sort((a,b) => Tone.Midi(b).toMidi() - Tone.Midi(a).toMidi());
-            let time = Tone.now();
-            arpeggioNotes.forEach(note => { synth.triggerAttackRelease(note, "8n", time); time += 0.15; });
-            synth.triggerAttackRelease(notes, "2n", time + 0.2);
+            if (state.selectedUserNotes.length > 1) {
+                playNotesList(state.selectedUserNotes);
+            } else if (state.givenNoteWithOctave) {
+                playSingleNoteWithOctave(state.givenNoteWithOctave, "4n");
+            }
         }
 
         function playSuccessSound() { if(feedbackSynth) feedbackSynth.triggerAttackRelease(["C5", "E5"], "16n"); }
         function playErrorSound() { if(feedbackSynth) feedbackSynth.triggerAttackRelease(["C3", "Db3"], "8n"); }
 
-
         // ==========================================
-        // 5. GENERADORES (Botones, Piano, Ejercicio)
+        // 7. GENERADORES (Botones, Piano, Ejercicio, Reto a Medida)
         // ==========================================
         function generateNoteButtons() {
-            naturalNoteButtonsContainer.innerHTML = naturalNotes.map(n => `<button class="note-button" data-note="${n}">${displayNote(n)}</button>`).join('');
-            accidentalButtonsContainer.innerHTML = accidentals.map(a => `<button class="note-button px-4" data-accidental="${a}">${a}</button>`).join('');
-            naturalNoteButtonsContainer.querySelectorAll('button').forEach(b => b.addEventListener('click', e => addNaturalNote(e.target.dataset.note)));
-            accidentalButtonsContainer.querySelectorAll('button').forEach(b => b.addEventListener('click', e => addAccidental(e.target.dataset.accidental)));
+            naturalNoteButtonsContainer.innerHTML = naturalNotes.map(n => `<button class="note-button" data-note="${n}" title="Nota ${displayNote(n)} (Tecla ${n})">${displayNote(n)}</button>`).join('');
+            accidentalButtonsContainer.innerHTML = accidentals.map(a => {
+                const titleText = a === '♮' ? 'Becuadro: Quitar alteración (Tecla 0 o =)' : `Alteración ${a} (Presiona de nuevo o usa ♮ para quitar)`;
+                return `<button class="note-button" data-accidental="${a}" title="${titleText}">${a}</button>`;
+            }).join('');
+            naturalNoteButtonsContainer.querySelectorAll('button').forEach(b => b.addEventListener('click', e => addNaturalNote(e.currentTarget.dataset.note)));
+            accidentalButtonsContainer.querySelectorAll('button').forEach(b => b.addEventListener('click', e => addAccidental(e.currentTarget.dataset.accidental)));
         }
 
         function generatePiano() {
@@ -830,43 +1227,28 @@
             }
         }
 
-        function generateExercise() {
+        function triggerTransitionAnimation() {
+            const disp = document.getElementById('displaySection');
+            const qWrap = document.getElementById('chordQuestionWrapper');
+            [disp, qWrap].forEach(el => {
+                el.classList.remove('exercise-transition');
+                void el.offsetWidth;
+                el.classList.add('exercise-transition');
+            });
+        }
+
+        function buildExerciseFromParams(rootNote, chordTypeKey, leadLabel, isCustom = false) {
             state.failedCurrentExercise = false;
             state.answerWasShown = false;
-            
-            const currentPracticeSettings = state.customPractice[state.difficulty];
-            const chords = Object.keys(chordStructures).filter(key => {
-                const chord = chordStructures[key];
-                const matchesDifficulty = (state.difficulty === 'advanced' && chord.difficulty === 'intermediate') || chord.difficulty === state.difficulty;
-                return matchesDifficulty && (!currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key));
-            });
+            state.staffValidationMode = null;
+            state.isCustomChallenge = isCustom;
+            document.getElementById('customModeBadge').classList.toggle('hidden', !isCustom);
 
-            if (chords.length === 0) {
-                showCustomMessage("Sin Acordes", "No hay acordes disponibles. Revisa tus ajustes (S).", "warning");
-                return;
-            }
-
-            const chordTypeKey = chords[Math.floor(Math.random() * chords.length)];
             const chordData = chordStructures[chordTypeKey];
-            
-            const leads = Object.keys(chordData.voicing_rules).filter(label => {
-                const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
-                const isTension = allTensions.includes(label);
-                if (state.difficulty === 'advanced' ? !isTension : isTension) return false;
-                if (state.difficulty === 'advanced' && currentPracticeSettings.isActive && currentPracticeSettings.allowedLeads.length > 0) {
-                    return currentPracticeSettings.allowedLeads.includes(label);
-                }
-                return true;
-            });
-
-            if (leads.length === 0) return generateExercise();
-            
+            state.chordRoot = rootNote;
             state.chordTypeKey = chordTypeKey;
-            state.givenLabel = leads[Math.floor(Math.random() * leads.length)];
-            
-            const possibleRoots = ["C", "F", "G", "Bb", "Eb", "Ab", "Db", "Gb", "D", "A", "E", "B"];
-            state.chordRoot = possibleRoots[Math.floor(Math.random() * possibleRoots.length)];
-            
+            state.givenLabel = leadLabel;
+
             const givenInterval = chordData.intervals.find(int => int.label === state.givenLabel);
             state.givenNote = calculateNoteName(state.chordRoot, givenInterval);
             state.givenIntervalName = givenInterval.name;
@@ -879,7 +1261,8 @@
             while (currentMidi > 84) { givenOctave--; currentMidi -= 12; }
             
             state.givenNoteWithOctave = `${state.givenNote}/${givenOctave}`;
-            state.orderedLabelsForDisplay = chordData.voicing_rules[state.givenLabel].slice(0, state.difficulty === 'basic' ? 3 : 4);
+            const numVoices = (chordData.difficulty === 'basic' && !isCustom) || (isCustom && chordData.difficulty === 'basic') ? 3 : 4;
+            state.orderedLabelsForDisplay = chordData.voicing_rules[state.givenLabel].slice(0, numVoices);
             state.correctNotesWithOctave = [];
 
             let lastMidi = currentMidi;
@@ -888,11 +1271,11 @@
                 if (!interval) continue;
 
                 const noteName = calculateNoteName(state.chordRoot, interval);
-                let currentNoteOctave = Math.floor(lastMidi / 12);
-                let candidateMidi = currentNoteOctave * 12 + getNoteSemitone(noteName);
-                
-                if (i > 0 && candidateMidi >= lastMidi) { candidateMidi -= 12; currentNoteOctave--; } 
-                else if (i === 0) { candidateMidi = lastMidi; currentNoteOctave = givenOctave; }
+                let currentNoteOctave = Math.floor(lastMidi / 12) - 1;
+                let candidateMidi = getNoteWithOctaveMidi(`${noteName}/${currentNoteOctave}`);
+                while (candidateMidi < lastMidi - 12) { currentNoteOctave++; candidateMidi = getNoteWithOctaveMidi(`${noteName}/${currentNoteOctave}`); }
+                while (i > 0 && candidateMidi >= lastMidi) { currentNoteOctave--; candidateMidi = getNoteWithOctaveMidi(`${noteName}/${currentNoteOctave}`); }
+                if (i === 0) { candidateMidi = lastMidi; currentNoteOctave = givenOctave; }
 
                 state.correctNotesWithOctave.push(`${noteName}/${currentNoteOctave}`);
                 lastMidi = candidateMidi;
@@ -902,52 +1285,152 @@
             state.selectedUserNotes = [state.givenNoteWithOctave];
             state.currentExerciseId = `${state.chordRoot}|${chordTypeKey}|${state.givenLabel}`;
             
+            triggerTransitionAnimation();
             updateDisplay();
-            [confirmAnswerButton, clearAllSelectionButton, changeQuestionButton, hintButton, showAnswerButton].forEach(btn => btn.disabled = false);
+            [confirmAnswerButton, undoLastNoteButton, clearAllSelectionButton, changeQuestionButton, hintButton, showAnswerButton].forEach(btn => btn.disabled = false);
+            updateButtonStates();
         }
 
+        function generateExercise() {
+            const currentPracticeSettings = state.customPractice[state.difficulty];
+            const chords = Object.keys(chordStructures).filter(key => {
+                const chord = chordStructures[key];
+                const matchesDifficulty = (state.difficulty === 'advanced' && chord.difficulty === 'intermediate') || chord.difficulty === state.difficulty;
+                return matchesDifficulty && (!currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key));
+            });
+
+            if (chords.length === 0) {
+                showCustomMessage("Sin Acordes", "No hay acordes seleccionados en Ajustes (S).", "warning");
+                return;
+            }
+
+            const chordTypeKey = chords[Math.floor(Math.random() * chords.length)];
+            const chordData = chordStructures[chordTypeKey];
+            
+            const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+            const leads = Object.keys(chordData.voicing_rules).filter(label => {
+                const isTension = allTensions.includes(label);
+                if (state.difficulty === 'advanced' ? !isTension : isTension) return false;
+                if (currentPracticeSettings.isActive && currentPracticeSettings.allowedLeads && currentPracticeSettings.allowedLeads.length > 0) {
+                    return currentPracticeSettings.allowedLeads.includes(label);
+                }
+                return true;
+            });
+
+            if (leads.length === 0) {
+                showCustomMessage("Filtro de Voces", "Las voces seleccionadas no aplican a estos acordes. Revisa Ajustes (S).", "warning");
+                return;
+            }
+            
+            const givenLabel = leads[Math.floor(Math.random() * leads.length)];
+            const possibleRoots = ["C", "F", "G", "Bb", "Eb", "Ab", "Db", "Gb", "D", "A", "E", "B"];
+            const chordRoot = possibleRoots[Math.floor(Math.random() * possibleRoots.length)];
+
+            buildExerciseFromParams(chordRoot, chordTypeKey, givenLabel, false);
+        }
+
+        // Creador de Retos a Medida
+        function openCustomChallengeModal() {
+            customRootSelect.innerHTML = allRoots.map(r => `<option value="${r}">${displayNote(r)}</option>`).join('');
+            customChordTypeSelect.innerHTML = Object.keys(chordStructures).map(k => `<option value="${k}">${chordStructures[k].name} (${chordStructures[k].cifrado || 'Tríada'})</option>`).join('');
+            
+            const updateLeadsDropdown = () => {
+                const cKey = customChordTypeSelect.value;
+                const rules = chordStructures[cKey].voicing_rules;
+                customLeadSelect.innerHTML = Object.keys(rules).map(l => {
+                    const intObj = chordStructures[cKey].intervals.find(i => i.label === l);
+                    return `<option value="${l}">${l} (${intObj ? intObj.name : ''})</option>`;
+                }).join('');
+            };
+            customChordTypeSelect.onchange = updateLeadsDropdown;
+            updateLeadsDropdown();
+            customChallengeModalOverlay.classList.add('visible');
+        }
+
+        function applyCustomChallenge() {
+            const root = customRootSelect.value;
+            const cKey = customChordTypeSelect.value;
+            const lead = customLeadSelect.value;
+            const cDiff = chordStructures[cKey].difficulty;
+            const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+            state.difficulty = allTensions.includes(lead) ? 'advanced' : cDiff;
+            document.querySelector(`input[name="difficulty"][value="${state.difficulty}"]`).checked = true;
+            updateDifficultySelectionUI();
+
+            customChallengeModalOverlay.classList.remove('visible');
+            buildExerciseFromParams(root, cKey, lead, true);
+        }
 
         // ==========================================
-        // 6. ACCIONES DEL USUARIO (Botones, Clicks, Teclado)
+        // 8. ACCIONES DEL USUARIO (Notas, Becuadro, Borrar Última, Borrar Todo)
         // ==========================================
         function addNaturalNote(note) {
-            if (state.selectedUserNotes.length >= (state.difficulty === 'basic' ? 3 : 4)) return showCustomMessage("Límite", "Ya seleccionaste todas las notas.", "warning");
+            state.staffValidationMode = null;
+            const maxVoices = state.orderedLabelsForDisplay.length;
+            if (state.selectedUserNotes.length >= maxVoices) return showCustomMessage("Límite", "Ya seleccionaste todas las voces. Puedes borrar la última con ⬅️ Borrar Última.", "warning");
             
             const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
-            let oct = parseInt(lastNote.split('/')[1]);
-            let candMidi = Tone.Midi(`${note}${oct}`).toMidi();
-            const lastMidi = Tone.Midi(lastNote.replace('/', '')).toMidi();
+            let oct = parseInt(lastNote.split('/')[1], 10);
+            let candMidi = getNoteWithOctaveMidi(`${note}/${oct}`);
+            const lastMidi = getNoteWithOctaveMidi(lastNote);
             while (candMidi >= lastMidi) { oct--; candMidi -= 12; }
-            state.selectedUserNotes.push(`${note}/${oct}`);
+            const newNoteWithOctave = `${note}/${oct}`;
+            state.selectedUserNotes.push(newNoteWithOctave);
             
-            if (synth) synth.triggerAttackRelease(`${note}${oct}`, "8n");
+            playSingleNoteWithOctave(newNoteWithOctave, "8n");
             updateDisplay();
         }
 
         function addAccidental(acc) {
+            state.staffValidationMode = null;
             const idx = state.selectedUserNotes.length - 1;
             if (idx < 1) return;
-            const match = state.selectedUserNotes[idx].match(/[A-G]/i);
-            if (match) {
-                state.selectedUserNotes[idx] = `${match[0]}${acc}/${state.selectedUserNotes[idx].split('/')[1]}`;
+            const [notePart, octPart] = state.selectedUserNotes[idx].split('/');
+            const match = notePart.match(/^[A-G]/i);
+            if (!match) return;
+
+            const baseLetter = match[0].toUpperCase();
+            const currentAcc = notePart.substring(baseLetter.length);
+
+            // Si se presiona Becuadro (♮) o se vuelve a presionar la misma alteración activa, vuelve a nota natural
+            let newAcc = '';
+            if (acc === '♮' || acc === '' || currentAcc === acc) {
+                newAcc = '';
+            } else {
+                newAcc = acc;
+            }
+
+            const updatedNoteWithOctave = `${baseLetter}${newAcc}/${octPart}`;
+            state.selectedUserNotes[idx] = updatedNoteWithOctave;
+            playSingleNoteWithOctave(updatedNoteWithOctave, "8n");
+            updateDisplay();
+        }
+
+        function deleteLastNote() {
+            if (state.selectedUserNotes.length > 1) {
+                state.staffValidationMode = null;
+                state.selectedUserNotes.pop();
                 updateDisplay();
             }
         }
 
-        function handlePianoKeyClick(e) {
-            const k = e.target.closest('.piano-key');
-            if (!k || !k.dataset.note) return;
-            const noteWithOctave = k.dataset.note;
-            
-            if (synth) synth.triggerAttackRelease(noteWithOctave.replace('/', ''), "8n");
+        function clearSelection() { 
+            state.staffValidationMode = null;
+            state.selectedUserNotes = [state.givenNoteWithOctave]; 
+            updateDisplay(); 
+        }
+
+        function handleDirectNoteInput(noteWithOctave) {
+            state.staffValidationMode = null;
+            playSingleNoteWithOctave(noteWithOctave, "8n");
             
             if (noteWithOctave === state.givenNoteWithOctave) {
-                showCustomMessage("Nota fija", "No puedes quitar la nota dada.", "info");
+                showCustomMessage("Nota fija", "No puedes quitar la nota guía.", "info");
                 return;
             }
 
-            const clickedMidi = Tone.Midi(noteWithOctave.replace('/', '')).toMidi();
-            const existingIndex = state.selectedUserNotes.findIndex(n => n && Tone.Midi(n.replace('/', '')).toMidi() === clickedMidi);
+            const clickedMidi = getNoteWithOctaveMidi(noteWithOctave);
+            const existingIndex = state.selectedUserNotes.findIndex(n => n && getNoteWithOctaveMidi(n) === clickedMidi);
 
             if (existingIndex !== -1) {
                 state.selectedUserNotes.splice(existingIndex, 1);
@@ -955,7 +1438,7 @@
                 return;
             }
 
-            const expectedCount = state.difficulty === 'basic' ? 3 : 4;
+            const expectedCount = state.orderedLabelsForDisplay.length;
             if (state.selectedUserNotes.length < expectedCount) {
                 const note = noteWithOctave.split('/')[0];
                 const enharmonic = enharmonicEquivalents[note];
@@ -967,13 +1450,19 @@
             }
         }
 
+        function handlePianoKeyClick(e) {
+            const k = e.target.closest('.piano-key');
+            if (!k || !k.dataset.note) return;
+            handleDirectNoteInput(k.dataset.note);
+        }
+
         function showEnharmonicModal(noteWithOctave) {
             const [note, octave] = noteWithOctave.split('/');
             const enharmonic = enharmonicEquivalents[note];
             
             enharmonicChoicesContainer.innerHTML = `
-                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" data-note="${note}/${octave}">${displayNote(note)}</button>
-                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" data-note="${enharmonic}/${octave}">${displayNote(enharmonic)}</button>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg" data-note="${note}/${octave}">${displayNote(note)}</button>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg" data-note="${enharmonic}/${octave}">${displayNote(enharmonic)}</button>
             `;
             enharmonicModalOverlay.classList.add('visible');
 
@@ -990,44 +1479,67 @@
             });
         }
 
-        function clearSelection() { 
-            state.selectedUserNotes = [state.givenNoteWithOctave]; 
-            updateDisplay(); 
-        }
-
         function giveHint() {
-            state.stats.hintsUsed++; updateStatsDisplay();
-            const missingNote = state.correctNotes.sort().find(note => !state.selectedUserNotes.map(n => n.split('/')[0]).includes(note));
-            hintModalBody.innerHTML = `<p>${missingNote ? `La nota <strong>${displayNote(missingNote)}</strong> es parte del acorde.` : "¡Verifica las alteraciones y las octavas!"}</p>`;
+            state.stats.hintsUsed++;
+            state.evaluation.batchHintsUsed++;
+            updateStatsDisplay();
+            const missingNote = state.correctNotes.find(note => !state.selectedUserNotes.map(n => n.split('/')[0]).includes(note));
+            hintModalBody.innerHTML = `<p>${missingNote ? `La nota <strong>${displayNote(missingNote)}</strong> forma parte del bloque armónico.` : "¡Tus notas pertenecen al acorde, verifica el orden de las voces o las enarmonías!"}</p>`;
             hintModalOverlay.classList.add('visible');
         }
 
         function showAnswer() {
             state.stats.answersUsed++;
-            if (!state.failedCurrentExercise) { state.stats.totalIncorrect++; state.failedCurrentExercise = true; }
-            updateStatsDisplay(); playCorrectChord(); state.answerWasShown = true;
+            if (!state.failedCurrentExercise) {
+                state.stats.totalIncorrect++;
+                state.failedCurrentExercise = true;
+                recordChordStat(false);
+            }
+            updateStatsDisplay();
+            playCorrectChord();
+            state.answerWasShown = true;
+            state.selectedUserNotes = [...state.correctNotesWithOctave];
+            state.staffValidationMode = 'solution';
+            updateDisplay();
             
-            infoModalTitle.textContent = 'Respuesta Correcta';
-            const formula = chordStructures[state.chordTypeKey].voicing_rules[state.givenLabel].slice(0, state.difficulty === 'basic' ? 3 : 4).join(' - ');
-            const notesList = state.correctNotes.map(n => `<li>${displayNote(n)}</li>`).join('');
-            infoModalBody.innerHTML = `<p class="font-semibold">Fórmula:</p><p>${formula}</p><p class="font-semibold">Notas:</p><ul>${notesList}</ul>`;
+            infoModalTitle.textContent = 'Solución del Acorde';
+            const formula = state.orderedLabelsForDisplay.join(' - ');
+            const notesList = state.correctNotes.map((n, i) => `<li><strong>${state.orderedLabelsForDisplay[i]}:</strong> ${displayNote(n)}</li>`).join('');
+            infoModalBody.innerHTML = `
+                <p class="font-semibold">Disposición de voces (descendente):</p>
+                <p class="p-2 bg-blue-500/10 rounded font-mono font-bold text-center">${formula}</p>
+                <p class="font-semibold mt-2">Notas exactas (mostradas en verde en el pentagrama):</p>
+                <ul class="list-disc list-inside space-y-1">${notesList}</ul>`;
             infoModalOverlay.classList.add('visible');
         }
 
+        function recordChordStat(isCorrect) {
+            if (!state.stats.chordBreakdown) state.stats.chordBreakdown = {};
+            const key = chordStructures[state.chordTypeKey].name;
+            if (!state.stats.chordBreakdown[key]) state.stats.chordBreakdown[key] = { correct: 0, incorrect: 0 };
+            if (isCorrect) state.stats.chordBreakdown[key].correct++;
+            else state.stats.chordBreakdown[key].incorrect++;
+        }
+
         function checkAnswer() {
-            const userPc = state.selectedUserNotes.map(n => getNoteSemitone(n.split('/')[0])).filter(n => n !== null).sort((a,b) => a-b);
-            const correctPc = state.correctNotesWithOctave.map(n => getNoteSemitone(n.split('/')[0])).filter(n => n !== null).sort((a,b) => a-b);
-            const isCorrect = JSON.stringify(userPc) === JSON.stringify(correctPc);
+            const userPc = state.selectedUserNotes.map(n => getNoteSemitone(n.split('/')[0]));
+            const correctPc = state.correctNotesWithOctave.map(n => getNoteSemitone(n.split('/')[0]));
+            const isCorrect = JSON.stringify([...userPc].sort((a,b)=>a-b)) === JSON.stringify([...correctPc].sort((a,b)=>a-b));
             
             if (isCorrect) {
+                state.staffValidationMode = 'correct';
+                updateDisplay();
+
                 if (state.answerWasShown) {
                     completeExercise('solution');
-                    showCustomMessage("Correcto", "Pasando al siguiente ejercicio.", "success");
+                    showCustomMessage("Correcto", "Pasando al siguiente ejercicio...", "success");
                 } else if (state.failedCurrentExercise) {
                     completeExercise('corrected');
-                    showCustomMessage("¡Corregido!", "Ahora sí. Pasando al siguiente.", "success");
+                    showCustomMessage("¡Corregido!", "Excelente corrección. Avanzando...", "success");
                 } else {
                     state.stats.totalCorrect++;
+                    state.evaluation.batchCorrectFirstTry++;
+                    recordChordStat(true);
                     completeExercise('correct');
                     playSuccessSound();
                     
@@ -1046,16 +1558,24 @@
                             state.stats.currentStreak = 1;
                         }
                         state.stats.lastPracticeDate = todayStr;
-                        saveUserData(); 
                     }
-                    showCustomMessage("Correcto", "¡Felicidades, tu respuesta es correcta!", "success");
+                    checkAchievements(true);
+                    saveUserData();
+                    showCustomMessage("¡Correcto!", "¡Excelente construcción armónica!", "success");
                 }
                 playCorrectChord();
-                setTimeout(generateExercise, 2000);
+                setTimeout(generateExercise, 1900);
             } else {
                 playErrorSound();
-                if (!state.failedCurrentExercise) { state.stats.totalIncorrect++; state.failedCurrentExercise = true; }
-                showCustomMessage("Incorrecto", "Tus notas no coinciden.", "error");
+                state.staffValidationMode = 'error';
+                updateDisplay();
+                if (!state.failedCurrentExercise) {
+                    state.stats.totalIncorrect++;
+                    state.failedCurrentExercise = true;
+                    recordChordStat(false);
+                    saveUserData();
+                }
+                showCustomMessage("Revisa el Pentagrama", "Las notas marcadas en rojo no corresponden al bloque armónico.", "error");
                 updateStatsDisplay();
             }
         }
@@ -1066,33 +1586,71 @@
 
             const statusMap = { 'correct': '✅ Correcto', 'corrected': '⚠️ Corregido', 'solution': '🆘 Solución', 'skipped': '⏭️ Omitido' };
             state.stats.sessionHistory.push({
-                id: state.currentExerciseId, chordRoot: state.chordRoot, chordCifrado: chordStructures[state.chordTypeKey].cifrado,
-                lead: state.givenLabel, status: statusMap[status]
+                id: state.currentExerciseId,
+                chordRoot: state.chordRoot,
+                chordName: chordStructures[state.chordTypeKey].name,
+                chordCifrado: chordStructures[state.chordTypeKey].cifrado,
+                lead: state.givenLabel,
+                difficulty: state.difficulty,
+                status: statusMap[status],
+                timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
             });
             updateStatsDisplay();
-            if (status !== 'skipped' && state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval) showEvaluationModal();
+            if (status !== 'skipped' && state.evaluation.questionsAttemptedInBatch >= state.evaluation.exercisesPerEval) {
+                showEvaluationModal();
+            }
+        }
+
+        function toggleInputMethod() {
+            const isPianoHidden = pianoContainer.classList.contains('hidden');
+            if (isPianoHidden) {
+                pianoToggle.click();
+            } else {
+                cifradoToggle.click();
+            }
         }
 
         function handleKeyPress(e) {
-            if (e.target.tagName === 'INPUT' || document.querySelector('.modal-overlay.visible:not(#tutorialOverlay)')) return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            const anyModalOpen = document.querySelector('.modal-overlay.visible:not(#tutorialOverlay)');
+            if (anyModalOpen) return;
+
             const key = e.key.toLowerCase();
-            if (['a','b','c','d','e','f','g'].includes(key)) { e.preventDefault(); addNaturalNote(key.toUpperCase()); }
+            if (['a','b','c','d','e','f','g'].includes(key)) { e.preventDefault(); addNaturalNote(key.toUpperCase()); return; }
             if (key === '+' || key === '-') {
                 e.preventDefault();
                 const now = Date.now();
                 if (key === state.keyboard.lastAccidentalKey && (now - state.keyboard.lastAccidentalTimestamp < 400)) {
-                    addAccidental(key === '+' ? '##' : 'bb'); state.keyboard.lastAccidentalKey = null;
+                    addAccidental(key === '+' ? '##' : 'bb');
+                    state.keyboard.lastAccidentalKey = null;
                 } else {
-                    addAccidental(key === '+' ? '#' : 'b'); state.keyboard.lastAccidentalKey = key; state.keyboard.lastAccidentalTimestamp = now;
+                    addAccidental(key === '+' ? '#' : 'b');
+                    state.keyboard.lastAccidentalKey = key;
+                    state.keyboard.lastAccidentalTimestamp = now;
                 }
+                return;
             }
-            if (['1','2','3'].includes(key)) { e.preventDefault(); document.getElementById(`difficulty${key==='1'?'Basic':key==='2'?'Intermediate':'Advanced'}`).click(); }
-            if (key === 'enter' && !confirmAnswerButton.disabled) { e.preventDefault(); confirmAnswerButton.click(); }
-            if (key === ' ') { e.preventDefault(); changeQuestionButton.click(); }
+            if (key === '0' || key === '=') { e.preventDefault(); addAccidental('♮'); return; }
+            if (key === 'backspace' || key === 'z') { e.preventDefault(); if (!undoLastNoteButton.disabled) deleteLastNote(); return; }
+            if (key === 'n' || key === 'delete') { e.preventDefault(); if (!clearAllSelectionButton.disabled) clearSelection(); return; }
+            if (['1','2','3'].includes(key)) { e.preventDefault(); document.getElementById(`difficulty${key==='1'?'Basic':key==='2'?'Intermediate':'Advanced'}`).click(); return; }
+            if (key === 'enter' && !confirmAnswerButton.disabled) { e.preventDefault(); confirmAnswerButton.click(); return; }
+            if (key === ' ') { e.preventDefault(); changeQuestionButton.click(); return; }
+            if (key === 'o') { e.preventDefault(); playPreviewAudio(); return; }
+            if (key === 'p') { e.preventDefault(); if (!hintButton.disabled) giveHint(); return; }
+            if (key === 'r') { e.preventDefault(); if (!showAnswerButton.disabled) showAnswer(); return; }
+            if (key === 'i') { e.preventDefault(); toggleInputMethod(); return; }
+            if (key === 'k') { e.preventDefault(); shortcutsModalOverlay.classList.add('visible'); return; }
+            if (key === 'l') { e.preventDefault(); openBadgesModal(); return; }
+            if (key === 'v') { e.preventDefault(); showHistoryModal(); return; }
+            if (key === 's') { e.preventDefault(); openSettingsModal(); return; }
+            if (key === 'h') { e.preventDefault(); startTutorial(); return; }
+            if (key === 'q') { e.preventDefault(); toggleFullscreen(); return; }
+            if (key === 'u') { e.preventDefault(); handleSwitchUser(); return; }
         }
 
         // ==========================================
-        // 7. MODALES, ESTADÍSTICAS Y GUARDADO
+        // 9. MODALES, AJUSTES POR INTERVALO Y ESTADÍSTICAS CON CHART.JS
         // ==========================================
         function openSettingsModal() { 
             populateSettingsModal();
@@ -1103,8 +1661,11 @@
             chordTypesCheckboxesContainer.innerHTML = '';
             const allChordTypes = Object.keys(chordStructures);
             let relevantChords = [];
+            const levelNames = { basic: 'Básico', intermediate: 'Intermedio', advanced: 'Avanzado' };
+            document.getElementById('settingsLevelLabel').textContent = levelNames[state.difficulty];
+
             if (state.difficulty === 'basic') relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'basic');
-            else if (state.difficulty === 'intermediate' || state.difficulty === 'advanced') relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'intermediate');
+            else relevantChords = allChordTypes.filter(key => chordStructures[key].difficulty === 'intermediate');
             
             const currentPracticeSettings = state.customPractice[state.difficulty];
 
@@ -1113,29 +1674,31 @@
                 const isChecked = !currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key);
                 chordTypesCheckboxesContainer.innerHTML += `
                     <div class="flex items-center">
-                        <input type="checkbox" id="chord_${key}" value="${key}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
-                        <label for="chord_${key}" class="ml-2 text-gray-700">${chord.name}</label>
+                        <input type="checkbox" id="chord_${key}" value="${key}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded">
+                        <label for="chord_${key}" class="ml-2 cursor-pointer">${chord.name}</label>
                     </div>`;
             });
             
-            leadVoicesSection.classList.toggle('hidden', state.difficulty !== 'advanced');
             leadVoicesCheckboxesContainer.innerHTML = '';
-            if (state.difficulty === 'advanced') {
-                const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
-                const availableTensions = new Set();
-                relevantChords.forEach(key => { chordStructures[key].intervals.forEach(interval => { if (allTensions.includes(interval.label)) availableTensions.add(interval.label); }); });
-
-                allTensions.forEach(label => {
-                    if (availableTensions.has(label)) {
-                        const isChecked = !currentPracticeSettings.isActive || currentPracticeSettings.allowedLeads.length === 0 || currentPracticeSettings.allowedLeads.includes(label);
-                        leadVoicesCheckboxesContainer.innerHTML += `
-                            <div class="flex items-center">
-                                <input type="checkbox" id="lead_${label}" value="${label}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300">
-                                <label for="lead_${label}" class="ml-2 text-gray-700">${label}</label>
-                            </div>`;
+            const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+            const availableLeads = new Set();
+            relevantChords.forEach(key => {
+                Object.keys(chordStructures[key].voicing_rules).forEach(label => {
+                    const isTension = allTensions.includes(label);
+                    if (state.difficulty === 'advanced' ? isTension : !isTension) {
+                        availableLeads.add(label);
                     }
                 });
-            }
+            });
+
+            Array.from(availableLeads).forEach(label => {
+                const isChecked = !currentPracticeSettings.isActive || !currentPracticeSettings.allowedLeads || currentPracticeSettings.allowedLeads.length === 0 || currentPracticeSettings.allowedLeads.includes(label);
+                leadVoicesCheckboxesContainer.innerHTML += `
+                    <div class="flex items-center">
+                        <input type="checkbox" id="lead_${label}" value="${label}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded">
+                        <label for="lead_${label}" class="ml-2 font-mono font-bold cursor-pointer">Voz: ${label}</label>
+                    </div>`;
+            });
         }
 
         function saveSettings() { 
@@ -1143,7 +1706,8 @@
             const allowedLeads = Array.from(leadVoicesCheckboxesContainer.querySelectorAll('input:checked')).map(cb => cb.value);
             state.customPractice[state.difficulty].isActive = true;
             state.customPractice[state.difficulty].allowedChords = allowedChords;
-            if (state.difficulty === 'advanced') state.customPractice[state.difficulty].allowedLeads = allowedLeads;
+            state.customPractice[state.difficulty].allowedLeads = allowedLeads;
+            saveUserData();
             settingsModalOverlay.classList.remove('visible'); 
             generateExercise(); 
         }
@@ -1151,9 +1715,30 @@
         function closeSettingsModal() { settingsModalOverlay.classList.remove('visible'); }
         
         function showEvaluationModal() { 
-            const acc = (state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0;
-            evaluationSummary.textContent = `Precisión de la tanda: ${acc}%.`;
+            const totalAttempts = state.stats.totalCorrect + state.stats.totalIncorrect;
+            const acc = totalAttempts > 0 ? Math.round((state.stats.totalCorrect / totalAttempts) * 100) : 0;
+            
+            if (state.evaluation.batchCorrectFirstTry >= state.evaluation.exercisesPerEval && state.evaluation.batchHintsUsed === 0) {
+                unlockBadge('perfect_batch');
+            }
+
+            evaluationSummary.textContent = `Precisión Global: ${acc}% (${state.evaluation.batchCorrectFirstTry}/${state.evaluation.exercisesPerEval} perfectos en esta tanda).`;
+            
+            adviceList.innerHTML = '';
+            const breakdown = state.stats.chordBreakdown || {};
+            const weakChords = Object.entries(breakdown).filter(([_, val]) => val.incorrect > 0).sort((a,b) => b[1].incorrect - a[1].incorrect);
+
+            if (weakChords.length > 0) {
+                weakChords.slice(0, 3).forEach(([name, val]) => {
+                    adviceList.innerHTML += `<li>Reforzar acordes <strong>${name}</strong> (${val.incorrect} errores registrados). Puedes aislarlos en Ajustes ⚙️ o en Reto a Medida 🎯.</li>`;
+                });
+            } else {
+                adviceList.innerHTML = `<li>¡Excelente dominio en esta tanda! Prueba subir el nivel de dificultad o practicar con diferentes direcciones de arpegio.</li>`;
+            }
+
             state.evaluation.questionsAttemptedInBatch = 0;
+            state.evaluation.batchCorrectFirstTry = 0;
+            state.evaluation.batchHintsUsed = 0;
             evaluationModalOverlay.classList.add('visible'); 
         }
 
@@ -1171,114 +1756,191 @@
             const minutes = Math.floor(durationMs / 60000);
             const seconds = Math.floor((durationMs % 60000) / 1000);
             const startDateTime = new Date(state.session.startTime);
+            const totalS = sessionCorrect + sessionIncorrect;
+            const accuracy = totalS > 0 ? Math.round((sessionCorrect / totalS) * 100) : 0;
+
             const sessionData = {
                 date: getLocalDateString(startDateTime),
                 time: startDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
                 duration: `${minutes}m ${seconds}s`,
                 correct: sessionCorrect,
-                incorrect: sessionIncorrect
+                incorrect: sessionIncorrect,
+                accuracy: accuracy,
+                details: [...state.stats.sessionHistory]
             };
 
             if (!state.stats.pastSessions) state.stats.pastSessions = [];
             state.stats.pastSessions.push(sessionData);
             state.stats.sessionHistory = []; 
-            state.session.startTime = Date.now(); 
+            state.session.startTime = Date.now();
+            saveUserData();
         }
 
-        function populateStatsView(container, isFinal) {
-            const acc = (state.stats.totalCorrect + state.stats.totalIncorrect) > 0 ? Math.round((state.stats.totalCorrect / (state.stats.totalCorrect + state.stats.totalIncorrect)) * 100) : 0;
-            const currentDurationMs = Date.now() - state.session.startTime;
-            const curMin = Math.floor(currentDurationMs / 60000);
-            const curSec = Math.floor((currentDurationMs % 60000) / 1000);
-            
-            let curCorrect = 0, curIncorrect = 0;
-            if(state.stats.sessionHistory) {
-                state.stats.sessionHistory.forEach(item => {
-                    if (item.status === '✅ Correcto') curCorrect++;
-                    else if (item.status !== '⏭️ Omitido') curIncorrect++;
+        function exportTeacherCSV() {
+            const pastSessions = state.stats.pastSessions || [];
+            const currentHistory = state.stats.sessionHistory || [];
+            const rows = [
+                ["Estudiante", "Fecha", "Hora", "Acorde Raiz", "Especie", "Voz Guia", "Nivel", "Resultado"]
+            ];
+
+            pastSessions.forEach(s => {
+                (s.details || []).forEach(d => {
+                    rows.push([state.currentUser || "Invitado", s.date, d.timestamp || s.time, d.chordRoot, d.chordName || d.chordCifrado, d.lead, d.difficulty || "", d.status]);
+                });
+            });
+
+            const today = getTodayDateString();
+            currentHistory.forEach(d => {
+                rows.push([state.currentUser || "Invitado", today, d.timestamp || "", d.chordRoot, d.chordName || d.chordCifrado, d.lead, d.difficulty || "", d.status]);
+            });
+
+            if (rows.length === 1) {
+                const breakdown = state.stats.chordBreakdown || {};
+                Object.entries(breakdown).forEach(([chordName, counts]) => {
+                    rows.push([state.currentUser || "Invitado", today, "-", "-", chordName, "-", "-", `Aciertos: ${counts.correct} | Errores: ${counts.incorrect}`]);
                 });
             }
 
+            const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + rows.map(e => e.join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `reporte_armonico_${state.currentUser || 'invitado'}_${getTodayDateString()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+
+        function populateStatsView(container, isFinal) {
+            const totalAttempts = (state.stats.totalCorrect || 0) + (state.stats.totalIncorrect || 0);
+            const acc = totalAttempts > 0 ? Math.round((state.stats.totalCorrect / totalAttempts) * 100) : 0;
+            
             const pastStreaks = state.stats.pastStreaks || [];
             let maxStreak = state.stats.currentStreak || 0;
             pastStreaks.forEach(s => { if(s.streak > maxStreak) maxStreak = s.streak; });
 
-            let streaksHTML = '';
-            if (pastStreaks.length > 0) {
-                streaksHTML = `
+            const pastSessions = state.stats.pastSessions || [];
+            const breakdown = state.stats.chordBreakdown || {};
+
+            let breakdownHTML = '';
+            if (Object.keys(breakdown).length > 0) {
+                breakdownHTML = `
                     <div class="mt-4 text-left w-full">
-                        <h3 class="text-[13px] uppercase font-bold text-gray-500 mb-2">Rachas Anteriores</h3>
-                        <div class="flex flex-wrap gap-2">
-                            ${[...pastStreaks].reverse().slice(0, 5).map(s => {
-                                const formattedDate = s.endDate.split('-').reverse().join('/');
-                                return `<span class="bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-1 rounded border border-amber-200">🔥 ${s.streak} días (hasta ${formattedDate})</span>`;
+                        <h3 class="text-xs uppercase font-bold opacity-70 mb-2">Rendimiento por Especie de Acorde (Diagnóstico Docente)</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            ${Object.entries(breakdown).map(([name, c]) => {
+                                const tot = c.correct + c.incorrect;
+                                const pct = tot > 0 ? Math.round((c.correct / tot) * 100) : 0;
+                                return `<div class="p-2 rounded border border-slate-500/20 bg-slate-500/5 text-xs flex justify-between items-center">
+                                    <span class="font-bold">${name}</span>
+                                    <span class="${pct >= 75 ? 'text-green-500' : 'text-amber-500'} font-extrabold">${pct}% (${c.correct}/${tot})</span>
+                                </div>`;
                             }).join('')}
                         </div>
                     </div>`;
             }
 
-            const pastSessions = state.stats.pastSessions || [];
             let tableHTML = `
                 <div class="mt-4 text-left w-full">
-                    <h3 class="text-[13px] uppercase font-bold text-gray-500 mb-2">Registro de Sesiones</h3>
-                    <div class="max-h-40 overflow-y-auto bg-white rounded shadow border border-gray-200">
-                        <table class="w-full text-xs sm:text-sm text-left text-gray-500">
-                            <thead class="text-gray-700 uppercase bg-gray-100 sticky top-0 shadow-sm">
+                    <h3 class="text-xs uppercase font-bold opacity-70 mb-2">Historial de Sesiones</h3>
+                    <div class="max-h-36 overflow-y-auto rounded shadow border border-slate-500/20">
+                        <table class="w-full text-xs text-left">
+                            <thead class="uppercase bg-slate-500/15 sticky top-0">
                                 <tr>
-                                    <th class="px-2 sm:px-4 py-2">Fecha/Hora</th>
-                                    <th class="px-2 sm:px-4 py-2">Duración</th>
-                                    <th class="px-2 sm:px-4 py-2">Aciertos</th>
-                                    <th class="px-2 sm:px-4 py-2">Errores</th>
+                                    <th class="px-3 py-2">Fecha/Hora</th>
+                                    <th class="px-3 py-2">Duración</th>
+                                    <th class="px-3 py-2">Aciertos</th>
+                                    <th class="px-3 py-2">Errores</th>
+                                    <th class="px-3 py-2">Precisión</th>
                                 </tr>
                             </thead>
                             <tbody>`;
-            
-            if (!isFinal && (curCorrect > 0 || curIncorrect > 0)) {
-                tableHTML += `<tr class="border-b bg-blue-50">
-                    <td class="px-2 sm:px-4 py-2 font-bold text-blue-800">Sesión Actual</td>
-                    <td class="px-2 sm:px-4 py-2 font-bold text-blue-800">${curMin}m ${curSec}s</td>
-                    <td class="px-2 sm:px-4 py-2 text-green-600 font-bold">${curCorrect}</td>
-                    <td class="px-2 sm:px-4 py-2 text-red-600 font-bold">${curIncorrect}</td>
-                </tr>`;
-            }
 
-            if (pastSessions.length === 0 && curCorrect === 0 && curIncorrect === 0 && isFinal) {
-                tableHTML += `<tr><td colspan="4" class="px-2 sm:px-4 py-4 text-center">No hay sesiones registradas</td></tr>`;
+            if (pastSessions.length === 0) {
+                tableHTML += `<tr><td colspan="5" class="px-3 py-4 text-center opacity-70">Completa ejercicios para registrar sesiones en la tabla.</td></tr>`;
             } else {
                 [...pastSessions].reverse().forEach(s => {
-                    tableHTML += `<tr class="border-b hover:bg-gray-50">
-                        <td class="px-2 sm:px-4 py-2">${s.date} <span class="text-xs text-gray-400 block sm:inline">${s.time}</span></td>
-                        <td class="px-2 sm:px-4 py-2">${s.duration}</td>
-                        <td class="px-2 sm:px-4 py-2 text-green-600 font-bold">${s.correct}</td>
-                        <td class="px-2 sm:px-4 py-2 text-red-600 font-bold">${s.incorrect}</td>
+                    const tot = s.correct + s.incorrect;
+                    const sAcc = s.accuracy !== undefined ? s.accuracy : (tot > 0 ? Math.round((s.correct / tot) * 100) : 0);
+                    tableHTML += `<tr class="border-b border-slate-500/10">
+                        <td class="px-3 py-1.5">${s.date} <span class="opacity-60">${s.time}</span></td>
+                        <td class="px-3 py-1.5">${s.duration}</td>
+                        <td class="px-3 py-1.5 text-green-500 font-bold">${s.correct}</td>
+                        <td class="px-3 py-1.5 text-red-500 font-bold">${s.incorrect}</td>
+                        <td class="px-3 py-1.5 font-bold text-blue-500">${sAcc}%</td>
                     </tr>`;
                 });
             }
             tableHTML += `</tbody></table></div></div>`;
 
+            const chartCanvasId = isFinal ? 'finalEvolutionChart' : 'modalEvolutionChart';
+
             container.innerHTML = `
-                <div class="grid grid-cols-3 gap-2 mb-2">
-                    <div class="bg-white p-2 rounded shadow text-center">
-                        <div class="text-[10px] text-gray-500 uppercase font-bold">Total Aciertos</div>
-                        <div class="text-xl font-bold text-green-600">${state.stats.totalCorrect}</div>
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                    <div class="bg-slate-500/10 p-2.5 rounded-xl border border-slate-500/20 text-center">
+                        <div class="text-[10px] opacity-70 uppercase font-bold">Total Aciertos</div>
+                        <div class="text-xl font-bold text-green-500">${state.stats.totalCorrect}</div>
                     </div>
-                    <div class="bg-white p-2 rounded shadow text-center">
-                        <div class="text-[10px] text-gray-500 uppercase font-bold">Precisión Global</div>
-                        <div class="text-xl font-bold text-blue-600">${acc}%</div>
+                    <div class="bg-slate-500/10 p-2.5 rounded-xl border border-slate-500/20 text-center">
+                        <div class="text-[10px] opacity-70 uppercase font-bold">Precisión Global</div>
+                        <div class="text-xl font-bold text-blue-500">${acc}%</div>
                     </div>
-                    <div class="bg-white p-2 rounded shadow text-center">
-                        <div class="text-[10px] text-gray-500 uppercase font-bold">Mejor Racha</div>
+                    <div class="bg-slate-500/10 p-2.5 rounded-xl border border-slate-500/20 text-center">
+                        <div class="text-[10px] opacity-70 uppercase font-bold">Mejor Racha</div>
                         <div class="text-xl font-bold text-amber-500">🔥 ${maxStreak}</div>
                     </div>
                 </div>
-                ${streaksHTML}
+                <div class="w-full bg-slate-500/5 p-3 rounded-xl border border-slate-500/20 mt-2">
+                    <h3 class="text-xs uppercase font-bold opacity-70 mb-1 text-left">Evolución de Precisión (%)</h3>
+                    <div class="h-36 w-full"><canvas id="${chartCanvasId}"></canvas></div>
+                </div>
+                ${breakdownHTML}
                 ${tableHTML}
             `;
+
+            setTimeout(() => {
+                const canvasEl = document.getElementById(chartCanvasId);
+                if (!canvasEl || typeof Chart === 'undefined') return;
+                if (activeChartInstance) activeChartInstance.destroy();
+
+                const labels = pastSessions.length > 0 ? pastSessions.map((s, idx) => `S${idx + 1} (${s.date.slice(5)})`) : ['Sesión Actual'];
+                const dataPoints = pastSessions.length > 0 ? pastSessions.map(s => {
+                    const t = s.correct + s.incorrect;
+                    return t > 0 ? Math.round((s.correct / t) * 100) : 0;
+                }) : [acc];
+
+                activeChartInstance = new Chart(canvasEl, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Precisión (%)',
+                            data: dataPoints,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { min: 0, max: 100 }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }, 50);
         }
 
         function showHistoryModal() { 
             recordCurrentSession(); 
-            historyModalTitle.textContent = `Estadísticas de Sesión`;
+            historyModalTitle.textContent = `Estadísticas de ${state.currentUser || 'Sesión'}`;
             populateStatsView(historyModalContent, false);
             historyModalOverlay.classList.add('visible'); 
         }
@@ -1307,29 +1969,74 @@
         }
 
         // ==========================================
-        // 8. LOGIN Y TUTORIAL
+        // 10. LOGIN Y TUTORIAL ACTUALIZADO (6 PASOS)
         // ==========================================
-        function startTutorial() { state.tutorial.isActive = true; state.tutorial.currentStep = 0; document.getElementById('tutorialOverlay').classList.remove('hidden'); openFullscreen(); showTutorialStep(); }
-        function endTutorial() { state.tutorial.isActive = false; document.getElementById('tutorialOverlay').classList.add('hidden'); closeFullscreen(); }
+        const TUTORIAL_STEPS = [
+            {
+                id: 'chordQuestionWrapper',
+                title: "1. El Reto Armónico",
+                text: "Observa la nota líder dada y qué intervalo ocupa dentro del acorde. Tu objetivo es completar el acorde en bloque cerrado descendente (de agudo a grave)."
+            },
+            {
+                id: 'displaySection',
+                title: "2. Voces y Pentagrama en Color",
+                text: "A medida que ingresas notas, se dibujan en el pentagrama. Al verificar, la nota guía se muestra en azul, los aciertos en verde y los errores en rojo."
+            },
+            {
+                id: 'noteBuildingControls',
+                title: "3. Notas, Becuadro (♮) y MIDI",
+                text: "Usa los botones, el Piano Virtual o un teclado MIDI USB. Si pones una alteración por error (#, b, ##, bb), presiona Becuadro (♮) o vuelve a pulsar la misma alteración para quitarla."
+            },
+            {
+                id: 'actionButtonsGroup',
+                title: "4. Borrar Última vs Borrar Todo",
+                text: "Usa '⬅️ Borrar Última' (Backspace o Z) para corregir solo la última nota puesta, o '🗑️ Borrar Todo' (N) para reiniciar el acorde."
+            },
+            {
+                id: 'difficultySelection',
+                title: "5. Niveles y Reproducción de Audio",
+                text: "Elige entre nivel Básico (tríadas), Intermedio (séptimas) o Avanzado (tensiones), y cambia la dirección del arpegio (Descendente, Ascendente o Bloque) con el botón 🔊 Escuchar."
+            },
+            {
+                id: 'statusBarControls',
+                title: "6. Funciones Pro y Atajos",
+                text: "En la barra superior tienes Modo Oscuro (🌙), Logros (🏆), Creador de Retos a Medida (🎯), Estadísticas con exportación CSV (📊), Ajustes de intervalos (⚙️) y la Guía de Atajos (⌨️)."
+            }
+        ];
+
+        function startTutorial() {
+            state.tutorial.isActive = true;
+            state.tutorial.currentStep = 0;
+            document.getElementById('tutorialOverlay').classList.remove('hidden');
+            showTutorialStep();
+        }
+
+        function endTutorial() {
+            state.tutorial.isActive = false;
+            document.getElementById('tutorialOverlay').classList.add('hidden');
+            document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+        }
+
         function showTutorialStep() { 
-            const s = [
-                {id: 'chordQuestionWrapper', title:"Paso 1: El Ejercicio", text:"Construye el resto del acorde según se indica."},
-                {id: 'displaySection', title:"Paso 2: Área de Respuesta", text:"Tus respuestas se reflejan aquí y en el pentagrama."},
-                {id: 'inputMethodToggle', title:"Paso 3: Métodos de Entrada", text:"Usa los botones o el piano para introducir notas."},
-                {id: 'confirmAnswerButton', title:"Paso 4: Comprobar", text:"Presiona 'Confirmar' cuando termines."}
-            ][state.tutorial.currentStep];
-            if(!s) return endTutorial();
+            const total = TUTORIAL_STEPS.length;
+            const s = TUTORIAL_STEPS[state.tutorial.currentStep];
+            if (!s) return endTutorial();
             
             document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+            tutorialStepBadge.textContent = `Paso ${state.tutorial.currentStep + 1} de ${total}`;
             document.getElementById('tutorialTitle').textContent = s.title; 
             document.getElementById('tutorialText').textContent = s.text;
             
+            tutorialPrevButton.disabled = state.tutorial.currentStep === 0;
+            tutorialNextButton.textContent = state.tutorial.currentStep === total - 1 ? "Finalizar" : "Siguiente";
+
             if (s.id) {
                 const target = document.getElementById(s.id);
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => target.classList.add('tutorial-highlight'), 300);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => target.classList.add('tutorial-highlight'), 180);
+                }
             }
-            document.getElementById('tutorialNextButton').textContent = state.tutorial.currentStep === 3 ? "Terminar" : "Siguiente";
         }
 
         function populateUserSelect() {
@@ -1344,12 +2051,26 @@
             let data = {};
             if (dataStr) { try { data = JSON.parse(dataStr); } catch (e) {} }
             
-            state.stats = data.stats || { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[], pastSessions:[], pastStreaks:[] };
+            state.stats = data.stats || {
+                totalExercises: 0, totalCorrect: 0, totalIncorrect: 0, currentStreak: 0,
+                hintsUsed: 0, answersUsed: 0, sessionHistory: [], pastSessions: [],
+                pastStreaks: [], unlockedBadges: [], chordBreakdown: {}
+            };
             
             if (!state.stats.pastSessions) state.stats.pastSessions = [];
             if (!state.stats.pastStreaks) state.stats.pastStreaks = [];
+            if (!state.stats.unlockedBadges) state.stats.unlockedBadges = [];
+            if (!state.stats.chordBreakdown) state.stats.chordBreakdown = {};
             state.stats.sessionHistory = [];
             
+            if (data.customPractice) {
+                state.customPractice = {
+                    basic: { isActive: false, allowedChords: [], allowedLeads: [], ...(data.customPractice.basic || {}) },
+                    intermediate: { isActive: false, allowedChords: [], allowedLeads: [], ...(data.customPractice.intermediate || {}) },
+                    advanced: { isActive: false, allowedChords: [], allowedLeads: [], ...(data.customPractice.advanced || {}) }
+                };
+            }
+
             state.session.startTime = Date.now();
             
             if (state.stats.lastPracticeDate) {
@@ -1373,8 +2094,8 @@
 
         function handleLogin() {
             const user = newUserInput.value.trim() || userSelect.value;
-            if (!user) return showCustomMessage("Error", "Selecciona o crea un perfil", "error");
-            if (user.toLowerCase() === 'invitado') return showCustomMessage("Error", "Nombre reservado", "error");
+            if (!user) return showCustomMessage("Atención", "Selecciona o escribe un nombre de perfil.", "error");
+            if (user.toLowerCase() === 'invitado') return showCustomMessage("Error", "Nombre reservado.", "error");
             
             state.currentUser = user;
             const users = JSON.parse(localStorage.getItem('harmonicBlockProUsers') || '[]');
@@ -1392,17 +2113,28 @@
 
         function handleGuestLogin() {
             state.currentUser = "Invitado"; currentUserName.textContent = "Invitado";
-            state.stats = { totalExercises:0, totalCorrect:0, totalIncorrect:0, currentStreak:0, hintsUsed:0, answersUsed:0, sessionHistory:[], pastSessions: [], pastStreaks: [] };
+            state.stats = {
+                totalExercises: 0, totalCorrect: 0, totalIncorrect: 0, currentStreak: 0,
+                hintsUsed: 0, answersUsed: 0, sessionHistory: [], pastSessions: [],
+                pastStreaks: [], unlockedBadges: [], chordBreakdown: {}
+            };
             state.session.startTime = Date.now();
             welcomeModalOverlay.classList.remove('visible');
             initializeApp(false);
         }
 
-        function handleSwitchUser() { recordCurrentSession(); saveUserData(); mainAppContainer.classList.add('hidden'); showLoginScreen(); }
+        function handleSwitchUser() {
+            recordCurrentSession();
+            saveUserData();
+            mainAppContainer.classList.add('hidden');
+            finalMessageDisplay.classList.add('hidden');
+            showLoginScreen();
+        }
+
         function confirmDeleteUser() { 
             const userToDelete = userSelect.value;
             if (!userToDelete) return;
-            deleteConfirmText.innerHTML = `¿Estás seguro de que quieres eliminar el perfil de <strong>${userToDelete}</strong>? Esta acción no se puede deshacer.`;
+            deleteConfirmText.innerHTML = `¿Estás seguro de que quieres eliminar el perfil de <strong>${userToDelete}</strong>?`;
             deleteConfirmModalOverlay.classList.add('visible');
 
             confirmDeleteButton.onclick = () => {
@@ -1413,13 +2145,13 @@
                 
                 populateUserSelect();
                 deleteConfirmModalOverlay.classList.remove('visible');
-                showCustomMessage("Éxito", `El perfil de ${userToDelete} ha sido eliminado.`, "success");
+                showCustomMessage("Eliminado", `El perfil ${userToDelete} fue eliminado.`, "success");
             };
         }
-        function showLoginScreen() { mainAppListenersAttached = false; welcomeModalOverlay.classList.add('visible'); populateUserSelect(); }
+        function showLoginScreen() { welcomeModalOverlay.classList.add('visible'); populateUserSelect(); }
 
         // ==========================================
-        // 9. INICIALIZACIÓN PRINCIPAL
+        // 11. INICIALIZACIÓN PRINCIPAL
         // ==========================================
         async function initializeApp(startWithTutorial) {
             tutorialPromptModalOverlay.classList.remove('visible');
@@ -1445,11 +2177,9 @@
                     
                     state.audioContextStarted = true;
                 }
-            } catch (e) {
-                console.error("Error inicializando audio:", e);
-                showCustomMessage("Error de Audio", "No se pudo iniciar el motor de audio.", "error");
-            }
+            } catch (e) {}
             
+            initWebMIDI();
             updateDifficultySelectionUI();
             generateNoteButtons();
             generatePiano();
@@ -1464,14 +2194,45 @@
             if(mainAppListenersAttached) return;
 
             confirmAnswerButton.addEventListener('click', checkAnswer);
+            undoLastNoteButton.addEventListener('click', deleteLastNote);
             clearAllSelectionButton.addEventListener('click', clearSelection);
             changeQuestionButton.addEventListener('click', () => { completeExercise('skipped'); generateExercise(); });
             hintButton.addEventListener('click', giveHint);
             showAnswerButton.addEventListener('click', showAnswer);
             showTutorialButton.addEventListener('click', startTutorial);
             tutorialEndButton.addEventListener('click', endTutorial);
+            tutorialPrevButton.addEventListener('click', () => {
+                if (state.tutorial.currentStep > 0) {
+                    state.tutorial.currentStep--;
+                    showTutorialStep();
+                }
+            });
+            tutorialOpenShortcutsBtn.addEventListener('click', () => {
+                endTutorial();
+                shortcutsModalOverlay.classList.add('visible');
+            });
+            openTutorialFromShortcutsBtn.addEventListener('click', () => {
+                shortcutsModalOverlay.classList.remove('visible');
+                startTutorial();
+            });
+
             document.addEventListener('keydown', handleKeyPress);
             fullscreenButton.addEventListener('click', toggleFullscreen);
+            darkModeButton.addEventListener('click', toggleDarkMode);
+            replayAudioButton.addEventListener('click', playPreviewAudio);
+
+            shortcutsButton.addEventListener('click', () => shortcutsModalOverlay.classList.add('visible'));
+            closeShortcutsButton.addEventListener('click', () => shortcutsModalOverlay.classList.remove('visible'));
+
+            badgesButton.addEventListener('click', openBadgesModal);
+            closeBadgesButton.addEventListener('click', () => badgesModalOverlay.classList.remove('visible'));
+
+            customChallengeButton.addEventListener('click', openCustomChallengeModal);
+            closeCustomChallengeButton.addEventListener('click', () => customChallengeModalOverlay.classList.remove('visible'));
+            applyCustomChallengeButton.addEventListener('click', applyCustomChallenge);
+
+            exportTeacherCsvButton.addEventListener('click', exportTeacherCSV);
+            exportCsvFinalButton.addEventListener('click', exportTeacherCSV);
             
             document.addEventListener('fullscreenchange', updateFullscreenIcons);
             document.addEventListener('webkitfullscreenchange', updateFullscreenIcons);
@@ -1512,8 +2273,8 @@
 
             continueTrainingButton.addEventListener('click', () => evaluationModalOverlay.classList.remove('visible'));
             endSessionButton.addEventListener('click', endSession);
-            saveAsPhotoButton.addEventListener('click', saveAsPhoto);
-            saveAsPdfButton.addEventListener('click', saveAsPdf);
+            document.getElementById('saveAsPhotoButton').addEventListener('click', saveAsPhoto);
+            document.getElementById('saveAsPdfButton').addEventListener('click', saveAsPdf);
             window.addEventListener('resize', () => drawMusicalStaff(state.selectedUserNotes));
             
             infoModalCloseButton.addEventListener('click', () => {
@@ -1528,9 +2289,12 @@
             deleteUserButton.addEventListener('click', confirmDeleteUser);
             cancelDeleteButton.addEventListener('click', () => deleteConfirmModalOverlay.classList.remove('visible'));
             
+            setupMobileViewTabs();
+
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
-                    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('visible'));
+                    document.querySelectorAll('.modal-overlay:not(#welcomeModalOverlay)').forEach(m => m.classList.remove('visible'));
+                    if (state.tutorial.isActive) endTutorial();
                 }
             });
             
@@ -1539,6 +2303,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             assignDomElements();
+            if (localStorage.getItem('harmonicBlockProDarkMode') === '1') {
+                toggleDarkMode();
+            }
             document.getElementById('promptStartTutorial').addEventListener('click', () => initializeApp(true));
             document.getElementById('promptSkipTutorial').addEventListener('click', () => initializeApp(false));
             document.getElementById('loginButton').addEventListener('click', handleLogin);
@@ -1549,4 +2316,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
