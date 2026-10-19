@@ -100,10 +100,27 @@
         .grid-cell {
             background-color: var(--cell-bg); border: 1px solid var(--border-color); padding: 0.65rem 0.85rem; border-radius: 6px;
             display: flex; justify-content: space-between; align-items: center; font-size: 1.05em; font-weight: 600;
-            transition: all 0.2s ease;
+            transition: all 0.2s ease; position: relative;
         }
+        .grid-cell.selectable-cell { cursor: pointer; }
+        .grid-cell.selectable-cell:hover { filter: brightness(0.96); border-color: #94a3b8; }
         .grid-cell.cell-correct { border-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
-        .grid-cell.cell-error { border-color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
+        .grid-cell.cell-error { border-color: #ef4444; background-color: rgba(239, 68, 68, 0.12); }
+        .grid-cell.cell-editing {
+            border: 2px solid #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            transform: scale(1.02);
+        }
+        .grid-cell.cell-error.cell-editing {
+            border: 2px solid #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35);
+        }
+        .grid-cell .edit-badge {
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            padding: 1px 5px; border-radius: 4px; background-color: #3b82f6; color: #ffffff;
+            margin-left: 6px;
+        }
+        .grid-cell.cell-error .edit-badge { background-color: #ef4444; }
         .grid-cell .note-display { font-size: 1.4em; }
         .grid-cell.hidden { display: none; }
 
@@ -363,11 +380,14 @@
             <div id="questionArea" class="w-full max-w-md md:flex-1 md:min-w-[250px] p-4 rounded-xl">
                 <p class="text-base font-bold text-blue-600 mb-2">Construye el acorde:</p>
                 <div class="notes-grid w-full">
-                    <div class="grid-cell" id="gridCell0"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
-                    <div class="grid-cell" id="gridCell1"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
-                    <div class="grid-cell" id="gridCell2"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
-                    <div class="grid-cell" id="gridCell3"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell0" title="Nota guía fija (haz clic para escucharla)"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell1" title="Haz clic para seleccionar y cambiar esta voz"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell2" title="Haz clic para seleccionar y cambiar esta voz"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
+                    <div class="grid-cell" id="gridCell3" title="Haz clic para seleccionar y cambiar esta voz"><span class="interval-label opacity-70"></span><span class="note-display font-bold"></span></div>
                 </div>
+                <p id="voiceEditHelper" class="text-[11px] opacity-75 mt-2.5 text-center leading-tight">
+                    💡 Haz clic en cualquier voz ingresada (o usa <kbd class="px-1 bg-slate-500/20 rounded font-mono">↑</kbd> <kbd class="px-1 bg-slate-500/20 rounded font-mono">↓</kbd>) para cambiarla.
+                </p>
             </div>
             <div id="staffArea" class="w-full max-w-md md:flex-1 md:min-w-[300px] flex flex-col justify-center items-center">
                 <canvas id="musicalStaffCanvas"></canvas>
@@ -501,7 +521,8 @@
             <div class="mb-3">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1.5">Construcción y Edición de Notas</h4>
                 <div class="space-y-1.5 text-xs sm:text-sm">
-                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Ingresar notas naturales</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">A B C D E F G</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Ingresar o reemplazar notas naturales</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">A B C D E F G</kbd></div>
+                    <div class="flex justify-between py-1 border-b border-slate-500/20"><span>✎ Seleccionar voz errada o específica para cambiarla</span><kbd class="px-2 py-0.5 bg-blue-500/20 text-blue-600 dark:text-blue-300 rounded font-mono font-bold">Clic en voz / ↑ ↓</kbd></div>
                     <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Sostenido (#) / Doble (##) <em class="opacity-70">(repetir quita)</em></span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">+ / ++</kbd></div>
                     <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Bemol (b) / Doble (bb) <em class="opacity-70">(repetir quita)</em></span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">- / --</kbd></div>
                     <div class="flex justify-between py-1 border-b border-slate-500/20"><span>Becuadro (♮) — Quitar alteración</span><kbd class="px-2 py-0.5 bg-slate-500/20 rounded font-mono font-bold">0 / =</kbd></div>
@@ -598,6 +619,8 @@
             correctNotes: [], correctNotesWithOctave: [],
             chordRoot: '', chordTypeKey: '', givenIntervalName: '', givenLabel: '', givenNote: '', givenNoteWithOctave: '',
             orderedLabelsForDisplay: [], selectedUserNotes: [],
+            editingCellIndex: null,
+            validatedCells: [null, null, null, null],
             stats: {},
             evaluation: { questionsAttemptedInBatch: 0, exercisesPerEval: 5, batchCorrectFirstTry: 0, batchHintsUsed: 0 },
             currentExerciseId: null, failedCurrentExercise: false, answerWasShown: false,
@@ -1056,23 +1079,26 @@
             const chordStaveNote = new StaveNote({ keys: staveNotes, duration: "w" });
             chordStaveNote.setStyle({ fillStyle: defaultStroke, strokeStyle: defaultStroke });
 
-            const correctPitchClasses = state.correctNotesWithOctave.map(n => getNoteSemitone(n.split('/')[0]));
-
             sortedNotes.forEach((note, index) => {
                 const accidentalPart = note.split('/')[0].match(/[#b]+/);
                 if (accidentalPart) chordStaveNote.addAccidental(index, new Accidental(accidentalPart[0]));
 
-                if (note === state.givenNoteWithOctave) {
+                const voiceIdx = state.selectedUserNotes.indexOf(note);
+                if (note === state.givenNoteWithOctave || voiceIdx === 0) {
                     chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" });
-                } else if (state.staffValidationMode) {
-                    const pc = getNoteSemitone(note.split('/')[0]);
-                    const isNoteCorrect = correctPitchClasses.includes(pc);
+                } else if (voiceIdx > 0 && state.validatedCells[voiceIdx]) {
+                    const isNoteCorrect = state.validatedCells[voiceIdx] === 'correct';
                     const color = isNoteCorrect ? "#16a34a" : "#dc2626";
                     chordStaveNote.setKeyStyle(index, { fillStyle: color, strokeStyle: color });
+                } else if (state.staffValidationMode === 'solution' || state.staffValidationMode === 'correct') {
+                    chordStaveNote.setKeyStyle(index, { fillStyle: "#16a34a", strokeStyle: "#16a34a" });
+                } else if (voiceIdx > 0 && voiceIdx === state.editingCellIndex) {
+                    chordStaveNote.setKeyStyle(index, { fillStyle: "#3b82f6", strokeStyle: "#3b82f6" });
                 }
             });
 
-            staffFeedbackLegend.classList.toggle('hidden', !state.staffValidationMode);
+            const anyValidated = state.validatedCells.some(v => v !== null) || !!state.staffValidationMode;
+            staffFeedbackLegend.classList.toggle('hidden', !anyValidated);
 
             const voice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([chordStaveNote]);
             new Formatter().joinVoices([voice]).format([voice], canvas.width - 45);
@@ -1096,14 +1122,19 @@
 
         function updateButtonStates() {
             const expectedCount = state.orderedLabelsForDisplay.length || (state.difficulty === 'basic' ? 3 : 4);
-            confirmAnswerButton.disabled = state.selectedUserNotes.length !== expectedCount;
-            undoLastNoteButton.disabled = state.selectedUserNotes.length <= 1;
-            clearAllSelectionButton.disabled = state.selectedUserNotes.length <= 1;
+            const filledNotesCount = state.selectedUserNotes.filter(Boolean).length;
+            confirmAnswerButton.disabled = filledNotesCount !== expectedCount;
+            undoLastNoteButton.disabled = filledNotesCount <= 1;
+            clearAllSelectionButton.disabled = filledNotesCount <= 1;
             document.querySelectorAll('.note-button.active').forEach(b => b.classList.remove('active'));
             
-            const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
-            if (state.selectedUserNotes.length > 1 && lastNote) {
-                const notePart = lastNote.split('/')[0];
+            const targetIdx = (state.editingCellIndex !== null && state.selectedUserNotes[state.editingCellIndex])
+                ? state.editingCellIndex
+                : (state.selectedUserNotes.length - 1);
+            const activeNote = state.selectedUserNotes[targetIdx];
+
+            if (targetIdx >= 1 && activeNote) {
+                const notePart = activeNote.split('/')[0];
                 const match = notePart.match(/^[A-G]/i);
                 if (match) {
                     const baseLetter = match[0].toUpperCase();
@@ -1126,21 +1157,61 @@
 
         function updateDisplay() {
             updateQuestionText();
+            const helperEl = document.getElementById('voiceEditHelper');
+
             gridCells.forEach((cell, i) => {
-                cell.classList.remove('cell-correct', 'cell-error');
+                cell.classList.remove('cell-correct', 'cell-error', 'cell-editing', 'selectable-cell');
+                const oldBadge = cell.querySelector('.edit-badge');
+                if (oldBadge) oldBadge.remove();
+
                 if (state.orderedLabelsForDisplay[i]) {
                     cell.classList.remove('hidden');
-                    cell.querySelector('.interval-label').textContent = state.orderedLabelsForDisplay[i];
+                    const intervalSpan = cell.querySelector('.interval-label');
+                    intervalSpan.textContent = state.orderedLabelsForDisplay[i];
+                    
                     const userNote = state.selectedUserNotes[i];
                     cell.querySelector('.note-display').textContent = i === 0 ? displayNote(state.givenNote) : (userNote ? displayNote(userNote.split('/')[0]) : "?");
                     
-                    if (i > 0 && userNote && state.staffValidationMode) {
-                        const pc = getNoteSemitone(userNote.split('/')[0]);
-                        const expectedPc = getNoteSemitone(state.correctNotes[i]);
-                        cell.classList.add(pc === expectedPc ? 'cell-correct' : 'cell-error');
+                    if (i === 0) {
+                        cell.classList.add('selectable-cell');
+                    } else if (userNote) {
+                        cell.classList.add('selectable-cell');
                     }
-                } else { cell.classList.add('hidden'); }
+
+                    if (i > 0 && userNote) {
+                        if (state.validatedCells[i] === 'correct' || state.staffValidationMode === 'correct' || state.staffValidationMode === 'solution') {
+                            cell.classList.add('cell-correct');
+                        } else if (state.validatedCells[i] === 'error') {
+                            cell.classList.add('cell-error');
+                        }
+                    }
+
+                    if (i > 0 && state.editingCellIndex === i) {
+                        cell.classList.add('cell-editing');
+                        const badge = document.createElement('span');
+                        badge.className = 'edit-badge';
+                        badge.textContent = state.validatedCells[i] === 'error' ? '✎ Corregir' : '✎ Editando';
+                        intervalSpan.insertAdjacentElement('afterend', badge);
+                    }
+                } else {
+                    cell.classList.add('hidden');
+                }
             });
+
+            if (helperEl) {
+                if (state.editingCellIndex !== null && state.orderedLabelsForDisplay[state.editingCellIndex]) {
+                    const label = state.orderedLabelsForDisplay[state.editingCellIndex];
+                    const isErr = state.validatedCells[state.editingCellIndex] === 'error';
+                    helperEl.className = `text-xs font-semibold mt-2.5 text-center leading-tight ${isErr ? 'text-red-500' : 'text-blue-600 dark:text-blue-400'}`;
+                    helperEl.innerHTML = isErr
+                        ? `⚠️ Voz <strong>${label}</strong> seleccionada — Elige la nota correcta o haz clic en otra voz`
+                        : `✎ Editando voz <strong>${label}</strong> — Elige la nueva nota/alteración (clic de nuevo para salir)`;
+                } else {
+                    helperEl.className = 'text-[11px] opacity-75 mt-2.5 text-center leading-tight';
+                    helperEl.innerHTML = '💡 Haz clic en cualquier voz ingresada (o usa <kbd class="px-1 bg-slate-500/20 rounded font-mono">↑</kbd> <kbd class="px-1 bg-slate-500/20 rounded font-mono">↓</kbd>) para cambiarla.';
+                }
+            }
+
             drawMusicalStaff(state.selectedUserNotes);
             updateButtonStates(); 
             updatePianoHighlight();
@@ -1241,6 +1312,8 @@
             state.failedCurrentExercise = false;
             state.answerWasShown = false;
             state.staffValidationMode = null;
+            state.editingCellIndex = null;
+            state.validatedCells = [null, null, null, null];
             state.isCustomChallenge = isCustom;
             document.getElementById('customModeBadge').classList.toggle('hidden', !isCustom);
 
@@ -1362,18 +1435,96 @@
         }
 
         // ==========================================
-        // 8. ACCIONES DEL USUARIO (Notas, Becuadro, Borrar Última, Borrar Todo)
+        // 8. ACCIONES DEL USUARIO (Notas, Selección de Voz, Becuadro, Borrar Última, Borrar Todo)
         // ==========================================
-        function addNaturalNote(note) {
-            state.staffValidationMode = null;
+        function recalculateDescendingOctaves() {
+            for (let i = 1; i < state.selectedUserNotes.length; i++) {
+                if (!state.selectedUserNotes[i]) continue;
+                const noteName = state.selectedUserNotes[i].split('/')[0];
+                const prevNote = state.selectedUserNotes[i - 1] || state.givenNoteWithOctave;
+                const prevMidi = getNoteWithOctaveMidi(prevNote);
+                let oct = parseInt(prevNote.split('/')[1], 10);
+                let candMidi = getNoteWithOctaveMidi(`${noteName}/${oct}`);
+                while (candMidi >= prevMidi) { oct--; candMidi -= 12; }
+                while (candMidi < prevMidi - 12) { oct++; candMidi += 12; }
+                state.selectedUserNotes[i] = `${noteName}/${oct}`;
+            }
+        }
+
+        function selectCellForEditing(cellIndex) {
+            if (cellIndex === 0) {
+                playSingleNoteWithOctave(state.givenNoteWithOctave, "8n");
+                return;
+            }
             const maxVoices = state.orderedLabelsForDisplay.length;
-            if (state.selectedUserNotes.length >= maxVoices) return showCustomMessage("Límite", "Ya seleccionaste todas las voces. Puedes borrar la última con ⬅️ Borrar Última.", "warning");
+            if (cellIndex < 1 || cellIndex >= maxVoices) return;
+
+            if (state.selectedUserNotes[cellIndex]) {
+                if (state.editingCellIndex === cellIndex) {
+                    state.editingCellIndex = null;
+                } else {
+                    state.editingCellIndex = cellIndex;
+                    playSingleNoteWithOctave(state.selectedUserNotes[cellIndex], "8n");
+                }
+                updateDisplay();
+            } else {
+                state.editingCellIndex = null;
+                updateDisplay();
+            }
+        }
+
+        function moveCellSelection(direction) {
+            const filledMaxIndex = state.selectedUserNotes.length - 1;
+            if (filledMaxIndex < 1) return;
+            if (state.editingCellIndex === null) {
+                state.editingCellIndex = direction > 0 ? 1 : filledMaxIndex;
+            } else {
+                let nextIdx = state.editingCellIndex + direction;
+                if (nextIdx < 1) nextIdx = filledMaxIndex;
+                if (nextIdx > filledMaxIndex) nextIdx = 1;
+                state.editingCellIndex = nextIdx;
+            }
+            if (state.selectedUserNotes[state.editingCellIndex]) {
+                playSingleNoteWithOctave(state.selectedUserNotes[state.editingCellIndex], "8n");
+            }
+            updateDisplay();
+        }
+
+        function addNaturalNote(note) {
+            const maxVoices = state.orderedLabelsForDisplay.length;
+
+            // Si todas las voces están llenas y no hay casilla activa pero sí una casilla con error, seleccionarla automáticamente
+            if (state.editingCellIndex === null && state.selectedUserNotes.length >= maxVoices) {
+                const firstErr = state.validatedCells.findIndex((val, idx) => idx > 0 && val === 'error');
+                if (firstErr !== -1) {
+                    state.editingCellIndex = firstErr;
+                }
+            }
+
+            // Modo reemplazo directo en la voz seleccionada
+            if (state.editingCellIndex !== null && state.selectedUserNotes[state.editingCellIndex]) {
+                const targetIdx = state.editingCellIndex;
+                state.selectedUserNotes[targetIdx] = `${note}/4`;
+                recalculateDescendingOctaves();
+                state.validatedCells[targetIdx] = null;
+                if (!state.validatedCells.includes('error')) {
+                    state.staffValidationMode = null;
+                }
+                playSingleNoteWithOctave(state.selectedUserNotes[targetIdx], "8n");
+                updateDisplay();
+                return;
+            }
+
+            if (state.selectedUserNotes.length >= maxVoices) {
+                return showCustomMessage("Voz Completa", "Haz clic sobre la nota que deseas cambiar o usa ⬅️ Borrar Última.", "warning");
+            }
             
             const lastNote = state.selectedUserNotes[state.selectedUserNotes.length - 1];
             let oct = parseInt(lastNote.split('/')[1], 10);
             let candMidi = getNoteWithOctaveMidi(`${note}/${oct}`);
             const lastMidi = getNoteWithOctaveMidi(lastNote);
             while (candMidi >= lastMidi) { oct--; candMidi -= 12; }
+            while (candMidi < lastMidi - 12) { oct++; candMidi += 12; }
             const newNoteWithOctave = `${note}/${oct}`;
             state.selectedUserNotes.push(newNoteWithOctave);
             
@@ -1382,9 +1533,10 @@
         }
 
         function addAccidental(acc) {
-            state.staffValidationMode = null;
-            const idx = state.selectedUserNotes.length - 1;
-            if (idx < 1) return;
+            const idx = (state.editingCellIndex !== null && state.selectedUserNotes[state.editingCellIndex])
+                ? state.editingCellIndex
+                : (state.selectedUserNotes.length - 1);
+            if (idx < 1 || !state.selectedUserNotes[idx]) return;
             const [notePart, octPart] = state.selectedUserNotes[idx].split('/');
             const match = notePart.match(/^[A-G]/i);
             if (!match) return;
@@ -1400,28 +1552,40 @@
                 newAcc = acc;
             }
 
-            const updatedNoteWithOctave = `${baseLetter}${newAcc}/${octPart}`;
-            state.selectedUserNotes[idx] = updatedNoteWithOctave;
-            playSingleNoteWithOctave(updatedNoteWithOctave, "8n");
+            state.selectedUserNotes[idx] = `${baseLetter}${newAcc}/${octPart}`;
+            recalculateDescendingOctaves();
+            state.validatedCells[idx] = null;
+            if (!state.validatedCells.includes('error')) {
+                state.staffValidationMode = null;
+            }
+            playSingleNoteWithOctave(state.selectedUserNotes[idx], "8n");
             updateDisplay();
         }
 
         function deleteLastNote() {
             if (state.selectedUserNotes.length > 1) {
-                state.staffValidationMode = null;
+                const removedIdx = state.selectedUserNotes.length - 1;
                 state.selectedUserNotes.pop();
+                state.validatedCells[removedIdx] = null;
+                if (state.editingCellIndex !== null && state.editingCellIndex >= state.selectedUserNotes.length) {
+                    state.editingCellIndex = null;
+                }
+                if (!state.validatedCells.includes('error')) {
+                    state.staffValidationMode = null;
+                }
                 updateDisplay();
             }
         }
 
         function clearSelection() { 
             state.staffValidationMode = null;
+            state.editingCellIndex = null;
+            state.validatedCells = [null, null, null, null];
             state.selectedUserNotes = [state.givenNoteWithOctave]; 
             updateDisplay(); 
         }
 
         function handleDirectNoteInput(noteWithOctave) {
-            state.staffValidationMode = null;
             playSingleNoteWithOctave(noteWithOctave, "8n");
             
             if (noteWithOctave === state.givenNoteWithOctave) {
@@ -1432,8 +1596,30 @@
             const clickedMidi = getNoteWithOctaveMidi(noteWithOctave);
             const existingIndex = state.selectedUserNotes.findIndex(n => n && getNoteWithOctaveMidi(n) === clickedMidi);
 
+            // Si hay una casilla seleccionada para edición y se toca una nueva nota en el piano/MIDI, reemplazar esa casilla
+            if (state.editingCellIndex !== null && state.selectedUserNotes[state.editingCellIndex] && existingIndex === -1) {
+                const targetIdx = state.editingCellIndex;
+                const note = noteWithOctave.split('/')[0];
+                const enharmonic = enharmonicEquivalents[note];
+                state.validatedCells[targetIdx] = null;
+                if (!state.validatedCells.includes('error')) state.staffValidationMode = null;
+
+                if (enharmonic) {
+                    showEnharmonicModal(noteWithOctave, targetIdx);
+                } else {
+                    state.selectedUserNotes[targetIdx] = noteWithOctave;
+                    const nextErr = state.validatedCells.findIndex((val, idx) => idx > 0 && val === 'error');
+                    state.editingCellIndex = nextErr !== -1 ? nextErr : targetIdx;
+                    updateDisplay();
+                }
+                return;
+            }
+
             if (existingIndex !== -1) {
                 state.selectedUserNotes.splice(existingIndex, 1);
+                state.validatedCells = [null, null, null, null];
+                state.editingCellIndex = null;
+                state.staffValidationMode = null;
                 updateDisplay();
                 return;
             }
@@ -1443,10 +1629,10 @@
                 const note = noteWithOctave.split('/')[0];
                 const enharmonic = enharmonicEquivalents[note];
 
-                if (enharmonic) { showEnharmonicModal(noteWithOctave); } 
+                if (enharmonic) { showEnharmonicModal(noteWithOctave, null); } 
                 else { state.selectedUserNotes.push(noteWithOctave); updateDisplay(); }
             } else {
-                showCustomMessage("Límite de notas", `Ya has seleccionado ${expectedCount} notas.`, "warning");
+                showCustomMessage("Voz Completa", "Haz clic en la voz que quieras cambiar o deselecciona una tecla del piano.", "warning");
             }
         }
 
@@ -1456,7 +1642,7 @@
             handleDirectNoteInput(k.dataset.note);
         }
 
-        function showEnharmonicModal(noteWithOctave) {
+        function showEnharmonicModal(noteWithOctave, replaceIndex = null) {
             const [note, octave] = noteWithOctave.split('/');
             const enharmonic = enharmonicEquivalents[note];
             
@@ -1468,7 +1654,13 @@
 
             const handler = (e) => {
                 const selectedNote = e.target.dataset.note;
-                state.selectedUserNotes.push(selectedNote);
+                if (replaceIndex !== null && replaceIndex >= 1) {
+                    state.selectedUserNotes[replaceIndex] = selectedNote;
+                    const nextErr = state.validatedCells.findIndex((val, idx) => idx > 0 && val === 'error');
+                    state.editingCellIndex = nextErr !== -1 ? nextErr : replaceIndex;
+                } else {
+                    state.selectedUserNotes.push(selectedNote);
+                }
                 enharmonicModalOverlay.classList.remove('visible');
                 enharmonicChoicesContainer.innerHTML = '';
                 updateDisplay();
@@ -1498,7 +1690,9 @@
             updateStatsDisplay();
             playCorrectChord();
             state.answerWasShown = true;
+            state.editingCellIndex = null;
             state.selectedUserNotes = [...state.correctNotesWithOctave];
+            state.validatedCells = state.orderedLabelsForDisplay.map((_, i) => i > 0 ? 'correct' : null);
             state.staffValidationMode = 'solution';
             updateDisplay();
             
@@ -1528,6 +1722,8 @@
             
             if (isCorrect) {
                 state.staffValidationMode = 'correct';
+                state.editingCellIndex = null;
+                state.validatedCells = state.orderedLabelsForDisplay.map((_, i) => i > 0 ? 'correct' : null);
                 updateDisplay();
 
                 if (state.answerWasShown) {
@@ -1568,6 +1764,22 @@
             } else {
                 playErrorSound();
                 state.staffValidationMode = 'error';
+
+                let firstErrorIndex = null;
+                for (let i = 1; i < state.orderedLabelsForDisplay.length; i++) {
+                    const uNote = state.selectedUserNotes[i];
+                    const pc = uNote ? getNoteSemitone(uNote.split('/')[0]) : null;
+                    const expectedPc = getNoteSemitone(state.correctNotes[i]);
+                    if (pc === expectedPc) {
+                        state.validatedCells[i] = 'correct';
+                    } else {
+                        state.validatedCells[i] = 'error';
+                        if (firstErrorIndex === null) firstErrorIndex = i;
+                    }
+                }
+                // Seleccionar automáticamente la primera nota errada para que el usuario pueda cambiarla de inmediato
+                state.editingCellIndex = firstErrorIndex !== null ? firstErrorIndex : 1;
+
                 updateDisplay();
                 if (!state.failedCurrentExercise) {
                     state.stats.totalIncorrect++;
@@ -1575,7 +1787,7 @@
                     recordChordStat(false);
                     saveUserData();
                 }
-                showCustomMessage("Revisa el Pentagrama", "Las notas marcadas en rojo no corresponden al bloque armónico.", "error");
+                showCustomMessage("Nota Errada Seleccionada", "Ingresa directamente la nota correcta o haz clic en cualquier voz en rojo para cambiarla.", "error");
                 updateStatsDisplay();
             }
         }
@@ -1614,6 +1826,9 @@
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
             const anyModalOpen = document.querySelector('.modal-overlay.visible:not(#tutorialOverlay)');
             if (anyModalOpen) return;
+
+            if (e.key === 'ArrowUp') { e.preventDefault(); moveCellSelection(-1); return; }
+            if (e.key === 'ArrowDown') { e.preventDefault(); moveCellSelection(1); return; }
 
             const key = e.key.toLowerCase();
             if (['a','b','c','d','e','f','g'].includes(key)) { e.preventDefault(); addNaturalNote(key.toUpperCase()); return; }
@@ -1979,8 +2194,8 @@
             },
             {
                 id: 'displaySection',
-                title: "2. Voces y Pentagrama en Color",
-                text: "A medida que ingresas notas, se dibujan en el pentagrama. Al verificar, la nota guía se muestra en azul, los aciertos en verde y los errores en rojo."
+                title: "2. Selección y Corrección de Voces",
+                text: "Los aciertos se marcan en verde y los errores en rojo. Si una nota es errada, se selecciona automáticamente (o puedes hacer clic en cualquier voz / usar ↑ ↓) para cambiarla directamente por la correcta."
             },
             {
                 id: 'noteBuildingControls',
@@ -2193,6 +2408,10 @@
         function addEventListeners() {
             if(mainAppListenersAttached) return;
 
+            gridCells.forEach((cell, idx) => {
+                cell.addEventListener('click', () => selectCellForEditing(idx));
+            });
+
             confirmAnswerButton.addEventListener('click', checkAnswer);
             undoLastNoteButton.addEventListener('click', deleteLastNote);
             clearAllSelectionButton.addEventListener('click', clearSelection);
@@ -2295,6 +2514,10 @@
                 if (e.key === 'Escape') {
                     document.querySelectorAll('.modal-overlay:not(#welcomeModalOverlay)').forEach(m => m.classList.remove('visible'));
                     if (state.tutorial.isActive) endTutorial();
+                    if (state.editingCellIndex !== null) {
+                        state.editingCellIndex = null;
+                        updateDisplay();
+                    }
                 }
             });
             
