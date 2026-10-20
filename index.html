@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bloque Armónico Pro: Herramienta de Entrenamiento</title>
-    <!-- Evita el error 404 de favicon.ico en GitHub Pages -->
+    <!-- Favicon integrado en SVG para evitar error 404 en GitHub Pages -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎹</text></svg>">
+    <!-- Librerías externas en formato UMD global -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -304,7 +305,6 @@
         </div>
     </div>
 
-    <!-- Main application container -->
     <div id="mainAppContainer" class="container hidden">
         <div class="flex flex-col items-center justify-between mb-1">
             <div class="flex items-center gap-2 flex-wrap justify-center">
@@ -371,7 +371,6 @@
             </div>
         </div>
 
-        <!-- Difficulty & Playback Mode Bar -->
         <div id="difficultySelection" class="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
             <div class="flex items-center gap-2 flex-wrap justify-center">
                 <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">Nivel:</span>
@@ -445,7 +444,6 @@
             </div>
         </div>
 
-        <!-- Selector de Pestañas Móvil -->
         <div id="mobileViewTabs" class="flex md:hidden justify-center bg-slate-500/15 p-1 rounded-lg text-xs font-bold">
             <button data-view="both" type="button" class="mobile-tab-btn flex-1 py-1.5 rounded-md bg-blue-600 text-white">Vista Completa</button>
             <button data-view="grid" type="button" class="mobile-tab-btn flex-1 py-1.5 rounded-md">Solo Voces</button>
@@ -514,7 +512,6 @@
         </div>
     </div>
     
-    <!-- Modal for Hint -->
     <div id="hintModalOverlay" class="modal-overlay hidden">
         <div class="modal-content p-6 rounded-xl shadow-lg">
             <h3 id="hintModalTitle" class="text-2xl font-bold text-amber-500 text-center mb-4">💡 Pista</h3>
@@ -569,7 +566,6 @@
         </div>
     </div>
 
-    <!-- Modal for Custom Challenge Builder -->
     <div id="customChallengeModalOverlay" class="modal-overlay hidden">
         <div class="modal-content p-6 rounded-xl shadow-lg text-left">
             <h3 class="text-2xl font-bold text-purple-500 text-center mb-2">🎯 Creador de Retos a Medida</h3>
@@ -697,18 +693,11 @@
         </div>
     </div>
 
-    <!-- Main application script encapsulado en IIFE para evitar colisiones globales -->
     <script>
     (function() {
         if (window.__BLOQUE_ARMONICO_PRO_LOADED__) return;
         window.__BLOQUE_ARMONICO_PRO_LOADED__ = true;
 
-        const VF = window.Vex ? window.Vex.Flow : {};
-        const { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } = VF;
-
-        // ==========================================
-        // 1. ESTADO Y CONSTANTES
-        // ==========================================
         const state = {
             currentUser: null,
             correctNotes: [], correctNotesWithOctave: [],
@@ -807,13 +796,24 @@
         
         let synth, reverb, feedbackSynth;
 
-        function assignDomElements() {
-            // Limpieza defensiva en caso de elementos duplicados en el DOM
-            const welcomeModals = document.querySelectorAll('#welcomeModalOverlay');
-            if (welcomeModals.length > 1) {
-                welcomeModals.forEach((el, idx) => { if (idx > 0) el.remove(); });
-            }
+        function deduplicateDomElements() {
+            const uniqueIds = [
+                'welcomeModalOverlay', 'mainAppContainer', 'tutorialPromptModalOverlay',
+                'deleteConfirmModalOverlay', 'tutorialOverlay', 'hintModalOverlay',
+                'infoModalOverlay', 'evaluationModalOverlay', 'settingsModalOverlay',
+                'customChallengeModalOverlay', 'shortcutsModalOverlay', 'badgesModalOverlay',
+                'enharmonicModalOverlay', 'historyModalOverlay', 'finalMessageDisplay', 'badgeToast'
+            ];
+            uniqueIds.forEach(id => {
+                const nodes = document.querySelectorAll(`#${id}`);
+                if (nodes.length > 1) {
+                    nodes.forEach((node, idx) => { if (idx > 0) node.remove(); });
+                }
+            });
+        }
 
+        function assignDomElements() {
+            deduplicateDomElements();
             welcomeModalOverlay = document.getElementById('welcomeModalOverlay');
             mainAppContainer = document.getElementById('mainAppContainer');
             chordQuestionText = document.getElementById('chordQuestionText');
@@ -993,7 +993,7 @@
         }
 
         function playSingleNoteWithOctave(noteWithOctave, duration = "8n") {
-            if (!synth || !noteWithOctave) return;
+            if (!synth || !noteWithOctave || typeof Tone === 'undefined') return;
             try {
                 const midiVal = getNoteWithOctaveMidi(noteWithOctave);
                 const freqNote = Tone.Frequency(midiVal, "midi").toNote();
@@ -1043,14 +1043,14 @@
                     btn.classList.add('bg-blue-600', 'text-white');
                     const view = btn.dataset.view;
                     if (view === 'both') {
-                        qArea.classList.remove('hidden');
-                        sArea.classList.remove('hidden');
+                        if (qArea) qArea.classList.remove('hidden');
+                        if (sArea) sArea.classList.remove('hidden');
                     } else if (view === 'grid') {
-                        qArea.classList.remove('hidden');
-                        sArea.classList.add('hidden');
+                        if (qArea) qArea.classList.remove('hidden');
+                        if (sArea) sArea.classList.add('hidden');
                     } else if (view === 'staff') {
-                        qArea.classList.add('hidden');
-                        sArea.classList.remove('hidden');
+                        if (qArea) qArea.classList.add('hidden');
+                        if (sArea) sArea.classList.remove('hidden');
                         drawMusicalStaff(state.selectedUserNotes);
                     }
                 });
@@ -1068,10 +1068,14 @@
             if (!badge) return;
 
             const toast = document.getElementById('badgeToast');
-            document.getElementById('badgeToastIcon').textContent = badge.icon;
-            document.getElementById('badgeToastTitle').textContent = badge.title;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3800);
+            const iconEl = document.getElementById('badgeToastIcon');
+            const titleEl = document.getElementById('badgeToastTitle');
+            if (iconEl) iconEl.textContent = badge.icon;
+            if (titleEl) titleEl.textContent = badge.title;
+            if (toast) {
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3800);
+            }
         }
 
         function checkAchievements(wasFirstTryCorrect) {
@@ -1086,6 +1090,7 @@
 
         function openBadgesModal() {
             const unlocked = state.stats.unlockedBadges || [];
+            if (!badgesGridContainer || !badgesModalOverlay) return;
             badgesGridContainer.innerHTML = BADGES_CATALOG.map(b => {
                 const isUnlocked = unlocked.includes(b.id);
                 return `
@@ -1110,16 +1115,16 @@
             if (!navigator.requestMIDIAccess) return;
 
             navigator.requestMIDIAccess().then(midiAccess => {
-                badge.classList.remove('hidden');
+                if (badge) badge.classList.remove('hidden');
                 const updateDevices = () => {
                     const inputs = Array.from(midiAccess.inputs.values());
                     if (inputs.length > 0) {
-                        text.textContent = "Conectado";
+                        if (text) text.textContent = "Conectado";
                         inputs.forEach(input => {
                             input.onmidimessage = handleMIDIMessage;
                         });
                     } else {
-                        text.textContent = "Listo";
+                        if (text) text.textContent = "Listo";
                     }
                 };
                 updateDevices();
@@ -1128,6 +1133,7 @@
         }
 
         function handleMIDIMessage(message) {
+            if (typeof Tone === 'undefined') return;
             const [command, midiNote, velocity] = message.data;
             if (command === 144 && velocity > 0) {
                 const freqNote = Tone.Frequency(midiNote, "midi").toNote();
@@ -1508,111 +1514,118 @@
         }
 
         function drawMusicalStaff(notesWithOctave = []) {
-            const canvas = musicalStaffCanvas;
-            if (!canvas || !Renderer) return;
-            canvas.classList.remove('fade-in');
-            void canvas.offsetWidth; 
-            canvas.classList.add('fade-in');
+            try {
+                const canvas = musicalStaffCanvas;
+                const VF = window.Vex ? window.Vex.Flow : null;
+                if (!canvas || !VF || !VF.Renderer) return;
+                const { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } = VF;
 
-            const validNotes = notesWithOctave.filter(note => note && note.includes('/'));
-            const hasLowNotes = validNotes.some(n => getNoteWithOctaveMidi(n) < 60) || state.correctNotesWithOctave.some(n => getNoteWithOctaveMidi(n) < 60);
-            const useGrandStaff = state.staffMode === 'grand' || (state.staffMode === 'auto' && (state.voicingType !== 'close' || state.includeBass || hasLowNotes));
+                canvas.classList.remove('fade-in');
+                void canvas.offsetWidth; 
+                canvas.classList.add('fade-in');
 
-            const context = canvas.getContext('2d');
-            const fixedWidth = 320;
-            const fixedHeight = useGrandStaff ? 245 : 155;
-            canvas.width = fixedWidth;
-            canvas.height = fixedHeight;
-            context.clearRect(0, 0, canvas.width, canvas.height);
+                const validNotes = notesWithOctave.filter(note => note && note.includes('/'));
+                const hasLowNotes = validNotes.some(n => getNoteWithOctaveMidi(n) < 60) || state.correctNotesWithOctave.some(n => getNoteWithOctaveMidi(n) < 60);
+                const useGrandStaff = state.staffMode === 'grand' || (state.staffMode === 'auto' && (state.voicingType !== 'close' || state.includeBass || hasLowNotes));
 
-            const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
-            renderer.resize(canvas.width, canvas.height);
-            const ctx = renderer.getContext();
+                const context = canvas.getContext('2d');
+                const fixedWidth = 320;
+                const fixedHeight = useGrandStaff ? 245 : 155;
+                canvas.width = fixedWidth;
+                canvas.height = fixedHeight;
+                context.clearRect(0, 0, canvas.width, canvas.height);
 
-            const defaultStroke = state.darkMode ? '#e2e8f0' : '#1e293b';
-            ctx.setFillStyle(defaultStroke);
-            ctx.setStrokeStyle(defaultStroke);
+                const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
+                renderer.resize(canvas.width, canvas.height);
+                const ctx = renderer.getContext();
 
-            const trebleStave = new Stave(14, 6, fixedWidth - 28);
-            trebleStave.addClef("treble").setContext(ctx).draw();
+                const defaultStroke = state.darkMode ? '#e2e8f0' : '#1e293b';
+                ctx.setFillStyle(defaultStroke);
+                ctx.setStrokeStyle(defaultStroke);
 
-            let bassStave = null;
-            if (useGrandStaff) {
-                bassStave = new Stave(14, 115, fixedWidth - 28);
-                bassStave.addClef("bass").setContext(ctx).draw();
-                ctx.beginPath();
-                ctx.strokeStyle = defaultStroke;
-                ctx.lineWidth = 2;
-                ctx.moveTo(14, trebleStave.getYForLine(0));
-                ctx.lineTo(14, bassStave.getYForLine(4));
-                ctx.stroke();
-            }
+                const trebleStave = new Stave(14, 6, fixedWidth - 28);
+                trebleStave.addClef("treble").setContext(ctx).draw();
 
-            state.lastRenderedStaves = { treble: trebleStave, bass: bassStave, useGrand: useGrandStaff };
+                let bassStave = null;
+                if (useGrandStaff) {
+                    bassStave = new Stave(14, 115, fixedWidth - 28);
+                    bassStave.addClef("bass").setContext(ctx).draw();
+                    ctx.beginPath();
+                    ctx.strokeStyle = defaultStroke;
+                    ctx.lineWidth = 2;
+                    ctx.moveTo(14, trebleStave.getYForLine(0));
+                    ctx.lineTo(14, bassStave.getYForLine(4));
+                    ctx.stroke();
+                }
 
-            if (validNotes.length === 0) return;
+                state.lastRenderedStaves = { treble: trebleStave, bass: bassStave, useGrand: useGrandStaff };
 
-            const sortedNotes = [...validNotes].sort((a, b) => getNoteWithOctaveMidi(a) - getNoteWithOctaveMidi(b));
+                if (validNotes.length === 0) return;
 
-            const styleNoteGroup = (chordStaveNote, notesSubset) => {
-                chordStaveNote.setStyle({ fillStyle: defaultStroke, strokeStyle: defaultStroke });
-                notesSubset.forEach((note, index) => {
-                    const accidentalPart = note.split('/')[0].match(/[#b]+/);
-                    if (accidentalPart) {
-                        const accModifier = new Accidental(accidentalPart[0]);
-                        if (typeof chordStaveNote.addModifier === 'function') {
-                            chordStaveNote.addModifier(accModifier, index);
-                        } else if (typeof chordStaveNote.addAccidental === 'function') {
-                            chordStaveNote.addAccidental(index, accModifier);
+                const sortedNotes = [...validNotes].sort((a, b) => getNoteWithOctaveMidi(a) - getNoteWithOctaveMidi(b));
+
+                const styleNoteGroup = (chordStaveNote, notesSubset) => {
+                    chordStaveNote.setStyle({ fillStyle: defaultStroke, strokeStyle: defaultStroke });
+                    notesSubset.forEach((note, index) => {
+                        const accidentalPart = note.split('/')[0].match(/[#b]+/);
+                        if (accidentalPart) {
+                            const accModifier = new Accidental(accidentalPart[0]);
+                            if (typeof chordStaveNote.addModifier === 'function') {
+                                chordStaveNote.addModifier(accModifier, index);
+                            } else if (typeof chordStaveNote.addAccidental === 'function') {
+                                chordStaveNote.addAccidental(index, accModifier);
+                            }
                         }
+
+                        const voiceIdx = state.selectedUserNotes.indexOf(note);
+                        if (note === state.givenNoteWithOctave || voiceIdx === 0) {
+                            chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" });
+                        } else if (voiceIdx > 0 && state.validatedCells[voiceIdx]) {
+                            const status = state.validatedCells[voiceIdx];
+                            const color = status === 'correct' ? "#16a34a" : (status === 'enharmonic' ? "#d97706" : "#dc2626");
+                            chordStaveNote.setKeyStyle(index, { fillStyle: color, strokeStyle: color });
+                        } else if (state.staffValidationMode === 'solution' || state.staffValidationMode === 'correct') {
+                            chordStaveNote.setKeyStyle(index, { fillStyle: "#16a34a", strokeStyle: "#16a34a" });
+                        } else if (voiceIdx > 0 && voiceIdx === state.editingCellIndex) {
+                            chordStaveNote.setKeyStyle(index, { fillStyle: "#3b82f6", strokeStyle: "#3b82f6" });
+                        }
+                    });
+                };
+
+                if (!useGrandStaff) {
+                    const staveNotes = sortedNotes.map(note => note.split('/')[0] + "/" + note.split('/')[1]);
+                    const chordStaveNote = new StaveNote({ keys: staveNotes, duration: "w", clef: "treble" });
+                    styleNoteGroup(chordStaveNote, sortedNotes);
+                    const voice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([chordStaveNote]);
+                    new Formatter().joinVoices([voice]).format([voice], canvas.width - 55);
+                    voice.draw(ctx, trebleStave);
+                } else {
+                    const trebleNotes = sortedNotes.filter(n => getNoteWithOctaveMidi(n) >= 60);
+                    const bassNotes = sortedNotes.filter(n => getNoteWithOctaveMidi(n) < 60);
+
+                    if (trebleNotes.length > 0) {
+                        const tKeys = trebleNotes.map(n => n.split('/')[0] + "/" + n.split('/')[1]);
+                        const tNote = new StaveNote({ keys: tKeys, duration: "w", clef: "treble" });
+                        styleNoteGroup(tNote, trebleNotes);
+                        const tVoice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([tNote]);
+                        new Formatter().joinVoices([tVoice]).format([tVoice], canvas.width - 55);
+                        tVoice.draw(ctx, trebleStave);
                     }
-
-                    const voiceIdx = state.selectedUserNotes.indexOf(note);
-                    if (note === state.givenNoteWithOctave || voiceIdx === 0) {
-                        chordStaveNote.setKeyStyle(index, { fillStyle: "#2563eb", strokeStyle: "#2563eb" });
-                    } else if (voiceIdx > 0 && state.validatedCells[voiceIdx]) {
-                        const status = state.validatedCells[voiceIdx];
-                        const color = status === 'correct' ? "#16a34a" : (status === 'enharmonic' ? "#d97706" : "#dc2626");
-                        chordStaveNote.setKeyStyle(index, { fillStyle: color, strokeStyle: color });
-                    } else if (state.staffValidationMode === 'solution' || state.staffValidationMode === 'correct') {
-                        chordStaveNote.setKeyStyle(index, { fillStyle: "#16a34a", strokeStyle: "#16a34a" });
-                    } else if (voiceIdx > 0 && voiceIdx === state.editingCellIndex) {
-                        chordStaveNote.setKeyStyle(index, { fillStyle: "#3b82f6", strokeStyle: "#3b82f6" });
+                    if (bassNotes.length > 0 && bassStave) {
+                        const bKeys = bassNotes.map(n => n.split('/')[0] + "/" + n.split('/')[1]);
+                        const bNote = new StaveNote({ keys: bKeys, duration: "w", clef: "bass" });
+                        styleNoteGroup(bNote, bassNotes);
+                        const bVoice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([bNote]);
+                        new Formatter().joinVoices([bVoice]).format([bVoice], canvas.width - 55);
+                        bVoice.draw(ctx, bassStave);
                     }
-                });
-            };
-
-            if (!useGrandStaff) {
-                const staveNotes = sortedNotes.map(note => note.split('/')[0] + "/" + note.split('/')[1]);
-                const chordStaveNote = new StaveNote({ keys: staveNotes, duration: "w", clef: "treble" });
-                styleNoteGroup(chordStaveNote, sortedNotes);
-                const voice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([chordStaveNote]);
-                new Formatter().joinVoices([voice]).format([voice], canvas.width - 55);
-                voice.draw(ctx, trebleStave);
-            } else {
-                const trebleNotes = sortedNotes.filter(n => getNoteWithOctaveMidi(n) >= 60);
-                const bassNotes = sortedNotes.filter(n => getNoteWithOctaveMidi(n) < 60);
-
-                if (trebleNotes.length > 0) {
-                    const tKeys = trebleNotes.map(n => n.split('/')[0] + "/" + n.split('/')[1]);
-                    const tNote = new StaveNote({ keys: tKeys, duration: "w", clef: "treble" });
-                    styleNoteGroup(tNote, trebleNotes);
-                    const tVoice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([tNote]);
-                    new Formatter().joinVoices([tVoice]).format([tVoice], canvas.width - 55);
-                    tVoice.draw(ctx, trebleStave);
                 }
-                if (bassNotes.length > 0 && bassStave) {
-                    const bKeys = bassNotes.map(n => n.split('/')[0] + "/" + n.split('/')[1]);
-                    const bNote = new StaveNote({ keys: bKeys, duration: "w", clef: "bass" });
-                    styleNoteGroup(bNote, bassNotes);
-                    const bVoice = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([bNote]);
-                    new Formatter().joinVoices([bVoice]).format([bVoice], canvas.width - 55);
-                    bVoice.draw(ctx, bassStave);
-                }
+
+                const anyValidated = state.validatedCells.some(v => v !== null) || !!state.staffValidationMode;
+                if (staffFeedbackLegend) staffFeedbackLegend.classList.toggle('hidden', !anyValidated);
+            } catch (err) {
+                console.warn("Aviso al dibujar pentagrama:", err);
             }
-
-            const anyValidated = state.validatedCells.some(v => v !== null) || !!state.staffValidationMode;
-            if (staffFeedbackLegend) staffFeedbackLegend.classList.toggle('hidden', !anyValidated);
         }
 
         function getNoteFromStaffCoordinates(clientX, clientY) {
@@ -1795,7 +1808,7 @@
         }
 
         async function playNotesList(notesWithOctaveList) {
-            if (!synth || !notesWithOctaveList || notesWithOctaveList.length === 0) return;
+            if (!synth || !notesWithOctaveList || notesWithOctaveList.length === 0 || typeof Tone === 'undefined') return;
             const validList = notesWithOctaveList.filter(Boolean);
             if (validList.length === 0) return;
 
@@ -1967,71 +1980,75 @@
         }
 
         function generateExercise() {
-            if (state.errorReviewMode && state.stats.errorBank && state.stats.errorBank.length > 0) {
-                const item = state.stats.errorBank[0];
-                if (item.voicingType) state.voicingType = item.voicingType;
-                if (typeof item.includeBass === 'boolean') {
-                    state.includeBass = item.includeBass;
-                    if (addBassBtn) {
-                        addBassBtn.classList.toggle('bg-amber-600', state.includeBass);
-                        addBassBtn.classList.toggle('text-white', state.includeBass);
+            try {
+                if (state.errorReviewMode && state.stats.errorBank && state.stats.errorBank.length > 0) {
+                    const item = state.stats.errorBank[0];
+                    if (item.voicingType) state.voicingType = item.voicingType;
+                    if (typeof item.includeBass === 'boolean') {
+                        state.includeBass = item.includeBass;
+                        if (addBassBtn) {
+                            addBassBtn.classList.toggle('bg-amber-600', state.includeBass);
+                            addBassBtn.classList.toggle('text-white', state.includeBass);
+                        }
                     }
+                    updateVoicingSelectOptions();
+                    const errBadge = document.getElementById('errorReviewModeBadge');
+                    if (errBadge) errBadge.classList.remove('hidden');
+                    buildExerciseFromParams(item.root, item.chordTypeKey, item.leadLabel, false);
+                    return;
+                } else if (state.errorReviewMode) {
+                    state.errorReviewMode = false;
+                    const errBadge = document.getElementById('errorReviewModeBadge');
+                    if (errBadge) errBadge.classList.add('hidden');
+                    if (errorBankButton) errorBankButton.classList.remove('ring-2', 'ring-white');
+                    showCustomMessage("¡Banco Completado!", "Has dominado todos los acordes pendientes de tu banco de errores.", "success");
                 }
-                updateVoicingSelectOptions();
-                const errBadge = document.getElementById('errorReviewModeBadge');
-                if (errBadge) errBadge.classList.remove('hidden');
-                buildExerciseFromParams(item.root, item.chordTypeKey, item.leadLabel, false);
-                return;
-            } else if (state.errorReviewMode) {
-                state.errorReviewMode = false;
-                const errBadge = document.getElementById('errorReviewModeBadge');
-                if (errBadge) errBadge.classList.add('hidden');
-                if (errorBankButton) errorBankButton.classList.remove('ring-2', 'ring-white');
-                showCustomMessage("¡Banco Completado!", "Has dominado todos los acordes pendientes de tu banco de errores.", "success");
-            }
 
-            if (state.progressionMode) {
-                generateProgressionExercise();
-                return;
-            }
-            const progBadge = document.getElementById('progressionModeBadge');
-            if (progBadge) progBadge.classList.add('hidden');
-
-            const currentPracticeSettings = state.customPractice[state.difficulty];
-            const chords = Object.keys(chordStructures).filter(key => {
-                const chord = chordStructures[key];
-                const matchesDifficulty = (state.difficulty === 'advanced' && chord.difficulty === 'intermediate') || chord.difficulty === state.difficulty;
-                return matchesDifficulty && (!currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key));
-            });
-
-            if (chords.length === 0) {
-                showCustomMessage("Sin Acordes", "No hay acordes seleccionados en Ajustes (S).", "warning");
-                return;
-            }
-
-            const chordTypeKey = chords[Math.floor(Math.random() * chords.length)];
-            const chordData = chordStructures[chordTypeKey];
-            
-            const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
-            const leads = Object.keys(chordData.voicing_rules).filter(label => {
-                const isTension = allTensions.includes(label);
-                if (state.difficulty === 'advanced' ? !isTension : isTension) return false;
-                if (currentPracticeSettings.isActive && currentPracticeSettings.allowedLeads && currentPracticeSettings.allowedLeads.length > 0) {
-                    return currentPracticeSettings.allowedLeads.includes(label);
+                if (state.progressionMode) {
+                    generateProgressionExercise();
+                    return;
                 }
-                return true;
-            });
+                const progBadge = document.getElementById('progressionModeBadge');
+                if (progBadge) progBadge.classList.add('hidden');
 
-            if (leads.length === 0) {
-                showCustomMessage("Filtro de Voces", "Las voces seleccionadas no aplican a estos acordes. Revisa Ajustes (S).", "warning");
-                return;
+                const currentPracticeSettings = state.customPractice[state.difficulty];
+                const chords = Object.keys(chordStructures).filter(key => {
+                    const chord = chordStructures[key];
+                    const matchesDifficulty = (state.difficulty === 'advanced' && chord.difficulty === 'intermediate') || chord.difficulty === state.difficulty;
+                    return matchesDifficulty && (!currentPracticeSettings.isActive || currentPracticeSettings.allowedChords.includes(key));
+                });
+
+                if (chords.length === 0) {
+                    showCustomMessage("Sin Acordes", "No hay acordes seleccionados en Ajustes (S).", "warning");
+                    return;
+                }
+
+                const chordTypeKey = chords[Math.floor(Math.random() * chords.length)];
+                const chordData = chordStructures[chordTypeKey];
+                
+                const allTensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+                const leads = Object.keys(chordData.voicing_rules).filter(label => {
+                    const isTension = allTensions.includes(label);
+                    if (state.difficulty === 'advanced' ? !isTension : isTension) return false;
+                    if (currentPracticeSettings.isActive && currentPracticeSettings.allowedLeads && currentPracticeSettings.allowedLeads.length > 0) {
+                        return currentPracticeSettings.allowedLeads.includes(label);
+                    }
+                    return true;
+                });
+
+                if (leads.length === 0) {
+                    showCustomMessage("Filtro de Voces", "Las voces seleccionadas no aplican a estos acordes. Revisa Ajustes (S).", "warning");
+                    return;
+                }
+                
+                const givenLabel = leads[Math.floor(Math.random() * leads.length)];
+                const possibleRoots = ["C", "F", "G", "Bb", "Eb", "Ab", "Db", "Gb", "D", "A", "E", "B"];
+                const chordRoot = possibleRoots[Math.floor(Math.random() * possibleRoots.length)];
+
+                buildExerciseFromParams(chordRoot, chordTypeKey, givenLabel, false);
+            } catch (err) {
+                console.error("Error al generar ejercicio:", err);
             }
-            
-            const givenLabel = leads[Math.floor(Math.random() * leads.length)];
-            const possibleRoots = ["C", "F", "G", "Bb", "Eb", "Ab", "Db", "Gb", "D", "A", "E", "B"];
-            const chordRoot = possibleRoots[Math.floor(Math.random() * possibleRoots.length)];
-
-            buildExerciseFromParams(chordRoot, chordTypeKey, givenLabel, false);
         }
 
         function openCustomChallengeModal() {
@@ -2524,10 +2541,11 @@
         }
 
         function toggleInputMethod() {
+            if (!pianoContainer) return;
             const isPianoHidden = pianoContainer.classList.contains('hidden');
-            if (isPianoHidden) {
+            if (isPianoHidden && pianoToggle) {
                 pianoToggle.click();
-            } else {
+            } else if (cifradoToggle) {
                 cifradoToggle.click();
             }
         }
@@ -2653,7 +2671,7 @@
         }
 
         function closeSettingsModal() { if (settingsModalOverlay) settingsModalOverlay.classList.remove('visible'); }
-        
+
         function showEvaluationModal() { 
             const totalAttempts = state.stats.totalCorrect + state.stats.totalIncorrect;
             const acc = totalAttempts > 0 ? Math.round((state.stats.totalCorrect / totalAttempts) * 100) : 0;
@@ -2970,11 +2988,13 @@
         }
 
         function saveAsPhoto() {
+            if (typeof html2canvas === 'undefined') return;
             html2canvas(resultsContentToCapture).then(canvas => {
                 const link = document.createElement('a'); link.download = `resultados-${Date.now()}.png`; link.href = canvas.toDataURL(); link.click();
             });
         }
         function saveAsPdf() {
+            if (typeof html2canvas === 'undefined' || !window.jspdf) return;
             const { jsPDF } = window.jspdf;
             html2canvas(resultsContentToCapture).then(canvas => {
                 const pdf = new jsPDF('p', 'mm', 'a4');
@@ -3115,6 +3135,7 @@
         }
 
         function hideAllWelcomeModals() {
+            deduplicateDomElements();
             document.querySelectorAll('#welcomeModalOverlay').forEach(el => {
                 el.classList.remove('visible');
                 el.style.display = 'none';
@@ -3122,16 +3143,20 @@
         }
 
         function showLoginScreen() { 
+            deduplicateDomElements();
             if (welcomeModalOverlay) {
-                welcomeModalOverlay.style.display = '';
+                welcomeModalOverlay.style.display = 'flex';
                 welcomeModalOverlay.classList.add('visible');
             }
             populateUserSelect(); 
         }
 
         function handleLogin() {
-            if (!newUserInput || !userSelect) assignDomElements();
-            const user = (newUserInput && newUserInput.value.trim()) || (userSelect && userSelect.value);
+            assignDomElements();
+            const typedVal = Array.from(document.querySelectorAll('#newUserInput')).map(el => el.value.trim()).find(Boolean) || '';
+            const selectedVal = Array.from(document.querySelectorAll('#userSelect')).map(el => el.value).find(Boolean) || '';
+            const user = typedVal || selectedVal;
+
             if (!user) return showCustomMessage("Atención", "Selecciona o escribe un nombre de perfil.", "error");
             if (user.toLowerCase() === 'invitado') return showCustomMessage("Error", "Nombre reservado.", "error");
             
@@ -3144,14 +3169,17 @@
             if (currentUserName) currentUserName.textContent = user;
             hideAllWelcomeModals();
             
-            if (state.stats.totalExercises === 0) {
+            if (state.stats.totalExercises === 0 && tutorialPromptModalOverlay) {
                 if (tutorialUserName) tutorialUserName.textContent = user;
-                if (tutorialPromptModalOverlay) tutorialPromptModalOverlay.classList.add('visible');
-            } else { initializeApp(false); }
+                tutorialPromptModalOverlay.style.display = 'flex';
+                tutorialPromptModalOverlay.classList.add('visible');
+            } else {
+                initializeApp(false);
+            }
         }
 
         function handleGuestLogin() {
-            if (!currentUserName) assignDomElements();
+            assignDomElements();
             state.currentUser = "Invitado"; 
             if (currentUserName) currentUserName.textContent = "Invitado";
             state.stats = {
@@ -3165,7 +3193,6 @@
             initializeApp(false);
         }
 
-        // Exponer globalmente como respaldo directo para los botones de bienvenida
         window.appHandleLogin = handleLogin;
         window.appHandleGuestLogin = handleGuestLogin;
 
@@ -3221,14 +3248,20 @@
         }
 
         function initializeApp(startWithTutorial) {
+            assignDomElements();
             hideAllWelcomeModals();
-            if (tutorialPromptModalOverlay) tutorialPromptModalOverlay.classList.remove('visible');
-            if (mainAppContainer) mainAppContainer.classList.remove('hidden');
+            if (tutorialPromptModalOverlay) {
+                tutorialPromptModalOverlay.classList.remove('visible');
+                tutorialPromptModalOverlay.style.display = '';
+            }
+            if (mainAppContainer) {
+                mainAppContainer.classList.remove('hidden');
+                mainAppContainer.style.display = 'flex';
+            }
             
             if (state.session.startTime === 0) state.session.startTime = Date.now();
 
             ensureAudioInitialized();
-            
             initWebMIDI();
             updateDifficultySelectionUI();
             updateVoicingSelectOptions();
@@ -3491,10 +3524,22 @@
                 toggleDarkMode();
             }
 
-            const pStart = document.getElementById('promptStartTutorial');
-            const pSkip = document.getElementById('promptSkipTutorial');
-            if (pStart) pStart.addEventListener('click', () => initializeApp(true));
-            if (pSkip) pSkip.addEventListener('click', () => initializeApp(false));
+            // Delegación global de eventos para garantizar funcionamiento aunque se duplique HTML
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#loginButton')) {
+                    e.preventDefault();
+                    handleLogin();
+                } else if (e.target.closest('#guestLoginButton')) {
+                    e.preventDefault();
+                    handleGuestLogin();
+                } else if (e.target.closest('#promptStartTutorial')) {
+                    e.preventDefault();
+                    initializeApp(true);
+                } else if (e.target.closest('#promptSkipTutorial')) {
+                    e.preventDefault();
+                    initializeApp(false);
+                }
+            });
 
             if (newUserInput) {
                 newUserInput.addEventListener('keydown', (e) => {
@@ -3522,6 +3567,7 @@
         } else {
             bootApp();
         }
+        window.addEventListener('load', deduplicateDomElements);
     })();
     </script>
 </body>
