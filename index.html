@@ -432,11 +432,23 @@
         <div class="modal-content p-6 rounded-xl shadow-lg text-left">
             <h3 class="text-2xl font-bold text-blue-500 text-center mb-4">Ajustes de Práctica</h3>
             <div class="mb-4">
-                <h4 class="text-base font-semibold border-b border-slate-500/30 pb-2 mb-2">Tipos de Acorde (<span id="settingsLevelLabel"></span>)</h4>
+                <div class="flex justify-between items-center border-b border-slate-500/30 pb-2 mb-2">
+                    <h4 class="text-base font-semibold">Tipos de Acorde (<span id="settingsLevelLabel"></span>)</h4>
+                    <div class="flex gap-1.5 text-xs">
+                        <button id="selectAllChordsBtn" type="button" class="px-2 py-0.5 rounded bg-blue-500/15 text-blue-500 font-bold hover:bg-blue-500/25">Todos</button>
+                        <button id="deselectAllChordsBtn" type="button" class="px-2 py-0.5 rounded bg-slate-500/15 opacity-80 font-bold hover:bg-slate-500/25">Ninguno</button>
+                    </div>
+                </div>
                 <div id="chordTypesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm"></div>
             </div>
             <div id="leadVoicesSection" class="mb-4">
-                <h4 class="text-base font-semibold border-b border-slate-500/30 pb-2 mb-2">Filtrar por Voz Superior (Intervalo Guía)</h4>
+                <div class="flex justify-between items-center border-b border-slate-500/30 pb-2 mb-2">
+                    <h4 class="text-base font-semibold">Filtrar por Voz Superior (Intervalo Guía)</h4>
+                    <div class="flex gap-1.5 text-xs">
+                        <button id="selectAllLeadsBtn" type="button" class="px-2 py-0.5 rounded bg-blue-500/15 text-blue-500 font-bold hover:bg-blue-500/25">Todas</button>
+                        <button id="deselectAllLeadsBtn" type="button" class="px-2 py-0.5 rounded bg-slate-500/15 opacity-80 font-bold hover:bg-slate-500/25">Ninguna</button>
+                    </div>
+                </div>
                 <div id="leadVoicesCheckboxes" class="grid grid-cols-3 sm:grid-cols-4 gap-2 text-sm"></div>
             </div>
             <div class="flex justify-center gap-4 mt-6">
@@ -1117,6 +1129,9 @@
                 showCustomMessage("¡Banco Completado!", "Has dominado todos los acordes pendientes.", "success");
             }
 
+            const cfg = state.customPractice[state.difficulty];
+            const tensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+
             if (state.progressionMode) {
                 const keys = ["C", "F", "G", "Bb", "Eb", "Ab", "D", "A"];
                 if (state.progression.step === 0 || !state.progression.keyRoot) {
@@ -1128,8 +1143,11 @@
                 const cRoot = calculateNoteName(state.progression.keyRoot, steps[step]);
                 const cType = state.difficulty === 'basic' ? (step === 0 ? 'minor' : 'major') : (step === 0 ? 'm7' : (step === 1 ? '7' : 'maj7'));
                 const cData = chordStructures[cType];
-                const tensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
                 let cLeads = Object.keys(cData.voicing_rules).filter(l => state.difficulty === 'advanced' ? tensions.includes(l) : !tensions.includes(l));
+                if (cfg.isActive && cfg.allowedLeads && cfg.allowedLeads.length > 0) {
+                    const filteredLeads = cLeads.filter(l => cfg.allowedLeads.includes(l));
+                    if (filteredLeads.length > 0) cLeads = filteredLeads;
+                }
                 if (!cLeads.length) cLeads = Object.keys(cData.voicing_rules);
                 const lead = cLeads[Math.floor(Math.random() * cLeads.length)];
                 if (el('progressionModeBadge')) {
@@ -1141,23 +1159,26 @@
             }
             if (el('progressionModeBadge')) el('progressionModeBadge').classList.add('hidden');
 
-            const cfg = state.customPractice[state.difficulty];
             const chords = Object.keys(chordStructures).filter(k => {
                 const c = chordStructures[k];
                 const m = (state.difficulty === 'advanced' && c.difficulty === 'intermediate') || c.difficulty === state.difficulty;
                 return m && (!cfg.isActive || cfg.allowedChords.includes(k));
             });
             if (!chords.length) return showCustomMessage("Sin Acordes", "Activa acordes en Ajustes (S).", "warning");
-            const cKey = chords[Math.floor(Math.random() * chords.length)];
-            const tensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
-            const leads = Object.keys(chordStructures[cKey].voicing_rules).filter(l => {
-                const isT = tensions.includes(l);
-                if (state.difficulty === 'advanced' ? !isT : isT) return false;
-                return !(cfg.isActive && cfg.allowedLeads && cfg.allowedLeads.length && !cfg.allowedLeads.includes(l));
+            const validPool = [];
+            chords.forEach(k => {
+                const validLeads = Object.keys(chordStructures[k].voicing_rules).filter(l => {
+                    const isT = tensions.includes(l);
+                    if (state.difficulty === 'advanced' ? !isT : isT) return false;
+                    return !(cfg.isActive && cfg.allowedLeads && cfg.allowedLeads.length && !cfg.allowedLeads.includes(l));
+                });
+                if (validLeads.length > 0) validPool.push({ chordKey: k, leads: validLeads });
             });
-            if (!leads.length) return showCustomMessage("Filtro de Voces", "Revisa Ajustes (S).", "warning");
+            if (!validPool.length) return showCustomMessage("Filtro de Voces", "Las voces seleccionadas no están presentes en esos acordes. Revisa Ajustes (S).", "warning");
+            const chosenEntry = validPool[Math.floor(Math.random() * validPool.length)];
+            const chosenLead = chosenEntry.leads[Math.floor(Math.random() * chosenEntry.leads.length)];
             const roots = ["C", "F", "G", "Bb", "Eb", "Ab", "Db", "Gb", "D", "A", "E", "B"];
-            buildExerciseFromParams(roots[Math.floor(Math.random() * roots.length)], cKey, leads[Math.floor(Math.random() * leads.length)], false);
+            buildExerciseFromParams(roots[Math.floor(Math.random() * roots.length)], chosenEntry.chordKey, chosenLead, false);
         }
 
         function addNaturalNote(note) {
@@ -1364,6 +1385,13 @@
             if (!state.stats.chordBreakdown) state.stats.chordBreakdown = {};
             if (!state.stats.errorBank) state.stats.errorBank = [];
             if (!state.stats.pastSessions) state.stats.pastSessions = [];
+            if (data.customPractice) {
+                state.customPractice = {
+                    basic: { isActive: false, allowedChords: [], allowedLeads: [], ...(data.customPractice.basic || {}) },
+                    intermediate: { isActive: false, allowedChords: [], allowedLeads: [], ...(data.customPractice.intermediate || {}) },
+                    advanced: { isActive: false, allowedChords: [], allowedLeads: [], ...(data.customPractice.advanced || {}) }
+                };
+            }
             state.session.startTime = Date.now();
         }
 
@@ -1393,7 +1421,7 @@
                 });
             }
             const c6 = document.createElement('div'); c6.className = 'piano-key white'; c6.dataset.note = 'C/6'; c6.dataset.midi = getNoteWithOctaveMidi('C/6'); p.appendChild(c6);
-            const blacks = { "C#/3":1, "D#/3":2, "F#/3":4, "G#/3":5, "A#/3":6, "C#/4":8, "D#/4":9, "F#/4":11, "G#/4":12, "A#/4":13, "C#/5":15, "D#/5":16, "F#/5":18, "G#/5":19, "A#/4":13, "A#/5":20 };
+            const blacks = { "C#/3":1, "D#/3":2, "F#/3":4, "G#/3":5, "A#/3":6, "C#/4":8, "D#/4":9, "F#/4":11, "G#/4":12, "A#/4":13, "C#/5":15, "D#/5":16, "F#/5":18, "G#/5":19, "A#/5":20 };
             for (const n in blacks) {
                 const k = document.createElement('div'); k.className = 'piano-key black'; k.dataset.note = n; k.dataset.midi = getNoteWithOctaveMidi(n);
                 k.style.left = `calc(100% / 22 * ${blacks[n]})`; p.appendChild(k);
@@ -1677,16 +1705,81 @@
             if (el('switchUserButton')) el('switchUserButton').addEventListener('click', () => { saveUserData(); el('mainAppContainer').classList.add('hidden'); el('welcomeModalOverlay').classList.add('visible'); populateUserSelect(); });
             if (el('fullscreenButton')) el('fullscreenButton').addEventListener('click', () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen().catch(() => {}); });
 
+            const renderLeadVoiceCheckboxes = (selectedChordKeys, preserveSelection = null) => {
+                const tensions = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
+                const cfg = state.customPractice[state.difficulty];
+                const availableLeads = new Set();
+                selectedChordKeys.forEach(k => {
+                    if (!chordStructures[k]) return;
+                    Object.keys(chordStructures[k].voicing_rules).forEach(l => {
+                        const isT = tensions.includes(l);
+                        if (state.difficulty === 'advanced' ? isT : !isT) availableLeads.add(l);
+                    });
+                });
+                const leadsArr = Array.from(availableLeads);
+                if (!el('leadVoicesCheckboxes')) return;
+                if (leadsArr.length === 0) {
+                    el('leadVoicesCheckboxes').innerHTML = `<span class="col-span-full text-xs opacity-70">Selecciona al menos un tipo de acorde arriba.</span>`;
+                    return;
+                }
+                el('leadVoicesCheckboxes').innerHTML = leadsArr.map(l => {
+                    const isChecked = preserveSelection !== null
+                        ? preserveSelection.includes(l)
+                        : (!cfg.isActive || !cfg.allowedLeads || cfg.allowedLeads.length === 0 || cfg.allowedLeads.includes(l));
+                    return `<label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-500/10"><input type="checkbox" value="${l}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded"> <span class="font-mono font-bold">Voz: ${l}</span></label>`;
+                }).join('');
+            };
+
             if (el('settingsButton')) el('settingsButton').addEventListener('click', () => {
+                const levelNames = { basic: 'Básico', intermediate: 'Intermedio', advanced: 'Avanzado' };
+                if (el('settingsLevelLabel')) el('settingsLevelLabel').textContent = levelNames[state.difficulty] || state.difficulty;
+                const cfg = state.customPractice[state.difficulty];
                 const rel = Object.keys(chordStructures).filter(k => state.difficulty === 'basic' ? chordStructures[k].difficulty === 'basic' : chordStructures[k].difficulty === 'intermediate');
-                el('chordTypesCheckboxes').innerHTML = rel.map(k => `<label class="flex items-center gap-2"><input type="checkbox" value="${k}" checked> ${chordStructures[k].name}</label>`).join('');
-                el('leadVoicesCheckboxes').innerHTML = '';
+                el('chordTypesCheckboxes').innerHTML = rel.map(k => {
+                    const isChecked = !cfg.isActive || !cfg.allowedChords || cfg.allowedChords.length === 0 || cfg.allowedChords.includes(k);
+                    return `<label class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-500/10"><input type="checkbox" value="${k}" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-blue-600 rounded"> <span>${chordStructures[k].name}</span></label>`;
+                }).join('');
+
+                const getCheckedChords = () => Array.from(el('chordTypesCheckboxes').querySelectorAll('input:checked')).map(x => x.value);
+                const getCheckedLeads = () => Array.from(el('leadVoicesCheckboxes').querySelectorAll('input:checked')).map(x => x.value);
+
+                renderLeadVoiceCheckboxes(getCheckedChords(), null);
+
+                el('chordTypesCheckboxes').querySelectorAll('input').forEach(cb => {
+                    cb.addEventListener('change', () => renderLeadVoiceCheckboxes(getCheckedChords(), getCheckedLeads()));
+                });
+
                 el('settingsModalOverlay').classList.add('visible');
             });
+
+            if (el('selectAllChordsBtn')) el('selectAllChordsBtn').addEventListener('click', () => {
+                el('chordTypesCheckboxes').querySelectorAll('input').forEach(cb => { cb.checked = true; });
+                const checkedChords = Array.from(el('chordTypesCheckboxes').querySelectorAll('input:checked')).map(x => x.value);
+                renderLeadVoiceCheckboxes(checkedChords, null);
+                el('leadVoicesCheckboxes').querySelectorAll('input').forEach(cb => { cb.checked = true; });
+            });
+            if (el('deselectAllChordsBtn')) el('deselectAllChordsBtn').addEventListener('click', () => {
+                el('chordTypesCheckboxes').querySelectorAll('input').forEach(cb => { cb.checked = false; });
+                renderLeadVoiceCheckboxes([], []);
+            });
+            if (el('selectAllLeadsBtn')) el('selectAllLeadsBtn').addEventListener('click', () => {
+                el('leadVoicesCheckboxes').querySelectorAll('input').forEach(cb => { cb.checked = true; });
+            });
+            if (el('deselectAllLeadsBtn')) el('deselectAllLeadsBtn').addEventListener('click', () => {
+                el('leadVoicesCheckboxes').querySelectorAll('input').forEach(cb => { cb.checked = false; });
+            });
+
             if (el('cancelSettingsButton')) el('cancelSettingsButton').addEventListener('click', () => el('settingsModalOverlay').classList.remove('visible'));
             if (el('saveSettingsButton')) el('saveSettingsButton').addEventListener('click', () => {
+                const checkedChords = Array.from(el('chordTypesCheckboxes').querySelectorAll('input:checked')).map(x => x.value);
+                const checkedLeads = Array.from(el('leadVoicesCheckboxes').querySelectorAll('input:checked')).map(x => x.value);
+                if (checkedChords.length === 0 || checkedLeads.length === 0) {
+                    return showCustomMessage("Atención", "Selecciona al menos un tipo de acorde y una voz superior.", "error");
+                }
                 state.customPractice[state.difficulty].isActive = true;
-                state.customPractice[state.difficulty].allowedChords = Array.from(el('chordTypesCheckboxes').querySelectorAll('input:checked')).map(x => x.value);
+                state.customPractice[state.difficulty].allowedChords = checkedChords;
+                state.customPractice[state.difficulty].allowedLeads = checkedLeads;
+                saveUserData();
                 el('settingsModalOverlay').classList.remove('visible');
                 generateExercise();
             });
