@@ -12,14 +12,14 @@
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-        window.tailwind = {
-            config: {
-                darkMode: ['class', '.dark-mode']
-            }
-        };
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        if (window.tailwind) {
+            window.tailwind.config = {
+                darkMode: ['class', '.dark-mode']
+            };
+        }
+    </script>
 
     <style>
         :root {
@@ -49,6 +49,9 @@
         *, *::before, *::after {
             box-sizing: border-box;
         }
+        .hidden {
+            display: none !important;
+        }
         html, body {
             min-height: 100%;
             width: 100%;
@@ -68,9 +71,35 @@
             text-rendering: optimizeLegibility;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
+        body.tutorial-active-padding {
+            padding-bottom: 260px !important;
+        }
         code, kbd, .font-mono {
             font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace !important;
         }
+        button, select, input {
+            font-family: inherit;
+        }
+        .modal-content button, #statusBar button, #difficultySelection button, #advancedModesToolbar button {
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .modal-content select, .modal-content input[type="text"] {
+            width: 100%;
+            padding: 0.55rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
+            color: #0f172a;
+            font-weight: 700;
+        }
+        #welcomeLoginBtn { background-color: #16a34a; color: #ffffff; padding: 0.65rem 1.25rem; }
+        #welcomeGuestBtn { background-color: #475569; color: #ffffff; padding: 0.65rem 1.25rem; }
+        #welcomeDeleteUserBtn { background-color: #ef4444; color: #ffffff; padding: 0.5rem 0.75rem; }
+        #welcomeExportJsonBtn { background-color: rgba(245, 158, 11, 0.18); color: #b45309; padding: 0.45rem 0.75rem; }
+        #welcomeImportJsonBtn { background-color: rgba(147, 51, 234, 0.18); color: #7e22ce; padding: 0.45rem 0.75rem; }
         .container {
             background-color: var(--bg-container);
             padding: 1.25rem;
@@ -273,9 +302,9 @@
         .grid-cell.cell-common-tone { border-left: 4px solid #0d9488; }
         @keyframes pulseUrgent { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
         .timer-urgent { animation: pulseUrgent 0.6s infinite; background-color: rgba(239, 68, 68, 0.2) !important; border-color: #ef4444 !important; color: #ef4444 !important; }
-        #tutorialOverlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.72); z-index: 2000; }
-        #tutorialModal { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--bg-container); color: var(--text-main); padding: 1.25rem 1.5rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 430px; width: 92%; border: 2px solid #3b82f6; z-index: 2005; }
-        .tutorial-highlight { position: relative; z-index: 2001; box-shadow: 0 0 0 4px #3b82f6, 0 0 20px 10px rgba(59, 130, 246, 0.65); border-radius: 8px; transition: box-shadow 0.3s ease-in-out; }
+        #tutorialOverlay { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.55); z-index: 2000; pointer-events: none; }
+        #tutorialModal { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background-color: var(--bg-container); color: var(--text-main); padding: 1.15rem 1.35rem; border-radius: 14px; box-shadow: 0 15px 35px rgba(0,0,0,0.65); max-width: 440px; width: 94%; border: 2px solid #3b82f6; z-index: 2010; pointer-events: auto; }
+        .tutorial-highlight { position: relative; z-index: 2002; background-color: var(--bg-container) !important; box-shadow: 0 0 0 4px #3b82f6, 0 0 25px 8px rgba(59, 130, 246, 0.55); border-radius: 10px; transition: box-shadow 0.3s ease-in-out; }
         #badgeToast { position: fixed; bottom: 20px; right: 20px; z-index: 3000; transform: translateY(150%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         #badgeToast.show { transform: translateY(0); }
         @media (max-width: 768px) {
@@ -284,6 +313,13 @@
             .action-buttons-group button { min-width: 0; padding: 0.6rem 0.35rem; font-size: 0.82rem; }
             #confirmAnswerButton, #changeQuestionButton { grid-column: 1 / -1; }
             .piano-container { height: 135px; }
+            #floatingHarmonizationModal {
+                left: 2.5vw !important;
+                right: 2.5vw !important;
+                bottom: 8px !important;
+                width: 95vw !important;
+                max-height: 62vh !important;
+            }
         }
     </style>
 </head>
@@ -387,6 +423,10 @@
                     <div class="text-[10px] font-bold text-sky-700">⏱️ Tiempo</div>
                     <div id="liveTimerText" class="text-xs font-mono font-extrabold text-sky-700">0.0s</div>
                 </div>
+                <div id="batchProgressBadge" class="flex flex-col items-center px-2.5 py-1 rounded-xl bg-purple-500/10 border border-purple-500/30" title="Progreso hacia el próximo Balance Evaluativo">
+                    <div class="text-[10px] font-bold text-purple-700">📋 Balance</div>
+                    <div id="batchProgressText" class="text-xs font-mono font-extrabold text-purple-700">0/5</div>
+                </div>
                 <div id="midiStatusBadge" class="flex flex-col items-center px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 cursor-pointer hover:bg-emerald-500/20 transition-colors" title="Haz clic para detectar o reconectar tu teclado MIDI USB">
                     <div class="text-[10px] font-bold text-emerald-700">🎹 MIDI</div>
                     <div id="midiStatusText" class="text-xs font-extrabold text-emerald-700">Conectar</div>
@@ -399,6 +439,7 @@
                     <input type="radio" id="notationLatino" name="notationSystem" value="latin" class="hidden">
                     <label for="notationLatino" class="py-1 px-2.5 text-xs font-bold rounded-full cursor-pointer transition-colors">Do,Re,Mi</label>
                 </div>
+                <button id="endSessionTopBtn" type="button" class="bg-red-600 hover:bg-red-700 text-white font-bold px-2.5 h-8 flex items-center justify-center gap-1 rounded-full shadow-sm transition-colors text-xs cursor-pointer" title="Terminar Sesión y Ver Estadística Completa de la Sesión en Curso">🏁 Terminar</button>
                 <button id="errorBankButton" type="button" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-2.5 h-8 flex items-center justify-center gap-1 rounded-full shadow-sm transition-colors text-xs cursor-pointer" title="Banco de Errores (W)">🔄 <span id="errorBankCount">0</span></button>
                 <button id="badgesButton" type="button" class="bg-amber-500 hover:bg-amber-600 text-white font-bold w-8 h-8 flex items-center justify-center rounded-full shadow-sm text-sm cursor-pointer" title="Logros y Medallas (L)">🏆</button>
                 <button id="customChallengeButton" type="button" class="bg-purple-600 hover:bg-purple-700 text-white font-bold w-8 h-8 flex items-center justify-center rounded-full shadow-sm text-sm cursor-pointer" title="Creador de Retos a Medida (E)">🎯</button>
@@ -484,6 +525,15 @@
                         <option value="15">⚡ 15s</option>
                         <option value="30">🔥 30s</option>
                         <option value="45">⏳ 45s</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-1">
+                    <label for="evalBatchSelect" class="font-extrabold" title="Define cada cuántos ejercicios deseas ver el Balance Evaluativo">Evaluar:</label>
+                    <select id="evalBatchSelect" class="py-1 px-2 font-bold rounded-lg border border-purple-500/50 bg-white text-slate-800">
+                        <option value="5" selected>📋 Cada 5 Ej.</option>
+                        <option value="10">📋 Cada 10 Ej.</option>
+                        <option value="15">📋 Cada 15 Ej.</option>
+                        <option value="0">♾️ Libre (Sin corte)</option>
                     </select>
                 </div>
             </div>
@@ -682,11 +732,11 @@
             </div>
         </div>
 
-        <!-- Panel de Continuidad Armónica (8 Compases) -->
-        <div id="continuityPanel" class="hidden flex-col gap-2 p-3 bg-teal-500/10 rounded-xl border border-teal-500/30 text-xs">
+        <!-- Panel de Tonicización -->
+        <div id="tonicizationPanel" class="hidden flex-col gap-2 p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/30 text-xs">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="font-extrabold text-teal-800 flex items-center gap-1.5">
-                    <span>🎼 Progresión de 8 Compases (Continuidad Armónica siempre a 4 Voces • Tríadas agregan 6ta Mayor • Navega con ← / →)</span>
+                <div class="font-extrabold text-indigo-800 flex items-center gap-1.5">
+                    <span>🔗 Progresión de Tonicización</span>
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap">
                     <select id="tonicizationFormulaSelect" class="py-1 px-2 font-bold rounded-lg border border-indigo-400/50 bg-white text-slate-800 text-xs">
@@ -899,10 +949,50 @@
                 </div>
                 <div id="leadVoicesCheckboxes" class="grid grid-cols-3 sm:grid-cols-4 gap-2 text-xs"></div>
             </div>
+            <div class="mb-4 pt-2 border-t border-slate-300 flex items-center justify-between gap-2">
+                <label for="settingsEvalFreqSelect" class="text-xs sm:text-sm font-bold">📋 Frecuencia del Balance Evaluativo:</label>
+                <select id="settingsEvalFreqSelect" class="py-1.5 px-3 rounded-lg border border-slate-300 bg-white text-slate-900 font-bold text-xs w-auto">
+                    <option value="5">Cada 5 ejercicios</option>
+                    <option value="10">Cada 10 ejercicios</option>
+                    <option value="15">Cada 15 ejercicios</option>
+                    <option value="0">Desactivado (Modo Libre)</option>
+                </select>
+            </div>
             <div class="flex justify-center gap-3 mt-5">
                 <button id="saveSettingsButton" type="button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg cursor-pointer">Guardar y Aplicar</button>
                 <button id="cancelSettingsButton" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg cursor-pointer">Cancelar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Balance Evaluativo (Cada 5 o 10 Ejercicios) -->
+    <div id="evaluationModalOverlay" class="modal-overlay">
+        <div class="modal-content p-6 rounded-xl shadow-2xl text-left max-w-lg">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                <h3 class="text-xl sm:text-2xl font-extrabold text-blue-600">📋 Balance Evaluativo de la Tanda</h3>
+                <span id="evalBatchSizeTag" class="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 font-extrabold text-xs">5 Ejercicios</span>
+            </div>
+            <div id="evaluationSummary" class="mb-3"></div>
+            <p class="text-xs font-extrabold uppercase tracking-wider text-indigo-800 mt-3 mb-1.5">💡 Recomendaciones Pedagógicas y Diagnóstico:</p>
+            <ul id="adviceList" class="list-disc list-inside opacity-90 space-y-1 text-xs sm:text-sm bg-slate-50 p-3 rounded-xl border border-slate-200 text-slate-800"></ul>
+            <div class="flex flex-col sm:flex-row justify-center gap-3 mt-5">
+                <button id="continueTrainingButton" type="button" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-2.5 px-4 rounded-lg shadow-md cursor-pointer text-xs sm:text-sm">▶️ Continuar Entrenamiento</button>
+                <button id="endSessionButton" type="button" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 px-4 rounded-lg shadow-md cursor-pointer text-xs sm:text-sm">🏁 Terminar Sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla / Modal de Estadística Completa al Terminar Sesión -->
+    <div id="finalMessageDisplay" class="container hidden p-6 text-center max-w-3xl">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-2">🏁 ¡Sesión Terminada! — Balance de la Sesión en Curso</h2>
+        <p class="text-xs opacity-75 mb-4">Este resumen ha quedado guardado automáticamente en tu Historial de Sesiones.</p>
+        <div id="resultsContentToCapture" class="p-3 bg-slate-500/5 rounded-xl border border-slate-500/20 text-left"></div>
+        <div class="flex flex-wrap justify-center gap-2.5 mt-5">
+            <button id="resumePracticeFromFinalBtn" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2 px-4 rounded-lg text-xs sm:text-sm cursor-pointer">▶️ Iniciar Nueva Sesión</button>
+            <button id="switchUserFinalButton" type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg text-xs sm:text-sm cursor-pointer">👥 Cambiar de Usuario</button>
+            <button id="exportCsvFinalButton" type="button" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg text-xs sm:text-sm cursor-pointer">📥 Exportar CSV Docente</button>
+            <button id="saveAsPhotoButton" type="button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-xs sm:text-sm cursor-pointer">📸 Guardar Foto (PNG)</button>
+            <button id="saveAsPdfButton" type="button" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded-lg text-xs sm:text-sm cursor-pointer">📄 Guardar Reporte PDF</button>
         </div>
     </div>
 
@@ -1324,6 +1414,13 @@
                 <button id="applyCustomMelodyManualBtn" type="button" class="bg-teal-600 hover:bg-teal-700 text-white font-extrabold py-2 px-4 rounded-lg text-xs sm:text-sm shadow-md cursor-pointer">
                     🧩 Cargar para Armonización Manual
                 </button>
+                <button id="exportCustomMelodyJsonBtn" type="button" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-3.5 rounded-lg text-xs sm:text-sm shadow-md cursor-pointer" title="Descargar esta melodía personalizada para compartirla con estudiantes">
+                    💾 Exportar Melodía (.JSON)
+                </button>
+                <button id="importCustomMelodyJsonBtn" type="button" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3.5 rounded-lg text-xs sm:text-sm shadow-md cursor-pointer" title="Cargar una melodía personalizada desde un archivo .JSON">
+                    📂 Importar Melodía (.JSON)
+                </button>
+                <input type="file" id="customMelodyJsonInput" accept=".json" class="hidden">
                 <button id="closeCustomMelodyModalBtn" type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg text-xs sm:text-sm cursor-pointer">
                     Cancelar
                 </button>
@@ -1350,10 +1447,38 @@
             editingCellIndex: null,
             validatedCells: [null, null, null, null, null, null],
             exerciseSolved: false,
+            failedCurrentExercise: false,
             stats: {
                 totalExercises: 0, totalCorrect: 0, totalIncorrect: 0, currentStreak: 0,
                 unlockedBadges: [], chordBreakdown: {}, leadBreakdown: {}, errorBank: [],
-                totalResponseTimeSec: 0, timedExercisesCount: 0
+                totalResponseTimeSec: 0, timedExercisesCount: 0,
+                pastSessions: [], sessionHistory: [],
+                competencies: {
+                    close4Way: { correct: 0, total: 0 },
+                    openDropsSpreads: { correct: 0, total: 0 },
+                    melodicApproaches: { correct: 0, total: 0 },
+                    earDictation: { correct: 0, total: 0 }
+                }
+            },
+            evaluation: {
+                exercisesPerEval: 5,
+                questionsAttemptedInBatch: 0,
+                batchCorrectFirstTry: 0,
+                batchIncorrect: 0,
+                batchHintsUsed: 0,
+                batchTotalTimeSec: 0,
+                batchChordsFailed: {}
+            },
+            currentSession: {
+                startTime: Date.now(),
+                exercises: 0,
+                correct: 0,
+                incorrect: 0,
+                hintsUsed: 0,
+                totalTimeSec: 0,
+                timedCount: 0,
+                chordBreakdown: {},
+                exercisesLog: []
             },
             difficulty: 'intermediate',
             notationSystem: 'american',
@@ -1483,22 +1608,245 @@
                 if (!raw) return;
                 const parsed = JSON.parse(raw);
                 if (parsed.currentUser) state.currentUser = parsed.currentUser;
-                if (parsed.stats) state.stats = { ...state.stats, ...parsed.stats };
+                if (parsed.stats) {
+                    state.stats = {
+                        ...state.stats,
+                        ...parsed.stats,
+                        pastSessions: Array.isArray(parsed.stats.pastSessions) ? parsed.stats.pastSessions : [],
+                        sessionHistory: Array.isArray(parsed.stats.sessionHistory) ? parsed.stats.sessionHistory : [],
+                        competencies: {
+                            close4Way: { correct: 0, total: 0 },
+                            openDropsSpreads: { correct: 0, total: 0 },
+                            melodicApproaches: { correct: 0, total: 0 },
+                            earDictation: { correct: 0, total: 0 },
+                            ...(parsed.stats.competencies || {})
+                        }
+                    };
+                }
+                if (typeof parsed.exercisesPerEval === 'number') {
+                    state.evaluation.exercisesPerEval = parsed.exercisesPerEval;
+                }
                 if (typeof parsed.darkMode === 'boolean') {
                     state.darkMode = parsed.darkMode;
                     document.body.classList.toggle('dark-mode', state.darkMode);
                 }
+                loadUserProfileStats(state.currentUser);
             } catch (e) {}
+        }
+
+        function loadUserProfileStats(username) {
+            if (!username) return;
+            try {
+                const rawUser = localStorage.getItem('bloqueArmonicoUser_' + username);
+                if (rawUser) {
+                    const p = JSON.parse(rawUser);
+                    if (p.stats) {
+                        state.stats = {
+                            totalExercises: 0, totalCorrect: 0, totalIncorrect: 0, currentStreak: 0,
+                            unlockedBadges: [], chordBreakdown: {}, leadBreakdown: {}, errorBank: [],
+                            totalResponseTimeSec: 0, timedExercisesCount: 0,
+                            pastSessions: [], sessionHistory: [],
+                            ...p.stats,
+                            competencies: {
+                                close4Way: { correct: 0, total: 0 },
+                                openDropsSpreads: { correct: 0, total: 0 },
+                                melodicApproaches: { correct: 0, total: 0 },
+                                earDictation: { correct: 0, total: 0 },
+                                ...(p.stats.competencies || {})
+                            }
+                        };
+                    }
+                    if (typeof p.exercisesPerEval === 'number') {
+                        state.evaluation.exercisesPerEval = p.exercisesPerEval;
+                    }
+                }
+            } catch (e) {}
+            resetCurrentSessionTracker();
+        }
+
+        function resetCurrentSessionTracker() {
+            state.currentSession = {
+                startTime: Date.now(),
+                exercises: 0,
+                correct: 0,
+                incorrect: 0,
+                hintsUsed: 0,
+                totalTimeSec: 0,
+                timedCount: 0,
+                chordBreakdown: {},
+                exercisesLog: []
+            };
+            state.evaluation.questionsAttemptedInBatch = 0;
+            state.evaluation.batchCorrectFirstTry = 0;
+            state.evaluation.batchIncorrect = 0;
+            state.evaluation.batchHintsUsed = 0;
+            state.evaluation.batchTotalTimeSec = 0;
+            state.evaluation.batchChordsFailed = {};
         }
 
         function savePersistedState() {
             try {
-                localStorage.setItem('bloqueArmonicoPro_v2', JSON.stringify({
+                const payload = {
                     currentUser: state.currentUser,
                     stats: state.stats,
+                    exercisesPerEval: state.evaluation.exercisesPerEval,
                     darkMode: state.darkMode
-                }));
+                };
+                localStorage.setItem('bloqueArmonicoPro_v2', JSON.stringify(payload));
+                if (state.currentUser) {
+                    localStorage.setItem('bloqueArmonicoUser_' + state.currentUser, JSON.stringify(payload));
+                }
             } catch (e) {}
+        }
+
+        function recordCurrentSessionToHistory() {
+            const sess = state.currentSession;
+            if (!sess || (sess.correct === 0 && sess.incorrect === 0)) return null;
+            const durationSec = Math.max(1, Math.round((Date.now() - sess.startTime) / 1000));
+            const tot = sess.correct + sess.incorrect;
+            const acc = tot > 0 ? Math.round((sess.correct / tot) * 100) : 0;
+            const avgTime = sess.timedCount > 0 ? (sess.totalTimeSec / sess.timedCount).toFixed(1) : '-';
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' +
+                            now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            const record = {
+                id: 'sess_' + Date.now(),
+                date: dateStr,
+                durationSec,
+                exercises: tot,
+                correct: sess.correct,
+                incorrect: sess.incorrect,
+                accuracy: acc,
+                avgTimeSec: avgTime,
+                chordBreakdown: { ...(sess.chordBreakdown || {}) },
+                exercisesLog: [...(sess.exercisesLog || [])]
+            };
+            if (!Array.isArray(state.stats.pastSessions)) state.stats.pastSessions = [];
+            state.stats.pastSessions.unshift(record);
+            if (state.stats.pastSessions.length > 50) state.stats.pastSessions.pop();
+            savePersistedState();
+            return record;
+        }
+
+        function buildStatsReportHTML(mode = 'history') {
+            const isCurrentOnly = mode === 'current_session';
+            const sess = state.currentSession;
+            const totCorrect = isCurrentOnly ? (sess.correct || 0) : (state.stats.totalCorrect || 0);
+            const totIncorrect = isCurrentOnly ? (sess.incorrect || 0) : (state.stats.totalIncorrect || 0);
+            const tot = totCorrect + totIncorrect;
+            const acc = tot > 0 ? Math.round((totCorrect / tot) * 100) : 0;
+            const avgSpeed = isCurrentOnly
+                ? (sess.timedCount > 0 ? (sess.totalTimeSec / sess.timedCount).toFixed(1) + 's' : '-')
+                : (state.stats.timedExercisesCount > 0 ? (state.stats.totalResponseTimeSec / state.stats.timedExercisesCount).toFixed(1) + 's' : '-');
+            const durMin = Math.max(1, Math.round((Date.now() - (sess.startTime || Date.now())) / 60000));
+
+            const bdSource = isCurrentOnly ? (sess.chordBreakdown || {}) : (state.stats.chordBreakdown || {});
+            const bdEntries = Object.entries(bdSource).map(([key, val]) => {
+                const c = val.correct || 0;
+                const inc = val.incorrect || 0;
+                const sum = c + inc;
+                const pct = sum > 0 ? Math.round((c / sum) * 100) : 100;
+                return { key, correct: c, incorrect: inc, total: sum, pct, failedLeads: val.failedLeads || {} };
+            }).sort((a, b) => (b.incorrect - a.incorrect) || (a.pct - b.pct));
+
+            const comp = state.stats.competencies || {
+                close4Way: { correct: 0, total: 0 },
+                openDropsSpreads: { correct: 0, total: 0 },
+                melodicApproaches: { correct: 0, total: 0 },
+                earDictation: { correct: 0, total: 0 }
+            };
+            const fmtComp = (obj) => obj && obj.total > 0 ? Math.round((obj.correct / obj.total) * 100) + '% (' + obj.correct + '/' + obj.total + ')' : 'Sin datos';
+
+            const competenciesHtml = `
+                <div class="text-left mt-3 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                    <div class="text-xs font-extrabold uppercase text-indigo-800 mb-2">🎯 Dominio por Competencias Armónicas:</div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                        <div class="p-2 rounded-lg bg-white/80 text-slate-900 border border-slate-200"><div class="text-[10px] font-bold text-slate-500">4-Way Close</div><div class="font-extrabold text-indigo-700">${fmtComp(comp.close4Way)}</div></div>
+                        <div class="p-2 rounded-lg bg-white/80 text-slate-900 border border-slate-200"><div class="text-[10px] font-bold text-slate-500">Drops y Spreads</div><div class="font-extrabold text-teal-700">${fmtComp(comp.openDropsSpreads)}</div></div>
+                        <div class="p-2 rounded-lg bg-white/80 text-slate-900 border border-slate-200"><div class="text-[10px] font-bold text-slate-500">Armoniz. Melódica</div><div class="font-extrabold text-emerald-700">${fmtComp(comp.melodicApproaches)}</div></div>
+                        <div class="p-2 rounded-lg bg-white/80 text-slate-900 border border-slate-200"><div class="text-[10px] font-bold text-slate-500">Dictado Auditivo</div><div class="font-extrabold text-pink-700">${fmtComp(comp.earDictation)}</div></div>
+                    </div>
+                </div>
+            `;
+
+            const deficienciesHtml = bdEntries.length > 0
+                ? '<div class="text-left mt-3"><div class="text-xs font-extrabold uppercase text-rose-700 mb-1.5">🔍 Diagnóstico de Errores Más Comunes y Mayor Deficiencia:</div>' +
+                  '<div class="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">' +
+                  bdEntries.map(item => {
+                      const chordName = chordStructures[item.key]?.name || item.key;
+                      const worstLeads = Object.entries(item.failedLeads).sort((a, b) => b[1] - a[1]).map(([l, cnt]) => 'Voz ' + l + ' (' + cnt + 'x)').join(', ');
+                      const badgeCol = item.pct < 60 ? 'bg-red-100 text-red-900 border-red-300' : (item.pct < 85 ? 'bg-amber-100 text-amber-900 border-amber-300' : 'bg-emerald-100 text-emerald-900 border-emerald-300');
+                      return `<div class="p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 flex flex-wrap items-center justify-between gap-2 text-xs">` +
+                          `<div><span class="font-extrabold">${chordName}</span> ` +
+                          (worstLeads ? `<span class="text-[11px] text-rose-700 font-semibold">— Mayor deficiencia en: ${worstLeads}</span>` : `<span class="text-[11px] text-emerald-700">— Sin fallos registrados</span>`) +
+                          `</div>` +
+                          `<span class="px-2 py-0.5 rounded font-mono font-bold border ${badgeCol}">${item.pct}% (${item.correct}✅ / ${item.incorrect}❌)</span>` +
+                          `</div>`;
+                  }).join('') + '</div></div>'
+                : '<div class="text-xs opacity-75 my-2 text-center">Aún no hay suficientes ejercicios registrados en esta vista.</div>';
+
+            const pastSessions = state.stats.pastSessions || [];
+            const sessionsHistoryHtml = !isCurrentOnly
+                ? '<div class="text-left mt-3 pt-2 border-t border-slate-300"><div class="text-xs font-extrabold uppercase text-blue-700 mb-1.5">🗂️ Historial de Todas las Sesiones Realizadas (' + pastSessions.length + '):</div>' +
+                  (pastSessions.length > 0
+                      ? '<div class="space-y-1.5 max-h-[185px] overflow-y-auto pr-1">' +
+                        pastSessions.map((s, idx) =>
+                            '<div class="p-2 rounded-lg border border-slate-200 bg-white text-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">' +
+                                '<div><span class="font-extrabold text-blue-800">#' + (pastSessions.length - idx) + ' • ' + s.date + '</span> <span class="text-[11px] opacity-75">(' + Math.max(1, Math.round((s.durationSec || 60) / 60)) + ' min)</span></div>' +
+                                '<div class="flex items-center gap-2 font-mono font-bold">' +
+                                    '<span class="text-green-700">✅ ' + s.correct + '</span>' +
+                                    '<span class="text-red-600">❌ ' + s.incorrect + '</span>' +
+                                    '<span class="px-2 py-0.5 rounded bg-blue-100 text-blue-900">' + s.accuracy + '%</span>' +
+                                    '<span class="text-sky-700">⏱️ ' + s.avgTimeSec + (s.avgTimeSec !== '-' ? 's' : '') + '</span>' +
+                                '</div>' +
+                            '</div>'
+                        ).join('') + '</div>'
+                      : '<div class="text-xs opacity-75 italic">Todavía no has finalizado sesiones previas. Pulsa "🏁 Terminar" para guardar el corte de tu sesión actual en el historial.</div>') +
+                  '</div>'
+                : '';
+
+            const currentLogHtml = (sess.exercisesLog && sess.exercisesLog.length > 0)
+                ? '<div class="text-left mt-3 pt-2 border-t border-slate-300"><div class="text-xs font-extrabold uppercase text-teal-700 mb-1">📝 Ejercicios Realizados en la Sesión en Curso (' + sess.exercisesLog.length + '):</div>' +
+                  '<div class="flex flex-wrap gap-1.5 max-h-[110px] overflow-y-auto pr-1">' +
+                  sess.exercisesLog.map((lg, i) =>
+                      '<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold border ' + (lg.ok ? 'bg-green-50 text-green-800 border-green-300' : 'bg-red-50 text-red-800 border-red-300') + '">' +
+                      (i + 1) + '. ' + lg.chord + ' (' + lg.lead + ') ' + (lg.ok ? '✓' : '✗') + ' ' + lg.time + 's</span>'
+                  ).join('') + '</div></div>'
+                : '';
+
+            return `
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 my-2 text-center">
+                    <div class="p-2.5 rounded-xl bg-slate-500/10"><div class="text-[11px] opacity-75 font-bold">${isCurrentOnly ? 'Aciertos Sesión' : 'Aciertos Totales'}</div><div class="text-xl font-extrabold text-green-600">${totCorrect} ✅ / ${totIncorrect} ❌</div></div>
+                    <div class="p-2.5 rounded-xl bg-slate-500/10"><div class="text-[11px] opacity-75 font-bold">Precisión</div><div class="text-xl font-extrabold text-blue-600">${acc}%</div></div>
+                    <div class="p-2.5 rounded-xl bg-slate-500/10"><div class="text-[11px] opacity-75 font-bold">Velocidad Prom.</div><div class="text-xl font-extrabold text-sky-600">⏱️ ${avgSpeed}</div></div>
+                    <div class="p-2.5 rounded-xl bg-slate-500/10"><div class="text-[11px] opacity-75 font-bold">${isCurrentOnly ? 'Tiempo Sesión' : 'Racha Actual'}</div><div class="text-xl font-extrabold text-amber-600">${isCurrentOnly ? ('⏳ ' + durMin + ' min') : ('🔥 ' + (state.stats.currentStreak || 0))}</div></div>
+                </div>
+                ${competenciesHtml}
+                ${deficienciesHtml}
+                ${currentLogHtml}
+                ${sessionsHistoryHtml}
+            `;
+        }
+
+        function stopExerciseTimer() {
+            if (state.timer.intervalId) {
+                clearInterval(state.timer.intervalId);
+                state.timer.intervalId = null;
+            }
+            el('timerStatusBadge')?.classList.remove('timer-urgent');
+            return (Date.now() - state.timer.exerciseStartTime) / 1000;
+        }
+
+        function triggerEndCurrentSession() {
+            stopExerciseTimer();
+            recordCurrentSessionToHistory();
+            el('evaluationModalOverlay')?.classList.remove('visible');
+            el('historyModalOverlay')?.classList.remove('visible');
+            el('mainAppContainer')?.classList.add('hidden');
+            if (el('resultsContentToCapture')) {
+                el('resultsContentToCapture').innerHTML = buildStatsReportHTML('current_session');
+            }
+            el('finalMessageDisplay')?.classList.remove('hidden');
         }
 
         function showFeedbackBanner(message, type = 'info') {
@@ -5489,6 +5837,11 @@
             if (el('valIncorrect')) el('valIncorrect').textContent = state.stats.totalIncorrect || 0;
             if (el('errorBankCount')) el('errorBankCount').textContent = (state.stats.errorBank || []).length;
             if (el('currentUserName')) el('currentUserName').textContent = state.currentUser || 'Invitado';
+            if (el('evalBatchSelect')) el('evalBatchSelect').value = String(state.evaluation.exercisesPerEval ?? 5);
+            if (el('batchProgressText')) {
+                const freq = state.evaluation.exercisesPerEval;
+                el('batchProgressText').textContent = freq > 0 ? `${state.evaluation.questionsAttemptedInBatch}/${freq}` : 'Libre';
+            }
 
             updatePianoVisuals(state.selectedUserNotes);
             drawMusicalStaff(state.selectedUserNotes);
@@ -6277,6 +6630,7 @@
             state.validatedCells = [null, null, null, null, null, null];
             state.editingCellIndex = null;
             state.exerciseSolved = false;
+            state.failedCurrentExercise = false;
             showFeedbackBanner('');
             updateDisplay();
             startExerciseTimer();
@@ -6345,6 +6699,7 @@
                     const isNew = Boolean(typed);
                     state.currentUser = user;
                     saveUserToCatalog(user);
+                    loadUserProfileStats(user);
                     savePersistedState();
                     populateWelcomeUserSelect();
                     updateDisplay();
@@ -6359,6 +6714,7 @@
             if (el('welcomeGuestBtn')) {
                 el('welcomeGuestBtn').addEventListener('click', () => {
                     state.currentUser = 'Invitado';
+                    loadUserProfileStats('Invitado');
                     savePersistedState();
                     updateDisplay();
                     el('welcomeModalOverlay')?.classList.remove('visible');
@@ -6482,6 +6838,63 @@
             if (el('timerModeSelect')) el('timerModeSelect').addEventListener('change', (e) => {
                 state.timer.limitSeconds = parseInt(e.target.value, 10) || 0;
                 startExerciseTimer();
+            });
+            if (el('evalBatchSelect')) el('evalBatchSelect').addEventListener('change', (e) => {
+                state.evaluation.exercisesPerEval = parseInt(e.target.value, 10) || 0;
+                state.evaluation.questionsAttemptedInBatch = 0;
+                savePersistedState();
+                updateDisplay();
+                showFeedbackBanner(
+                    state.evaluation.exercisesPerEval > 0
+                        ? `📋 Balance Evaluativo configurado cada ${state.evaluation.exercisesPerEval} ejercicios.`
+                        : '♾️ Balance Evaluativo automático desactivado (Modo Libre).',
+                    'info'
+                );
+            });
+            if (el('endSessionTopBtn')) el('endSessionTopBtn').addEventListener('click', triggerEndCurrentSession);
+            if (el('continueTrainingButton')) el('continueTrainingButton').addEventListener('click', () => {
+                el('evaluationModalOverlay')?.classList.remove('visible');
+                generateStandAloneExercise();
+            });
+            if (el('endSessionButton')) el('endSessionButton').addEventListener('click', triggerEndCurrentSession);
+            if (el('resumePracticeFromFinalBtn')) el('resumePracticeFromFinalBtn').addEventListener('click', () => {
+                resetCurrentSessionTracker();
+                el('finalMessageDisplay')?.classList.add('hidden');
+                el('mainAppContainer')?.classList.remove('hidden');
+                updateDisplay();
+                generateStandAloneExercise();
+            });
+            if (el('switchUserFinalButton')) el('switchUserFinalButton').addEventListener('click', () => {
+                resetCurrentSessionTracker();
+                el('finalMessageDisplay')?.classList.add('hidden');
+                populateWelcomeUserSelect();
+                el('welcomeModalOverlay')?.classList.add('visible');
+            });
+            if (el('exportCsvFinalButton')) el('exportCsvFinalButton').addEventListener('click', () => el('exportTeacherCsvButton')?.click());
+            if (el('saveAsPhotoButton')) el('saveAsPhotoButton').addEventListener('click', async () => {
+                const target = el('resultsContentToCapture');
+                if (!target || typeof html2canvas === 'undefined') return;
+                try {
+                    const canvas = await html2canvas(target, { backgroundColor: '#ffffff', scale: 2 });
+                    const a = document.createElement('a');
+                    a.download = 'reporte_sesion_' + state.currentUser + '.png';
+                    a.href = canvas.toDataURL('image/png');
+                    a.click();
+                } catch (e) {}
+            });
+            if (el('saveAsPdfButton')) el('saveAsPdfButton').addEventListener('click', async () => {
+                const target = el('resultsContentToCapture');
+                if (!target || typeof html2canvas === 'undefined' || !window.jspdf) return;
+                try {
+                    const canvas = await html2canvas(target, { backgroundColor: '#ffffff', scale: 2 });
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const w = pdf.internal.pageSize.getWidth() - 20;
+                    const h = (canvas.height * w) / canvas.width;
+                    pdf.addImage(imgData, 'PNG', 10, 15, w, Math.min(h, 265));
+                    pdf.save('reporte_sesion_' + state.currentUser + '.pdf');
+                } catch (e) {}
             });
             if (el('autoFillQuickButton')) el('autoFillQuickButton').addEventListener('click', () => {
                 state.selectedUserNotes = [...state.correctNotesWithOctave];
@@ -6698,35 +7111,7 @@
             });
 
             if (el('viewHistoryButton')) el('viewHistoryButton').addEventListener('click', () => {
-                const tot = (state.stats.totalCorrect || 0) + (state.stats.totalIncorrect || 0);
-                const acc = tot > 0 ? Math.round((state.stats.totalCorrect / tot) * 100) : 0;
-                const bd = state.stats.chordBreakdown || {};
-                const bdEntries = Object.entries(bd).map(([key, val]) => {
-                    const c = val.correct || 0;
-                    const inc = val.incorrect || 0;
-                    const sum = c + inc;
-                    const pct = sum > 0 ? Math.round((c / sum) * 100) : 100;
-                    return { key, correct: c, incorrect: inc, total: sum, pct, failedLeads: val.failedLeads || {} };
-                }).sort((a, b) => (b.incorrect - a.incorrect) || (a.pct - b.pct));
-
                 const errBank = state.stats.errorBank || [];
-                const deficienciesHtml = bdEntries.length > 0
-                    ? '<div class="text-left mt-3"><div class="text-xs font-extrabold uppercase text-rose-700 mb-1.5">🔍 Diagnóstico de Errores Más Comunes y Mayor Deficiencia:</div>' +
-                      '<div class="space-y-1.5 max-h-[210px] overflow-y-auto pr-1">' +
-                      bdEntries.map(item => {
-                          const chordName = chordStructures[item.key]?.name || item.key;
-                          const worstLeads = Object.entries(item.failedLeads).sort((a, b) => b[1] - a[1]).map(([l, cnt]) => 'Voz ' + l + ' (' + cnt + 'x)').join(', ');
-                          const badgeCol = item.pct < 60 ? 'bg-red-100 text-red-900 border-red-300' : (item.pct < 85 ? 'bg-amber-100 text-amber-900 border-amber-300' : 'bg-emerald-100 text-emerald-900 border-emerald-300');
-                          return '<div class="p-2 rounded-lg border border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-2 text-xs">' +
-                              '<div><span class="font-extrabold text-slate-900">' + chordName + '</span> ' +
-                              (worstLeads ? '<span class="text-[11px] text-rose-700 font-semibold">— Mayor deficiencia en: ' + worstLeads + '</span>' : '<span class="text-[11px] text-emerald-700">— Sin fallos registrados</span>') +
-                              '</div>' +
-                              '<div class="flex items-center gap-1.5">' +
-                              '<span class="px-2 py-0.5 rounded font-mono font-bold border ' + badgeCol + '">' + item.pct + '% (' + item.correct + '✅ / ' + item.incorrect + '❌)</span>' +
-                              '</div></div>';
-                      }).join('') + '</div></div>'
-                    : '<div class="text-xs opacity-75 my-2">Aún no hay suficientes ejercicios registrados para el diagnóstico por especie de acorde.</div>';
-
                 const pendingBankHtml = errBank.length > 0
                     ? '<div class="text-left mt-3 pt-2 border-t border-slate-200"><div class="text-xs font-extrabold uppercase text-amber-800 mb-1">🔄 Acordes Específicos Pendientes en tu Banco de Errores (' + errBank.length + '):</div>' +
                       '<div class="flex flex-wrap gap-1.5">' +
@@ -6738,12 +7123,7 @@
                     : '';
 
                 if (el('historyModalContent')) {
-                    el('historyModalContent').innerHTML =
-                        '<div class="grid grid-cols-3 gap-2 my-2">' +
-                        '<div class="p-3 rounded-xl bg-slate-500/10"><div class="text-xs opacity-75">Aciertos</div><div class="text-xl font-extrabold text-green-600">' + (state.stats.totalCorrect || 0) + '</div></div>' +
-                        '<div class="p-3 rounded-xl bg-slate-500/10"><div class="text-xs opacity-75">Precisión Global</div><div class="text-xl font-extrabold text-blue-600">' + acc + '%</div></div>' +
-                        '<div class="p-3 rounded-xl bg-slate-500/10"><div class="text-xs opacity-75">Racha Actual</div><div class="text-xl font-extrabold text-amber-600">🔥 ' + (state.stats.currentStreak || 0) + '</div></div></div>' +
-                        deficienciesHtml + pendingBankHtml;
+                    el('historyModalContent').innerHTML = buildStatsReportHTML('history') + pendingBankHtml;
 
                     el('historyModalContent').querySelectorAll('.practice-err-item-btn').forEach(btn => {
                         btn.addEventListener('click', (e) => {
@@ -6765,6 +7145,7 @@
                             state.selectedUserNotes = [state.givenNoteWithOctave];
                             state.validatedCells = [null, null, null, null, null, null];
                             state.exerciseSolved = false;
+                            state.failedCurrentExercise = false;
                             el('historyModalOverlay')?.classList.remove('visible');
                             updateDisplay();
                         });
@@ -6812,16 +7193,30 @@
             ];
             const showTutStep = () => {
                 const s = TUTORIAL_STEPS[state.tutorial.currentStep];
-                if (!s) { el('tutorialOverlay')?.classList.add('hidden'); return; }
+                if (!s) {
+                    el('tutorialOverlay')?.classList.add('hidden');
+                    document.body.classList.remove('tutorial-active-padding');
+                    return;
+                }
+                el('tutorialPromptModalOverlay')?.classList.remove('visible');
+                document.body.classList.add('tutorial-active-padding');
                 document.querySelectorAll('.tutorial-highlight').forEach(x => x.classList.remove('tutorial-highlight'));
                 if (el('tutorialStepBadge')) el('tutorialStepBadge').textContent = 'Paso ' + (state.tutorial.currentStep + 1) + ' de ' + TUTORIAL_STEPS.length;
                 if (el('tutorialTitle')) el('tutorialTitle').textContent = s.title;
                 if (el('tutorialText')) el('tutorialText').textContent = s.text;
-                const t = el(s.id);
-                if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'center' }); t.classList.add('tutorial-highlight'); }
+                let targetId = s.id;
+                if (targetId === 'melodicAnalysisStudioPanel' && !state.melodicStudio.isActive) {
+                    targetId = 'advancedModesToolbar';
+                }
+                const t = el(targetId);
+                if (t) {
+                    t.classList.add('tutorial-highlight');
+                    t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             };
             if (el('showTutorialButton')) el('showTutorialButton').addEventListener('click', () => {
                 state.tutorial.currentStep = 0;
+                el('tutorialPromptModalOverlay')?.classList.remove('visible');
                 el('tutorialOverlay')?.classList.remove('hidden');
                 showTutStep();
             });
@@ -6831,6 +7226,7 @@
             });
             if (el('tutorialOpenShortcutsBtn')) el('tutorialOpenShortcutsBtn').addEventListener('click', () => {
                 el('tutorialOverlay')?.classList.add('hidden');
+                document.body.classList.remove('tutorial-active-padding');
                 document.querySelectorAll('.tutorial-highlight').forEach(x => x.classList.remove('tutorial-highlight'));
                 el('shortcutsModalOverlay')?.classList.add('visible');
             });
@@ -6843,6 +7239,7 @@
             });
             if (el('tutorialEndButton')) el('tutorialEndButton').addEventListener('click', () => {
                 el('tutorialOverlay')?.classList.add('hidden');
+                document.body.classList.remove('tutorial-active-padding');
                 document.querySelectorAll('.tutorial-highlight').forEach(x => x.classList.remove('tutorial-highlight'));
             });
 
@@ -6850,6 +7247,7 @@
                 const rel = Object.keys(chordStructures).filter(k => state.difficulty === 'basic' ? chordStructures[k].difficulty === 'basic' : chordStructures[k].difficulty === 'intermediate');
                 const cfg = state.customPractice[state.difficulty];
                 if (el('settingsLevelLabel')) el('settingsLevelLabel').textContent = state.difficulty;
+                if (el('settingsEvalFreqSelect')) el('settingsEvalFreqSelect').value = String(state.evaluation.exercisesPerEval ?? 5);
                 if (el('chordTypesCheckboxes')) {
                     el('chordTypesCheckboxes').innerHTML = rel.map(k => {
                         const chk = !cfg.isActive || !cfg.allowedChords.length || cfg.allowedChords.includes(k);
@@ -6878,6 +7276,11 @@
                 const c = Array.from(el('chordTypesCheckboxes')?.querySelectorAll('input:checked') || []).map(x => x.value);
                 const l = Array.from(el('leadVoicesCheckboxes')?.querySelectorAll('input:checked') || []).map(x => x.value);
                 state.customPractice[state.difficulty] = { isActive: true, allowedChords: c, allowedLeads: l };
+                if (el('settingsEvalFreqSelect')) {
+                    state.evaluation.exercisesPerEval = parseInt(el('settingsEvalFreqSelect').value, 10) || 0;
+                    state.evaluation.questionsAttemptedInBatch = 0;
+                }
+                savePersistedState();
                 el('settingsModalOverlay')?.classList.remove('visible');
                 generateStandAloneExercise();
             });
@@ -7518,6 +7921,37 @@
             if (el('applyCustomMelodyManualBtn')) {
                 el('applyCustomMelodyManualBtn').addEventListener('click', () => buildAndLoadCustomMelodyIntoStudio(true));
             }
+            if (el('exportCustomMelodyJsonBtn')) {
+                el('exportCustomMelodyJsonBtn').addEventListener('click', () => {
+                    const draft = state.melodicStudio.customEditorDraft;
+                    if (!draft) return;
+                    const blob = new Blob([JSON.stringify({ type: 'bloqueArmonicoMelody', version: 1, draft }, null, 2)], { type: 'application/json' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'melodia_personalizada_' + draft.barsCount + 'C.json';
+                    a.click();
+                });
+            }
+            if (el('importCustomMelodyJsonBtn')) {
+                el('importCustomMelodyJsonBtn').addEventListener('click', () => el('customMelodyJsonInput')?.click());
+            }
+            if (el('customMelodyJsonInput')) {
+                el('customMelodyJsonInput').addEventListener('change', (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        try {
+                            const parsed = JSON.parse(ev.target.result);
+                            if (parsed && parsed.draft && Array.isArray(parsed.draft.measures)) {
+                                state.melodicStudio.customEditorDraft = parsed.draft;
+                                renderCustomMelodyEditorUI();
+                            }
+                        } catch (err) {}
+                    };
+                    reader.readAsText(file);
+                });
+            }
             if (el('closeCustomMelodyModalBtn')) {
                 el('closeCustomMelodyModalBtn').addEventListener('click', () => el('customMelodyModalOverlay')?.classList.remove('visible'));
             }
@@ -7612,17 +8046,66 @@
                     }
                     if (allOk) {
                         const elapsed = (Date.now() - state.timer.exerciseStartTime) / 1000;
-                        state.stats.totalCorrect++;
-                        state.stats.currentStreak++;
+                        const wasAlreadySolved = state.exerciseSolved;
                         state.exerciseSolved = true;
-                        if (!state.stats.chordBreakdown) state.stats.chordBreakdown = {};
-                        if (!state.stats.chordBreakdown[state.chordTypeKey]) {
-                            state.stats.chordBreakdown[state.chordTypeKey] = { correct: 0, incorrect: 0, failedLeads: {} };
+
+                        if (!wasAlreadySolved) {
+                            state.stats.totalExercises = (state.stats.totalExercises || 0) + 1;
+                            if (!state.failedCurrentExercise) {
+                                state.stats.totalCorrect++;
+                                state.stats.currentStreak++;
+                                state.currentSession.correct++;
+                                state.evaluation.batchCorrectFirstTry++;
+                            }
+                            state.currentSession.exercises++;
+                            if (elapsed > 0 && elapsed < 180) {
+                                state.stats.totalResponseTimeSec = (state.stats.totalResponseTimeSec || 0) + elapsed;
+                                state.stats.timedExercisesCount = (state.stats.timedExercisesCount || 0) + 1;
+                                state.currentSession.totalTimeSec += elapsed;
+                                state.currentSession.timedCount++;
+                                state.evaluation.batchTotalTimeSec += elapsed;
+                            }
+                            const cifLog = chordStructures[state.chordTypeKey]?.cifrado || '';
+                            state.currentSession.exercisesLog.push({
+                                chord: displayNote(state.chordRoot) + cifLog,
+                                lead: state.givenLabel,
+                                ok: !state.failedCurrentExercise,
+                                time: elapsed.toFixed(1)
+                            });
+
+                            if (!state.stats.chordBreakdown) state.stats.chordBreakdown = {};
+                            if (!state.stats.chordBreakdown[state.chordTypeKey]) {
+                                state.stats.chordBreakdown[state.chordTypeKey] = { correct: 0, incorrect: 0, failedLeads: {} };
+                            }
+                            if (!state.currentSession.chordBreakdown[state.chordTypeKey]) {
+                                state.currentSession.chordBreakdown[state.chordTypeKey] = { correct: 0, incorrect: 0, failedLeads: {} };
+                            }
+                            if (!state.failedCurrentExercise) {
+                                state.stats.chordBreakdown[state.chordTypeKey].correct++;
+                                state.currentSession.chordBreakdown[state.chordTypeKey].correct++;
+                            }
+
+                            if (!state.stats.competencies) {
+                                state.stats.competencies = {
+                                    close4Way: { correct: 0, total: 0 },
+                                    openDropsSpreads: { correct: 0, total: 0 },
+                                    melodicApproaches: { correct: 0, total: 0 },
+                                    earDictation: { correct: 0, total: 0 }
+                                };
+                            }
+                            const compKey = state.melodicStudio.isActive
+                                ? 'melodicApproaches'
+                                : (state.dictationMode ? 'earDictation' : (state.voicingType === 'close' ? 'close4Way' : 'openDropsSpreads'));
+                            state.stats.competencies[compKey].total++;
+                            if (!state.failedCurrentExercise) state.stats.competencies[compKey].correct++;
+
+                            if (state.errorReviewMode && state.stats.errorBank && !state.failedCurrentExercise) {
+                                state.stats.errorBank.shift();
+                            }
+
+                            state.evaluation.questionsAttemptedInBatch++;
                         }
-                        state.stats.chordBreakdown[state.chordTypeKey].correct++;
-                        if (state.errorReviewMode && state.stats.errorBank) {
-                            state.stats.errorBank.shift();
-                        }
+
                         unlockBadge('first_chord');
                         if (state.stats.totalCorrect >= 10) unlockBadge('triad_master');
                         if (state.stats.currentStreak >= 3) unlockBadge('streak_3');
@@ -7649,19 +8132,95 @@
                             renderContinuityPanel();
                         }
                         playNotesList(state.correctNotesWithOctave);
+
+                        // Verificar si se alcanzó el límite de la tanda para mostrar el Balance Evaluativo (5, 10 o 15 ejercicios)
+                        const evalTarget = state.evaluation.exercisesPerEval || 0;
+                        if (!wasAlreadySolved && evalTarget > 0 && state.evaluation.questionsAttemptedInBatch >= evalTarget && !state.melodicStudio.isActive) {
+                            setTimeout(() => {
+                                const bPerf = state.evaluation.batchCorrectFirstTry;
+                                const bInc = state.evaluation.batchIncorrect;
+                                const bPct = Math.round((bPerf / evalTarget) * 100);
+                                const avgBatchT = (state.evaluation.batchTotalTimeSec / evalTarget).toFixed(1);
+                                const totGlobal = (state.stats.totalCorrect || 0) + (state.stats.totalIncorrect || 0);
+                                const globalAcc = totGlobal > 0 ? Math.round((state.stats.totalCorrect / totGlobal) * 100) : 100;
+
+                                if (el('evalBatchSizeTag')) el('evalBatchSizeTag').textContent = `Tanda de ${evalTarget} Ejercicios`;
+                                if (el('evaluationSummary')) {
+                                    el('evaluationSummary').innerHTML = `
+                                        <div class="grid grid-cols-3 gap-2 text-center my-2">
+                                            <div class="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                                                <div class="text-[10px] font-bold opacity-75">Precisión Tanda</div>
+                                                <div class="text-lg font-extrabold text-blue-600">${bPct}% (${bPerf}/${evalTarget})</div>
+                                            </div>
+                                            <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                                <div class="text-[10px] font-bold opacity-75">Precisión Global</div>
+                                                <div class="text-lg font-extrabold text-emerald-600">${globalAcc}%</div>
+                                            </div>
+                                            <div class="p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/20">
+                                                <div class="text-[10px] font-bold opacity-75">Tiempo Promedio</div>
+                                                <div class="text-lg font-extrabold text-sky-600">⏱️ ${avgBatchT}s</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                                const failedEntries = Object.entries(state.evaluation.batchChordsFailed || {});
+                                const tips = [];
+                                if (bPct === 100 && state.evaluation.batchHintsUsed === 0) {
+                                    tips.push('🏆 ¡Tanda impecable al 100%! Puedes probar ahora con disposiciones Drop 2, Spread Voicings o reducir el reloj contrarreloj.');
+                                } else if (failedEntries.length > 0) {
+                                    const worstStr = failedEntries.map(([k, cnt]) => `${chordStructures[k]?.name || k} (${cnt} fallo${cnt > 1 ? 's' : ''})`).join(', ');
+                                    tips.push(`🔍 Refuerza especialmente: <strong>${worstStr}</strong>.`);
+                                    tips.push('💡 Recuerda que puedes usar el botón 🔄 Banco de Errores en la barra superior para repasar únicamente los acordes fallados.');
+                                } else {
+                                    tips.push('👍 Buen ritmo de trabajo. Mantén la atención en las notas guía (3ra y 7ma/6ta) dentro de las voces internas.');
+                                }
+                                if (parseFloat(avgBatchT) > 14) {
+                                    tips.push('⚡ Para agilizar tus reflejos armónicos, visualiza primero el intervalo de la 2ª voz debajo de la melodía.');
+                                }
+                                if (el('adviceList')) {
+                                    el('adviceList').innerHTML = tips.map(t => `<li>${t}</li>`).join('');
+                                }
+
+                                state.evaluation.questionsAttemptedInBatch = 0;
+                                state.evaluation.batchCorrectFirstTry = 0;
+                                state.evaluation.batchIncorrect = 0;
+                                state.evaluation.batchHintsUsed = 0;
+                                state.evaluation.batchTotalTimeSec = 0;
+                                state.evaluation.batchChordsFailed = {};
+                                updateDisplay();
+                                el('evaluationModalOverlay')?.classList.add('visible');
+                            }, 650);
+                        }
                     } else {
-                        state.stats.totalIncorrect++;
-                        state.stats.currentStreak = 0;
-                        if (!state.stats.chordBreakdown) state.stats.chordBreakdown = {};
-                        if (!state.stats.chordBreakdown[state.chordTypeKey]) {
-                            state.stats.chordBreakdown[state.chordTypeKey] = { correct: 0, incorrect: 0, failedLeads: {} };
+                        if (!state.failedCurrentExercise) {
+                            state.failedCurrentExercise = true;
+                            state.stats.totalIncorrect++;
+                            state.stats.currentStreak = 0;
+                            state.currentSession.incorrect++;
+                            state.evaluation.batchIncorrect++;
+                            state.evaluation.batchChordsFailed[state.chordTypeKey] = (state.evaluation.batchChordsFailed[state.chordTypeKey] || 0) + 1;
+
+                            if (!state.stats.chordBreakdown) state.stats.chordBreakdown = {};
+                            if (!state.stats.chordBreakdown[state.chordTypeKey]) {
+                                state.stats.chordBreakdown[state.chordTypeKey] = { correct: 0, incorrect: 0, failedLeads: {} };
+                            }
+                            state.stats.chordBreakdown[state.chordTypeKey].incorrect++;
+                            if (!state.stats.chordBreakdown[state.chordTypeKey].failedLeads) {
+                                state.stats.chordBreakdown[state.chordTypeKey].failedLeads = {};
+                            }
+                            state.stats.chordBreakdown[state.chordTypeKey].failedLeads[state.givenLabel] =
+                                (state.stats.chordBreakdown[state.chordTypeKey].failedLeads[state.givenLabel] || 0) + 1;
+
+                            if (!state.currentSession.chordBreakdown[state.chordTypeKey]) {
+                                state.currentSession.chordBreakdown[state.chordTypeKey] = { correct: 0, incorrect: 0, failedLeads: {} };
+                            }
+                            state.currentSession.chordBreakdown[state.chordTypeKey].incorrect++;
+                            if (!state.currentSession.chordBreakdown[state.chordTypeKey].failedLeads) {
+                                state.currentSession.chordBreakdown[state.chordTypeKey].failedLeads = {};
+                            }
+                            state.currentSession.chordBreakdown[state.chordTypeKey].failedLeads[state.givenLabel] =
+                                (state.currentSession.chordBreakdown[state.chordTypeKey].failedLeads[state.givenLabel] || 0) + 1;
                         }
-                        state.stats.chordBreakdown[state.chordTypeKey].incorrect++;
-                        if (!state.stats.chordBreakdown[state.chordTypeKey].failedLeads) {
-                            state.stats.chordBreakdown[state.chordTypeKey].failedLeads = {};
-                        }
-                        state.stats.chordBreakdown[state.chordTypeKey].failedLeads[state.givenLabel] =
-                            (state.stats.chordBreakdown[state.chordTypeKey].failedLeads[state.givenLabel] || 0) + 1;
 
                         if (!state.stats.errorBank) state.stats.errorBank = [];
                         const exId = state.chordRoot + '|' + state.chordTypeKey + '|' + state.givenLabel;
