@@ -107,10 +107,13 @@
             selectedClassificationByNote: {},
             selectedHarmonizationByNote: {},
             autoFilledPhraseVoicings: {},
+            enharmonicNoteSpellingByNote: {},
             manuallyClearedNotes: {},
             scoreZoomPercent: 100,
             autoFillSeed: 0,
             showFullVoicingInScore: true,
+            approachNotation: 'd',
+            scoreAnnotationMode: 'both',
             isPlayingPhrase: false,
             phraseTimers: [],
             groupPreviewTimers: [],
@@ -272,12 +275,12 @@
         "del_par_chrom": { id: "del_par_chrom", abbr: "RR(Pa-Cr)", shortName: "Variante: paralela–cromática", category: "4. Resolución retardada", desc: "Primera nota paralela a un tono + segunda nota cromática a un semitono del objetivo." },
         "double_chrom": { id: "double_chrom", abbr: "2Crom", shortName: "Doble cromático [c ➔ c ➔ objetivo]", category: "4. Agrupación melódica", desc: "Dos semitonos consecutivos en bloque cerrado conducen al acorde objetivo." },
         // Opciones separadas: Voz Líder Independiente Enumerada (#1 a #6)
-        "ind_1": { id: "ind_1", abbr: "LI-1", shortName: "Voz líder independiente 1: sube un tono", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía sube un tono y las tres voces internas suben un semitono hacia el objetivo." },
-        "ind_2": { id: "ind_2", abbr: "LI-2", shortName: "Voz líder independiente 2: baja un tono", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía baja un tono y las tres voces internas bajan un semitono hacia el objetivo." },
-        "ind_3": { id: "ind_3", abbr: "LI-3", shortName: "Voz líder independiente 3: sube un semitono", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía sube un semitono y las tres voces internas bajan un semitono." },
-        "ind_4": { id: "ind_4", abbr: "LI-4", shortName: "Voz líder independiente 4: baja un semitono", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía baja un semitono y las tres voces internas suben un semitono." },
-        "ind_5": { id: "ind_5", abbr: "LI-5", shortName: "Voz líder independiente 5: se mantiene", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía se mantiene y las tres voces internas bajan un semitono." },
-        "ind_6": { id: "ind_6", abbr: "LI-6", shortName: "Voz líder independiente 6: se mantiene", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía se mantiene y las tres voces internas suben un semitono." },
+        "ind_1": { id: "ind_1", abbr: "LI-1", shortName: "Voz líder independiente 1: sube un tono", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía sube un tono y las tres voces interiores suben un semitono hacia el acorde objetivo." },
+        "ind_2": { id: "ind_2", abbr: "LI-2", shortName: "Voz líder independiente 2: baja un tono", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía baja un tono y las tres voces interiores bajan un semitono hacia el acorde objetivo." },
+        "ind_3": { id: "ind_3", abbr: "LI-3", shortName: "Voz líder independiente 3: sube un semitono", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía sube un semitono y las tres voces interiores bajan un semitono hacia el acorde objetivo." },
+        "ind_4": { id: "ind_4", abbr: "LI-4", shortName: "Voz líder independiente 4: baja un semitono", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía baja un semitono y las tres voces interiores suben un semitono hacia el acorde objetivo." },
+        "ind_5": { id: "ind_5", abbr: "LI-5", shortName: "Voz líder independiente 5: se mantiene", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía repite la nota y las tres voces interiores suben un semitono hacia el acorde objetivo." },
+        "ind_6": { id: "ind_6", abbr: "LI-6", shortName: "Voz líder independiente 6: se mantiene", category: "Voz líder independiente", isSeparateIndLead: true, desc: "La melodía repite la nota y las tres voces interiores bajan un semitono hacia el acorde objetivo." },
         // Catálogo Completo de Tonicizaciones de 2 y 3 Acordes (según Tonicizacion.pdf)
         "tonic_V7_I": { id: "tonic_V7_I", abbr: "Ton(V7)", shortName: "Dos acordes: V7 ➔ I / Im", category: "Tonicizaciones", isSeparateTonic: true, desc: "El dominante secundario V7 anticipa el acorde de llegada." },
         "tonic_VIIo7_I": { id: "tonic_VIIo7_I", abbr: "Ton(vii°7)", shortName: "Dos acordes: vii°7 ➔ I / Im", category: "Tonicizaciones", isSeparateTonic: true, desc: "El acorde de séptima disminuida de sensible resuelve por semitono al acorde de llegada." },
@@ -421,11 +424,13 @@
                 { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 },
                 { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
-                { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }
+                { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 },
+                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 }
             ],
             voicing_rules: {
                 "1": ["1", "b7", "b5", "b3"], "b3": ["b3", "1", "b7", "b5"], "b5": ["b5", "b3", "1", "b7"],
-                "b7": ["b7", "b5", "b3", "1"], "9": ["9", "b7", "b5", "b3"], "11": ["11", "b7", "b5", "b3"]
+                "b7": ["b7", "b5", "b3", "1"], "9": ["9", "b7", "b5", "b3"], "11": ["11", "b7", "b5", "b3"],
+                "13": ["13", "b3", "b7", "b5"]
             }
         },
         "dim7": {
@@ -751,6 +756,37 @@
             { label: '5', semitones: 7, degreeOffset: 4 }, { label: '6', semitones: 9, degreeOffset: 5 },
             { label: '7', semitones: 11, degreeOffset: 6 }
         ];
+    }
+
+    function getChordScaleDefinition(chordTypeKey, scaleId = null) {
+        const scales = CHORD_SCALE_CONTEXT_CATALOG[chordTypeKey] || CHORD_SCALE_CONTEXT_CATALOG.maj7;
+        return scales.find(scale => scale.id === scaleId) || scales[0];
+    }
+
+    function isChordToneOrAvailableTension(noteName, chordRoot, chordTypeKey, scaleId) {
+        const relation = getCoherentChordRelationLabel(noteName, chordRoot, chordTypeKey);
+        const scaleDefinition = getChordScaleDefinition(chordTypeKey, scaleId);
+        return relation.isChordTone || Boolean(scaleDefinition?.availTensions?.includes(relation.label));
+    }
+
+    function getContextualEnharmonicSpelling(noteObj) {
+        if (!noteObj || noteObj.isRest) return null;
+        const target = noteObj.isMainMelodicNote ? noteObj : (noteObj.analysisTargetNoteObj || noteObj);
+        const root = target.barChordRoot || noteObj.barChordRoot;
+        const type = target.barChordTypeKey || noteObj.barChordTypeKey;
+        const scale = getChordScaleIntervals(type, target.barScaleId || noteObj.barScaleId);
+        const pitchClass = getNoteSemitone(noteObj.note.split('/')[0]);
+        const currentName = noteObj.note.split('/')[0];
+        const contextualName = scale
+            .map(interval => calculateNoteName(root, interval))
+            .find(name => getNoteSemitone(name) === pitchClass && name !== currentName);
+        if (contextualName) return contextualName;
+        const commonEnharmonicAlternates = {
+            'C#': 'Db', 'Db': 'C#', 'D#': 'Eb', 'Eb': 'D#',
+            'F#': 'Gb', 'Gb': 'F#', 'G#': 'Ab', 'Ab': 'G#',
+            'A#': 'Bb', 'Bb': 'A#'
+        };
+        return commonEnharmonicAlternates[currentName] || null;
     }
 
     function getImplicitBassWithOctave(rootNote, lowestUpperMidi = 60) {
@@ -1425,19 +1461,116 @@
 
     function getCoherentChordRelationLabel(noteName, chordRoot, chordTypeKey) {
         const cData = chordStructures[chordTypeKey] || chordStructures['maj7'];
-        const notePc = getNoteSemitone(noteName);
-        const rootPc = getNoteSemitone(chordRoot);
-        const diff = ((notePc - rootPc) % 12 + 12) % 12;
-        const basicLabels = ['1', '3', 'b3', '5', 'b5', '#5', '6', '7', 'b7'];
-        const matchedInt = cData.intervals.find(i => (i.semitones % 12) === diff);
-        if (matchedInt) {
-            return { label: matchedInt.label, isChordTone: basicLabels.includes(matchedInt.label) };
+        const rootLetter = chordRoot.match(/[A-G]/i)?.[0]?.toUpperCase() || 'C';
+        const noteLetter = noteName.match(/[A-G]/i)?.[0]?.toUpperCase() || 'C';
+        const letterOrder = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const degreeIndex = (letterOrder.indexOf(noteLetter) - letterOrder.indexOf(rootLetter) + 7) % 7;
+        const naturalSemitones = [0, 2, 4, 5, 7, 9, 11][degreeIndex];
+        const chromaticDistance = (getNoteSemitone(noteName) - getNoteSemitone(chordRoot) + 12) % 12;
+        let alteration = chromaticDistance - naturalSemitones;
+        if (alteration > 6) alteration -= 12;
+        if (alteration < -6) alteration += 12;
+        const accidental = alteration <= -2 ? 'bb'
+            : alteration === -1 ? 'b'
+                : alteration === 1 ? '#'
+                    : alteration >= 2 ? '##' : '';
+        const intervalNumbers = ['1', '9', '3', '11', '5', '13', '7'];
+        let label = `${accidental}${intervalNumbers[degreeIndex]}`;
+        const simpleLabel = `${accidental}${degreeIndex + 1}`;
+        if (degreeIndex === 5 && alteration === 0 && cData.intervals.some(interval => interval.label === '6')) {
+            label = '6';
         }
-        const fallbackMap = {
-            0: '1', 1: 'b9', 2: '9', 3: (cData.intervals.some(i => i.label === 'b3') ? 'b3' : '#9'),
-            4: '3', 5: '11', 6: '#11', 7: '5', 8: 'b13', 9: '13', 10: 'b7', 11: '7'
+        const chordToneLabels = ['1', '3', 'b3', '5', 'b5', '#5', '6', '7', 'b7'];
+        return {
+            label,
+            simpleLabel,
+            isChordTone: chordToneLabels.includes(label)
+                && cData.intervals.some(interval => interval.label === label)
         };
-        return { label: fallbackMap[diff] || '9', isChordTone: false };
+    }
+
+    function getMelodicIntervalLabel(noteWithOctave, targetWithOctave) {
+        const parsePitch = (pitch) => {
+            const [noteName, octaveText] = String(pitch).split('/');
+            const match = noteName.match(/^([A-G])([#b]*)$/);
+            if (!match) return null;
+            const letterIndex = ['C', 'D', 'E', 'F', 'G', 'A', 'B'].indexOf(match[1]);
+            const octave = Number(octaveText);
+            if (letterIndex < 0 || !Number.isInteger(octave)) return null;
+            return { letterIndex, octave, midi: getNoteWithOctaveMidi(pitch) };
+        };
+        const source = parsePitch(noteWithOctave);
+        const target = parsePitch(targetWithOctave);
+        if (!source || !target) return '';
+
+        const diatonicDistance = Math.abs(
+            target.octave * 7 + target.letterIndex - (source.octave * 7 + source.letterIndex)
+        );
+        const intervalNumber = diatonicDistance + 1;
+        const simpleNumber = ((intervalNumber - 1) % 7) + 1;
+        const octaveCount = Math.floor((intervalNumber - 1) / 7);
+        const naturalSemitones = { 1: 0, 2: 2, 3: 4, 4: 5, 5: 7, 6: 9, 7: 11 }[simpleNumber];
+        const expectedSemitones = octaveCount * 12 + naturalSemitones;
+        const alteration = Math.abs(target.midi - source.midi) - expectedSemitones;
+        const accidental = alteration <= -2 ? 'bb'
+            : alteration === -1 ? 'b'
+                : alteration === 1 ? '#'
+                    : alteration >= 2 ? '##' : '';
+        return `${accidental}${intervalNumber}`;
+    }
+
+    function getMelodicAnalysisNotation(note, classification, approachNotation = 'd') {
+        const relation = getCoherentChordRelationLabel(
+            note.note.split('/')[0],
+            note.barChordRoot,
+            note.barChordTypeKey
+        );
+        const isAvailableTension = !relation.isChordTone && Boolean(getChordScaleDefinition(
+            note.barChordTypeKey,
+            note.barScaleId
+        )?.availTensions?.includes(relation.label));
+        if (classification.id === 'class_DUAL_H') {
+            if (note.groupType === 'dbl_chrom_start') {
+                return isAvailableTension ? `T${relation.label}` : relation.label;
+            }
+            if (note.groupType === 'dbl_chrom_end') {
+                return `${approachNotation}${relation.simpleLabel}`;
+            }
+            return isAvailableTension ? `T${relation.label}` : relation.label;
+        }
+        if (note.isMainMelodicNote || classification.pOrS === 'P') {
+            return isAvailableTension ? `T${relation.label}` : relation.label;
+        }
+        if (note.analysisChromaticApproach
+            || ((note.groupType === 'dbl_chrom_start' || note.groupType === 'dbl_chrom_end')
+                && note.analysisDoubleChromaticValid)) {
+            return 'c';
+        }
+        const isDiatonicApproach = note.analysisDiatonicToScale
+            && (!note.isMainMelodicNote || classification.pOrS !== 'P');
+        if (isDiatonicApproach) {
+            return `${approachNotation}${relation.simpleLabel}`;
+        }
+        return isAvailableTension ? `T${relation.label}` : relation.label;
+    }
+
+    function isDiatonicStepToTarget(note, target) {
+        if (!note || !target || note === target) return false;
+        const scale = getChordScaleIntervals(target.barChordTypeKey, target.barScaleId);
+        const scalePitchClasses = scale.map(interval => getNoteSemitone(calculateNoteName(target.barChordRoot, interval)));
+        const noteDegree = scalePitchClasses.indexOf(getNoteSemitone(note.note.split('/')[0]));
+        const targetDegree = scalePitchClasses.indexOf(getNoteSemitone(target.note.split('/')[0]));
+        if (noteDegree < 0 || targetDegree < 0) return false;
+        const degreeDistance = Math.abs(noteDegree - targetDegree);
+        const scaleDistance = Math.min(degreeDistance, scale.length - degreeDistance);
+        return scaleDistance === 1
+            && Math.abs(getNoteWithOctaveMidi(target.note) - getNoteWithOctaveMidi(note.note)) <= 2;
+    }
+
+    function isStepwiseMelodicMotion(note, target) {
+        if (!note || !target || note === target) return false;
+        const distance = Math.abs(getNoteWithOctaveMidi(target.note) - getNoteWithOctaveMidi(note.note));
+        return distance === 1 || distance === 2;
     }
 
     // Punto 2: Calcula en cada compás qué acorde y escala contextual rigen según el tiempo exacto (tiempos 1-2 vs tiempos 3-4)
@@ -1467,6 +1600,10 @@
                 const segChord = getActiveChordForMeasureBeat(m, beatCursor, nextM);
                 rawFlat.push({
                     ...n,
+                    sourceNote: n.note,
+                    note: state.melodicStudio.enharmonicNoteSpellingByNote[gIdx]
+                        ? `${state.melodicStudio.enharmonicNoteSpellingByNote[gIdx]}/${n.note.split('/')[1]}`
+                        : n.note,
                     globalIdx: gIdx,
                     measureIdx: mIdx,
                     noteIdxInMeasure: nIdx,
@@ -1484,6 +1621,62 @@
             });
         });
 
+        rawFlat.forEach((item, idx) => {
+            if (item.isRest) return;
+            const relation = getCoherentChordRelationLabel(item.note.split('/')[0], item.barChordRoot, item.barChordTypeKey);
+            const nextPlayable = rawFlat.slice(idx + 1).find(note => !note.isRest) || item;
+            const nextMove = nextPlayable === item
+                ? 0
+                : Math.abs(getNoteWithOctaveMidi(nextPlayable.note) - getNoteWithOctaveMidi(item.note));
+            const durationBeats = getBeatsForDuration(item.dur);
+            let restDuration = 0;
+            for (let nextIdx = idx + 1; nextIdx < rawFlat.length && rawFlat[nextIdx].isRest; nextIdx++) {
+                restDuration += getBeatsForDuration(rawFlat[nextIdx].dur);
+            }
+            const isExplicitApproachGroup = ['res_ret_start', 'res_ret_end', 'dbl_chrom_start', 'dbl_chrom_end'].includes(item.groupType);
+            const isShortStructuralNote = durationBeats < 1 && (
+                nextPlayable !== item && nextMove > 2
+                || restDuration >= durationBeats
+                || item.isWeakBeat === false && nextPlayable.isWeakBeat === true
+            );
+            item.isMainMelodicNote = !isExplicitApproachGroup && (
+                relation.isChordTone
+                || durationBeats >= 1
+                || isShortStructuralNote
+            );
+        });
+
+        rawFlat.forEach((item, idx) => {
+            if (item.isRest || item.isMainMelodicNote) return;
+            const isExplicitApproachGroup = ['res_ret_start', 'res_ret_end', 'dbl_chrom_start', 'dbl_chrom_end'].includes(item.groupType);
+            const nextMainNote = rawFlat.slice(idx + 1).find(note => !note.isRest && note.isMainMelodicNote);
+            const nextPlayable = nextMainNote || rawFlat.slice(idx + 1).find(note => !note.isRest);
+            item.isSecondaryApproach = Boolean(isExplicitApproachGroup || (
+                nextPlayable && (
+                    isDiatonicStepToTarget(item, nextPlayable)
+                    || isStepwiseMelodicMotion(item, nextPlayable)
+                )
+            ));
+            if (!item.isSecondaryApproach) item.isMainMelodicNote = true;
+        });
+
+        rawFlat.forEach((item, idx) => {
+            if (item.isRest) return;
+            const isRetardationStart = item.groupType === 'res_ret_start' || item.groupType === 'dbl_chrom_start';
+            const isDoubleChromaticEnd = item.groupType === 'dbl_chrom_end';
+            const target = isRetardationStart
+                ? rawFlat.slice(idx + 2).find(note => !note.isRest)
+                : isDoubleChromaticEnd
+                    ? rawFlat.slice(idx + 1).find(note => !note.isRest)
+                    : rawFlat.slice(idx + 1).find(note => !note.isRest && note.isMainMelodicNote)
+                        || rawFlat.slice(idx + 1).find(note => !note.isRest);
+            const analysisTarget = target || item;
+            item.analysisTargetNoteObj = analysisTarget;
+            item.analysisDiatonicToScale = isDiatonicStepToTarget(item, analysisTarget);
+            item.analysisChromaticApproach = isStepwiseMelodicMotion(item, analysisTarget)
+                && !item.analysisDiatonicToScale;
+        });
+
         // Analizador Melódico con Doble Análisis (Nota de Acorde usada como Aproximación), Resoluciones Retardadas según clasificación y Tonicizaciones de 2 y 3 acordes
         rawFlat.forEach((item, idx) => {
             if (item.isRest) {
@@ -1497,11 +1690,20 @@
 
             const isResRetGroup = item.groupType === 'res_ret_start' || item.groupType === 'res_ret_end';
             const isDblChromGroup = item.groupType === 'dbl_chrom_start' || item.groupType === 'dbl_chrom_end';
-            const targetNode = (item.groupType === 'res_ret_start' || item.groupType === 'dbl_chrom_start') ? next2Playable : nextPlayable;
-
+            const targetNode = item.analysisTargetNoteObj || nextPlayable;
             const relOwn = getCoherentChordRelationLabel(item.note.split('/')[0], item.barChordRoot, item.barChordTypeKey);
+            const ownScaleDefinition = getChordScaleDefinition(item.barChordTypeKey, item.barScaleId);
+            const ownIsAvailableTension = !relOwn.isChordTone
+                && Boolean(ownScaleDefinition?.availTensions?.includes(relOwn.label));
             const scaleIntervals = getChordScaleIntervals(item.barChordTypeKey, item.barScaleId);
             const notePc = getNoteSemitone(item.note.split('/')[0]);
+            const melodyIsAvailableForTarget = isChordToneOrAvailableTension(
+                targetNode.note.split('/')[0],
+                targetNode.barChordRoot,
+                targetNode.barChordTypeKey,
+                targetNode.barScaleId
+            );
+            item.analysisTargetNote = targetNode.note;
             const isDiatonicToMomentScale = scaleIntervals.some(s => getNoteSemitone(calculateNoteName(item.barChordRoot, s)) === notePc);
 
             const pOpts = ['principal_4way', 'principal_var1', 'principal_var2', 'principal_var3', 'ambi_a', 'ambi_b', 'ambi_c'];
@@ -1514,6 +1716,7 @@
             // Catálogo completo de Tonicizaciones de 2 y 3 acordes disponibles cuando el acorde objetivo no es disminuido
             const sepTonic2Opts = targetIsDim ? [] : ['tonic_V7_I', 'tonic_VIIo7_I', 'tonic_bII7_I', 'tonic_bVII7_I'];
             const sepTonic3Opts = [];
+            let hasStepwiseApproachGroup = true;
             if (!targetIsDim && targetIsMajor) sepTonic2Opts.push('tonic_VII7_I');
 
             if (isResRetGroup) {
@@ -1528,54 +1731,90 @@
                 const n2Pc = getNoteSemitone(n2.note.split('/')[0]);
                 const goalScale = getChordScaleIntervals(tGoal.barChordTypeKey, tGoal.barScaleId);
 
-                const n1CanBeChrom = dist1 === 1;
-                const n1CanBeDiat = dist1 <= 2 && goalScale.some(s => getNoteSemitone(calculateNoteName(tGoal.barChordRoot, s)) === n1Pc);
-                const n2CanBeChrom = dist2 === 1;
-                const n2CanBeDiat = dist2 <= 2 && goalScale.some(s => getNoteSemitone(calculateNoteName(tGoal.barChordRoot, s)) === n2Pc);
+                const n1IsStepwise = dist1 === 1 || dist1 === 2;
+                const n2IsStepwise = dist2 === 1 || dist2 === 2;
+                hasStepwiseApproachGroup = n1IsStepwise && n2IsStepwise;
+                const n1InScale = goalScale.some(s => getNoteSemitone(calculateNoteName(tGoal.barChordRoot, s)) === n1Pc);
+                const n2InScale = goalScale.some(s => getNoteSemitone(calculateNoteName(tGoal.barChordRoot, s)) === n2Pc);
+                const n1CanBeDiat = n1IsStepwise && n1InScale;
+                const n1CanBeChrom = n1IsStepwise && !n1InScale;
+                const n2CanBeDiat = n2IsStepwise && n2InScale;
+                const n2CanBeChrom = n2IsStepwise && !n2InScale;
+                const retardationIsValid = hasStepwiseApproachGroup && melodyIsAvailableForTarget;
+                n1.analysisRetardationValid = retardationIsValid;
+                n2.analysisRetardationValid = retardationIsValid;
 
                 // Filtrar estrictamente entre a) Diatónico-Cromático, b) Cromático-Diatónico, c) Cromático-Cromático, d) Diatónico-Diatónico
                 if (n1CanBeDiat && n2CanBeChrom) sOpts.push('del_dc');
                 if (n1CanBeChrom && n2CanBeDiat) sOpts.push('del_cd');
                 if (n1CanBeChrom && n2CanBeChrom) sOpts.push('del_cc');
                 if (n1CanBeDiat && n2CanBeDiat) sOpts.push('del_dd');
-                if (!sOpts.length) sOpts.push('del_cd', 'del_dc', 'del_dd');
-
                 // Agregar las otras variantes posibles según el análisis (Paralelo, Disminuido, Dominante)
                 if (n1CanBeChrom && dist2 === 2) sOpts.push('del_chrom_par');
                 if (dist1 === 2 && n2CanBeChrom) sOpts.push('del_par_chrom');
-                if (n2CanBeDiat) sOpts.push('del_dom_diat', 'del_dim_diat');
+                if (n1IsStepwise && n2CanBeDiat) sOpts.push('del_dom_diat', 'del_dim_diat');
                 if (n1CanBeDiat) sOpts.push('del_diat_dom');
 
-                if (!targetIsDim) {
+                if (!targetIsDim && hasStepwiseApproachGroup) {
                     sepTonic3Opts.push('tonic_II_V_I', 'tonic_V7ofV_V_I', 'tonic_II_bII_I', 'tonic_bVI_bII_I');
                     if (targetIsMajor) sepTonic3Opts.push('tonic_IVm_bVII_I', 'tonic_sIVm7b5_VII7_I');
                 }
             } else if (isDblChromGroup) {
-                sOpts.push('double_chrom');
-                if (!targetIsDim) {
+                const doubleChromStart = item.groupType === 'dbl_chrom_start'
+                    ? item
+                    : prevPlayable.groupType === 'dbl_chrom_start' ? prevPlayable : null;
+                const doubleChromMiddle = item.groupType === 'dbl_chrom_end' ? item : nextPlayable;
+                const doubleChromTarget = item.groupType === 'dbl_chrom_start'
+                    ? next2Playable
+                    : rawFlat.slice(idx + 1).find(note => !note.isRest);
+                const startToTarget = doubleChromStart && doubleChromTarget
+                    ? Math.abs(getNoteWithOctaveMidi(doubleChromTarget.note) - getNoteWithOctaveMidi(doubleChromStart.note))
+                    : Infinity;
+                const middleToTarget = doubleChromMiddle && doubleChromTarget
+                    ? Math.abs(getNoteWithOctaveMidi(doubleChromTarget.note) - getNoteWithOctaveMidi(doubleChromMiddle.note))
+                    : Infinity;
+                const startToMiddleMotion = doubleChromStart && doubleChromMiddle
+                    ? getNoteWithOctaveMidi(doubleChromMiddle.note) - getNoteWithOctaveMidi(doubleChromStart.note)
+                    : 0;
+                const middleToTargetMotion = doubleChromMiddle && doubleChromTarget
+                    ? getNoteWithOctaveMidi(doubleChromTarget.note) - getNoteWithOctaveMidi(doubleChromMiddle.note)
+                    : 0;
+                const notesMoveByStep = doubleChromStart && doubleChromMiddle
+                    && isStepwiseMelodicMotion(doubleChromStart, doubleChromMiddle)
+                    && Math.sign(startToMiddleMotion) === Math.sign(middleToTargetMotion);
+                hasStepwiseApproachGroup = Boolean(notesMoveByStep
+                    && startToTarget <= 2 && startToTarget >= 1
+                    && middleToTarget <= 2 && middleToTarget >= 1);
+                const doubleChromaticIsValid = melodyIsAvailableForTarget && hasStepwiseApproachGroup;
+                if (doubleChromStart) doubleChromStart.analysisDoubleChromaticValid = doubleChromaticIsValid;
+                if (doubleChromMiddle) doubleChromMiddle.analysisDoubleChromaticValid = doubleChromaticIsValid;
+                if (melodyIsAvailableForTarget && hasStepwiseApproachGroup) {
+                    sOpts.push('double_chrom');
+                }
+                if (!targetIsDim && hasStepwiseApproachGroup) {
                     sepTonic3Opts.push('tonic_II_V_I', 'tonic_V7ofV_V_I', 'tonic_II_bII_I', 'tonic_bVI_bII_I');
                     if (targetIsMajor) sepTonic3Opts.push('tonic_IVm_bVII_I', 'tonic_sIVm7b5_VII7_I');
                 }
             } else {
-                if (move === 1) {
-                    sOpts.push('chromatic_below');
-                    if (isDiatonicToMomentScale) sOpts.push('diatonic');
-                    sepIndLeadOpts.push('ind_3');
-                } else if (move === -1) {
-                    sOpts.push('chromatic_above');
-                    if (isDiatonicToMomentScale) sOpts.push('diatonic');
-                    sepIndLeadOpts.push('ind_4');
-                } else if (Math.abs(move) === 2) {
-                    if (isDiatonicToMomentScale) sOpts.push('diatonic');
-                    sOpts.push('parallel');
-                    sepIndLeadOpts.push(move > 0 ? 'ind_1' : 'ind_2');
-                } else if (move === 0 && targetNode !== item) {
+                if (melodyIsAvailableForTarget && item.analysisDiatonicToScale && isStepwiseMelodicMotion(item, targetNode)) sOpts.push('diatonic');
+                else if (melodyIsAvailableForTarget && item.analysisChromaticApproach && isStepwiseMelodicMotion(item, targetNode)) sOpts.push(move > 0 ? 'chromatic_below' : 'chromatic_above');
+                if (targetNode !== item && melodyIsAvailableForTarget && Math.abs(move) <= 2 && Math.abs(move) > 0) {
+                    if (Math.abs(move) === 1) {
+                        sepIndLeadOpts.push(move > 0 ? 'ind_3' : 'ind_4');
+                    } else {
+                        sepIndLeadOpts.push(move > 0 ? 'ind_1' : 'ind_2');
+                    }
+                } else if (targetNode !== item && melodyIsAvailableForTarget && move === 0) {
                     sepIndLeadOpts.push('ind_5', 'ind_6');
                 }
-                if (targetNode !== item) {
-                    sOpts.push('dominant', 'diminished');
-                    if (isDiatonicToMomentScale && !sOpts.includes('diatonic')) sOpts.push('diatonic');
+                if (item.isMainMelodicNote && targetNode !== item && Math.abs(move) <= 2) {
+                    sOpts.push('parallel', 'dominant', 'diminished');
                 }
+            }
+            if ((isResRetGroup || isDblChromGroup) && (!melodyIsAvailableForTarget || !hasStepwiseApproachGroup)) {
+                sOpts.length = 0;
+                sepTonic2Opts.length = 0;
+                sepTonic3Opts.length = 0;
             }
             const sepTonicOpts = [...sepTonic2Opts, ...sepTonic3Opts];
 
@@ -1585,17 +1824,22 @@
             const tCData = chordStructures[targetNode.barChordTypeKey] || chordStructures['maj7'];
 
             item.classifications = [];
-            const canApproachNext = targetNode !== item && (Math.abs(move) <= 3 || isResRetGroup || isDblChromGroup || item.isWeakBeat || item.pOrS === 'S');
+            const canApproachNext = targetNode !== item && (
+                item.analysisDiatonicToScale
+                || item.analysisChromaticApproach
+                || isResRetGroup
+                || isDblChromGroup
+            );
             const hasDualAnalysis = !isResRetGroup && !isDblChromGroup && canApproachNext && (relOwn.isChordTone || isDiatonicToMomentScale);
 
-            if (item.pOrS !== 'S' && !item.isWeakBeat && !isResRetGroup && !isDblChromGroup) {
+            if (item.isMainMelodicNote && !isResRetGroup && !isDblChromGroup) {
                 item.targetRoot = item.barChordRoot;
                 item.targetType = item.barChordTypeKey;
                 item.targetLeadLabel = ownCData.voicing_rules[relOwn.label] ? relOwn.label : '3';
                 item.classifications.push({
                     id: 'class_P', pOrS: 'P', shortTag: `I:${relOwn.label}`,
-                    title: `Nota del acorde • I:${relOwn.label} (${item.barChordSymbol})`,
-                    explain: `Es ${relOwn.label} de ${item.barChordSymbol} y pertenece a su escala ${item.barScaleName}. Puedes armonizarla como nota principal o con una variante.`,
+                    title: `Nota principal • ${relOwn.isChordTone ? `I:${relOwn.label}` : `T:${relOwn.label}`} (${item.barChordSymbol})`,
+                    explain: `${relOwn.isChordTone ? `Es ${relOwn.label} del acorde` : `Es una tensión ${relOwn.label}`} ${item.barChordSymbol}; por duración o comportamiento melódico se considera nota principal.`,
                     options: pOpts,
                     separateIndLeadOptions: [],
                     separateTonicOptions: [],
@@ -1632,20 +1876,27 @@
                     options: Array.from(new Set(sOpts)),
                     separateIndLeadOptions: Array.from(new Set(sepIndLeadOpts)),
                     separateTonicOptions: Array.from(new Set(sepTonicOpts)),
-                    defaultOpt: (item.defaultOpt && sOpts.includes(item.defaultOpt)) ? item.defaultOpt : (sOpts[0] || 'chromatic_below')
+                    defaultOpt: (item.defaultOpt && sOpts.includes(item.defaultOpt)) ? item.defaultOpt : (sOpts[0] || 'none')
                 });
-
-                if (relOwn.isChordTone || isDiatonicToMomentScale) {
+                if ((isDblChromGroup && item.analysisDoubleChromaticValid)
+                    || (item.analysisDiatonicToScale && ownIsAvailableTension)) {
                     item.classifications.push({
-                        id: 'class_S_4way', pOrS: 'P', shortTag: `I:${relOwn.label}`,
-                        title: `Doble función • armonizar como nota de ${item.barChordSymbol}`,
-                        explain: `${formatScientificPitch(item.note)} es el grado ${relOwn.label} de ${item.barChordSymbol} y también puede armonizarse de forma independiente.`,
+                        id: 'class_DUAL_H',
+                        pOrS: 'P',
+                        shortTag: `H:${ownIsAvailableTension ? `T${relOwn.label}` : relOwn.label}`,
+                        title: isDblChromGroup
+                            ? `Análisis armónico alternativo • relación con ${item.barChordSymbol}`
+                            : `Tensión disponible • ${relOwn.label} de ${item.barChordSymbol}`,
+                        explain: isDblChromGroup
+                            ? `Alternativa al análisis cromático: muestra la relación de esta nota con ${item.barChordSymbol} y permite armonizarla como nota del acorde.`
+                            : `Alternativa al análisis de aproximación: muestra la tensión disponible de esta nota sobre ${item.barChordSymbol}.`,
                         options: pOpts,
                         separateIndLeadOptions: [],
                         separateTonicOptions: [],
                         defaultOpt: 'principal_4way'
                     });
                 }
+
             }
             const savedClassId = state.melodicStudio.selectedClassificationByNote[item.globalIdx];
             item.activeClassObj = item.classifications.find(c => c.id === savedClassId) || item.classifications[0];
@@ -1738,6 +1989,16 @@
             return [noteObj.globalIdx];
         }
         const idx = noteObj.globalIdx;
+        if ((noteObj.groupType === 'res_ret_start' || noteObj.groupType === 'res_ret_end')
+            && !noteObj.analysisRetardationValid) return [idx];
+        if ((noteObj.groupType === 'dbl_chrom_start' || noteObj.groupType === 'dbl_chrom_end')
+            && !noteObj.analysisDoubleChromaticValid) return [idx];
+        if (chosenTechId.startsWith('ind_')) {
+            const targetIdx = noteObj.analysisTargetNoteObj?.globalIdx;
+            return targetIdx !== undefined && targetIdx > idx && !notesList[targetIdx]?.isRest
+                ? [idx, targetIdx]
+                : [idx];
+        }
         if (chosenTechId.startsWith('del_') || chosenTechId === 'double_chrom' ||
             noteObj.groupType === 'res_ret_start' || noteObj.groupType === 'res_ret_end' ||
             noteObj.groupType === 'dbl_chrom_start' || noteObj.groupType === 'dbl_chrom_end' ||
@@ -1768,6 +2029,12 @@
     function harmonizeNoteOrGroupInStudio(noteObj, chosenTechId) {
         const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
         const groupIndices = getGroupIndicesForHarmonization(noteObj, chosenTechId, notesList);
+        if (chosenTechId.startsWith('ind_') && groupIndices.length > 1) {
+            const disposition = state.melodicStudio.voicingDispositionByNote[noteObj.globalIdx]
+                || state.melodicStudio.voicingDisposition
+                || 'close';
+            state.melodicStudio.voicingDispositionByNote[groupIndices[groupIndices.length - 1]] = disposition;
+        }
         if (groupIndices.length <= 1) {
             state.melodicStudio.selectedHarmonizationByNote[noteObj.globalIdx] = chosenTechId;
             state.melodicStudio.autoFilledPhraseVoicings[noteObj.globalIdx] = computeHarmonizationForMelodicNote(noteObj, chosenTechId);
@@ -1803,10 +2070,29 @@
         const allNotes = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
         const nextPlayable = allNotes.slice(noteObj.globalIdx + 1).find(x => !x.isRest) || noteObj;
         const next2Playable = allNotes.slice(allNotes.indexOf(nextPlayable) + 1).find(x => !x.isRest) || nextPlayable;
-        const targetNoteObj = (noteObj.groupType === 'res_ret_start' || noteObj.groupType === 'dbl_chrom_start') ? next2Playable : nextPlayable;
+        const targetNoteObj = isStandalone
+            ? noteObj
+            : (chosenId.startsWith('ind_')
+                ? (noteObj.analysisTargetNoteObj || nextPlayable)
+                : ((noteObj.groupType === 'res_ret_start' || noteObj.groupType === 'dbl_chrom_start') ? next2Playable : nextPlayable));
         const targetTopNote = isStandalone ? noteObj.note : targetNoteObj.note;
 
-        const targetBase = buildCloseVoicingForChordAndLead(tRoot, tType, tLead, targetTopNote);
+        let targetBase = buildCloseVoicingForChordAndLead(tRoot, tType, tLead, targetTopNote);
+        if (chosenId.startsWith('ind_')) {
+            const targetDisposition = state.melodicStudio.voicingDispositionByNote[noteObj.globalIdx]
+                || state.melodicStudio.voicingDisposition
+                || 'close';
+            if (targetDisposition !== 'close') {
+                targetBase = applyDispositionToCloseVoicing(
+                    tRoot,
+                    tType,
+                    tLead,
+                    targetBase.labels,
+                    targetBase.notesWithOct,
+                    targetDisposition
+                );
+            }
+        }
         const targetMidis = targetBase.notesWithOct.map(n => getNoteWithOctaveMidi(n));
 
         let labels = [...targetBase.labels];
@@ -1826,14 +2112,14 @@
             labels = varBuilt.labels;
             chordNameDisplay += ` [Var.${chosenId.slice(-1)}]`;
         } else if (chosenId === 'chromatic_below' || (chosenId === 'double_chrom' && getNoteWithOctaveMidi(targetTopNote) > getNoteWithOctaveMidi(noteObj.note))) {
-            const d = noteObj.groupType === 'dbl_chrom_start' ? -2 : -1;
+            const d = getNoteWithOctaveMidi(noteObj.note) - getNoteWithOctaveMidi(targetTopNote);
             effectiveBassRoot = midiToNoteWithOctave(getNoteWithOctaveMidi(tRoot + '/4') + d, preferFlats).split('/')[0];
             notesWithOct = targetMidis.map(m => midiToNoteWithOctave(m + d, preferFlats));
             notesWithOct[0] = noteObj.note;
             labels = targetBase.labels.map((l, idx) => idx === 0 ? l + ' (Voz 1)' : l + ' (Crom.↑)');
             chordNameDisplay = displayNote(effectiveBassRoot) + (cData.cifrado || '') + ' [Crom.↑] ➔ ' + chordNameDisplay;
         } else if (chosenId === 'chromatic_above' || chosenId === 'double_chrom') {
-            const d = noteObj.groupType === 'dbl_chrom_start' ? 2 : 1;
+            const d = getNoteWithOctaveMidi(noteObj.note) - getNoteWithOctaveMidi(targetTopNote);
             effectiveBassRoot = midiToNoteWithOctave(getNoteWithOctaveMidi(tRoot + '/4') + d, preferFlats).split('/')[0];
             notesWithOct = targetMidis.map(m => midiToNoteWithOctave(m + d, preferFlats));
             notesWithOct[0] = noteObj.note;
@@ -1955,20 +2241,48 @@
                 labels = [tLead, ...arr.labels];
             }
         } else if (chosenId.startsWith('ind_')) {
-            const delta = ['ind_1', 'ind_4', 'ind_6'].includes(chosenId) ? -1 : 1;
-            notesWithOct = [
-                noteObj.note,
-                midiToNoteWithOctave(targetMidis[1] + delta, preferFlats),
-                midiToNoteWithOctave(targetMidis[2] + delta, preferFlats),
-                midiToNoteWithOctave(targetMidis[3] + delta, preferFlats)
-            ];
-            labels = targetBase.labels.map((l, idx) => idx === 0 ? `${l} (Lead Ind.)` : `${l} (${delta < 0 ? '↑½T' : '↓½T'})`);
+            const leadMotion = getNoteWithOctaveMidi(targetTopNote) - getNoteWithOctaveMidi(noteObj.note);
+            const expectedMotion = {
+                ind_1: 2,
+                ind_2: -2,
+                ind_3: 1,
+                ind_4: -1,
+                ind_5: 0,
+                ind_6: 0
+            }[chosenId];
+            const targetScaleId = targetNoteObj.barScaleId;
+            if (leadMotion !== expectedMotion
+                || !isChordToneOrAvailableTension(targetTopNote.split('/')[0], tRoot, tType, targetScaleId)) {
+                throw new Error(`La técnica ${chosenId} requiere que la melodía llegue por el intervalo indicado a una nota del acorde o tensión disponible del objetivo.`);
+            }
+
+            const innerVoiceMotion = {
+                ind_1: 1,
+                ind_2: -1,
+                ind_3: -1,
+                ind_4: 1,
+                ind_5: 1,
+                ind_6: -1
+            }[chosenId];
+            const approachVoices = targetBase.notesWithOct.slice(1).map(targetVoice =>
+                midiToNoteWithOctave(getNoteWithOctaveMidi(targetVoice) - innerVoiceMotion, preferFlats)
+            );
+            const bassTarget = getImplicitBassWithOctave(tRoot, getNoteWithOctaveMidi(targetBase.notesWithOct.at(-1)));
+            effectiveBassRoot = midiToNoteWithOctave(
+                getNoteWithOctaveMidi(bassTarget) - innerVoiceMotion,
+                preferFlats
+            ).split('/')[0];
+            notesWithOct = [noteObj.note, ...approachVoices];
+            labels = targetBase.labels.map((label, idx) => idx === 0
+                ? `${label} (LI-${chosenId.slice(-1)})`
+                : `${label} (${innerVoiceMotion > 0 ? '↑' : '↓'}½T)`);
+            chordNameDisplay = `LI-${chosenId.slice(-1)} ➔ ${targetNoteObj.barChordSymbol}`;
         }
 
         if (!skipPermutationsAndDrops) {
             const normalizeRole = (r) => (r === 'b3' ? '3' : (r === 'b7' ? '7' : (r === 'b5' ? '5' : r)));
             const activePerms = state.melodicStudio.selectedMultiPermutationsByNote[noteObj.globalIdx] || [];
-            if (activePerms.length > 0 && notesWithOct.length >= 4 && !['ambi_a', 'ambi_b', 'ambi_c'].includes(chosenId)) {
+            if (activePerms.length > 0 && notesWithOct.length >= 4 && !chosenId.startsWith('ind_') && !['ambi_a', 'ambi_b', 'ambi_c'].includes(chosenId)) {
                 const usedPcs = new Set([getNoteSemitone(notesWithOct[0].split('/')[0])]);
                 const innerSpecs = [];
                 for (let i = 1; i < 4; i++) {
@@ -1996,7 +2310,7 @@
 
             // Aplicar disposición individual de la nota (o global) a cualquier técnica (4-Way Close, Lead Independiente, Resolución Retardada, Tonicización, etc.)
             const disp = state.melodicStudio.voicingDispositionByNote[noteObj.globalIdx] || state.melodicStudio.voicingDisposition || 'close';
-            if (disp !== 'close' && !['ambi_a', 'ambi_b', 'ambi_c'].includes(chosenId)) {
+            if (disp !== 'close' && !chosenId.startsWith('ind_') && !['ambi_a', 'ambi_b', 'ambi_c'].includes(chosenId)) {
                 const dispBuilt = applyDispositionToCloseVoicing(effectiveBassRoot, effectiveChordTypeKey, tLead, labels, notesWithOct, disp);
                 notesWithOct = dispBuilt.notesWithOct;
                 labels = dispBuilt.labels;
@@ -2004,7 +2318,9 @@
         }
 
         const activeDisp = state.melodicStudio.voicingDispositionByNote[noteObj.globalIdx] || state.melodicStudio.voicingDisposition || 'close';
-        const checked = enforceNoMinorSecondAtTop(notesWithOct, labels, effectiveBassRoot);
+        const checked = chosenId.startsWith('ind_')
+            ? { notesWithOct, labels }
+            : enforceNoMinorSecondAtTop(notesWithOct, labels, effectiveBassRoot);
         notesWithOct = checked.notesWithOct;
         labels = checked.labels;
         const lowMidi = Math.min(...notesWithOct.map(n => getNoteWithOctaveMidi(n)));
@@ -2080,7 +2396,7 @@
             const measuresPerRow = isMobile ? 1 : (state.melodicStudio.measuresPerRowMode === 4 ? 4 : 2);
             const numRows = Math.ceil(measures.length / measuresPerRow);
             const width = isMobile ? 740 : (measuresPerRow === 4 ? 1560 : 1280);
-            const rowHeight = 385;
+            const rowHeight = 439;
             const height = numRows * rowHeight + 30;
 
             canvas.dataset.logicalWidth = String(width);
@@ -2128,7 +2444,7 @@
                 const col = mIdx % measuresPerRow;
                 const staveW = Math.floor((width - 44) / measuresPerRow);
                 const x = 22 + col * staveW;
-                const yTreble = row * rowHeight + 52;
+                const yTreble = row * rowHeight + 90;
                 const yBass = yTreble + 102;
                 const timeSigStr = m.timeSignature || ex.timeSignature || "4/4";
                 const [tsNum, tsDen] = timeSigStr.split('/').map(n => parseInt(n, 10) || 4);
@@ -2158,7 +2474,7 @@
                 context.save();
                 context.font = '800 10px "JetBrains Mono", monospace';
                 context.fillStyle = '#475569';
-                context.fillText('[' + m.bar + ']', x + 2, yTreble - 22);
+                context.fillText('[' + m.bar + ']', x + 2, yTreble - 78);
                 context.restore();
 
                 // Control de alteraciones dentro del compás para colocar becuadro (♮) cuando una nota # o b pasa a natural (ej. D# ➔ D♮)
@@ -2234,7 +2550,8 @@
 
                     trebleNotes.push(tSn);
                     bassNotes.push(bSn);
-                    barNotesMeta.push({ fn, sn: tSn, globalIdx: cursorGlobal, startBeatOfNote });
+                    const melodyStaveNote = !fn.isRest && getNoteWithOctaveMidi(fn.note) < 60 ? bSn : tSn;
+                    barNotesMeta.push({ fn, sn: tSn, melodyStaveNote, globalIdx: cursorGlobal, startBeatOfNote });
                     cursorGlobal++;
                 }
 
@@ -2250,6 +2567,7 @@
                 const hrList = (Array.isArray(m.harmonicRhythm) && m.harmonicRhythm.length)
                     ? m.harmonicRhythm
                     : [{ root: m.chordRoot, type: m.chordTypeKey, startBeat: 0, durationBeats: 4 }];
+                const chordLabelRightEdges = [-Infinity, -Infinity];
                 hrList.forEach((seg, sIdx) => {
                     const segSym = displayNote(seg.root) + (chordStructures[seg.type]?.cifrado || '');
                     let chordX = x + (col === 0 ? 58 : 20);
@@ -2259,19 +2577,72 @@
                     } else if (barNotesMeta[0]) {
                         chordX = Math.max(chordX, barNotesMeta[0].sn.getAbsoluteX() - 4);
                     }
+                    const scInfo = inferContextualScaleAndFunction(seg.root, seg.type, null, null, seg.scaleId || m.scaleId);
                     context.save();
                     context.font = '800 16px "Plus Jakarta Sans", Georgia, serif';
+                    const chordWidth = context.measureText(segSym).width;
+                    context.font = '700 9.5px "Plus Jakarta Sans", sans-serif';
+                    const scaleName = scInfo.name.split(' (')[0];
+                    const scaleWidth = context.measureText(scaleName).width;
+                    const labelWidth = Math.max(chordWidth, scaleWidth);
+                    chordX = Math.max(x + (col === 0 ? 58 : 20), chordX);
+                    chordX = Math.min(chordX, x + staveW - labelWidth - 8);
+                    let chordLane = chordLabelRightEdges.findIndex(rightEdge => chordX >= rightEdge + 6);
+                    if (chordLane < 0) chordLane = sIdx % chordLabelRightEdges.length;
+                    chordLabelRightEdges[chordLane] = chordX + labelWidth;
+
+                    context.font = '800 16px "Plus Jakarta Sans", Georgia, serif';
                     context.fillStyle = '#0f172a';
-                    context.fillText(segSym, chordX, yTreble - 17);
-                    const scInfo = inferContextualScaleAndFunction(seg.root, seg.type, null, null, seg.scaleId || m.scaleId);
+                    context.fillText(segSym, chordX, yTreble - 68 - chordLane * 34);
                     context.font = '700 9.5px "Plus Jakarta Sans", sans-serif';
                     context.fillStyle = '#0d9488';
-                    context.fillText(scInfo.name.split(' (')[0], chordX, yTreble - 5);
+                    context.fillText(scaleName, chordX, yTreble - 51 - chordLane * 34);
                     context.restore();
                 });
 
                 // Control de espaciado horizontal por niveles para que las etiquetas de análisis NUNCA se solapen
-                const rowRightEdgeX = [-999, -999, -999, -999];
+                const rowRightEdgeX = [-999];
+                const analysisRightEdgeX = [-999, -999, -999, -999];
+                const harmonizationGroups = new Map();
+                const groupedNotes = new Set();
+                barNotesMeta.forEach(meta => {
+                    if (meta.fn.isRest || groupedNotes.has(meta.globalIdx)) return;
+                    const comp = state.melodicStudio.autoFilledPhraseVoicings[meta.globalIdx];
+                    const techId = comp?.techniqueId || state.melodicStudio.selectedHarmonizationByNote[meta.globalIdx] || meta.fn.activeClassObj?.defaultOpt || 'principal_4way';
+                    const groupType = meta.fn.groupType;
+                    const isGroupStart = (groupType === 'res_ret_start' && meta.fn.analysisRetardationValid)
+                        || (groupType === 'dbl_chrom_start' && meta.fn.analysisDoubleChromaticValid)
+                        || techId.startsWith('del_')
+                        || (techId === 'double_chrom' && meta.fn.analysisDoubleChromaticValid)
+                        || techId.startsWith('ind_') || techId.startsWith('tonic_');
+                    if (!isGroupStart) return;
+
+                    const indices = getGroupIndicesForHarmonization(meta.fn, techId, flatNotes);
+                    if (indices.length < 2 || indices[0] !== meta.globalIdx) return;
+                    const members = indices.map(idx => barNotesMeta.find(candidate => candidate.globalIdx === idx));
+                    if (members.some(member => !member)) return;
+
+                    let label = `[ ${HARMONIZATION_TECHNIQUES_CATALOG[techId]?.abbr || techId} ]`;
+                    let color = '#b91c1c';
+                    let background = '#fee2e2';
+                    if (groupType === 'dbl_chrom_start' || techId === 'double_chrom') {
+                        label = '[ Doble cromático ]';
+                        color = '#5b21b6';
+                        background = '#ede9fe';
+                    } else if (techId.startsWith('tonic_')) {
+                        label = '[ TONICIZACIÓN ]';
+                        color = '#be185d';
+                        background = '#fce7f3';
+                    } else if (techId.startsWith('ind_')) {
+                        label = `[ LEAD INDEP. ${techId.replace('ind_', '#')} ]`;
+                        color = '#047857';
+                        background = '#d1fae5';
+                    }
+
+                    const group = { techId, indices, members, label, color, background };
+                    indices.forEach(idx => groupedNotes.add(idx));
+                    harmonizationGroups.set(meta.globalIdx, group);
+                });
 
                 barNotesMeta.forEach((meta, idxInBar) => {
                     const nx = meta.sn.getAbsoluteX();
@@ -2317,6 +2688,9 @@
                     const dispId = ['ambi_a', 'ambi_b', 'ambi_c'].includes(tId)
                         ? tId
                         : (compObj?.dispositionId || state.melodicStudio.voicingDispositionByNote[meta.globalIdx] || 'close');
+                    const annotationMode = state.melodicStudio.scoreAnnotationMode;
+                    const showAnalysisAnnotation = annotationMode === 'analysis' || annotationMode === 'both';
+                    const showHarmonizationAnnotation = annotationMode === 'harmonization' || annotationMode === 'both';
 
                     // Mostrar etiqueta flotante sobre el acorde en reproducción indicando su disposición
                     if (isPlaybackActive && meta.globalIdx === activeNoteGlobalIdx && !meta.fn.isRest) {
@@ -2341,98 +2715,139 @@
                         context.restore();
                     }
 
-                    // Todas las notas llevan abreviado qué tipo de técnica (y disposición si no es cerrada) se utilizó para armonizar
+                    if (showAnalysisAnnotation) {
+                        const analysisLabel = meta.fn.isRest
+                            ? '𝄽'
+                            : getMelodicAnalysisNotation(meta.fn, cl, state.melodicStudio.approachNotation);
+                        context.save();
+                        context.font = '800 9.5px "JetBrains Mono", monospace';
+                        const analysisTextW = context.measureText(analysisLabel).width + 8;
+                        const analysisLabelX = nx - 6;
+                        let analysisLane = 0;
+                        for (let lane = 0; lane < analysisRightEdgeX.length; lane++) {
+                            if (analysisLabelX >= analysisRightEdgeX[lane] + 8) {
+                                analysisLane = lane;
+                                break;
+                            }
+                            if (lane === analysisRightEdgeX.length - 1) analysisLane = idxInBar % analysisRightEdgeX.length;
+                        }
+                        analysisRightEdgeX[analysisLane] = analysisLabelX + analysisTextW;
+                        const stemExtents = meta.melodyStaveNote?.getStemExtents?.();
+                        const stemTopY = stemExtents
+                            ? Math.min(stemExtents.topY, stemExtents.baseY)
+                            : yTreble + 20;
+                        const analysisLabelY = stemTopY - 6 - analysisLane * 13;
+                        const analysisColors = meta.fn.isRest
+                            ? { text: '#64748b', bg: '#f1f5f9', border: '#cbd5e1' }
+                            : (meta.fn.isMainMelodicNote || cl.pOrS === 'P'
+                                ? { text: '#1e40af', bg: '#eff6ff', border: '#93c5fd' }
+                                : (meta.fn.analysisDiatonicToScale
+                                    ? { text: '#065f46', bg: '#d1fae5', border: '#6ee7b7' }
+                                    : { text: '#92400e', bg: '#fef3c7', border: '#fcd34d' }));
+                        context.fillStyle = analysisColors.bg;
+                        context.strokeStyle = analysisColors.border;
+                        context.lineWidth = 1;
+                        context.fillRect(analysisLabelX, analysisLabelY - 9, analysisTextW, 13);
+                        context.strokeRect(analysisLabelX, analysisLabelY - 9, analysisTextW, 13);
+                        context.fillStyle = analysisColors.text;
+                        context.fillText(analysisLabel, analysisLabelX + 4, analysisLabelY + 1);
+                        context.restore();
+                    }
+
+                    // La etiqueta inferior identifica la técnica y disposición usadas para armonizar
                     const techAbbr = HARMONIZATION_TECHNIQUES_CATALOG[tId]?.abbr || '4-WC';
                     const dispAbbrMap = { shearing: '5ªV', double_lead: '5ªV', drop2: 'D2', drop3: 'D3', drop24: 'D24', spread4: 'Sp4', spread5_m1: 'Sp5M1', drop2_spread5: 'Sp5M2', quasi_spread5: 'QSp5' };
                     const dispSuffix = (dispId && dispId !== 'close' && dispAbbrMap[dispId]) ? `·${dispAbbrMap[dispId]}` : '';
-                    const analysisTag = meta.fn.isRest ? '𝄽' : `${cl.shortTag}:${techAbbr}${dispSuffix}`;
+                    const techniqueTag = meta.fn.isRest ? '𝄽' : `${techAbbr}${dispSuffix}`;
 
-                    context.save();
-                    context.font = '800 9.5px "JetBrains Mono", monospace';
-                    const textW = context.measureText(analysisTag).width + 8;
-                    const labelX = nx - 6;
-
-                    // Asignar fila vertical sin colisión horizontal
-                    let chosenLane = 0;
-                    for (let lane = 0; lane < 4; lane++) {
-                        if (labelX >= rowRightEdgeX[lane] + 18) {
-                            chosenLane = lane;
-                            break;
-                        }
-                        if (lane === 3) chosenLane = idxInBar % 4;
-                    }
-                    rowRightEdgeX[chosenLane] = labelX + textW;
-                    const labelY = yBass + 86 + chosenLane * 17;
-
-                    // Colores fuertes y diferenciados para Lead Independiente vs Tonicización vs Estándar
-                    let tagTextColor = '#1e40af';
-                    let tagBgColor = '#eff6ff';
-                    let tagBorderColor = '#93c5fd';
-                    if (meta.fn.isRest) {
-                        tagTextColor = '#64748b'; tagBgColor = '#f1f5f9'; tagBorderColor = '#cbd5e1';
-                    } else if (tId.startsWith('ind_')) {
-                        // Lead Independiente: Verde Esmeralda Fuerte
-                        tagTextColor = '#065f46'; tagBgColor = '#a7f3d0'; tagBorderColor = '#059669';
-                    } else if (tId.startsWith('tonic_')) {
-                        // Tonicización: Fucsia / Magenta Fuerte
-                        tagTextColor = '#9d174d'; tagBgColor = '#fbcfe8'; tagBorderColor = '#db2777';
-                    } else if (tId.startsWith('del_') || meta.fn.groupType?.startsWith('res_ret')) {
-                        tagTextColor = '#991b1b'; tagBgColor = '#fee2e2'; tagBorderColor = '#dc2626';
-                    } else if (cl.pOrS !== 'P') {
-                        tagTextColor = '#92400e'; tagBgColor = '#fef3c7'; tagBorderColor = '#f59e0b';
-                    }
-
-                    if (chosenLane > 0) {
-                        context.strokeStyle = tagBorderColor;
-                        context.lineWidth = 1;
-                        context.beginPath();
-                        context.moveTo(nx + 4, yBass + 74);
-                        context.lineTo(nx + 4, labelY - 9);
-                        context.stroke();
-                    }
-
-                    context.fillStyle = tagBgColor;
-                    context.strokeStyle = tagBorderColor;
-                    context.lineWidth = 1.2;
-                    context.fillRect(labelX, labelY - 9, textW, 13);
-                    context.strokeRect(labelX, labelY - 9, textW, 13);
-                    context.fillStyle = tagTextColor;
-                    context.fillText(analysisTag, labelX + 4, labelY + 1);
-                    context.restore();
-
-                    // Dibujar símbolo de agrupación ([ ... ➔ ]) con colores fuertes diferenciados para Lead Independiente y Tonicización
-                    const isGrouped3 = meta.fn.groupType === 'res_ret_start' || meta.fn.groupType === 'dbl_chrom_start' || ChosenIs3ChordTonic(tId);
-                    const isGrouped2 = !isGrouped3 && (tId.startsWith('ind_') || (tId.startsWith('tonic_') && !ChosenIs3ChordTonic(tId)));
-                    if ((isGrouped3 || isGrouped2) && barNotesMeta[idxInBar + 1]) {
-                        const endBarMeta = (isGrouped3 && barNotesMeta[idxInBar + 2]) ? barNotesMeta[idxInBar + 2] : barNotesMeta[idxInBar + 1];
-                        const nextX = endBarMeta.sn.getAbsoluteX() + 18;
-                        const brkY = yBass + 155;
-                        let brkColor = '#b91c1c';
-                        let brkBg = '#fee2e2';
-                        let brkLabel = `[ ${techAbbr} ➔ ]`;
-                        if (meta.fn.groupType === 'dbl_chrom_start' || tId === 'double_chrom') {
-                            brkColor = '#5b21b6'; brkBg = '#ede9fe'; brkLabel = '[ Doble Crom. ➔ ]';
-                        } else if (tId.startsWith('tonic_')) {
-                            brkColor = '#be185d'; brkBg = '#fce7f3'; brkLabel = `[ TONICIZACIÓN ${techAbbr}: ${(compObj?.chordNameDisplay || '').split(' ➔')[0]} ➔ ]`;
-                        } else if (tId.startsWith('ind_')) {
-                            brkColor = '#047857'; brkBg = '#d1fae5'; brkLabel = `[ LEAD INDEP. (${tId.replace('ind_', '#')}) ➔ ]`;
-                        }
+                    const harmonyGroup = harmonizationGroups.get(meta.globalIdx);
+                    const isGroupedNote = groupedNotes.has(meta.globalIdx);
+                    if (showHarmonizationAnnotation && !isGroupedNote) {
                         context.save();
-                        context.strokeStyle = brkColor;
-                        context.lineWidth = 2.2;
-                        context.beginPath();
-                        context.moveTo(nx - 4, brkY - 6);
-                        context.lineTo(nx - 4, brkY);
-                        context.lineTo(nextX, brkY);
-                        context.lineTo(nextX, brkY - 6);
-                        context.stroke();
+                        context.font = '800 9.5px "JetBrains Mono", monospace';
+                        const textW = context.measureText(techniqueTag).width + 8;
+                        const labelX = Math.max(nx - 6, rowRightEdgeX[0] + 4);
+
+                        // Asignar fila vertical sin colisión horizontal
+                        let chosenLane = 0;
+                        for (let lane = 0; lane < 1; lane++) {
+                            if (labelX >= rowRightEdgeX[lane] + 18) {
+                                chosenLane = lane;
+                                break;
+                            }
+                            if (lane === 3) chosenLane = idxInBar % 4;
+                        }
+                        rowRightEdgeX[chosenLane] = labelX + textW;
+                        const labelY = yBass + 112;
+
+                        // Colores fuertes y diferenciados para Lead Independiente vs Tonicización vs Estándar
+                        let tagTextColor = '#1e40af';
+                        let tagBgColor = '#eff6ff';
+                        let tagBorderColor = '#93c5fd';
+                        if (meta.fn.isRest) {
+                            tagTextColor = '#64748b'; tagBgColor = '#f1f5f9'; tagBorderColor = '#cbd5e1';
+                        } else if (tId.startsWith('ind_')) {
+                            // Lead Independiente: Verde Esmeralda Fuerte
+                            tagTextColor = '#065f46'; tagBgColor = '#a7f3d0'; tagBorderColor = '#059669';
+                        } else if (tId.startsWith('tonic_')) {
+                            // Tonicización: Fucsia / Magenta Fuerte
+                            tagTextColor = '#9d174d'; tagBgColor = '#fbcfe8'; tagBorderColor = '#db2777';
+                        } else if (tId.startsWith('del_') || meta.fn.groupType?.startsWith('res_ret')) {
+                            tagTextColor = '#991b1b'; tagBgColor = '#fee2e2'; tagBorderColor = '#dc2626';
+                        } else if (cl.pOrS !== 'P') {
+                            tagTextColor = '#92400e'; tagBgColor = '#fef3c7'; tagBorderColor = '#f59e0b';
+                        }
+
+                        if (chosenLane > 0) {
+                            context.strokeStyle = tagBorderColor;
+                            context.lineWidth = 1;
+                            context.beginPath();
+                            context.moveTo(nx + 4, yBass + 74);
+                            context.lineTo(nx + 4, labelY - 9);
+                            context.stroke();
+                        }
+
+                        context.fillStyle = tagBgColor;
+                        context.strokeStyle = tagBorderColor;
+                        context.lineWidth = 1.2;
+                        context.fillRect(labelX, labelY - 9, textW, 13);
+                        context.strokeRect(labelX, labelY - 9, textW, 13);
+                        context.fillStyle = tagTextColor;
+                        context.fillText(techniqueTag, labelX + 4, labelY + 1);
+                        context.restore();
+                    }
+
+                    if (showHarmonizationAnnotation && harmonyGroup) {
+                        const groupStartX = nx - 4;
+                        const groupEndX = harmonyGroup.members[harmonyGroup.members.length - 1].sn.getAbsoluteX() + 18;
+                        context.save();
                         context.font = '800 9.5px "Plus Jakarta Sans", sans-serif';
-                        const lblW = context.measureText(brkLabel).width + 8;
-                        context.fillStyle = brkBg;
-                        context.fillRect(nx - 4, brkY + 2, lblW, 13);
-                        context.strokeRect(nx - 4, brkY + 2, lblW, 13);
-                        context.fillStyle = brkColor;
-                        context.fillText(brkLabel, nx, brkY + 11.5);
+                        const labelWidth = context.measureText(harmonyGroup.label).width + 8;
+                        const labelX = (groupStartX + groupEndX - labelWidth) / 2;
+                        let chosenLane = 0;
+                        for (let lane = 0; lane < rowRightEdgeX.length; lane++) {
+                            if (labelX >= rowRightEdgeX[lane] + 12) {
+                                chosenLane = lane;
+                                break;
+                            }
+                            if (lane === rowRightEdgeX.length - 1) chosenLane = idxInBar % rowRightEdgeX.length;
+                        }
+                        rowRightEdgeX[chosenLane] = Math.max(groupEndX, labelX + labelWidth);
+                        const labelY = yBass + 112;
+                        const bracketY = labelY - 12;
+                        context.strokeStyle = harmonyGroup.color;
+                        context.lineWidth = 2;
+                        context.beginPath();
+                        context.moveTo(groupStartX, bracketY - 5);
+                        context.lineTo(groupStartX, bracketY);
+                        context.lineTo(groupEndX, bracketY);
+                        context.lineTo(groupEndX, bracketY - 5);
+                        context.stroke();
+                        context.fillStyle = harmonyGroup.background;
+                        context.fillRect(labelX, labelY - 9, labelWidth, 13);
+                        context.strokeRect(labelX, labelY - 9, labelWidth, 13);
+                        context.fillStyle = harmonyGroup.color;
+                        context.fillText(harmonyGroup.label, labelX + 4, labelY + 1);
                         context.restore();
                     }
 
@@ -2445,7 +2860,7 @@
         }
     }
 
-    function scrollMelodicScoreToNote(globalIdx) {
+    function scrollMelodicScoreToNote(globalIdx, behavior = 'smooth') {
         const scrollWrap = el('melodicScoreScrollContainer');
         const canvas = el('melodicPhraseCanvas');
         const hitBox = (state.melodicStudio.noteHitBoxes || []).find(hit => hit.globalIdx === globalIdx);
@@ -2470,7 +2885,7 @@
             if (Math.abs(targetLeft - visibleLeft) > 1) {
                 scrollWrap.scrollTo({
                     left: targetLeft,
-                    behavior: 'smooth'
+                    behavior
                 });
             }
 
@@ -2485,7 +2900,7 @@
                 verticalDelta = noteBottom - safeBottom;
             }
             if (Math.abs(verticalDelta) > 1) {
-                window.scrollBy({ top: verticalDelta, behavior: 'smooth' });
+                window.scrollBy({ top: verticalDelta, behavior });
             }
         });
     }
@@ -3423,6 +3838,14 @@
         panel.classList.toggle('flex', state.melodicStudio.isActive);
         el('mainAppContainer')?.classList.toggle('compact-mode', !state.melodicStudio.isActive);
         el('studioActiveTopBadge')?.classList.toggle('hidden', !state.melodicStudio.isActive);
+        if (el('toggleApproachNotationBtn')) {
+            const showSecondaryLabel = state.melodicStudio.approachNotation === 'S';
+            el('toggleApproachNotationBtn').textContent = `Aproximación: ${showSecondaryLabel ? 'S' : 'd'}`;
+            el('toggleApproachNotationBtn').setAttribute('aria-pressed', String(showSecondaryLabel));
+        }
+        if (el('scoreAnnotationModeSelect')) {
+            el('scoreAnnotationModeSelect').value = state.melodicStudio.scoreAnnotationMode;
+        }
 
         if (!state.melodicStudio.isActive) {
             el('floatingHarmonizationModal')?.classList.add('hidden');
@@ -3431,6 +3854,22 @@
 
         ensureExampleAutoFilled(state.melodicStudio.exampleId);
         const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+        const selectedNote = notesList[state.melodicStudio.selectedNoteIdx];
+        const enharmonicButton = el('toggleSelectedNoteEnharmonicBtn');
+        if (enharmonicButton) {
+            const currentSpelling = state.melodicStudio.enharmonicNoteSpellingByNote[state.melodicStudio.selectedNoteIdx];
+            const contextualSpelling = selectedNote && !selectedNote.isRest
+                ? getContextualEnharmonicSpelling(selectedNote)
+                : null;
+            enharmonicButton.disabled = !selectedNote || selectedNote.isRest || (!currentSpelling && !contextualSpelling);
+            enharmonicButton.textContent = currentSpelling
+                ? `Enarmonía: restaurar ${formatScientificPitch(selectedNote.sourceNote)}`
+                : `Enarmonía: convertir${contextualSpelling ? ` a ${displayNote(contextualSpelling)}` : ''}`;
+            enharmonicButton.setAttribute('aria-pressed', String(Boolean(currentSpelling)));
+            enharmonicButton.title = currentSpelling
+                ? 'Restaurar la escritura original de la nota seleccionada'
+                : 'Reescribir la nota seleccionada con la ortografía de su escala de llegada';
+        }
         syncLiveElementEditorBar();
 
         // Sombreado en la barra inferior exclusivo para conjuntos de 2, 3 o más notas hacia el acorde objetivo
@@ -3464,14 +3903,15 @@
             }));
         }
 
-        const permCont = el('studioMultiPermutationContainer');
-        if (permCont) {
-            const refIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
-            const refNote = notesList[refIdx] || notesList[0];
-            const curArr = state.melodicStudio.selectedMultiPermutationsByNote[refIdx] || [];
-            const baseVoicingNoPerm = refNote ? computeHarmonizationForMelodicNote(refNote, null, true) : null;
-            const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(refNote, baseVoicingNoPerm, curArr);
-
+        const selectedPermNoteIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+        const selectedPermNote = notesList[selectedPermNoteIdx] || notesList[0];
+        const renderPermutationOptions = (permCont) => {
+            if (!permCont) return;
+            const curArr = state.melodicStudio.selectedMultiPermutationsByNote[selectedPermNoteIdx] || [];
+            const baseVoicingNoPerm = selectedPermNote
+                ? computeHarmonizationForMelodicNote(selectedPermNote, null, true)
+                : null;
+            const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(selectedPermNote, baseVoicingNoPerm, curArr);
             if (!validPermKeys.length) {
                 permCont.innerHTML = `<span class="text-[10px] text-slate-500 italic">Sin permutaciones disponibles para este bloque</span>`;
             } else {
@@ -3482,7 +3922,7 @@
                 }).join('');
                 permCont.querySelectorAll('[data-perm]').forEach(b => b.addEventListener('click', e => {
                     const pid = e.currentTarget.dataset.perm;
-                    const tIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+                    const tIdx = selectedPermNoteIdx;
                     const arr = state.melodicStudio.selectedMultiPermutationsByNote[tIdx] || [];
                     const pObj = HARMONIZATION_TECHNIQUES_CATALOG[pid];
                     if (arr.includes(pid)) {
@@ -3502,10 +3942,14 @@
                     renderMelodicStudioUI();
                 }));
             }
-        }
+        };
+        renderPermutationOptions(el('studioMultiPermutationContainer'));
+        renderPermutationOptions(el('floatingPermutationsContainer'));
 
         const refIdxForDisp = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
-        const activeDispForSelected = state.melodicStudio.voicingDispositionByNote[refIdxForDisp] || 'close';
+        const activeDispForSelected = state.melodicStudio.voicingDispositionByNote[refIdxForDisp]
+            || state.melodicStudio.voicingDisposition
+            || 'close';
         document.querySelectorAll('.studio-drop-btn').forEach(btn => {
             const isAct = btn.dataset.studioDrop === activeDispForSelected;
             btn.className = 'studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] border-0 cursor-pointer ' +
@@ -3544,6 +3988,25 @@
 
         const savedTech = state.melodicStudio.selectedHarmonizationByNote[curNote.globalIdx];
         const chosenTechId = (savedTech && allCombinedOpts.includes(savedTech)) ? savedTech : (activeCl.defaultOpt || validOptions[0]);
+        const floatingDispositionOptions = el('floatingDispositionOptions');
+        if (floatingDispositionOptions) {
+            const activeDisposition = state.melodicStudio.voicingDispositionByNote[curNote.globalIdx]
+                || state.melodicStudio.voicingDisposition
+                || 'close';
+            floatingDispositionOptions.innerHTML = Object.entries(DISPOSITION_HUMAN_NAMES).map(([id, name]) => {
+                const shortName = name.replace(/\s*\([^)]*\)/g, '');
+                const isActive = id === activeDisposition;
+                return `<button type="button" data-floating-drop="${id}" aria-pressed="${isActive}" title="${name}" class="px-2 py-1 rounded border text-[10px] font-bold ${isActive ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-white text-slate-800 border-slate-300'}">${shortName}</button>`;
+            }).join('');
+            floatingDispositionOptions.querySelectorAll('[data-floating-drop]').forEach(button => button.addEventListener('click', event => {
+                const selectedDisposition = event.currentTarget.dataset.floatingDrop || 'close';
+                state.melodicStudio.voicingDispositionByNote[curNote.globalIdx] = selectedDisposition;
+                harmonizeNoteOrGroupInStudio(curNote, chosenTechId);
+                const updated = state.melodicStudio.autoFilledPhraseVoicings[curNote.globalIdx];
+                if (updated) playNotesList(updated.notesWithOct, updated.implicitBassNote);
+                renderMelodicStudioUI();
+            }));
+        }
         const currentComp = computeHarmonizationForMelodicNote(curNote, chosenTechId);
         loadHarmonizationIntoMainBlock(curNote, currentComp);
         updateDisplay();
@@ -3551,9 +4014,8 @@
             el('activeNoteHeaderTitle').innerHTML = `Compás ${curNote.bar} • Acorde ${curNote.barChordSymbol} • Melodía ${formatScientificPitch(curNote.note)}`;
         }
         if (el('activeNoteBadgesRow')) {
-            const abbr = HARMONIZATION_TECHNIQUES_CATALOG[chosenTechId]?.abbr || '4-WC';
             el('activeNoteBadgesRow').innerHTML =
-                `<span class="px-2 py-0.5 rounded bg-blue-100 text-blue-900 font-extrabold text-[10px]">${activeCl.shortTag}:${abbr}</span>` +
+                `<span class="px-2 py-0.5 rounded bg-blue-100 text-blue-900 font-extrabold text-[10px]">${getMelodicAnalysisNotation(curNote, activeCl, state.melodicStudio.approachNotation)}</span>` +
                 `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-extrabold text-[10px]">${curNote.barChordSymbol} • ${curNote.barScaleName || 'Jónica'}</span>` +
                 `<span class="px-2 py-0.5 rounded bg-teal-100 text-teal-900 font-extrabold text-[10px]">${curNote.barFuncName || ''}</span>`;
         }
@@ -3922,6 +4384,7 @@
         state.melodicStudio.customRandomExamples[id] = { id, bars: barsCount, title: `🎲 Aleatoria (${barsCount}C): ` + measures.map(m => m.chordSymbol).join(' | '), measures };
         state.melodicStudio.exampleId = id;
         state.melodicStudio.selectedNoteIdx = 0;
+        state.melodicStudio.enharmonicNoteSpellingByNote = {};
         state.melodicStudio.manuallyClearedNotes = {};
         state.melodicStudio.selectedHarmonizationByNote = {};
         state.melodicStudio.autoFilledPhraseVoicings = {};
@@ -4477,6 +4940,7 @@
         }
         state.melodicStudio.phraseTimers = [];
         state.melodicStudio.isPlayingPhrase = false;
+        el('studioLivePlaybackBanner')?.classList.remove('studio-live-playback-active');
         if (el('playMelodyOnlyBtn')) el('playMelodyOnlyBtn').textContent = '🎵 Solo Melodía';
         if (el('playFullMelodicPhraseBtn')) el('playFullMelodicPhraseBtn').textContent = '▶️ Sonar Frase + Bajo';
         if (el('playFromActiveNoteBtn')) el('playFromActiveNoteBtn').textContent = '⏩ Desde Nota Activa';
@@ -4551,6 +5015,7 @@
         if (!notesList.length) return;
 
         state.melodicStudio.isPlayingPhrase = true;
+        el('studioLivePlaybackBanner')?.classList.add('studio-live-playback-active');
         if (melodyOnly && el('playMelodyOnlyBtn')) el('playMelodyOnlyBtn').textContent = '⏹️ Detener';
         else if (startIdx === 0 && el('playFullMelodicPhraseBtn')) el('playFullMelodicPhraseBtn').textContent = '⏹️ Detener';
         else if (el('playFromActiveNoteBtn')) el('playFromActiveNoteBtn').textContent = '⏹️ Detener';
@@ -4572,6 +5037,7 @@
                 const comp = state.melodicStudio.autoFilledPhraseVoicings[i];
                 updateStudioLivePlaybackBanner(n, comp, true);
                 drawMelodicPhraseScore(i);
+                scrollMelodicScoreToNote(i, 'auto');
                 if (!n.isRest) {
                     const noteDurTone = bVal >= 1.5 ? "2n" : (bVal >= 0.9 ? "4n" : "8n");
                     if (!melodyOnly && comp && comp.notesWithOct && comp.notesWithOct.length) {
@@ -4650,6 +5116,7 @@
         };
         state.melodicStudio.exampleId = id;
         state.melodicStudio.barsCount = builtMeasures.length;
+        state.melodicStudio.enharmonicNoteSpellingByNote = {};
         state.melodicStudio.stepByStepMode = manualMode;
         state.melodicStudio.manuallyClearedNotes = {};
         state.melodicStudio.selectedHarmonizationByNote = {};
@@ -6025,6 +6492,7 @@
                 state.melodicStudio.barsCount = 4;
                 state.melodicStudio.exampleId = 'f3_4_1';
                 state.melodicStudio.selectedNoteIdx = 0;
+                state.melodicStudio.enharmonicNoteSpellingByNote = {};
                 state.melodicStudio.manuallyClearedNotes = {};
                 state.melodicStudio.selectedHarmonizationByNote = {};
                 state.melodicStudio.autoFilledPhraseVoicings = {};
@@ -6040,6 +6508,7 @@
                 state.melodicStudio.barsCount = 8;
                 state.melodicStudio.exampleId = 'f3_8_1';
                 state.melodicStudio.selectedNoteIdx = 0;
+                state.melodicStudio.enharmonicNoteSpellingByNote = {};
                 state.melodicStudio.manuallyClearedNotes = {};
                 state.melodicStudio.selectedHarmonizationByNote = {};
                 state.melodicStudio.autoFilledPhraseVoicings = {};
@@ -6054,6 +6523,7 @@
                 stopStudioPhrasePlayback();
                 state.melodicStudio.exampleId = e.target.value;
                 state.melodicStudio.selectedNoteIdx = 0;
+                state.melodicStudio.enharmonicNoteSpellingByNote = {};
                 state.melodicStudio.manuallyClearedNotes = {};
                 state.melodicStudio.selectedHarmonizationByNote = {};
                 state.melodicStudio.autoFilledPhraseVoicings = {};
@@ -6120,6 +6590,42 @@
                 drawMelodicPhraseScore(-1);
             });
         }
+        if (el('toggleApproachNotationBtn')) {
+            el('toggleApproachNotationBtn').addEventListener('click', () => {
+                state.melodicStudio.approachNotation = state.melodicStudio.approachNotation === 'S' ? 'd' : 'S';
+                renderMelodicStudioUI();
+            });
+        }
+        if (el('toggleSelectedNoteEnharmonicBtn')) {
+            el('toggleSelectedNoteEnharmonicBtn').addEventListener('click', () => {
+                const selectedIdx = state.melodicStudio.selectedNoteIdx;
+                const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+                const selected = notesList[selectedIdx];
+                if (!selected || selected.isRest) return;
+
+                if (state.melodicStudio.enharmonicNoteSpellingByNote[selectedIdx]) {
+                    delete state.melodicStudio.enharmonicNoteSpellingByNote[selectedIdx];
+                } else {
+                    const contextualSpelling = getContextualEnharmonicSpelling(selected);
+                    if (!contextualSpelling) return;
+                    state.melodicStudio.enharmonicNoteSpellingByNote[selectedIdx] = contextualSpelling;
+                }
+
+                const selectedTechnique = state.melodicStudio.selectedHarmonizationByNote[selectedIdx]
+                    || selected.activeClassObj?.defaultOpt
+                    || 'principal_4way';
+                getGroupIndicesForHarmonization(selected, selectedTechnique, notesList).forEach(globalIdx => {
+                    delete state.melodicStudio.autoFilledPhraseVoicings[globalIdx];
+                });
+                renderMelodicStudioUI();
+            });
+        }
+        if (el('scoreAnnotationModeSelect')) {
+            el('scoreAnnotationModeSelect').addEventListener('change', e => {
+                state.melodicStudio.scoreAnnotationMode = e.currentTarget.value;
+                drawMelodicPhraseScore(-1);
+            });
+        }
         if (el('toggleScoreZoomBtn')) {
             el('toggleScoreZoomBtn').addEventListener('click', () => {
                 state.melodicStudio.measuresPerRowMode = state.melodicStudio.measuresPerRowMode === 4 ? 2 : 4;
@@ -6175,6 +6681,7 @@
                 cloned.title = `💾 Guardada (${cloned.bars}C): ` + cloned.measures.map(m => m.chordSymbol).join(' | ');
                 state.melodicStudio.customRandomExamples[savedId] = cloned;
                 state.melodicStudio.exampleId = savedId;
+                state.melodicStudio.enharmonicNoteSpellingByNote = {};
                 state.melodicStudio.manuallyClearedNotes = {};
                 const saved = savePersistedState();
                 populateMelodicStudioExamplesDropdown();
@@ -6543,6 +7050,7 @@
                     state.melodicStudio.isActive = true;
                     state.continuityMode = false;
                     state.melodicStudio.exampleId = standardId;
+                    state.melodicStudio.enharmonicNoteSpellingByNote = {};
                     state.melodicStudio.barsCount = 8;
                     setStudioTempo(standard.bpm);
                     state.melodicStudio.stepByStepMode = target.dataset.stdMode === 'manual';
