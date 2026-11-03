@@ -1,6 +1,15 @@
 (function() {
     const el = (id) => document.getElementById(id);
 
+    function createEmptySession() {
+        return {
+            startTime: Date.now(), exercises: 0, correct: 0, incorrect: 0,
+            xpEarned: 0, bestSessionStreak: 0, currentSessionStreak: 0,
+            badgesUnlockedInSession: [],
+            totalTimeSec: 0, timedCount: 0, exercisesLog: []
+        };
+    }
+
     const state = {
         currentUser: "Invitado",
         correctNotes: [],
@@ -41,12 +50,7 @@
             batchTotalTimeSec: 0,
             batchChordsFailed: {}
         },
-        currentSession: {
-            startTime: Date.now(), exercises: 0, correct: 0, incorrect: 0,
-            xpEarned: 0, bestSessionStreak: 0, currentSessionStreak: 0,
-            badgesUnlockedInSession: [],
-            totalTimeSec: 0, timedCount: 0, exercisesLog: []
-        },
+        currentSession: createEmptySession(),
         difficulty: 'intermediate',
         notationSystem: 'american',
         instrument: 'piano',
@@ -115,6 +119,19 @@
             customEditorDraft: { barsCount: 4, timeSigNum: 4, timeSigDen: 4, activeBarIdx: 0, activeNoteIdx: -1, noteHitBoxes: [], measures: [] }
         }
     };
+
+    const DEFAULT_STATS = JSON.parse(JSON.stringify(state.stats));
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, char => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[char]);
+    }
+
+    function reportProfileStorageError(action, error) {
+        console.error(`No se pudo ${action} los datos del perfil:`, error);
+        showFeedbackBanner(`❌ No se pudieron ${action} los datos del perfil. Comprueba el almacenamiento del navegador.`, 'error');
+    }
 
     const BADGES_CATALOG = [
         { id: 'first_chord', icon: '🎵', title: 'Primer Bloque', desc: 'Armoniza tu primer acorde correctamente.' },
@@ -1638,7 +1655,7 @@
     }
 
     // Devuelve las permutaciones válidas según el acorde armonizado, garantizando que no se repitan notas destino
-    function getValidPermutationsWithoutRepetition(noteObj, baseVoicingObj, activePermIds = []) {
+    function getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(noteObj, baseVoicingObj, activePermIds = []) {
         if (!noteObj || noteObj.isRest || !baseVoicingObj || !Array.isArray(baseVoicingObj.notesWithOct)) return [];
         const effRoot = baseVoicingObj.effectiveBassRoot || noteObj.targetRoot || noteObj.barChordRoot || 'C';
         const effType = baseVoicingObj.effectiveChordTypeKey || noteObj.targetType || noteObj.barChordTypeKey || 'maj7';
@@ -1687,7 +1704,7 @@
         return ['tonic_II_V_I', 'tonic_V7ofV_V_I', 'tonic_II_bII_I', 'tonic_bVI_bII_I', 'tonic_IVm_bVII_I', 'tonic_sIVm7b5_VII7_I'].includes(techId);
     }
 
-    function getTonicizationPreviewProgressionText(techId, targetRoot, targetTypeKey) {
+    function getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(techId, targetRoot, targetTypeKey) {
         const root = targetRoot || 'C';
         const type = targetTypeKey || 'maj7';
         const isMinor = type === 'm7' || type === 'minor';
@@ -3453,7 +3470,7 @@
             const refNote = notesList[refIdx] || notesList[0];
             const curArr = state.melodicStudio.selectedMultiPermutationsByNote[refIdx] || [];
             const baseVoicingNoPerm = refNote ? computeHarmonizationForMelodicNote(refNote, null, true) : null;
-            const validPermKeys = getValidPermutationsWithoutRepetition(refNote, baseVoicingNoPerm, curArr);
+            const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(refNote, baseVoicingNoPerm, curArr);
 
             if (!validPermKeys.length) {
                 permCont.innerHTML = `<span class="text-[10px] text-slate-500 italic">Sin permutaciones disponibles para este bloque</span>`;
@@ -3643,7 +3660,7 @@
                         : 'bg-pink-50 text-pink-950 border-2 border-pink-500 hover:bg-pink-100 font-bold';
                 }
                 const previewText = isTonic
-                    ? getTonicizationPreviewProgressionText(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
+                    ? getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
                     : (tObj.desc || '');
                 return `<button type="button" data-tech-opt="${tid}" aria-pressed="${isAct}" class="analysis-tech-option-btn text-left p-2 rounded-lg border text-[11px] cursor-pointer ${btnColors}">
                     <div class="font-bold">[${tObj.abbr}] ${tObj.shortName}</div>
@@ -3917,7 +3934,7 @@
         const sel = el('melodicExampleSelect');
         if (!sel) return;
         const allEx = { ...MELODIC_ANALYSIS_EXAMPLES, ...(state.melodicStudio.customRandomExamples || {}) };
-        sel.innerHTML = Object.values(allEx).map(ex => `<option value="${ex.id}">${ex.title}</option>`).join('');
+        sel.replaceChildren(...Object.values(allEx).map(ex => new Option(ex.title, ex.id)));
         sel.value = state.melodicStudio.exampleId;
     }
 
@@ -4308,7 +4325,7 @@
             <div class="space-y-3 text-xs">
                 <div class="p-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex flex-wrap items-center justify-between gap-2">
                     <div>
-                        <div class="text-[11px] uppercase font-bold opacity-85">👤 Estudiante: ${state.currentUser} • Nivel ${level} (${rankName})</div>
+                        <div class="text-[11px] uppercase font-bold opacity-85">👤 Estudiante: ${escapeHtml(state.currentUser)} • Nivel ${level} (${rankName})</div>
                         <div class="text-lg font-extrabold">Calificación de la Sesión: ${starsStr} (${acc}% Precisión)</div>
                     </div>
                     <div class="text-right font-mono">
@@ -4645,28 +4662,70 @@
     }
 
     function savePersistedState() {
-        if (!state.currentUser || state.currentUser === 'Invitado') return;
+        if (!state.currentUser || state.currentUser === 'Invitado') return null;
         try {
-            localStorage.setItem('bloqueArmonicoUser_v3_' + state.currentUser, JSON.stringify({
+            const storageKey = 'bloqueArmonicoUser_v3_' + state.currentUser;
+            const previousData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            localStorage.setItem(storageKey, JSON.stringify({
+                ...previousData,
+                version: 4,
+                currentUser: state.currentUser,
                 stats: state.stats,
+                currentSession: state.currentSession,
                 customRandomExamples: state.melodicStudio.customRandomExamples
             }));
-        } catch (e) {}
+            return true;
+        } catch (error) {
+            reportProfileStorageError('guardar', error);
+            return false;
+        }
     }
 
     function loadUserProfileStats(userName) {
-        if (!userName || userName === 'Invitado') return;
+        state.stats = JSON.parse(JSON.stringify(DEFAULT_STATS));
+        state.currentSession = createEmptySession();
+        state.melodicStudio.customRandomExamples = {};
+        state.melodicStudio.exampleId = 'f3_4_1';
+        if (!userName || userName === 'Invitado') {
+            populateMelodicStudioExamplesDropdown();
+            return;
+        }
         try {
             const raw = localStorage.getItem('bloqueArmonicoUser_v3_' + userName);
             if (raw) {
                 const parsed = JSON.parse(raw);
-                if (parsed.stats) state.stats = { ...state.stats, ...parsed.stats };
-                if (parsed.customRandomExamples) {
-                    state.melodicStudio.customRandomExamples = { ...state.melodicStudio.customRandomExamples, ...parsed.customRandomExamples };
-                    populateMelodicStudioExamplesDropdown();
+                if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                    throw new Error('El perfil guardado no tiene un formato válido.');
+                }
+                if (parsed.stats && typeof parsed.stats === 'object' && !Array.isArray(parsed.stats)) {
+                    const savedCompetencies = parsed.stats.competencies;
+                    state.stats = {
+                        ...state.stats,
+                        ...parsed.stats,
+                        competencies: {
+                            ...state.stats.competencies,
+                            ...(savedCompetencies && typeof savedCompetencies === 'object' && !Array.isArray(savedCompetencies)
+                                ? savedCompetencies
+                                : {})
+                        }
+                    };
+                }
+                if (parsed.currentSession && typeof parsed.currentSession === 'object' && !Array.isArray(parsed.currentSession)) {
+                    state.currentSession = {
+                        ...state.currentSession,
+                        ...parsed.currentSession,
+                        startTime: Date.now()
+                    };
+                }
+                if (parsed.customRandomExamples && typeof parsed.customRandomExamples === 'object' && !Array.isArray(parsed.customRandomExamples)) {
+                    state.melodicStudio.customRandomExamples = parsed.customRandomExamples;
                 }
             }
-        } catch (e) {}
+        } catch (error) {
+            reportProfileStorageError('cargar', error);
+        } finally {
+            populateMelodicStudioExamplesDropdown();
+        }
     }
 
     function populateWelcomeUserSelect() {
@@ -4674,8 +4733,22 @@
         if (!sel) return;
         try {
             const users = JSON.parse(localStorage.getItem('bloqueArmonicoUsers_v3') || '[]');
-            sel.innerHTML = '<option value="">-- Cargar Perfil --</option>' + users.map(u => `<option value="${u}">${u}</option>`).join('');
-        } catch (e) {}
+            if (!Array.isArray(users)) throw new Error('La lista de perfiles guardada no tiene un formato válido.');
+            sel.replaceChildren(new Option('-- Cargar Perfil --', ''));
+            [...new Set(users.filter(user => typeof user === 'string' && user.trim()))].forEach(user => {
+                sel.add(new Option(user, user));
+            });
+        } catch (error) {
+            reportProfileStorageError('cargar', error);
+        }
+    }
+
+    function registerUserProfile(userName) {
+        const users = JSON.parse(localStorage.getItem('bloqueArmonicoUsers_v3') || '[]');
+        if (!Array.isArray(users)) throw new Error('La lista de perfiles guardada no tiene un formato válido.');
+        if (users.includes(userName)) return false;
+        localStorage.setItem('bloqueArmonicoUsers_v3', JSON.stringify([...users, userName]));
+        return true;
     }
 
     function navigateChordGridVoice(delta) {
@@ -4750,7 +4823,7 @@
         }
     }
 
-    function recordLearningProgressSnapshot() {
+    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
         if (!Array.isArray(state.stats.progressionHistory)) state.stats.progressionHistory = [];
         const totalExercises = Number(state.stats.totalExercises) || 0;
         if (!totalExercises) return;
@@ -5060,16 +5133,14 @@
                 const newName = (el('welcomeNewUserInput')?.value || '').trim();
                 const selectedName = el('welcomeUserSelect')?.value || '';
                 const chosen = newName || selectedName || 'Estudiante';
-                state.currentUser = chosen;
                 let isBrandNewUser = false;
                 try {
-                    const users = JSON.parse(localStorage.getItem('bloqueArmonicoUsers_v3') || '[]');
-                    if (!users.includes(chosen)) {
-                        users.push(chosen);
-                        localStorage.setItem('bloqueArmonicoUsers_v3', JSON.stringify(users));
-                        isBrandNewUser = true;
-                    }
-                } catch (e) {}
+                    isBrandNewUser = registerUserProfile(chosen);
+                } catch (error) {
+                    reportProfileStorageError('registrar', error);
+                    return;
+                }
+                state.currentUser = chosen;
                 loadUserProfileStats(chosen);
                 registerDailyPracticeActivity();
                 savePersistedState();
@@ -5128,7 +5199,9 @@
                     localStorage.setItem('bloqueArmonicoUsers_v3', JSON.stringify(users));
                     localStorage.removeItem('bloqueArmonicoUser_v3_' + u);
                     populateWelcomeUserSelect();
-                } catch (e) {}
+                } catch (error) {
+                    reportProfileStorageError('eliminar', error);
+                }
             });
         }
         if (el('promptStartTutorialBtn')) {
@@ -5692,10 +5765,15 @@
                                 retries: state.continuity.runRetries,
                                 measures: JSON.parse(JSON.stringify(state.continuity.measures))
                             });
-                            recordLearningProgressSnapshot();
-                            savePersistedState();
+                            rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
+                            const saved = savePersistedState();
                             unlockBadge('continuity_8c');
-                            showFeedbackBanner('🎉 ¡Completaste los 8 compases! Guardado en tu Historial y abriendo partitura del enlace...', 'success');
+                            showFeedbackBanner(
+                                saved === false
+                                    ? '🎉 ¡Completaste los 8 compases! No se pudo guardar el progreso del perfil.'
+                                    : '🎉 ¡Completaste los 8 compases! Guardado en tu Historial y abriendo partitura del enlace...',
+                                saved === false ? 'error' : 'success'
+                            );
                             setTimeout(() => openContinuitySummaryModal(0), 450);
                         } else {
                             showFeedbackBanner(`✅ Compás ${state.continuity.currentBar + 1}/8 correcto. Pasando al siguiente compás...`, 'success');
@@ -5731,7 +5809,7 @@
                         state.currentSession.totalTimeSec += elapsed;
                         state.currentSession.timedCount++;
                     }
-                    recordLearningProgressSnapshot();
+                    rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
                     const compKey = state.melodicStudio.isActive ? 'melodicApproaches' : (state.dictationMode ? 'earDictation' : (state.voicingType === 'close' ? 'close4Way' : 'openDropsSpreads'));
                     if (state.stats.competencies && state.stats.competencies[compKey]) {
                         state.stats.competencies[compKey].total++;
@@ -5745,10 +5823,15 @@
                     if (state.dictationMode) unlockBadge('ear_master');
                     if (state.voicingType !== 'close' || state.includeBass) unlockBadge('drop_arranger');
 
-                    savePersistedState();
+                    const saved = savePersistedState();
                     state.evaluation.questionsAttemptedInBatch++;
                     playNotesList(state.correctNotesWithOctave);
-                    showFeedbackBanner('✅ ¡Correcto! (+15 XP). Pulsa Enter o Siguiente Ejercicio para continuar.', 'success');
+                    showFeedbackBanner(
+                        saved === false
+                            ? '✅ ¡Correcto! No se pudo guardar el progreso del perfil.'
+                            : '✅ ¡Correcto! (+15 XP). Pulsa Enter o Siguiente Ejercicio para continuar.',
+                        saved === false ? 'error' : 'success'
+                    );
 
                     const evalTarget = state.evaluation.exercisesPerEval || 0;
                     if (evalTarget > 0 && state.evaluation.questionsAttemptedInBatch >= evalTarget && !state.melodicStudio.isActive) {
@@ -5778,8 +5861,13 @@
                     if (!state.stats.errorBank.some(x => x.id === exId)) {
                         state.stats.errorBank.push({ id: exId, root: state.chordRoot, chordTypeKey: state.chordTypeKey, leadLabel: state.givenLabel });
                     }
-                    savePersistedState();
-                    showFeedbackBanner('❌ Revisa las celdas marcadas en rojo (añadido a tu Banco de Errores 🔄).', 'error');
+                    const saved = savePersistedState();
+                    showFeedbackBanner(
+                        saved === false
+                            ? '❌ Revisa las celdas marcadas en rojo. No se pudo guardar el progreso del perfil.'
+                            : '❌ Revisa las celdas marcadas en rojo (añadido a tu Banco de Errores 🔄).',
+                        'error'
+                    );
                 }
                 updateDisplay();
             });
@@ -5845,11 +5933,7 @@
             el('welcomeModalOverlay')?.classList.add('visible');
         });
         if (el('resumePracticeFromFinalBtn')) el('resumePracticeFromFinalBtn').addEventListener('click', () => {
-            state.currentSession = {
-                startTime: Date.now(), exercises: 0, correct: 0, incorrect: 0,
-                xpEarned: 0, bestSessionStreak: 0, currentSessionStreak: 0,
-                badgesUnlockedInSession: [], totalTimeSec: 0, timedCount: 0, exercisesLog: []
-            };
+            state.currentSession = createEmptySession();
             el('finalMessageDisplay')?.classList.add('hidden');
             el('mainAppContainer')?.classList.remove('hidden');
             generateStandAloneExercise();
@@ -6092,9 +6176,16 @@
                 state.melodicStudio.customRandomExamples[savedId] = cloned;
                 state.melodicStudio.exampleId = savedId;
                 state.melodicStudio.manuallyClearedNotes = {};
-                savePersistedState();
+                const saved = savePersistedState();
                 populateMelodicStudioExamplesDropdown();
-                showFeedbackBanner('💾 Melodía y armonización guardadas en tu selector de ejemplos.', 'success');
+                showFeedbackBanner(
+                    saved === true
+                        ? '💾 Melodía y armonización guardadas en tu selector de ejemplos.'
+                        : (saved === null
+                            ? '💾 Melodía disponible durante esta sesión de invitado; inicia un perfil para conservarla.'
+                            : '⚠️ La melodía está disponible en esta sesión, pero no se pudo guardar en el perfil.'),
+                    saved === false ? 'error' : (saved === null ? 'info' : 'success')
+                );
             });
         }
         if (el('exportStudioXmlBtn')) {
@@ -6119,6 +6210,7 @@
                     exportedAt: new Date().toISOString(),
                     currentUser: state.currentUser,
                     stats: state.stats,
+                    currentSession: state.currentSession,
                     customRandomExamples: state.melodicStudio.customRandomExamples
                 };
                 const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -6137,18 +6229,56 @@
                 reader.onload = (ev) => {
                     try {
                         const data = JSON.parse(String(ev.target?.result || '{}'));
-                        if (data.stats) state.stats = { ...state.stats, ...data.stats };
-                        if (data.customRandomExamples) {
-                            state.melodicStudio.customRandomExamples = { ...state.melodicStudio.customRandomExamples, ...data.customRandomExamples };
+                        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+                            throw new Error('El respaldo no tiene un formato válido.');
+                        }
+                        const importedUser = typeof data.currentUser === 'string' && data.currentUser.trim()
+                            ? data.currentUser.trim()
+                            : (state.currentUser === 'Invitado' ? 'Estudiante' : state.currentUser);
+                        try {
+                            registerUserProfile(importedUser);
+                        } catch (error) {
+                            reportProfileStorageError('registrar', error);
+                            return;
+                        }
+                        state.currentUser = importedUser;
+                        loadUserProfileStats(importedUser);
+                        if (data.stats && typeof data.stats === 'object' && !Array.isArray(data.stats)) {
+                            const importedCompetencies = data.stats.competencies;
+                            state.stats = {
+                                ...state.stats,
+                                ...data.stats,
+                                competencies: {
+                                    ...state.stats.competencies,
+                                    ...(importedCompetencies && typeof importedCompetencies === 'object' && !Array.isArray(importedCompetencies)
+                                        ? importedCompetencies
+                                        : {})
+                                }
+                            };
+                        }
+                        if (data.currentSession && typeof data.currentSession === 'object' && !Array.isArray(data.currentSession)) {
+                            state.currentSession = {
+                                ...state.currentSession,
+                                ...data.currentSession,
+                                startTime: Date.now()
+                            };
+                        }
+                        if (data.customRandomExamples && typeof data.customRandomExamples === 'object' && !Array.isArray(data.customRandomExamples)) {
+                            state.melodicStudio.customRandomExamples = {
+                                ...state.melodicStudio.customRandomExamples,
+                                ...data.customRandomExamples
+                            };
                             populateMelodicStudioExamplesDropdown();
                         }
-                        if (data.currentUser) state.currentUser = data.currentUser;
-                        savePersistedState();
+                        const saved = savePersistedState();
+                        populateWelcomeUserSelect();
                         updateDisplay();
                         if (el('historyModalContent')) el('historyModalContent').innerHTML = buildFullGamifiedSessionReportHTML(false);
+                        if (!saved) return;
                         showFeedbackBanner('📥 Datos y melodías importados correctamente.', 'success');
-                    } catch (err) {
-                        showFeedbackBanner('❌ Archivo JSON inválido.', 'error');
+                    } catch (error) {
+                        console.error('Error al importar los datos del perfil:', error);
+                        showFeedbackBanner('❌ Archivo JSON inválido o incompatible.', 'error');
                     }
                 };
                 reader.readAsText(file);
