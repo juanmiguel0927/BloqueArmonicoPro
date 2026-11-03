@@ -340,6 +340,15 @@
                     <button id="clearAllPhraseBlocksBtn" type="button" class="toolbar-btn bg-teal-600 text-white">🧩 Limpiar Frase</button>
                     <button id="autoFillAllPhraseBtn" type="button" class="toolbar-btn bg-amber-500 text-white">⚡ Rellenar Frase</button>
                     <button id="toggleScoreVoicingViewBtn" type="button" class="toolbar-btn bg-indigo-100 text-indigo-900">🎼 Vista: Melodía + Bloque</button>
+                    <button id="toggleApproachNotationBtn" type="button" class="toolbar-btn bg-teal-100 text-teal-900" aria-label="Cambiar la letra de las aproximaciones de escala" aria-pressed="false" title="Alterna la notación de aproximación entre d y S">Aproximación: d</button>
+                    <button id="toggleSelectedNoteEnharmonicBtn" type="button" class="toolbar-btn bg-amber-100 text-amber-900" disabled>Enarmonía: convertir</button>
+                    <label for="scoreAnnotationModeSelect" class="font-extrabold text-[11px]">Etiquetas de partitura:</label>
+                    <select id="scoreAnnotationModeSelect" class="ctrl-select" aria-label="Qué etiquetas mostrar en la partitura">
+                        <option value="analysis">Análisis melódico</option>
+                        <option value="harmonization">Armonización</option>
+                        <option value="both" selected>Ambos</option>
+                        <option value="none">Ninguno</option>
+                    </select>
                     <button id="toggleScoreZoomBtn" type="button" class="toolbar-btn bg-emerald-100 text-emerald-900">📐 Compases: 2C/fila</button>
                     <button id="saveStudioMelodyBtn" type="button" class="toolbar-btn bg-teal-700 text-white" title="Guardar esta melodía y armonización en el catálogo">💾 Guardar Melodía</button>
                     <button id="exportStudioXmlBtn" type="button" class="toolbar-btn bg-violet-700 text-white" title="Exportar partitura en formato universal MusicXML (.musicxml)">🎼 Exportar XML</button>
@@ -430,9 +439,18 @@
                         <p class="analysis-help-text">Selecciona una opción para actualizar las voces del bloque principal.</p>
                         <div id="possibleHarmonizationsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[155px] overflow-y-auto pr-1"></div>
                     </div>
+                    <div class="pt-1 border-t border-slate-200">
+                        <div class="analysis-section-heading">3. Disposición de voces</div>
+                        <div id="floatingDispositionOptions" class="flex flex-wrap gap-1"></div>
+                    </div>
+                    <div class="pt-1 border-t border-slate-200">
+                        <div class="analysis-section-heading">4. Permutaciones válidas</div>
+                        <p class="analysis-help-text">Agrega o quita permutaciones válidas sin reemplazar las demás opciones de armonización.</p>
+                        <div id="floatingPermutationsContainer" class="flex flex-wrap gap-1"></div>
+                    </div>
                     <div id="specialSeparateTechniquesWrapper" class="hidden pt-1 border-t border-slate-200 space-y-1.5">
                         <div class="flex items-center justify-between gap-1.5 flex-wrap">
-                            <span class="analysis-section-heading">3. Otras técnicas</span>
+                            <span class="analysis-section-heading">5. Otras técnicas</span>
                             <div class="flex gap-1">
                                 <button id="toggleIndLeadPanelBtn" type="button" class="px-2.5 py-1 rounded-lg border-2 border-emerald-700 bg-emerald-700 text-white font-extrabold text-[10px] cursor-pointer shadow-sm">⚡ Voz líder independiente (1–6)</button>
                                 <button id="toggleTonicPanelBtn" type="button" class="px-2.5 py-1 rounded-lg border-2 border-pink-700 bg-pink-700 text-white font-extrabold text-[10px] cursor-pointer shadow-sm">🔗 Tonicizaciones en Tránsito</button>
@@ -783,27 +801,28 @@
                         <li><strong>Concepto de Doble Análisis (Nota del Acorde o Tensión usada como Aproximación):</strong> Cuando una nota ubicada en tiempo débil (o que se mueve por grado conjunto hacia la siguiente nota objetivo) pertenece simultáneamente al acorde o escala del momento, posee <strong>Doble Análisis</strong>:
                             <ul class="list-disc list-inside ml-5 mt-0.5">
                                 <li><em>1. Análisis principal (<code>I:...</code>):</em> Puede armonizarse como nota del acorde en bloque cerrado, variantes 1–3 o cuartas ambivalentes.</li>
-                                <li><em>2. Análisis secundario de aproximación (<code>S(...)->Obj</code>):</em> Puede armonizarse en posición cerrada como aproximación hacia la nota objetivo (cromática, paralela, diatónica, dominante, disminuida, voz líder independiente o tonicización).</li>
+                                <li><em>2. Análisis secundario de aproximación (<code>S(...)->Obj</code>):</em> Puede armonizarse en posición cerrada como aproximación hacia la nota objetivo (cromática, paralela, diatónica, dominante, disminuida, voz líder independiente o tonicización). La melodía siempre debe avanzar por grado conjunto: ½ tono o 1 tono, nunca por salto.</li>
                                 <li><em>Doble análisis a medio tono diatónico (por ejemplo, <code>F</code> hacia <code>E</code> sobre <code>Cmaj7</code>):</em> Al estar a un semitono y pertenecer a la escala (cuarta/onceava), admite armonización <strong>diatónica</strong> y <strong>cromática</strong>.</li>
                             </ul>
                         </li>
                         <li><strong>Todos los Movimientos Posibles de la Resolución Retardada (Pareja que rodea a la Nota Objetivo):</strong> Todas las aproximaciones se construyen en <strong>disposición cerrada sin excepción</strong> según la clasificación melódica de ambas notas previas al objetivo:
                             <ul class="list-disc list-inside ml-5 mt-0.5">
-                                <li><strong>a) Diatónico – Cromático (<code>RR(DC)</code>):</strong> 1ª nota a 1 tono o ½ tono diatónico (armonización diatónica) + 2ª nota a ½ tono (armonización cromática) ➔ Objetivo.</li>
-                                <li><strong>b) Cromático – Diatónico (<code>RR(CD)</code>):</strong> 1ª nota a ½ tono (armonización cromática) + 2ª nota diatónica a 1 tono o ½ tono (armonización diatónica) ➔ Objetivo (ej. <code>F – D – E</code> sobre <code>Cmaj7</code>).</li>
-                                <li><strong>c) Cromático – Cromático (<code>RR(CC)</code>):</strong> Ambas notas a ½ tono superior e inferior del objetivo (doble bordadura cromática en bloque cerrado) ➔ Objetivo.</li>
-                                <li><strong>d) Diatónico – Diatónico (<code>RR(DD)</code>):</strong> Ambas notas diatónicas a la escala del momento (bordadura diatónica superior e inferior) ➔ Objetivo.</li>
+                                <li><strong>a) Diatónico – Cromático (<code>RR(DC)</code>):</strong> Cada una de las dos notas debe quedar a 1 tono o ½ tono del objetivo; la primera es de la escala y la segunda cromática ➔ Objetivo.</li>
+                                <li><strong>b) Cromático – Diatónico (<code>RR(CD)</code>):</strong> Cada una de las dos notas debe quedar a 1 tono o ½ tono del objetivo; la primera es cromática y la segunda de la escala ➔ Objetivo (ej. <code>F# – D – E</code> sobre <code>Cmaj7</code>).</li>
+                                <li><strong>c) Cromático – Cromático (<code>RR(CC)</code>):</strong> Ambas notas cromáticas resuelven al objetivo desde un tono o ½ tono, sin saltos.</li>
+                                <li><strong>d) Diatónico – Diatónico (<code>RR(DD)</code>):</strong> Ambas notas pertenecen a la escala y resuelven al objetivo desde un tono o ½ tono.</li>
+                                <li><strong>Doble cromático:</strong> El corchete se identifica como <code>[Doble cromático]</code>; las dos notas de aproximación y su objetivo avanzan por grados conjuntos.</li>
                                 <li><strong>Variantes mixtas:</strong> combinaciones en posición cerrada con aproximaciones paralelas, dominantes (V7) y disminuidas (vii°7), como <code>Dominante – Dominante</code>, <code>Paralelo – Cromático</code> o <code>Disminuido – Diatónico</code>.</li>
                             </ul>
                         </li>
-                        <li><strong>Voz Líder Independiente Enumerada (Casos #1 al #6):</strong> Se organiza primero el acorde objetivo y se conducen las 3 voces internas por semitono hacia él en posición cerrada:
+                        <li><strong>Voz Líder Independiente Enumerada (Casos #1 al #6):</strong> Primero se construye el acorde objetivo. La nota melódica de llegada debe pertenecer al acorde o ser una tensión disponible de su escala. Las voces interiores se preparan a un semitono del acorde objetivo conforme a cada caso; la sonoridad resultante puede no corresponder al acorde del momento:
                             <ul class="list-none ml-4 mt-0.5 space-y-0.5 font-mono text-xs">
-                                <li><strong>#1 (<code>LI-1</code>):</strong> La 1ª voz <strong>sube 1 tono</strong> ➔ las 3 voces internas <strong>suben ½ tono</strong> hacia el objetivo.</li>
-                                <li><strong>#2 (<code>LI-2</code>):</strong> La 1ª voz <strong>baja 1 tono</strong> ➔ las 3 voces internas <strong>bajan ½ tono</strong> hacia el objetivo.</li>
-                                <li><strong>#3 (<code>LI-3</code>):</strong> La 1ª voz <strong>sube ½ tono</strong> ➔ las 3 voces internas <strong>bajan ½ tono</strong> (movimiento contrario).</li>
-                                <li><strong>#4 (<code>LI-4</code>):</strong> La 1ª voz <strong>baja ½ tono</strong> ➔ las 3 voces internas <strong>suben ½ tono</strong> (movimiento contrario).</li>
-                                <li><strong>#5 (<code>LI-5</code>):</strong> La 1ª voz <strong>se mantiene</strong> ➔ las 3 voces internas <strong>bajan ½ tono</strong> hacia el objetivo.</li>
-                                <li><strong>#6 (<code>LI-6</code>):</strong> La 1ª voz <strong>se mantiene</strong> ➔ las 3 voces internas <strong>suben ½ tono</strong> hacia el objetivo.</li>
+                                <li><strong>#1 (<code>LI-1</code>):</strong> La melodía sube 1 tono; las voces interiores suben ½ tono.</li>
+                                <li><strong>#2 (<code>LI-2</code>):</strong> La melodía baja 1 tono; las voces interiores bajan ½ tono.</li>
+                                <li><strong>#3 (<code>LI-3</code>):</strong> La melodía sube ½ tono; las voces interiores bajan ½ tono.</li>
+                                <li><strong>#4 (<code>LI-4</code>):</strong> La melodía baja ½ tono; las voces interiores suben ½ tono.</li>
+                                <li><strong>#5 (<code>LI-5</code>):</strong> La melodía repite la nota; las voces interiores suben ½ tono.</li>
+                                <li><strong>#6 (<code>LI-6</code>):</strong> La melodía repite la nota; las voces interiores bajan ½ tono.</li>
                             </ul>
                         </li>
                     </ul>
@@ -854,6 +873,7 @@
                                 <tbody class="font-mono">
                                     <tr><td class="p-1.5 border font-bold text-blue-800">I:1, I:3, I:5, I:7</td><td class="p-1.5 border font-sans font-bold">Nota principal del acorde</td><td class="p-1.5 border font-sans">Nota estructural del acorde del momento (fundamental, 3ra, 5ta, 6ta o 7ma).</td></tr>
                                     <tr><td class="p-1.5 border font-bold text-blue-800">I:9, I:11, I:13</td><td class="p-1.5 border font-sans font-bold">Tensión principal</td><td class="p-1.5 border font-sans">Tensión disponible de la escala del momento tratada como nota principal.</td></tr>
+                                    <tr><td class="p-1.5 border font-bold text-blue-800">5 / c / b5 / d4</td><td class="p-1.5 border font-sans font-bold">Relación melódica con el acorde activo</td><td class="p-1.5 border font-sans">La nota principal E sobre A7 conserva su grado 5. Las aproximaciones cromáticas se marcan c (Eb-D-C# = c-c-3); el par doble cromático Eb-D puede seleccionarse aparte para ver su análisis armónico alternativo b5-d4.</td></tr>
                                     <tr><td class="p-1.5 border font-bold text-purple-800">I:x/S</td><td class="p-1.5 border font-sans font-bold">Doble análisis melódico</td><td class="p-1.5 border font-sans">Nota del acorde que también se armoniza como aproximación hacia la nota siguiente.</td></tr>
                                     <tr><td class="p-1.5 border font-bold text-indigo-800">4-WC / Var1 / Var2 / Var3</td><td class="p-1.5 border font-sans font-bold">4-Way Close y variantes 1–3</td><td class="p-1.5 border font-sans">Bloque cerrado estándar o variantes con guías y tensiones.</td></tr>
                                     <tr><td class="p-1.5 border font-bold text-indigo-800">AmbiA / AmbiB / AmbiC</td><td class="p-1.5 border font-sans font-bold">Cuartas ambivalentes (modelos A, B y C)</td><td class="p-1.5 border font-sans">Cuartas ambivalentes construidas con la escala del momento.</td></tr>
