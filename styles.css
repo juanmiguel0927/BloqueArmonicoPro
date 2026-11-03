@@ -263,6 +263,13 @@ body.dark-mode td {
     touch-action: pan-x pan-y;
 }
 
+#studioLivePlaybackBanner.studio-live-playback-active {
+    position: sticky;
+    top: 0.5rem;
+    z-index: 20;
+    margin-bottom: 0.5rem;
+}
+
 #melodicScoreZoomInner { max-width: none; }
 #melodicPhraseCanvas { display: block; min-width: 100%; }
 
