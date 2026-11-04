@@ -308,6 +308,7 @@
         "perm_3rd_11": { id: "perm_3rd_11", shortName: "Guía 3ra ➔ 11na", targetRole: "3", allowedTypes: ["m7","minor","7","m7b5"], subInt: { semitones: 5, degreeOffset: 3, label: "11" } },
         "perm_7th_6": { id: "perm_7th_6", shortName: "Guía 7ma ➔ 13(6ta)", targetRole: "7", allowedTypes: ["maj7","major","m7","minor","7"], subInt: { semitones: 9, degreeOffset: 5, label: "6" } },
         "perm_7th_b13": { id: "perm_7th_b13", shortName: "Guía b7 ➔ #5(b13)", targetRole: "7", allowedTypes: ["7"], subInt: { semitones: 8, degreeOffset: 5, label: "b13" } },
+        "perm_7th_b9": { id: "perm_7th_b9", shortName: "Guía b7 ➔ b9", targetRole: "7", requiredLeadRole: "1", allowedTypes: ["7"], subInt: { semitones: 1, degreeOffset: 1, label: "b9" } },
         "perm_7th_9": { id: "perm_7th_9", shortName: "Guía b7 ➔ 9na", targetRole: "7", allowedTypes: ["m7b5"], subInt: { semitones: 2, degreeOffset: 1, label: "9" } }
     };
 
@@ -1906,13 +1907,15 @@
     }
 
     // Devuelve las permutaciones válidas según el acorde armonizado, garantizando que no se repitan notas destino
-    function getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(noteObj, baseVoicingObj, activePermIds = []) {
+    function getValidPermutationsWithoutRepetition(noteObj, baseVoicingObj, activePermIds = []) {
         if (!noteObj || noteObj.isRest || !baseVoicingObj || !Array.isArray(baseVoicingObj.notesWithOct)) return [];
         const effRoot = baseVoicingObj.effectiveBassRoot || noteObj.targetRoot || noteObj.barChordRoot || 'C';
         const effType = baseVoicingObj.effectiveChordTypeKey || noteObj.targetType || noteObj.barChordTypeKey || 'maj7';
         const baseNotes = baseVoicingObj.notesWithOct.slice(0, 4);
         const basePcs = baseNotes.map(n => getNoteSemitone(n.split('/')[0]));
         const normalizeRole = (r) => (r === 'b3' ? '3' : (r === 'b7' ? '7' : (r === 'b5' ? '5' : r)));
+        const leadRole = normalizeRole(((baseVoicingObj.labels || [])[0] || '').split(' ')[0]);
+        const isRootInMelody = leadRole === '1' && basePcs[0] === getNoteSemitone(effRoot);
         const innerRoles = (baseVoicingObj.labels || []).slice(1, 4).map(l => normalizeRole((l || '').split(' ')[0]));
 
         const allPermKeys = Object.keys(HARMONIZATION_TECHNIQUES_CATALOG).filter(k => k.startsWith('perm_'));
@@ -1922,6 +1925,10 @@
             const pObj = HARMONIZATION_TECHNIQUES_CATALOG[pid];
             if (!pObj || !pObj.subInt) return false;
             if (!pObj.allowedTypes.includes(effType)) return false;
+            if (pObj.requiredLeadRole) {
+                if (pObj.requiredLeadRole === '1' && !isRootInMelody) return false;
+                if (pObj.requiredLeadRole !== '1' && pObj.requiredLeadRole !== leadRole) return false;
+            }
 
             const voiceIdxInInner = innerRoles.indexOf(pObj.targetRole);
             if (voiceIdxInInner === -1) return false;
@@ -1955,7 +1962,7 @@
         return ['tonic_II_V_I', 'tonic_V7ofV_V_I', 'tonic_II_bII_I', 'tonic_bVI_bII_I', 'tonic_IVm_bVII_I', 'tonic_sIVm7b5_VII7_I'].includes(techId);
     }
 
-    function getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(techId, targetRoot, targetTypeKey) {
+    function getTonicizationPreviewProgressionText(techId, targetRoot, targetTypeKey) {
         const root = targetRoot || 'C';
         const type = targetTypeKey || 'maj7';
         const isMinor = type === 'm7' || type === 'minor';
@@ -2281,6 +2288,8 @@
 
         if (!skipPermutationsAndDrops) {
             const normalizeRole = (r) => (r === 'b3' ? '3' : (r === 'b7' ? '7' : (r === 'b5' ? '5' : r)));
+            const leadRole = normalizeRole((labels[0] || '').split(' ')[0]);
+            const isRootInMelody = leadRole === '1' && getNoteSemitone(notesWithOct[0].split('/')[0]) === getNoteSemitone(effectiveBassRoot);
             const activePerms = state.melodicStudio.selectedMultiPermutationsByNote[noteObj.globalIdx] || [];
             if (activePerms.length > 0 && notesWithOct.length >= 4 && !chosenId.startsWith('ind_') && !['ambi_a', 'ambi_b', 'ambi_c'].includes(chosenId)) {
                 const usedPcs = new Set([getNoteSemitone(notesWithOct[0].split('/')[0])]);
@@ -2288,7 +2297,14 @@
                 for (let i = 1; i < 4; i++) {
                     const rawRole = (labels[i] || '').split(' ')[0];
                     const normRole = normalizeRole(rawRole);
-                    const foundPermId = activePerms.find(pid => HARMONIZATION_TECHNIQUES_CATALOG[pid]?.targetRole === normRole);
+                    const foundPermId = activePerms.find(pid => {
+                        const p = HARMONIZATION_TECHNIQUES_CATALOG[pid];
+                        if (!p || p.targetRole !== normRole) return false;
+                        if (!p.allowedTypes.includes(effectiveChordTypeKey)) return false;
+                        if (p.requiredLeadRole === '1' && !isRootInMelody) return false;
+                        if (p.requiredLeadRole && p.requiredLeadRole !== '1' && p.requiredLeadRole !== leadRole) return false;
+                        return true;
+                    });
                     if (foundPermId) {
                         const pObj = HARMONIZATION_TECHNIQUES_CATALOG[foundPermId];
                         const candName = calculateNoteName(effectiveBassRoot, pObj.subInt);
@@ -3911,7 +3927,7 @@
             const baseVoicingNoPerm = selectedPermNote
                 ? computeHarmonizationForMelodicNote(selectedPermNote, null, true)
                 : null;
-            const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(selectedPermNote, baseVoicingNoPerm, curArr);
+            const validPermKeys = getValidPermutationsWithoutRepetition(selectedPermNote, baseVoicingNoPerm, curArr);
             if (!validPermKeys.length) {
                 permCont.innerHTML = `<span class="text-[10px] text-slate-500 italic">Sin permutaciones disponibles para este bloque</span>`;
             } else {
@@ -4122,7 +4138,7 @@
                         : 'bg-pink-50 text-pink-950 border-2 border-pink-500 hover:bg-pink-100 font-bold';
                 }
                 const previewText = isTonic
-                    ? getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
+                    ? getTonicizationPreviewProgressionText(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
                     : (tObj.desc || '');
                 return `<button type="button" data-tech-opt="${tid}" aria-pressed="${isAct}" class="analysis-tech-option-btn text-left p-2 rounded-lg border text-[11px] cursor-pointer ${btnColors}">
                     <div class="font-bold">[${tObj.abbr}] ${tObj.shortName}</div>
@@ -5290,7 +5306,7 @@
         }
     }
 
-    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
+    function recordLearningProgressSnapshot() {
         if (!Array.isArray(state.stats.progressionHistory)) state.stats.progressionHistory = [];
         const totalExercises = Number(state.stats.totalExercises) || 0;
         if (!totalExercises) return;
@@ -6232,7 +6248,7 @@
                                 retries: state.continuity.runRetries,
                                 measures: JSON.parse(JSON.stringify(state.continuity.measures))
                             });
-                            rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
+                            recordLearningProgressSnapshot();
                             const saved = savePersistedState();
                             unlockBadge('continuity_8c');
                             showFeedbackBanner(
@@ -6276,7 +6292,7 @@
                         state.currentSession.totalTimeSec += elapsed;
                         state.currentSession.timedCount++;
                     }
-                    rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
+                    recordLearningProgressSnapshot();
                     const compKey = state.melodicStudio.isActive ? 'melodicApproaches' : (state.dictationMode ? 'earDictation' : (state.voicingType === 'close' ? 'close4Way' : 'openDropsSpreads'));
                     if (state.stats.competencies && state.stats.competencies[compKey]) {
                         state.stats.competencies[compKey].total++;
