@@ -308,7 +308,7 @@
         "perm_3rd_11": { id: "perm_3rd_11", shortName: "Guía 3ra ➔ 11na", targetRole: "3", allowedTypes: ["m7","minor","7","m7b5"], subInt: { semitones: 5, degreeOffset: 3, label: "11" } },
         "perm_7th_6": { id: "perm_7th_6", shortName: "Guía 7ma ➔ 13(6ta)", targetRole: "7", allowedTypes: ["maj7","major","m7","minor","7"], subInt: { semitones: 9, degreeOffset: 5, label: "6" } },
         "perm_7th_b13": { id: "perm_7th_b13", shortName: "Guía b7 ➔ #5(b13)", targetRole: "7", allowedTypes: ["7"], subInt: { semitones: 8, degreeOffset: 5, label: "b13" } },
-        "perm_7th_b9": { id: "perm_7th_b9", shortName: "Guía b7 ➔ b9", targetRole: "7", requiredLeadRole: "1", allowedTypes: ["7"], subInt: { semitones: 1, degreeOffset: 1, label: "b9" } },
+        "perm_7th_b9": { id: "perm_7th_b9", shortName: "Guía b7 ➔ b9 (1ªV Fundamental)", targetRole: "7", allowedTypes: ["7"], requireLeadRoot: true, subInt: { semitones: 1, degreeOffset: 1, label: "b9" } },
         "perm_7th_9": { id: "perm_7th_9", shortName: "Guía b7 ➔ 9na", targetRole: "7", allowedTypes: ["m7b5"], subInt: { semitones: 2, degreeOffset: 1, label: "9" } }
     };
 
@@ -738,7 +738,7 @@
     }
 
     function arrangeInnerVoicesInClosePosition(topNoteWithOctave, innerVoiceSpecs) {
-        return placeVoicesInStrictOrderOfAppearance(topNoteWithOctave, innerVoiceSpecs);
+        return placeVoicesInStrictOrderOfAppearance(topNoteWithOctave, innerVoiceSpecs, true);
     }
 
     function getChordScaleIntervals(chordTypeKey, explicitScaleId = null) {
@@ -1914,8 +1914,6 @@
         const baseNotes = baseVoicingObj.notesWithOct.slice(0, 4);
         const basePcs = baseNotes.map(n => getNoteSemitone(n.split('/')[0]));
         const normalizeRole = (r) => (r === 'b3' ? '3' : (r === 'b7' ? '7' : (r === 'b5' ? '5' : r)));
-        const leadRole = normalizeRole(((baseVoicingObj.labels || [])[0] || '').split(' ')[0]);
-        const isRootInMelody = leadRole === '1' && basePcs[0] === getNoteSemitone(effRoot);
         const innerRoles = (baseVoicingObj.labels || []).slice(1, 4).map(l => normalizeRole((l || '').split(' ')[0]));
 
         const allPermKeys = Object.keys(HARMONIZATION_TECHNIQUES_CATALOG).filter(k => k.startsWith('perm_'));
@@ -1925,14 +1923,19 @@
             const pObj = HARMONIZATION_TECHNIQUES_CATALOG[pid];
             if (!pObj || !pObj.subInt) return false;
             if (!pObj.allowedTypes.includes(effType)) return false;
-            if (pObj.requiredLeadRole) {
-                if (pObj.requiredLeadRole === '1' && !isRootInMelody) return false;
-                if (pObj.requiredLeadRole !== '1' && pObj.requiredLeadRole !== leadRole) return false;
-            }
 
             const voiceIdxInInner = innerRoles.indexOf(pObj.targetRole);
             if (voiceIdxInInner === -1) return false;
             const actualVoiceIdx = voiceIdxInInner + 1;
+
+            if (pObj.requireLeadRoot) {
+                const leadName = baseNotes[0].split('/')[0];
+                const leadPc = getNoteSemitone(leadName);
+                const rootPc = getNoteSemitone(effRoot);
+                const leadLabel = (baseVoicingObj.labels && baseVoicingObj.labels[0]) ? (baseVoicingObj.labels[0].split(' ')[0]) : '';
+                const isLeadRoot = leadLabel === '1' || leadPc === rootPc;
+                if (!isLeadRoot) return false;
+            }
 
             if (activePermIds.includes(pid)) return true;
 
@@ -2288,8 +2291,6 @@
 
         if (!skipPermutationsAndDrops) {
             const normalizeRole = (r) => (r === 'b3' ? '3' : (r === 'b7' ? '7' : (r === 'b5' ? '5' : r)));
-            const leadRole = normalizeRole((labels[0] || '').split(' ')[0]);
-            const isRootInMelody = leadRole === '1' && getNoteSemitone(notesWithOct[0].split('/')[0]) === getNoteSemitone(effectiveBassRoot);
             const activePerms = state.melodicStudio.selectedMultiPermutationsByNote[noteObj.globalIdx] || [];
             if (activePerms.length > 0 && notesWithOct.length >= 4 && !chosenId.startsWith('ind_') && !['ambi_a', 'ambi_b', 'ambi_c'].includes(chosenId)) {
                 const usedPcs = new Set([getNoteSemitone(notesWithOct[0].split('/')[0])]);
@@ -2297,14 +2298,7 @@
                 for (let i = 1; i < 4; i++) {
                     const rawRole = (labels[i] || '').split(' ')[0];
                     const normRole = normalizeRole(rawRole);
-                    const foundPermId = activePerms.find(pid => {
-                        const p = HARMONIZATION_TECHNIQUES_CATALOG[pid];
-                        if (!p || p.targetRole !== normRole) return false;
-                        if (!p.allowedTypes.includes(effectiveChordTypeKey)) return false;
-                        if (p.requiredLeadRole === '1' && !isRootInMelody) return false;
-                        if (p.requiredLeadRole && p.requiredLeadRole !== '1' && p.requiredLeadRole !== leadRole) return false;
-                        return true;
-                    });
+                    const foundPermId = activePerms.find(pid => HARMONIZATION_TECHNIQUES_CATALOG[pid]?.targetRole === normRole);
                     if (foundPermId) {
                         const pObj = HARMONIZATION_TECHNIQUES_CATALOG[foundPermId];
                         const candName = calculateNoteName(effectiveBassRoot, pObj.subInt);
