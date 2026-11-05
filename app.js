@@ -16,6 +16,7 @@
         correctNotesWithOctave: [],
         chordRoot: 'C',
         chordTypeKey: 'maj7',
+        forcedChordTypeKey: 'auto',
         givenLabel: '3',
         givenNote: 'E',
         givenNoteWithOctave: 'E/5',
@@ -178,7 +179,7 @@
         }
     }
 
-    // Catálogo de Relación Escala - Acorde y Análisis Armónico Contextual Ampliado (con Mixolidio #4, Locrio ♮6 y Locrio ♮2)
+    // Catálogo de Relación Escala - Acorde y Análisis Armónico Contextual Ampliado (con soporte para todas las especies)
     const CHORD_SCALE_CONTEXT_CATALOG = {
         "maj7": [
             { id: "ionian", name: "Jónica (Imaj7)", func: "Imaj7 (Tónica Mayor)", semitones: [0, 2, 4, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "11", "5", "13", "7"], availTensions: ["9", "13"], avoid: ["11"] },
@@ -186,8 +187,12 @@
             { id: "lydian_s9", name: "Lidia #9 (6to modo menor armónica)", func: "Maj7 Colorido No-Diatónico", semitones: [0, 3, 4, 6, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "#9", "3", "#11", "5", "13", "7"], availTensions: ["#9", "#11", "13"], avoid: [] }
         ],
         "major": [
-            { id: "ionian", name: "Jónica (I6 / Tríada Tónica)", func: "I (Tónica Mayor)", semitones: [0, 2, 4, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "11", "5", "6", "7"], availTensions: ["9", "6"], avoid: ["11"] },
+            { id: "ionian", name: "Jónica (I / Tríada Tónica)", func: "I (Tónica Mayor)", semitones: [0, 2, 4, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "11", "5", "6", "7"], availTensions: ["9", "6"], avoid: ["11"] },
             { id: "lydian", name: "Lidia (IV / Subdominante)", func: "IV (Subdominante Mayor)", semitones: [0, 2, 4, 6, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "#11", "5", "6", "7"], availTensions: ["9", "#11", "6"], avoid: [] }
+        ],
+        "6": [
+            { id: "ionian", name: "Jónica (I6 / Tónica Mayor)", func: "I6 (Tónica Mayor)", semitones: [0, 2, 4, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "11", "5", "6", "7"], availTensions: ["9", "11", "6"], avoid: ["11"] },
+            { id: "lydian", name: "Lidia (IV6 / Subdominante)", func: "IV6 Subdominante Mayor", semitones: [0, 2, 4, 6, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "#11", "5", "6", "7"], availTensions: ["9", "#11", "6"], avoid: [] }
         ],
         "m7": [
             { id: "dorian", name: "Dórica (IIm7 / IVm7)", func: "IIm7 (Subdominante Menor)", semitones: [0, 2, 3, 5, 7, 9, 10], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "b3", "11", "5", "13", "b7"], availTensions: ["9", "11", "13"], avoid: [] },
@@ -198,6 +203,14 @@
         "minor": [
             { id: "dorian", name: "Dórica (Im6 / IIm)", func: "Im6 / IIm", semitones: [0, 2, 3, 5, 7, 9, 10], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "b3", "11", "5", "6", "b7"], availTensions: ["9", "11", "6"], avoid: [] },
             { id: "melodic_minor", name: "Menor Melódica (ImMaj7 / Im6)", func: "Im (Tónica Menor)", semitones: [0, 2, 3, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "b3", "11", "5", "6", "7"], availTensions: ["9", "11", "6"], avoid: [] }
+        ],
+        "m6": [
+            { id: "dorian", name: "Dórica (Im6 / Menor Jazz)", func: "Im6 / IIm6", semitones: [0, 2, 3, 5, 7, 9, 10], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "b3", "11", "5", "6", "b7"], availTensions: ["9", "11", "6"], avoid: [] },
+            { id: "melodic_minor", name: "Menor Melódica (Im6 Tónica)", func: "Im6 (Tónica Menor)", semitones: [0, 2, 3, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "b3", "11", "5", "6", "7"], availTensions: ["9", "11", "6"], avoid: [] }
+        ],
+        "mMaj7": [
+            { id: "melodic_minor", name: "Menor Melódica (ImMaj7)", func: "Im(maj7) Tónica Menor", semitones: [0, 2, 3, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "b3", "11", "5", "13", "7"], availTensions: ["9", "11", "13"], avoid: [] },
+            { id: "harmonic_minor", name: "Menor Armónica (ImMaj7)", func: "Im(maj7) Menor Armónica", semitones: [0, 2, 3, 5, 7, 8, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "b3", "11", "5", "b13", "7"], availTensions: ["9", "11"], avoid: ["b13"] }
         ],
         "m7b5": [
             { id: "locrian", name: "Locria (VIIm7b5)", func: "VIIm7(b5) Diatónico", semitones: [0, 1, 3, 5, 6, 8, 10], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "b9", "b3", "11", "b5", "b13", "b7"], availTensions: ["11", "b13"], avoid: ["b9"] },
@@ -213,6 +226,24 @@
             { id: "half_whole", name: "Semitono-Tono (Simétrica Disminuida)", func: "V7(b9,13) Dominante Simétrico", semitones: [0, 1, 3, 4, 6, 7, 9, 10], degs: [0, 1, 1, 2, 3, 4, 5, 6], labels: ["1", "b9", "#9", "3", "#11", "5", "13", "b7"], availTensions: ["b9", "#9", "#11", "13"], avoid: [] },
             { id: "whole_tone", name: "Tonos Enteros (Hexatónica)", func: "V7(#5,#11)", semitones: [0, 2, 4, 6, 8, 10], degs: [0, 1, 2, 3, 5, 6], labels: ["1", "9", "3", "#11", "b13", "b7"], availTensions: ["9", "#11", "b13"], avoid: [] }
         ],
+        "7sus4": [
+            { id: "mixolydian", name: "Mixolidia (V7sus4)", func: "V7sus4 Dominante Suspendido", semitones: [0, 2, 4, 5, 7, 9, 10], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "11", "5", "13", "b7"], availTensions: ["9", "13", "11"], avoid: [] },
+            { id: "dorian", name: "Dórica (IIm7 / V7sus4)", func: "IIm7 / Suspendido Subdominante", semitones: [0, 2, 3, 5, 7, 9, 10], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "b3", "11", "5", "13", "b7"], availTensions: ["9", "11", "13"], avoid: [] }
+        ],
+        "sus4": [
+            { id: "mixolydian", name: "Mixolidia Sus4", func: "V(sus4) Dominante Suspendido", semitones: [0, 2, 4, 5, 7, 9, 10], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "4", "5", "13", "b7"], availTensions: ["9", "13"], avoid: [] },
+            { id: "ionian", name: "Jónica Sus4", func: "I(sus4) Tónica Suspendida", semitones: [0, 2, 4, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "4", "5", "13", "7"], availTensions: ["9", "13"], avoid: [] }
+        ],
+        "sus2": [
+            { id: "ionian", name: "Jónica Sus2", func: "I(sus2) Tónica Suspendida 2", semitones: [0, 2, 4, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "2", "3", "11", "5", "13", "7"], availTensions: ["2", "13"], avoid: ["11"] },
+            { id: "mixolydian", name: "Mixolidia Sus2", func: "V(sus2) Dominante Suspendido 2", semitones: [0, 2, 4, 5, 7, 9, 10], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "2", "3", "11", "5", "13", "b7"], availTensions: ["2", "13"], avoid: ["11"] }
+        ],
+        "augmented": [
+            { id: "whole_tone", name: "Tonos Enteros (Hexatónica Aumentada)", func: "V+ / I+ Acorde Aumentado", semitones: [0, 2, 4, 6, 8, 10], degs: [0, 1, 2, 3, 5, 6], labels: ["1", "9", "3", "#11", "#5", "b7"], availTensions: ["9", "#11"], avoid: [] }
+        ],
+        "diminished": [
+            { id: "whole_half", name: "Tono-Semitono (Simétrica Disminuida)", func: "Tríada Disminuida", semitones: [0, 2, 3, 5, 6, 8, 9, 11], degs: [0, 1, 2, 3, 4, 5, 5, 6], labels: ["1", "9", "b3", "11", "b5", "b13", "6", "7"], availTensions: ["9", "11", "7"], avoid: [] }
+        ],
         "dim7": [
             { id: "whole_half", name: "Tono-Semitono (Simétrica Disminuida)", func: "vii°7 / #iv°7 Disminuido de Paso", semitones: [0, 2, 3, 5, 6, 8, 9, 11], degs: [0, 1, 2, 3, 4, 5, 5, 6], labels: ["1", "9", "b3", "11", "b5", "b13", "6", "7"], availTensions: ["9", "11", "b13", "7"], avoid: [] },
             { id: "harm_min_7", name: "7mo modo menor armónica (+7M)", func: "vii°7 Sensible Diatónica", semitones: [0, 1, 3, 4, 6, 8, 9, 11], degs: [0, 1, 2, 2, 4, 5, 5, 6], labels: ["1", "b9", "b3", "b10", "b5", "b13", "6", "7"], availTensions: ["b9", "b13", "7"], avoid: [] }
@@ -221,8 +252,8 @@
 
     // Detecta automáticamente la función armónica contextual y la escala recomendada entre acordes consecutivos
     function inferContextualScaleAndFunction(chordRoot, chordTypeKey, nextChordRoot = null, nextChordTypeKey = null, explicitScaleId = null) {
-        const list = CHORD_SCALE_CONTEXT_CATALOG[chordTypeKey] || CHORD_SCALE_CONTEXT_CATALOG["maj7"];
-        if (explicitScaleId) {
+        const list = CHORD_SCALE_CONTEXT_CATALOG[chordTypeKey] || CHORD_SCALE_CONTEXT_CATALOG["maj7"] || [];
+        if (explicitScaleId && list.length) {
             const found = list.find(s => s.id === explicitScaleId);
             if (found) return found;
         }
@@ -242,10 +273,10 @@
                 return list.find(s => s.id === 'mixolydian_b9b13') || list[0];
             }
         }
-        if (chordTypeKey === 'm7b5') {
+        if (chordTypeKey === 'm7b5' && list.length) {
             return list.find(s => s.id === 'locrian_nat2') || list[0];
         }
-        return list[0];
+        return list[0] || { id: "ionian", name: "Jónica", func: "Tónica Mayor", semitones: [0, 2, 4, 5, 7, 9, 11], degs: [0, 1, 2, 3, 4, 5, 6], labels: ["1", "9", "3", "11", "5", "13", "7"], availTensions: ["9", "13"], avoid: ["11"] };
     }
 
     // Catálogo de técnicas de armonización y análisis melódico
@@ -330,10 +361,12 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
-                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 }
+                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
+                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
+                { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 }
             ],
-            voicing_rules: { "1": ["1", "5", "3", "1"], "3": ["3", "1", "5", "3"], "5": ["5", "3", "1", "5"] },
-            continuity_rules: { "1": ["1", "6", "5", "3"], "3": ["3", "1", "6", "5"], "5": ["5", "3", "1", "6"], "6": ["6", "5", "3", "1"] }
+            voicing_rules: { "1": ["1", "5", "3", "1"], "3": ["3", "1", "5", "3"], "5": ["5", "3", "1", "5"], "6": ["6", "5", "3", "1"], "13": ["13", "3", "1", "7"] },
+            continuity_rules: { "1": ["1", "6", "5", "3"], "3": ["3", "1", "6", "5"], "5": ["5", "3", "1", "6"], "6": ["6", "5", "3", "1"], "13": ["13", "3", "1", "7"] }
         },
         "minor": {
             name: "Menor", cifrado: "m", difficulty: "basic",
@@ -341,10 +374,12 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
-                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 }
+                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
+                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
+                { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 }
             ],
-            voicing_rules: { "1": ["1", "5", "b3", "1"], "b3": ["b3", "1", "5", "b3"], "5": ["5", "b3", "1", "5"] },
-            continuity_rules: { "1": ["1", "6", "5", "b3"], "b3": ["b3", "1", "6", "5"], "5": ["5", "b3", "1", "6"], "6": ["6", "5", "b3", "1"] }
+            voicing_rules: { "1": ["1", "5", "b3", "1"], "b3": ["b3", "1", "5", "b3"], "5": ["5", "b3", "1", "5"], "6": ["6", "5", "b3", "1"], "13": ["13", "b3", "1", "b7"] },
+            continuity_rules: { "1": ["1", "6", "5", "b3"], "b3": ["b3", "1", "6", "5"], "5": ["5", "b3", "1", "6"], "6": ["6", "5", "b3", "1"], "13": ["13", "b3", "1", "b7"] }
         },
         "augmented": {
             name: "Aumentado", cifrado: "aug", difficulty: "basic",
@@ -371,13 +406,15 @@
                 { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
                 { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
+                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
                 { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
                 { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }
             ],
             voicing_rules: {
                 "1": ["1", "6", "5", "3"], "3": ["3", "1", "7", "5"], "5": ["5", "3", "1", "7"],
-                "7": ["7", "5", "3", "1"], "9": ["9", "7", "5", "3"], "#11": ["#11", "3", "1", "7"]
+                "6": ["6", "5", "3", "1"], "7": ["7", "5", "3", "1"], "9": ["9", "7", "5", "3"],
+                "#11": ["#11", "3", "1", "7"], "13": ["13", "3", "1", "7"]
             }
         },
         "m7": {
@@ -386,13 +423,16 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
+                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
+                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
                 { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
                 { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }
             ],
             voicing_rules: {
                 "1": ["1", "b7", "5", "b3"], "b3": ["b3", "1", "b7", "5"], "5": ["5", "b3", "1", "b7"],
-                "b7": ["b7", "5", "b3", "1"], "9": ["9", "b7", "5", "b3"], "11": ["11", "b7", "5", "b3"]
+                "6": ["6", "5", "b3", "1"], "b7": ["b7", "5", "b3", "1"], "9": ["9", "b7", "5", "b3"],
+                "11": ["11", "b7", "5", "b3"], "13": ["13", "b3", "1", "b7"]
             }
         },
         "7": {
@@ -401,6 +441,7 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
+                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
                 { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
                 { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 },
@@ -412,9 +453,9 @@
             ],
             voicing_rules: {
                 "1": ["1", "b7", "5", "3"], "3": ["3", "1", "b7", "5"], "5": ["5", "3", "1", "b7"],
-                "b7": ["b7", "5", "3", "1"], "9": ["9", "b7", "5", "3"], "b9": ["b9", "b7", "5", "3"],
-                "#9": ["#9", "b7", "5", "3"], "11": ["11", "1", "b7", "5"], "#11": ["#11", "3", "9", "b7"],
-                "13": ["13", "3", "9", "b7"], "b13": ["b13", "3", "b9", "b7"]
+                "6": ["6", "5", "3", "1"], "b7": ["b7", "5", "3", "1"], "9": ["9", "b7", "5", "3"],
+                "b9": ["b9", "b7", "5", "3"], "#9": ["#9", "b7", "5", "3"], "11": ["11", "1", "b7", "5"],
+                "#11": ["#11", "3", "9", "b7"], "13": ["13", "3", "1", "b7"], "b13": ["b13", "3", "1", "b7"]
             }
         },
         "m7b5": {
@@ -423,6 +464,8 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 },
+                { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
+                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
                 { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
                 { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 },
@@ -430,8 +473,8 @@
             ],
             voicing_rules: {
                 "1": ["1", "b7", "b5", "b3"], "b3": ["b3", "1", "b7", "b5"], "b5": ["b5", "b3", "1", "b7"],
-                "b7": ["b7", "b5", "b3", "1"], "9": ["9", "b7", "b5", "b3"], "11": ["11", "b7", "b5", "b3"],
-                "13": ["13", "b3", "b7", "b5"]
+                "6": ["6", "5", "b3", "1"], "b7": ["b7", "b5", "b3", "1"], "9": ["9", "b7", "b5", "b3"],
+                "11": ["11", "b7", "b5", "b3"], "13": ["13", "b3", "1", "b7"]
             }
         },
         "dim7": {
@@ -474,9 +517,11 @@
                 { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
                 { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
+                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
+                { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }
             ],
-            voicing_rules: { "1": ["1", "6", "5", "3"], "3": ["3", "1", "6", "5"], "5": ["5", "3", "1", "6"], "6": ["6", "5", "3", "1"], "9": ["9", "6", "5", "3"] }
+            voicing_rules: { "1": ["1", "6", "5", "3"], "3": ["3", "1", "6", "5"], "5": ["5", "3", "1", "6"], "6": ["6", "5", "3", "1"], "9": ["9", "6", "5", "3"], "13": ["13", "3", "1", "7"] }
         },
         "m6": {
             name: "Menor 6", cifrado: "m6", difficulty: "intermediate",
@@ -485,9 +530,11 @@
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
                 { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
+                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
+                { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }
             ],
-            voicing_rules: { "1": ["1", "6", "5", "b3"], "b3": ["b3", "1", "6", "5"], "5": ["5", "b3", "1", "6"], "6": ["6", "5", "b3", "1"], "9": ["9", "6", "5", "b3"] }
+            voicing_rules: { "1": ["1", "6", "5", "b3"], "b3": ["b3", "1", "6", "5"], "5": ["5", "b3", "1", "6"], "6": ["6", "5", "b3", "1"], "9": ["9", "6", "5", "b3"], "13": ["13", "b3", "1", "b7"] }
         },
         "mMaj7": {
             name: "Menor (Maj7)", cifrado: "m(maj7)", difficulty: "intermediate",
@@ -495,10 +542,12 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
+                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
+                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
                 { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }
             ],
-            voicing_rules: { "1": ["1", "7", "5", "b3"], "b3": ["b3", "1", "7", "5"], "5": ["5", "b3", "1", "7"], "7": ["7", "5", "b3", "1"], "9": ["9", "7", "5", "b3"] }
+            voicing_rules: { "1": ["1", "7", "5", "b3"], "b3": ["b3", "1", "7", "5"], "5": ["5", "b3", "1", "7"], "6": ["6", "5", "b3", "1"], "7": ["7", "5", "b3", "1"], "9": ["9", "7", "5", "b3"], "13": ["13", "b3", "1", "7"] }
         },
         "7sus4": {
             name: "Dominante 7sus4", cifrado: "7sus4", difficulty: "intermediate",
@@ -506,10 +555,12 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 5, name: "cuarta justa", label: "11", degreeOffset: 3 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
+                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
+                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
                 { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }
             ],
-            voicing_rules: { "1": ["1", "b7", "5", "11"], "11": ["11", "1", "b7", "5"], "5": ["5", "11", "1", "b7"], "b7": ["b7", "5", "11", "1"], "9": ["9", "b7", "5", "11"] }
+            voicing_rules: { "1": ["1", "b7", "5", "11"], "11": ["11", "1", "b7", "5"], "5": ["5", "11", "1", "b7"], "6": ["6", "5", "11", "1"], "b7": ["b7", "5", "11", "1"], "9": ["9", "b7", "5", "11"], "13": ["13", "11", "1", "b7"] }
         }
     });
 
@@ -761,7 +812,7 @@
 
     function getChordScaleDefinition(chordTypeKey, scaleId = null) {
         const scales = CHORD_SCALE_CONTEXT_CATALOG[chordTypeKey] || CHORD_SCALE_CONTEXT_CATALOG.maj7;
-        return scales.find(scale => scale.id === scaleId) || scales[0];
+        return (scales && scales.find(scale => scale.id === scaleId)) || scales?.[0] || { id: "ionian", name: "Jónica", availTensions: ["9", "13"], avoid: ["11"] };
     }
 
     function isChordToneOrAvailableTension(noteName, chordRoot, chordTypeKey, scaleId) {
@@ -920,7 +971,7 @@
         const chordData = chordStructures[chordTypeKey] || chordStructures['maj7'];
         const rules = (state.continuityMode && chordData.continuity_rules) ? chordData.continuity_rules : chordData.voicing_rules;
         const safeLead = rules[leadLabel] ? leadLabel : Object.keys(rules)[0];
-        const isTriad = (chordData.difficulty === 'basic') && !state.continuityMode;
+        const isTriad = (chordData.difficulty === 'basic') && !state.continuityMode && safeLead !== '6' && safeLead !== '13';
         const count = isTriad ? 3 : 4;
         const labels = [...rules[safeLead].slice(0, count)];
 
@@ -1478,8 +1529,8 @@
         const intervalNumbers = ['1', '9', '3', '11', '5', '13', '7'];
         let label = `${accidental}${intervalNumbers[degreeIndex]}`;
         const simpleLabel = `${accidental}${degreeIndex + 1}`;
-        if (degreeIndex === 5 && alteration === 0 && cData.intervals.some(interval => interval.label === '6')) {
-            label = '6';
+        if (degreeIndex === 5 && alteration === 0) {
+            label = ['6', 'm6', 'major', 'minor'].includes(chordTypeKey) ? '6' : '13';
         }
         const chordToneLabels = ['1', '3', 'b3', '5', 'b5', '#5', '6', '7', 'b7'];
         return {
@@ -3061,7 +3112,26 @@
         state.studioHarmonicBlockVisible = true;
     }
 
+    function populatePracticeChordTypeSelect() {
+        const sel = el('practiceChordTypeSelect');
+        if (!sel) return;
+        const currentVal = state.forcedChordTypeKey || 'auto';
+        let html = '<option value="auto">🎲 Aleatorio (Nivel)</option>';
+        Object.keys(chordStructures).forEach(k => {
+            const chord = chordStructures[k];
+            const label = chord.cifrado ? `${chord.cifrado} (${chord.name})` : chord.name;
+            html += `<option value="${k}">${label}</option>`;
+        });
+        sel.innerHTML = html;
+        sel.value = currentVal;
+    }
+
     function updateDisplay() {
+        const pSel = el('practiceChordTypeSelect');
+        if (pSel) {
+            if (pSel.options.length <= 1) populatePracticeChordTypeSelect();
+            pSel.value = state.forcedChordTypeKey || 'auto';
+        }
         const rootDisp = displayNote(state.chordRoot);
         const cif = chordStructures[state.chordTypeKey]?.cifrado || '';
         const noteDisp = displayNote(state.givenNote);
@@ -3726,23 +3796,41 @@
         const curMeasure = ex.measures[curNote.measureIdx] || ex.measures[0];
 
         if (el('liveEditPitchSelect')) {
-            el('liveEditPitchSelect').value = curNote.isRest ? 'REST' : curNote.note.split('/')[0];
+            const rawPitch = curNote.isRest ? 'REST' : curNote.note.split('/')[0];
+            const pSel = el('liveEditPitchSelect');
+            if (curNote.isRest) {
+                pSel.value = 'REST';
+            } else {
+                const optExists = Array.from(pSel.options).some(o => o.value === rawPitch);
+                pSel.value = optExists ? rawPitch : simplifySingleNoteEnharmonic(rawPitch, false);
+            }
         }
-        if (el('liveEditOctaveSelect') && !curNote.isRest) {
-            el('liveEditOctaveSelect').value = curNote.note.split('/')[1] || '5';
+        if (el('liveEditOctaveSelect')) {
+            el('liveEditOctaveSelect').disabled = Boolean(curNote.isRest);
+            if (!curNote.isRest) {
+                el('liveEditOctaveSelect').value = curNote.note.split('/')[1] || '5';
+            }
         }
         if (el('liveEditDurSelect')) {
             el('liveEditDurSelect').value = curNote.dur || 'q';
         }
 
-        const chordTypesList = ['maj7', '7', 'm7', 'm7b5', 'dim7', 'major', 'minor'];
+        const chordTypesList = Object.keys(chordStructures);
         ['liveEditChord1Root', 'liveEditChord2Root'].forEach(id => {
             const s = el(id);
-            if (s && !s.options.length) s.innerHTML = allRoots.map(r => `<option value="${r}">${displayNote(r)}</option>`).join('');
+            if (s && s.options.length !== allRoots.length) {
+                s.innerHTML = allRoots.map(r => `<option value="${r}">${displayNote(r)}</option>`).join('');
+            }
         });
         ['liveEditChord1Type', 'liveEditChord2Type'].forEach(id => {
             const s = el(id);
-            if (s && !s.options.length) s.innerHTML = chordTypesList.map(k => `<option value="${k}">${chordStructures[k]?.cifrado || chordStructures[k]?.name}</option>`).join('');
+            if (s && s.options.length !== chordTypesList.length) {
+                s.innerHTML = chordTypesList.map(k => {
+                    const c = chordStructures[k];
+                    const label = c?.cifrado ? `${c.cifrado} (${c.name})` : (c?.name || k);
+                    return `<option value="${k}">${label}</option>`;
+                }).join('');
+            }
         });
 
         const hr = curMeasure.harmonicRhythm || [{ root: curMeasure.chordRoot, type: curMeasure.chordTypeKey, startBeat: 0, durationBeats: 4 }];
@@ -3758,10 +3846,19 @@
         }
         const scaleSelect = el('liveEditChordScaleSelect');
         if (scaleSelect) {
-            const activeChordType = curNote.barChordTypeKey || hr[0].type || 'maj7';
-            const scalesForType = CHORD_SCALE_CONTEXT_CATALOG[activeChordType] || CHORD_SCALE_CONTEXT_CATALOG['maj7'];
+            const activeChordType = (curNote.startBeatInBar >= 2 && isTwoChords && hr[1])
+                ? hr[1].type
+                : (hr[0].type || curNote.barChordTypeKey || 'maj7');
+            const scalesForType = CHORD_SCALE_CONTEXT_CATALOG[activeChordType] || CHORD_SCALE_CONTEXT_CATALOG['maj7'] || [];
             scaleSelect.innerHTML = scalesForType.map(sc => `<option value="${sc.id}">${sc.name}</option>`).join('');
-            scaleSelect.value = curNote.barScaleId || scalesForType[0].id;
+            const currentScaleId = (curNote.startBeatInBar >= 2 && isTwoChords && hr[1])
+                ? (hr[1].scaleId || curNote.barScaleId)
+                : (hr[0].scaleId || curNote.barScaleId);
+            if (scalesForType.some(sc => sc.id === currentScaleId)) {
+                scaleSelect.value = currentScaleId;
+            } else if (scalesForType.length) {
+                scaleSelect.value = scalesForType[0].id;
+            }
         }
     }
 
@@ -4179,8 +4276,8 @@
     }
 
     function getAllowedMelodyPitchNames(chordRoot, chordType, scaleId) {
-        const chord = chordStructures[chordType];
-        const scaleCatalog = CHORD_SCALE_CONTEXT_CATALOG[chordType] || CHORD_SCALE_CONTEXT_CATALOG.maj7;
+        const chord = chordStructures[chordType] || chordStructures.maj7;
+        const scaleCatalog = CHORD_SCALE_CONTEXT_CATALOG[chordType] || CHORD_SCALE_CONTEXT_CATALOG.maj7 || [];
         const scale = scaleCatalog.find(candidate => candidate.id === scaleId) || scaleCatalog[0];
         const pitchNames = new Map();
         (chord?.intervals || []).forEach(interval => {
@@ -4197,6 +4294,9 @@
                 }
             }
         });
+        if (!pitchNames.size) {
+            pitchNames.set(getNoteSemitone(chordRoot), chordRoot);
+        }
         return [...pitchNames.values()];
     }
 
@@ -4212,7 +4312,7 @@
             const harmony = getActiveChordForMeasureBeat(measure, beatCursor);
             const allowedNotes = getAllowedMelodyPitchNames(harmony.root, harmony.type, harmony.scaleId);
             if (!allowedNotes.length) {
-                throw new Error(`No hay notas válidas para ${harmony.sym} en la escala seleccionada.`);
+                allowedNotes.push(harmony.root);
             }
             const currentNoteName = note.note.split('/')[0];
             const currentPitchClass = getNoteSemitone(currentNoteName);
@@ -4443,17 +4543,22 @@
             return;
         }
 
-        let relevant = Object.keys(chordStructures).filter(k =>
-            state.difficulty === 'basic'
-                ? chordStructures[k].difficulty === 'basic'
-                : chordStructures[k].difficulty === 'intermediate'
-        );
-        const customCfg = state.customPractice[state.difficulty];
-        if (customCfg && customCfg.isActive && customCfg.allowedChords && customCfg.allowedChords.length) {
-            const filtered = relevant.filter(k => customCfg.allowedChords.includes(k));
-            if (filtered.length) relevant = filtered;
+        let cKey;
+        if (state.forcedChordTypeKey && state.forcedChordTypeKey !== 'auto' && chordStructures[state.forcedChordTypeKey]) {
+            cKey = state.forcedChordTypeKey;
+        } else {
+            let relevant = Object.keys(chordStructures).filter(k =>
+                state.difficulty === 'basic'
+                    ? chordStructures[k].difficulty === 'basic'
+                    : chordStructures[k].difficulty === 'intermediate'
+            );
+            const customCfg = state.customPractice[state.difficulty];
+            if (customCfg && customCfg.isActive && customCfg.allowedChords && customCfg.allowedChords.length) {
+                const filtered = relevant.filter(k => customCfg.allowedChords.includes(k));
+                if (filtered.length) relevant = filtered;
+            }
+            cKey = relevant[Math.floor(Math.random() * relevant.length)] || 'maj7';
         }
-        const cKey = relevant[Math.floor(Math.random() * relevant.length)] || 'maj7';
         const root = allRoots[Math.floor(Math.random() * allRoots.length)];
         const allLeads = Object.keys(chordStructures[cKey].voicing_rules);
         const practiceCfg = state.customPractice[state.difficulty];
@@ -4861,12 +4966,20 @@
                 renderCustomMelodyEditorUI();
             }));
         }
-        const chordTypes = ['maj7', '7', '7sus4', 'm7', 'm7b5', 'mMaj7', 'm6', '6', 'sus4', 'dim7', 'major', 'minor'];
+        const chordTypes = Object.keys(chordStructures);
         ['customBarChord1Root', 'customBarChord2Root'].forEach(id => {
-            if (el(id) && !el(id).options.length) el(id).innerHTML = allRoots.map(r => `<option value="${r}">${displayNote(r)}</option>`).join('');
+            const s = el(id);
+            if (s && s.options.length !== allRoots.length) s.innerHTML = allRoots.map(r => `<option value="${r}">${displayNote(r)}</option>`).join('');
         });
         ['customBarChord1Type', 'customBarChord2Type'].forEach(id => {
-            if (el(id) && !el(id).options.length) el(id).innerHTML = chordTypes.map(k => `<option value="${k}">${chordStructures[k]?.cifrado || chordStructures[k]?.name}</option>`).join('');
+            const s = el(id);
+            if (s && s.options.length !== chordTypes.length) {
+                s.innerHTML = chordTypes.map(k => {
+                    const c = chordStructures[k];
+                    const label = c?.cifrado ? `${c.cifrado} (${c.name})` : (c?.name || k);
+                    return `<option value="${k}">${label}</option>`;
+                }).join('');
+            }
         });
         if (el('customBarSplitSelect')) el('customBarSplitSelect').value = String(curBar.splitCount || 1);
         if (el('customBarChord2Wrapper')) el('customBarChord2Wrapper').classList.toggle('hidden', curBar.splitCount !== 2);
@@ -5605,6 +5718,14 @@
 
     function setupListeners() {
         populateWelcomeUserSelect();
+        if (el('welcomeNewUserInput')) {
+            el('welcomeNewUserInput').addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    el('welcomeLoginBtn')?.click();
+                }
+            });
+        }
         if (el('welcomeLoginBtn')) {
             el('welcomeLoginBtn').addEventListener('click', () => {
                 const newName = (el('welcomeNewUserInput')?.value || '').trim();
@@ -5615,12 +5736,13 @@
                     isBrandNewUser = registerUserProfile(chosen);
                 } catch (error) {
                     reportProfileStorageError('registrar', error);
-                    return;
                 }
                 state.currentUser = chosen;
-                loadUserProfileStats(chosen);
-                registerDailyPracticeActivity();
-                savePersistedState();
+                try {
+                    loadUserProfileStats(chosen);
+                    registerDailyPracticeActivity();
+                    savePersistedState();
+                } catch (err) {}
                 el('welcomeModalOverlay')?.classList.remove('visible');
                 el('finalMessageDisplay')?.classList.add('hidden');
                 el('mainAppContainer')?.classList.remove('hidden');
@@ -5743,11 +5865,18 @@
         if (el('customChallengeButton')) {
             el('customChallengeButton').addEventListener('click', () => {
                 if (el('customRootSelect')) el('customRootSelect').innerHTML = allRoots.map(r => `<option value="${r}">${displayNote(r)}</option>`).join('');
-                if (el('customChordTypeSelect')) el('customChordTypeSelect').innerHTML = Object.keys(chordStructures).map(k => `<option value="${k}">${chordStructures[k].name}</option>`).join('');
+                if (el('customChordTypeSelect')) {
+                    el('customChordTypeSelect').innerHTML = Object.keys(chordStructures).map(k => {
+                        const chord = chordStructures[k];
+                        const label = chord?.cifrado ? `${chord.cifrado} (${chord.name})` : (chord?.name || k);
+                        return `<option value="${k}">${label}</option>`;
+                    }).join('');
+                }
                 const updLeads = () => {
                     const cKey = el('customChordTypeSelect')?.value || 'maj7';
+                    const rules = chordStructures[cKey]?.voicing_rules || {};
                     if (el('customLeadSelect')) {
-                        el('customLeadSelect').innerHTML = Object.keys(chordStructures[cKey].voicing_rules).map(l => `<option value="${l}">${l}</option>`).join('');
+                        el('customLeadSelect').innerHTML = Object.keys(rules).map(l => `<option value="${l}">${l}</option>`).join('');
                     }
                 };
                 if (el('customChordTypeSelect')) el('customChordTypeSelect').onchange = updLeads;
@@ -5764,6 +5893,8 @@
                 state.melodicStudio.isActive = false;
                 state.continuityMode = false;
                 state.isCustomChallenge = true;
+                state.forcedChordTypeKey = c;
+                if (el('practiceChordTypeSelect')) el('practiceChordTypeSelect').value = c;
                 state.studioHarmonicBlockVisible = false;
                 renderMelodicStudioUI();
                 renderContinuityPanel();
@@ -5780,6 +5911,7 @@
                 state.exerciseSolved = false;
                 el('customChallengeModalOverlay')?.classList.remove('visible');
                 updateDisplay();
+                showFeedbackBanner(`🎯 Practicando ${displayNote(r)}${chordStructures[c]?.cifrado || ''} con melodía en ${l}.`, 'info');
             });
         }
 
@@ -6008,6 +6140,8 @@
 
         document.querySelectorAll('.diff-btn').forEach(btn => btn.addEventListener('click', e => {
             state.difficulty = e.currentTarget.dataset.diff;
+            state.forcedChordTypeKey = null;
+            if (el('practiceChordTypeSelect')) el('practiceChordTypeSelect').value = 'auto';
             document.querySelectorAll('.diff-btn').forEach(b => {
                 b.className = 'diff-btn toolbar-btn ' + (b.dataset.diff === state.difficulty ? 'bg-green-600 text-white' : 'bg-slate-200 text-slate-800');
             });
@@ -6072,71 +6206,163 @@
             });
         }
 
-        // Punto 6: Eventos de modificación en vivo de la melodía/armonía en el estudio
+        // Selector de tipo de acorde para práctica en barra principal
+        if (el('practiceChordTypeSelect')) {
+            populatePracticeChordTypeSelect();
+            el('practiceChordTypeSelect').addEventListener('change', e => {
+                const val = e.target.value;
+                state.forcedChordTypeKey = val === 'auto' ? null : val;
+                generateStandAloneExercise();
+                const name = val === 'auto' ? 'Aleatorio por nivel' : (chordStructures[val]?.name || val);
+                showFeedbackBanner(`🎸 Tipo de acorde para practicar: <strong>${name}</strong>.`, 'info');
+            });
+        }
+
+        // Punto 6: Modificación en vivo y fluida de notas y acordes en el estudio
+        const refreshLiveScaleSelect = () => {
+            const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+            const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+            const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+            const cur = notesList[selIdx] || notesList[0];
+            const split = parseInt(el('liveEditBarSplitSelect')?.value || '1', 10);
+            const t1 = el('liveEditChord1Type')?.value || 'maj7';
+            const t2 = el('liveEditChord2Type')?.value || 'maj7';
+            const activeType = (cur && cur.startBeatInBar >= 2 && split === 2) ? t2 : t1;
+            const scaleSelect = el('liveEditChordScaleSelect');
+            if (scaleSelect) {
+                const scales = CHORD_SCALE_CONTEXT_CATALOG[activeType] || CHORD_SCALE_CONTEXT_CATALOG['maj7'] || [];
+                scaleSelect.innerHTML = scales.map(sc => `<option value="${sc.id}">${sc.name}</option>`).join('');
+                if (scales.length) scaleSelect.value = scales[0].id;
+            }
+        };
+
+        const applyLiveChordModification = (showBanner = false) => {
+            const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+            const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+            const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+            const cur = notesList[selIdx] || notesList[0];
+            if (!cur || !ex) return;
+            const m = ex.measures[cur.measureIdx];
+            if (!m) return;
+            const split = parseInt(el('liveEditBarSplitSelect')?.value || '1', 10);
+            const r1 = el('liveEditChord1Root')?.value || 'C';
+            const t1 = el('liveEditChord1Type')?.value || 'maj7';
+            const r2 = el('liveEditChord2Root')?.value || 'C';
+            const t2 = el('liveEditChord2Type')?.value || 'maj7';
+            const activeType = (cur.startBeatInBar >= 2 && split === 2) ? t2 : t1;
+            const validScales = CHORD_SCALE_CONTEXT_CATALOG[activeType] || CHORD_SCALE_CONTEXT_CATALOG['maj7'] || [];
+            let chosenScaleId = el('liveEditChordScaleSelect')?.value || null;
+            if (!validScales.some(s => s.id === chosenScaleId)) {
+                chosenScaleId = validScales[0]?.id || 'ionian';
+            }
+            m.chordRoot = r1;
+            m.chordTypeKey = t1;
+            m.scaleId = chosenScaleId;
+            if (split === 2) {
+                const s1 = (cur.startBeatInBar < 2) ? chosenScaleId : (m.harmonicRhythm?.[0]?.scaleId || (CHORD_SCALE_CONTEXT_CATALOG[t1]?.[0]?.id || 'ionian'));
+                const s2 = (cur.startBeatInBar >= 2) ? chosenScaleId : (m.harmonicRhythm?.[1]?.scaleId || (CHORD_SCALE_CONTEXT_CATALOG[t2]?.[0]?.id || 'ionian'));
+                m.harmonicRhythm = [
+                    { root: r1, type: t1, startBeat: 0, durationBeats: 2, scaleId: s1 },
+                    { root: r2, type: t2, startBeat: 2, durationBeats: 2, scaleId: s2 }
+                ];
+                m.chordSymbol = `${displayNote(r1)}${chordStructures[t1]?.cifrado || ''} - ${displayNote(r2)}${chordStructures[t2]?.cifrado || ''}`;
+            } else {
+                m.harmonicRhythm = [{ root: r1, type: t1, startBeat: 0, durationBeats: 4, scaleId: chosenScaleId }];
+                m.chordSymbol = `${displayNote(r1)}${chordStructures[t1]?.cifrado || ''}`;
+            }
+            state.melodicStudio.autoFilledPhraseVoicings = {};
+            renderMelodicStudioUI();
+            if (showBanner) {
+                showFeedbackBanner(`🎸 Acorde actualizado a ${m.chordSymbol}.`, 'success');
+            }
+        };
+
         if (el('liveEditBarSplitSelect')) {
             el('liveEditBarSplitSelect').addEventListener('change', e => {
                 const isTwo = e.target.value === '2';
                 el('liveEditChord2Group')?.classList.toggle('hidden', !isTwo);
                 el('liveEditChord2Group')?.classList.toggle('inline-flex', isTwo);
+                refreshLiveScaleSelect();
+                applyLiveChordModification(false);
             });
+        }
+        if (el('liveEditChord1Type')) {
+            el('liveEditChord1Type').addEventListener('change', () => {
+                refreshLiveScaleSelect();
+                applyLiveChordModification(false);
+            });
+        }
+        if (el('liveEditChord1Root')) {
+            el('liveEditChord1Root').addEventListener('change', () => applyLiveChordModification(false));
+        }
+        if (el('liveEditChord2Type')) {
+            el('liveEditChord2Type').addEventListener('change', () => {
+                refreshLiveScaleSelect();
+                applyLiveChordModification(false);
+            });
+        }
+        if (el('liveEditChord2Root')) {
+            el('liveEditChord2Root').addEventListener('change', () => applyLiveChordModification(false));
+        }
+        if (el('liveEditChordScaleSelect')) {
+            el('liveEditChordScaleSelect').addEventListener('change', () => applyLiveChordModification(false));
+        }
+        const applyLiveNoteModification = (showBanner = false) => {
+            const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+            const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+            const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+            const cur = notesList[selIdx];
+            if (!cur || !ex) return;
+            const rawNote = ex.measures[cur.measureIdx]?.notes[cur.noteIdxInMeasure];
+            if (!rawNote) return;
+            const pitchVal = el('liveEditPitchSelect')?.value || 'E';
+            const octVal = el('liveEditOctaveSelect')?.value || '5';
+            const durVal = el('liveEditDurSelect')?.value || 'q';
+            rawNote.dur = durVal;
+            delete state.melodicStudio.enharmonicNoteSpellingByNote[selIdx];
+            delete state.melodicStudio.selectedClassificationByNote[selIdx];
+            delete state.melodicStudio.selectedHarmonizationByNote[selIdx];
+            delete state.melodicStudio.manuallyClearedNotes[selIdx];
+            delete rawNote.groupType;
+            delete rawNote.defaultOpt;
+
+            if (pitchVal === 'REST') {
+                rawNote.isRest = true;
+                delete state.melodicStudio.autoFilledPhraseVoicings[selIdx];
+                if (el('liveEditOctaveSelect')) el('liveEditOctaveSelect').disabled = true;
+            } else {
+                rawNote.isRest = false;
+                rawNote.note = `${pitchVal}/${octVal}`;
+                if (el('liveEditOctaveSelect')) el('liveEditOctaveSelect').disabled = false;
+                triggerUpperVoiceNotes([rawNote.note], "4n");
+            }
+            state.melodicStudio.selectedNoteIdx = selIdx;
+            state.melodicStudio.autoFilledPhraseVoicings = {};
+            renderMelodicStudioUI();
+            if (showBanner) {
+                showFeedbackBanner(
+                    pitchVal === 'REST'
+                        ? '𝄽 Silencio actualizado en la partitura.'
+                        : `🎶 Nota actualizada a <strong>${formatScientificPitch(rawNote.note)}</strong> (${rawNote.dur}).`,
+                    'success'
+                );
+            }
+        };
+
+        if (el('liveEditPitchSelect')) {
+            el('liveEditPitchSelect').addEventListener('change', () => applyLiveNoteModification(false));
+        }
+        if (el('liveEditOctaveSelect')) {
+            el('liveEditOctaveSelect').addEventListener('change', () => applyLiveNoteModification(false));
+        }
+        if (el('liveEditDurSelect')) {
+            el('liveEditDurSelect').addEventListener('change', () => applyLiveNoteModification(false));
         }
         if (el('applyLiveNoteModBtn')) {
-            el('applyLiveNoteModBtn').addEventListener('click', () => {
-                const ex = getMelodicExampleById(state.melodicStudio.exampleId);
-                const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
-                const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
-                const cur = notesList[selIdx];
-                if (!cur || !ex) return;
-                const rawNote = ex.measures[cur.measureIdx]?.notes[cur.noteIdxInMeasure];
-                if (!rawNote) return;
-                const pitchVal = el('liveEditPitchSelect')?.value || 'E';
-                const octVal = el('liveEditOctaveSelect')?.value || '5';
-                const durVal = el('liveEditDurSelect')?.value || 'q';
-                rawNote.dur = durVal;
-                if (pitchVal === 'REST') {
-                    rawNote.isRest = true;
-                    delete state.melodicStudio.autoFilledPhraseVoicings[selIdx];
-                } else {
-                    rawNote.isRest = false;
-                    rawNote.note = `${pitchVal}/${octVal}`;
-                }
-                state.melodicStudio.autoFilledPhraseVoicings = {};
-                renderMelodicStudioUI();
-                showFeedbackBanner('✅ Elemento melódico/figura actualizado en la partitura.', 'success');
-            });
+            el('applyLiveNoteModBtn').addEventListener('click', () => applyLiveNoteModification(true));
         }
         if (el('applyLiveChordModBtn')) {
-            el('applyLiveChordModBtn').addEventListener('click', () => {
-                const ex = getMelodicExampleById(state.melodicStudio.exampleId);
-                const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
-                const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
-                const cur = notesList[selIdx] || notesList[0];
-                if (!cur || !ex) return;
-                const m = ex.measures[cur.measureIdx];
-                if (!m) return;
-                const split = parseInt(el('liveEditBarSplitSelect')?.value || '1', 10);
-                const r1 = el('liveEditChord1Root')?.value || 'C';
-                const t1 = el('liveEditChord1Type')?.value || 'maj7';
-                const r2 = el('liveEditChord2Root')?.value || 'C';
-                const t2 = el('liveEditChord2Type')?.value || 'maj7';
-                const chosenScaleId = el('liveEditChordScaleSelect')?.value || null;
-                m.chordRoot = r1;
-                m.chordTypeKey = t1;
-                m.scaleId = chosenScaleId;
-                if (split === 2) {
-                    m.harmonicRhythm = [
-                        { root: r1, type: t1, startBeat: 0, durationBeats: 2, scaleId: cur.startBeatInBar < 2 ? chosenScaleId : (m.harmonicRhythm?.[0]?.scaleId || null) },
-                        { root: r2, type: t2, startBeat: 2, durationBeats: 2, scaleId: cur.startBeatInBar >= 2 ? chosenScaleId : (m.harmonicRhythm?.[1]?.scaleId || null) }
-                    ];
-                    m.chordSymbol = `${displayNote(r1)}${chordStructures[t1]?.cifrado || ''} - ${displayNote(r2)}${chordStructures[t2]?.cifrado || ''}`;
-                } else {
-                    m.harmonicRhythm = [{ root: r1, type: t1, startBeat: 0, durationBeats: 4, scaleId: chosenScaleId }];
-                    m.chordSymbol = `${displayNote(r1)}${chordStructures[t1]?.cifrado || ''}`;
-                }
-                state.melodicStudio.autoFilledPhraseVoicings = {};
-                renderMelodicStudioUI();
-                showFeedbackBanner('🎸 Acorde(s) y relación Escala–Acorde actualizados.', 'success');
-            });
+            el('applyLiveChordModBtn').addEventListener('click', () => applyLiveChordModification(true));
         }
 
         if (el('mechanicalApproachBtn')) {
