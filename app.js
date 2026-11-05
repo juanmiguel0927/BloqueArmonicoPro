@@ -6313,18 +6313,20 @@
             const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
             const cur = notesList[selIdx];
             if (!cur || !ex) return;
-            const rawNote = ex.measures[cur.measureIdx]?.notes[cur.noteIdxInMeasure];
+            const curMeasure = ex.measures[cur.measureIdx];
+            if (!curMeasure) return;
+            const rawNote = curMeasure.notes[cur.noteIdxInMeasure];
             if (!rawNote) return;
             const pitchVal = el('liveEditPitchSelect')?.value || 'E';
             const octVal = el('liveEditOctaveSelect')?.value || '5';
             const durVal = el('liveEditDurSelect')?.value || 'q';
-            rawNote.dur = durVal;
-            delete state.melodicStudio.enharmonicNoteSpellingByNote[selIdx];
-            delete state.melodicStudio.selectedClassificationByNote[selIdx];
-            delete state.melodicStudio.selectedHarmonizationByNote[selIdx];
-            delete state.melodicStudio.manuallyClearedNotes[selIdx];
-            delete rawNote.groupType;
-            delete rawNote.defaultOpt;
+
+            const oldDur = rawNote.dur;
+            const newDur = durVal;
+            const oldBeats = getBeatsForDuration(oldDur);
+            const newBeats = getBeatsForDuration(newDur);
+
+            rawNote.dur = newDur;
 
             if (pitchVal === 'REST') {
                 rawNote.isRest = true;
@@ -6336,6 +6338,59 @@
                 if (el('liveEditOctaveSelect')) el('liveEditOctaveSelect').disabled = false;
                 triggerUpperVoiceNotes([rawNote.note], "4n");
             }
+
+            if (oldDur !== newDur) {
+                if (newBeats < oldBeats) {
+                    // Si se cambia a una figura menor (ej. negra -> corchea), divide el pulso creando notas compañeras
+                    // del mismo valor para que el usuario pueda escribir ambas notas sin desfasar ni añadir rellenos arbitrarios
+                    const diff = +(oldBeats - newBeats).toFixed(4);
+                    const count = Math.round(diff / newBeats);
+                    for (let k = 0; k < count; k++) {
+                        curMeasure.notes.splice(cur.noteIdxInMeasure + 1 + k, 0, {
+                            note: rawNote.note,
+                            dur: newDur,
+                            isRest: rawNote.isRest
+                        });
+                    }
+                } else if (newBeats > oldBeats) {
+                    // Si se cambia a una figura mayor (ej. corchea -> negra), absorbe las notas siguientes del compás que quepan
+                    let needed = +(newBeats - oldBeats).toFixed(4);
+                    let remIdx = cur.noteIdxInMeasure + 1;
+                    while (needed > 0.001 && remIdx < curMeasure.notes.length) {
+                        const nextB = getBeatsForDuration(curMeasure.notes[remIdx].dur);
+                        if (nextB <= needed + 0.001) {
+                            needed = +(needed - nextB).toFixed(4);
+                            curMeasure.notes.splice(remIdx, 1);
+                        } else {
+                            const remNext = +(nextB - needed).toFixed(4);
+                            const durCatalog = [
+                                { dur: 'h', b: 2 },
+                                { dur: 'q', b: 1 },
+                                { dur: '8', b: 0.5 },
+                                { dur: '16', b: 0.25 }
+                            ];
+                            const fitting = durCatalog.find(d => Math.abs(d.b - remNext) < 0.01);
+                            if (fitting) {
+                                curMeasure.notes[remIdx].dur = fitting.dur;
+                            }
+                            needed = 0;
+                        }
+                    }
+                }
+            }
+
+            curMeasure.notes.forEach((n, idx) => {
+                n.isWeakBeat = (n.dur === '8' || n.dur === '16') && (idx % 2 === 1);
+                n.pOrS = n.isWeakBeat ? 'S' : 'P';
+            });
+
+            delete state.melodicStudio.enharmonicNoteSpellingByNote[selIdx];
+            delete state.melodicStudio.selectedClassificationByNote[selIdx];
+            delete state.melodicStudio.selectedHarmonizationByNote[selIdx];
+            delete state.melodicStudio.manuallyClearedNotes[selIdx];
+            delete rawNote.groupType;
+            delete rawNote.defaultOpt;
+
             state.melodicStudio.selectedNoteIdx = selIdx;
             state.melodicStudio.autoFilledPhraseVoicings = {};
             renderMelodicStudioUI();
@@ -6349,6 +6404,62 @@
             }
         };
 
+        const liveAddNote = () => {
+            const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+            const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+            const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+            const cur = notesList[selIdx];
+            if (!cur || !ex) return;
+            const curMeasure = ex.measures[cur.measureIdx];
+            if (!curMeasure) return;
+            const pitchVal = el('liveEditPitchSelect')?.value || 'E';
+            const octVal = el('liveEditOctaveSelect')?.value || '5';
+            const durVal = el('liveEditDurSelect')?.value || '8';
+            const isRest = pitchVal === 'REST';
+            const noteStr = isRest ? 'B/4' : `${pitchVal}/${octVal}`;
+
+            const newNote = {
+                note: noteStr,
+                dur: durVal,
+                isRest: isRest,
+                isWeakBeat: false,
+                pOrS: 'P'
+            };
+            curMeasure.notes.splice(cur.noteIdxInMeasure + 1, 0, newNote);
+            curMeasure.notes.forEach((n, idx) => {
+                n.isWeakBeat = (n.dur === '8' || n.dur === '16') && (idx % 2 === 1);
+                n.pOrS = n.isWeakBeat ? 'S' : 'P';
+            });
+            state.melodicStudio.autoFilledPhraseVoicings = {};
+            state.melodicStudio.selectedNoteIdx = selIdx + 1;
+            renderMelodicStudioUI();
+            if (!isRest) triggerUpperVoiceNotes([newNote.note], "8n");
+            showFeedbackBanner(`➕ Nueva nota <strong>${formatScientificPitch(newNote.note)}</strong> (${newNote.dur}) agregada al compás ${cur.bar}.`, 'success');
+        };
+
+        const liveDeleteNote = () => {
+            const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+            const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+            const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+            const cur = notesList[selIdx];
+            if (!cur || !ex) return;
+            const curMeasure = ex.measures[cur.measureIdx];
+            if (!curMeasure) return;
+            if (curMeasure.notes.length <= 1) {
+                showFeedbackBanner(`⚠️ El compás ${cur.bar} debe tener al menos una nota o silencio.`, 'error');
+                return;
+            }
+            curMeasure.notes.splice(cur.noteIdxInMeasure, 1);
+            curMeasure.notes.forEach((n, idx) => {
+                n.isWeakBeat = (n.dur === '8' || n.dur === '16') && (idx % 2 === 1);
+                n.pOrS = n.isWeakBeat ? 'S' : 'P';
+            });
+            state.melodicStudio.autoFilledPhraseVoicings = {};
+            state.melodicStudio.selectedNoteIdx = Math.max(0, selIdx - 1);
+            renderMelodicStudioUI();
+            showFeedbackBanner(`🗑️ Nota eliminada del compás ${cur.bar}.`, 'info');
+        };
+
         if (el('liveEditPitchSelect')) {
             el('liveEditPitchSelect').addEventListener('change', () => applyLiveNoteModification(false));
         }
@@ -6360,6 +6471,12 @@
         }
         if (el('applyLiveNoteModBtn')) {
             el('applyLiveNoteModBtn').addEventListener('click', () => applyLiveNoteModification(true));
+        }
+        if (el('liveAddNoteBtn')) {
+            el('liveAddNoteBtn').addEventListener('click', liveAddNote);
+        }
+        if (el('liveDeleteNoteBtn')) {
+            el('liveDeleteNoteBtn').addEventListener('click', liveDeleteNote);
         }
         if (el('applyLiveChordModBtn')) {
             el('applyLiveChordModBtn').addEventListener('click', () => applyLiveChordModification(true));
