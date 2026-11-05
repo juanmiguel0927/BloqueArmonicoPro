@@ -143,6 +143,10 @@
                 <button type="button" data-diff="advanced" class="diff-btn toolbar-btn bg-slate-200 text-slate-800">Avanzado</button>
             </div>
             <div class="flex items-center gap-1.5 flex-wrap justify-center">
+                <div class="flex items-center gap-1">
+                    <label for="practiceChordTypeSelect" class="text-xs font-extrabold text-indigo-800">Acorde:</label>
+                    <select id="practiceChordTypeSelect" class="ctrl-select font-bold max-w-[210px]" title="Seleccionar tipo de acorde para practicar fluidamente"></select>
+                </div>
                 <select id="instrumentSelect" class="ctrl-select">
                     <option value="piano" selected>🎹 Piano Acústico</option>
                     <option value="rhodes">⚡ Piano Rhodes</option>
@@ -278,6 +282,7 @@
                         <option value="Gb">Gb</option><option value="G">G (Sol)</option><option value="G#">G#</option>
                         <option value="Ab">Ab</option><option value="A">A (La)</option><option value="A#">A#</option>
                         <option value="Bb">Bb</option><option value="B">B (Si)</option>
+                        <option value="Cb">Cb</option><option value="B#">B#</option><option value="Fb">Fb</option><option value="E#">E#</option>
                     </select>
                     <label class="font-bold">Oct:</label>
                     <select id="liveEditOctaveSelect" class="ctrl-select">
@@ -776,6 +781,9 @@
                         </table>
                         <div class="text-[11px] text-slate-700 mt-1 italic bg-white/80 p-1.5 rounded border border-indigo-200">
                             <strong>* Regla de permutación en acordes 7:</strong> Cuando la <strong>1ª voz tiene la fundamental del acorde</strong>, se puede permutar el <strong>b7 por b9</strong> (ejemplo: <code>G7</code> cerrado en 4-way close es <code>G - F - D - B</code>; con la permutación queda <code>G - D - B - Ab</code>).
+                        </div>
+                        <div class="text-[11px] text-slate-700 mt-1 italic bg-white/80 p-1.5 rounded border border-indigo-200">
+                            <strong>* Construcción de 6ta y Tensión 13 en 4-Way Close:</strong> Cuando la 1ª voz es la <strong>6ta (6)</strong>, la posición cerrada se construye como <code>6 - 5 - 3 - 1</code> para acordes mayores o <code>6 - 5 - b3 - 1</code> para menores. Si la 1ª voz es la <strong>tensión 13</strong>, actúa como permutación de la 5ta y queda <code>13 - 3 - 1 - 7</code> (con <code>b3</code> o <code>b7</code> según el tipo de acorde: ej. <code>13 - 3 - 1 - b7</code> en Dominante 7, <code>13 - b3 - 1 - b7</code> en Menor 7).
                         </div>
                     </div>
                 </div>
