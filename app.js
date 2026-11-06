@@ -120,7 +120,13 @@
             groupPreviewTimers: [],
             noteHitBoxes: [],
             customRandomExamples: {},
-            customEditorDraft: { barsCount: 4, timeSigNum: 4, timeSigDen: 4, activeBarIdx: 0, activeNoteIdx: -1, noteHitBoxes: [], measures: [] }
+            customEditorDraft: { barsCount: 4, timeSigNum: 4, timeSigDen: 4, activeBarIdx: 0, activeNoteIdx: -1, noteHitBoxes: [], measures: [] },
+            undoStack: [],
+            redoStack: [],
+            swingMode: 'straight',
+            metronomeActive: false,
+            isLoopingBar: false,
+            showVoiceLeadingLines: false
         }
     };
 
@@ -1504,10 +1510,16 @@
 
     function getBeatsForDuration(dur) {
         if (dur === 'w') return 4;
+        if (dur === 'hd') return 3;
         if (dur === 'h') return 2;
+        if (dur === 'qd') return 1.5;
         if (dur === 'q') return 1;
+        if (dur === 'qt') return 2 / 3;
+        if (dur === '8d') return 0.75;
         if (dur === '8') return 0.5;
+        if (dur === '8t') return 1 / 3;
         if (dur === '16') return 0.25;
+        if (dur === '16t') return 1 / 6;
         return 1;
     }
 
@@ -2544,8 +2556,21 @@
                 const bassNotes = [];
                 const barNotesMeta = [];
                 const tBeams = [];
+                const tupletsToDraw = [];
+                const tupletCanvasGroups = [];
                 let curBeam = [];
+                let curTupletGroup = [];
+                let curTupletMetaGroup = [];
                 let beatCursor = 0;
+
+                const applyDotsToAllKeys = (staveNoteObj, keysCount) => {
+                    if (!staveNoteObj || !VF.Dot) return;
+                    for (let k = 0; k < keysCount; k++) {
+                        try {
+                            staveNoteObj.addModifier(new VF.Dot(), k);
+                        } catch (e) {}
+                    }
+                };
 
                 for (let nIdx = 0; nIdx < m.notes.length; nIdx++) {
                     const fn = flatNotes[cursorGlobal];
@@ -2555,9 +2580,17 @@
                     const colMain = isPlay ? '#dc2626' : (isSel ? '#1d4ed8' : (isGroupCompanion ? '#b45309' : '#0f172a'));
                     let tSn = null, bSn = null, tReal = false;
 
+                    const isTuplet = fn.dur.endsWith('t');
+                    const isDotted = fn.dur.endsWith('d');
+                    const vfDur = isTuplet ? fn.dur.replace('t', '') : (isDotted ? fn.dur.replace('d', '') : fn.dur);
+                    const durForSn = isDotted ? (vfDur + 'd') : vfDur;
+
                     if (fn.isRest) {
-                        tSn = new StaveNote({ keys: ["b/4"], duration: fn.dur + "r", clef: "treble" });
-                        bSn = GhostNote ? new GhostNote({ duration: fn.dur }) : new StaveNote({ keys: ["d/3"], duration: fn.dur + "r", clef: "bass" });
+                        tSn = new StaveNote({ keys: ["b/4"], duration: durForSn + "r", clef: "treble" });
+                        bSn = GhostNote ? new GhostNote({ duration: durForSn }) : new StaveNote({ keys: ["d/3"], duration: durForSn + "r", clef: "bass" });
+                        if (isDotted) {
+                            applyDotsToAllKeys(tSn, 1);
+                        }
                     } else {
                         const comp = state.melodicStudio.autoFilledPhraseVoicings[cursorGlobal];
                         const showChord = state.melodicStudio.showFullVoicingInScore && comp && comp.notesWithOct && comp.notesWithOct.length;
@@ -2579,27 +2612,62 @@
                         };
 
                         if (tKeys.length > 0) {
-                            tSn = new StaveNote({ keys: tKeys, duration: fn.dur, clef: "treble", stem_direction: 1, auto_stem: false });
+                            tSn = new StaveNote({ keys: tKeys, duration: durForSn, clef: "treble", stem_direction: 1, auto_stem: false });
                             applyMeasureAccidentalWithNatural(tSn, tKeys);
+                            if (isDotted) {
+                                applyDotsToAllKeys(tSn, tKeys.length);
+                            }
                             tReal = true;
                         } else {
-                            tSn = GhostNote ? new GhostNote({ duration: fn.dur }) : new StaveNote({ keys: ["b/4"], duration: fn.dur + "r", clef: "treble" });
+                            tSn = GhostNote ? new GhostNote({ duration: durForSn }) : new StaveNote({ keys: ["b/4"], duration: durForSn + "r", clef: "treble" });
                         }
 
                         if (bKeys.length > 0) {
-                            bSn = new StaveNote({ keys: bKeys, duration: fn.dur, clef: "bass", stem_direction: -1, auto_stem: false });
+                            bSn = new StaveNote({ keys: bKeys, duration: durForSn, clef: "bass", stem_direction: -1, auto_stem: false });
                             applyMeasureAccidentalWithNatural(bSn, bKeys);
+                            if (isDotted) {
+                                applyDotsToAllKeys(bSn, bKeys.length);
+                            }
                         } else {
-                            bSn = GhostNote ? new GhostNote({ duration: fn.dur }) : new StaveNote({ keys: ["d/3"], duration: fn.dur + "r", clef: "bass" });
+                            bSn = GhostNote ? new GhostNote({ duration: durForSn }) : new StaveNote({ keys: ["d/3"], duration: durForSn + "r", clef: "bass" });
                         }
+                    }
+
+                    if (isTuplet) {
+                        const tupletNote = tReal ? tSn : bSn;
+                        curTupletGroup.push(tupletNote);
+                        curTupletMetaGroup.push({ sn: tupletNote, fn, tReal, tSn, bSn });
+                        if (curTupletGroup.length === 3) {
+                            if (VF.Tuplet) {
+                                try {
+                                    tupletsToDraw.push(new VF.Tuplet(curTupletGroup, {
+                                        num_notes: 3,
+                                        notes_occupied: 2,
+                                        location: VF.Tuplet.LOCATION_TOP,
+                                        bracketed: true,
+                                        ratioed: false
+                                    }));
+                                } catch (e) {}
+                            }
+                            tupletCanvasGroups.push([...curTupletMetaGroup]);
+                            curTupletGroup = [];
+                            curTupletMetaGroup = [];
+                        }
+                    } else {
+                        if (curTupletMetaGroup.length > 0) {
+                            tupletCanvasGroups.push([...curTupletMetaGroup]);
+                        }
+                        curTupletGroup = [];
+                        curTupletMetaGroup = [];
                     }
 
                     const startBeatOfNote = beatCursor;
                     const bVal = getBeatsForDuration(fn.dur);
-                    if (!fn.isRest && tReal && (fn.dur === '8' || fn.dur === '16')) {
+                    if (!fn.isRest && tReal && (vfDur === '8' || vfDur === '16')) {
                         curBeam.push(tSn);
                         const nextB = beatCursor + bVal;
-                        if (Math.abs(nextB - Math.round(nextB)) < 0.001 || nIdx === m.notes.length - 1) {
+                        const isTupletEnd = isTuplet && curTupletGroup.length === 0;
+                        if (isTupletEnd || Math.abs(nextB - Math.round(nextB)) < 0.001 || nIdx === m.notes.length - 1) {
                             if (curBeam.length > 1) tBeams.push(new Beam(curBeam));
                             curBeam = [];
                         }
@@ -2616,6 +2684,12 @@
                     cursorGlobal++;
                 }
 
+                if (curTupletMetaGroup.length > 0) {
+                    tupletCanvasGroups.push([...curTupletMetaGroup]);
+                    curTupletGroup = [];
+                    curTupletMetaGroup = [];
+                }
+
                 const vTreble = new Voice({ num_beats: tsNum, beat_value: tsDen }).setStrict(false).addTickables(trebleNotes);
                 const vBass = new Voice({ num_beats: tsNum, beat_value: tsDen }).setStrict(false).addTickables(bassNotes);
                 const formatWidth = Math.max(210, staveW - (col === 0 ? 100 : 52));
@@ -2623,6 +2697,28 @@
                 vTreble.draw(ctx, trebleStave);
                 vBass.draw(ctx, bassStave);
                 tBeams.forEach(b => b.setContext(ctx).draw());
+
+                // Líneas guía de enlace de voces (Voice Leading)
+                if (state.melodicStudio.showVoiceLeadingLines && barNotesMeta.length > 1) {
+                    context.save();
+                    context.setLineDash([3, 3]);
+                    for (let i = 0; i < barNotesMeta.length - 1; i++) {
+                        const m1 = barNotesMeta[i], m2 = barNotesMeta[i + 1];
+                        if (m1.sn && m2.sn && !m1.fn.isRest && !m2.fn.isRest) {
+                            const x1 = m1.sn.getAbsoluteX() + 6;
+                            const x2 = m2.sn.getAbsoluteX() + 6;
+                            const y1 = (m1.melodyStaveNote.getYs && m1.melodyStaveNote.getYs()[0]) || (yTreble + 40);
+                            const y2 = (m2.melodyStaveNote.getYs && m2.melodyStaveNote.getYs()[0]) || (yTreble + 40);
+                            context.strokeStyle = 'rgba(6, 182, 212, 0.55)';
+                            context.lineWidth = 1.6;
+                            context.beginPath();
+                            context.moveTo(x1, y1);
+                            context.bezierCurveTo(x1 + (x2 - x1) * 0.4, y1 - 10, x1 + (x2 - x1) * 0.6, y2 - 10, x2, y2);
+                            context.stroke();
+                        }
+                    }
+                    context.restore();
+                }
 
                 // Punto 2: Dibujar los cifrados estilo Lead Sheet sobre sus tiempos exactos (T1 y T3)
                 const hrList = (Array.isArray(m.harmonicRhythm) && m.harmonicRhythm.length)
@@ -2753,6 +2849,24 @@
                     const showAnalysisAnnotation = annotationMode === 'analysis' || annotationMode === 'both';
                     const showHarmonizationAnnotation = annotationMode === 'harmonization' || annotationMode === 'both';
 
+                    // Cabezal y cursor de reproducción luminoso en tiempo real
+                    if (isPlaybackActive && meta.globalIdx === activeNoteGlobalIdx) {
+                        context.save();
+                        context.fillStyle = 'rgba(239, 68, 68, 0.18)';
+                        context.strokeStyle = '#ef4444';
+                        context.lineWidth = 2.4;
+                        context.fillRect(nx - 8, yTreble - 16, 36, 230);
+                        context.strokeRect(nx - 8, yTreble - 16, 36, 230);
+                        context.fillStyle = '#ef4444';
+                        context.beginPath();
+                        context.moveTo(nx + 10, yTreble - 8);
+                        context.lineTo(nx + 18, yTreble - 20);
+                        context.lineTo(nx + 2, yTreble - 20);
+                        context.closePath();
+                        context.fill();
+                        context.restore();
+                    }
+
                     // Mostrar etiqueta flotante sobre el acorde en reproducción indicando su disposición
                     if (isPlaybackActive && meta.globalIdx === activeNoteGlobalIdx && !meta.fn.isRest) {
                         const dispShort = DISPOSITION_HUMAN_NAMES[dispId] || dispId;
@@ -2798,6 +2912,7 @@
                             ? Math.min(stemExtents.topY, stemExtents.baseY)
                             : yTreble + 20;
                         const analysisLabelY = stemTopY - 6 - analysisLane * 13;
+                        meta.badgeTopY = analysisLabelY - 9;
                         const analysisColors = meta.fn.isRest
                             ? { text: '#64748b', bg: '#f1f5f9', border: '#cbd5e1' }
                             : (meta.fn.isMainMelodicNote || cl.pOrS === 'P'
@@ -2813,6 +2928,11 @@
                         context.fillStyle = analysisColors.text;
                         context.fillText(analysisLabel, analysisLabelX + 4, analysisLabelY + 1);
                         context.restore();
+                    } else {
+                        const stemExtents = meta.melodyStaveNote?.getStemExtents?.();
+                        meta.badgeTopY = stemExtents
+                            ? Math.min(stemExtents.topY, stemExtents.baseY)
+                            : yTreble + 20;
                     }
 
                     // La etiqueta inferior identifica la técnica y disposición usadas para armonizar
@@ -2913,6 +3033,70 @@
                     }
 
                     state.melodicStudio.noteHitBoxes.push({ globalIdx: meta.globalIdx, x: nx - 10, y: yTreble - 10, w: 36, h: 225 });
+                });
+
+                // Renderizado visible, limpio y garantizado del corchete con símbolo 3 para los tresillos (sin solapes con insignias de análisis)
+                tupletCanvasGroups.forEach(grp => {
+                    if (!grp || !grp.length) return;
+                    const firstSn = grp[0].sn;
+                    const lastSn = grp[grp.length - 1].sn;
+                    if (!firstSn || !lastSn) return;
+                    const x1 = (typeof firstSn.getAbsoluteX === 'function') ? firstSn.getAbsoluteX() - 4 : (x + 20);
+                    const x2 = (typeof lastSn.getAbsoluteX === 'function') ? lastSn.getAbsoluteX() + 14 : (x1 + 35);
+
+                    let minObstacleY = yTreble + 15;
+                    grp.forEach(it => {
+                        const noteObj = it.sn;
+                        if (noteObj && typeof noteObj.getYs === 'function') {
+                            const ys = noteObj.getYs();
+                            if (ys && ys.length) minObstacleY = Math.min(minObstacleY, ...ys);
+                        }
+                        if (noteObj && typeof noteObj.getStemExtents === 'function') {
+                            const ext = noteObj.getStemExtents();
+                            if (ext && ext.topY !== undefined) minObstacleY = Math.min(minObstacleY, ext.topY);
+                        }
+                        const meta = barNotesMeta.find(m => m.sn === it.sn || m.fn === it.fn);
+                        if (meta && typeof meta.badgeTopY === 'number') {
+                            minObstacleY = Math.min(minObstacleY, meta.badgeTopY);
+                        }
+                    });
+
+                    // Colocar el corchete con holgura segura (8px) por encima del obstáculo más alto (insignia o plica)
+                    const bracketY = minObstacleY - 8;
+                    const midX = (x1 + x2) / 2;
+                    const numText = '3';
+
+                    context.save();
+                    context.font = '800 13px "Plus Jakarta Sans", Georgia, serif';
+                    const textW = context.measureText(numText).width;
+                    const gap = (textW / 2) + 5;
+
+                    // Pastilla protectora para asegurar contraste y legibilidad absoluta
+                    context.fillStyle = '#ffffff';
+                    context.fillRect(midX - gap + 1, bracketY - 8, (gap - 1) * 2, 16);
+
+                    context.strokeStyle = '#0f172a';
+                    context.fillStyle = '#0f172a';
+                    context.lineWidth = 1.5;
+                    context.lineCap = 'round';
+                    context.lineJoin = 'round';
+
+                    context.beginPath();
+                    context.moveTo(x1, bracketY + 5);
+                    context.lineTo(x1, bracketY);
+                    context.lineTo(midX - gap, bracketY);
+                    context.stroke();
+
+                    context.beginPath();
+                    context.moveTo(midX + gap, bracketY);
+                    context.lineTo(x2, bracketY);
+                    context.lineTo(x2, bracketY + 5);
+                    context.stroke();
+
+                    context.textAlign = 'center';
+                    context.textBaseline = 'middle';
+                    context.fillText(numText, midX, bracketY);
+                    context.restore();
                 });
             }
         } catch (error) {
@@ -3264,7 +3448,20 @@
             k.style.left = `calc(100% / 22 * ${blacks[n]})`;
             p.appendChild(k);
         }
-        p.querySelectorAll('.piano-key').forEach(k => k.addEventListener('click', e => addUserVoiceNote(e.currentTarget.dataset.note.split('/')[0])));
+        p.querySelectorAll('.piano-key').forEach(k => k.addEventListener('click', e => {
+            const fullNoteWithOct = e.currentTarget.dataset.note;
+            if (state.melodicStudio.isActive && state.melodicStudio.selectedNoteIdx !== null) {
+                const [pName, octStr] = fullNoteWithOct.split('/');
+                if (el('liveEditPitchSelect')) {
+                    const optExists = Array.from(el('liveEditPitchSelect').options).some(o => o.value === pName);
+                    el('liveEditPitchSelect').value = optExists ? pName : simplifySingleNoteEnharmonic(pName, false);
+                }
+                if (el('liveEditOctaveSelect')) el('liveEditOctaveSelect').value = octStr;
+                applyLiveNoteModification(true);
+                return;
+            }
+            addUserVoiceNote(fullNoteWithOct.split('/')[0]);
+        }));
     }
 
     // Punto 10: Continuidad Armónica de 8 Compases Evaluados como un Solo Ejercicio
@@ -3786,6 +3983,162 @@
         });
     }
 
+    function checkVoicingAcousticAlert(notesWithOct) {
+        if (!notesWithOct || notesWithOct.length < 2) return null;
+        const midis = notesWithOct.map(n => getNoteWithOctaveMidi(n)).sort((a, b) => a - b);
+        const lowestMidi = midis[0];
+        const secondLowestMidi = midis[1];
+        const lowestInterval = secondLowestMidi - lowestMidi;
+        if (lowestMidi < 48 && lowestInterval < 3) {
+            return '⚠️ LIL: Intervalo grave muy cerrado (< 3m debajo de C3). Sugerencia: Drop 2 o Spread.';
+        }
+        if (lowestMidi < 41 && lowestInterval < 4) {
+            return '⚠️ LIL: Intervalo grave inferior a 4ª justa bajo F2. Riesgo de opacidad acústica.';
+        }
+        const topMidis = [...midis].reverse();
+        if (topMidis.length >= 2 && topMidis[0] - topMidis[1] === 1) {
+            return '⚠️ Disonancia: 2ª menor entre las voces superiores.';
+        }
+        return null;
+    }
+
+    function renderLivePermutationsChips() {
+        const cont = el('livePermutationsContainer');
+        if (!cont) return;
+        const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+        const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+        const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+        const cur = notesList[selIdx];
+        if (!cur || cur.isRest || !ex) {
+            cont.innerHTML = '<span class="text-[11px] text-slate-400 italic">Selecciona una nota para permutar tensiones</span>';
+            return;
+        }
+        const curArr = state.melodicStudio.selectedMultiPermutationsByNote[selIdx] || [];
+        const baseVoicingNoPerm = computeHarmonizationForMelodicNote(cur, null, true);
+        const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(cur, baseVoicingNoPerm, curArr);
+        if (!validPermKeys.length) {
+            cont.innerHTML = '<span class="text-[11px] text-slate-400 italic">Sin permutaciones disponibles para este acorde</span>';
+            return;
+        }
+        cont.innerHTML = validPermKeys.map(pid => {
+            const p = HARMONIZATION_TECHNIQUES_CATALOG[pid];
+            const isAct = curArr.includes(pid);
+            return `<button type="button" data-live-perm="${pid}" class="px-2 py-0.5 rounded text-xs font-bold border transition cursor-pointer ${isAct ? 'bg-purple-600 text-white border-purple-700 shadow-sm' : 'bg-white text-purple-900 border-purple-300 hover:bg-purple-50'}">${isAct ? '✓ ' : '+ '}${p.shortName}</button>`;
+        }).join(' ');
+
+        cont.querySelectorAll('[data-live-perm]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const pid = e.currentTarget.dataset.livePerm;
+                const pObj = HARMONIZATION_TECHNIQUES_CATALOG[pid];
+                let arr = state.melodicStudio.selectedMultiPermutationsByNote[selIdx] || [];
+                if (arr.includes(pid)) {
+                    state.melodicStudio.selectedMultiPermutationsByNote[selIdx] = arr.filter(x => x !== pid);
+                } else {
+                    arr = arr.filter(existingId => {
+                        const existing = HARMONIZATION_TECHNIQUES_CATALOG[existingId];
+                        return existing && existing.targetRole !== pObj.targetRole;
+                    });
+                    arr.push(pid);
+                    state.melodicStudio.selectedMultiPermutationsByNote[selIdx] = arr;
+                }
+                const comp = computeHarmonizationForMelodicNote(cur);
+                state.melodicStudio.autoFilledPhraseVoicings[selIdx] = comp;
+                playNotesList(comp.notesWithOct, comp.implicitBassNote);
+                renderMelodicStudioUI();
+                showFeedbackBanner(`🔀 Permutación [${pObj.shortName}] ${arr.includes(pid) ? 'aplicada' : 'retirada'}.`, 'success');
+            });
+        });
+    }
+
+    function pushStudioUndoState() {
+        const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+        if (!ex) return;
+        state.melodicStudio.undoStack.push({
+            measures: JSON.parse(JSON.stringify(ex.measures)),
+            selectedNoteIdx: state.melodicStudio.selectedNoteIdx
+        });
+        if (state.melodicStudio.undoStack.length > 25) {
+            state.melodicStudio.undoStack.shift();
+        }
+        state.melodicStudio.redoStack = [];
+        updateUndoRedoButtons();
+    }
+
+    function updateUndoRedoButtons() {
+        if (el('studioUndoBtn')) {
+            el('studioUndoBtn').disabled = state.melodicStudio.undoStack.length === 0;
+        }
+        if (el('studioRedoBtn')) {
+            el('studioRedoBtn').disabled = state.melodicStudio.redoStack.length === 0;
+        }
+    }
+
+    function undoStudioAction() {
+        if (!state.melodicStudio.undoStack.length) return;
+        const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+        if (!ex) return;
+        state.melodicStudio.redoStack.push({
+            measures: JSON.parse(JSON.stringify(ex.measures)),
+            selectedNoteIdx: state.melodicStudio.selectedNoteIdx
+        });
+        const prev = state.melodicStudio.undoStack.pop();
+        ex.measures = prev.measures;
+        state.melodicStudio.selectedNoteIdx = prev.selectedNoteIdx;
+        state.melodicStudio.autoFilledPhraseVoicings = {};
+        renderMelodicStudioUI();
+        updateUndoRedoButtons();
+        showFeedbackBanner('↩️ Acción deshecha.', 'info');
+    }
+
+    function redoStudioAction() {
+        if (!state.melodicStudio.redoStack.length) return;
+        const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+        if (!ex) return;
+        state.melodicStudio.undoStack.push({
+            measures: JSON.parse(JSON.stringify(ex.measures)),
+            selectedNoteIdx: state.melodicStudio.selectedNoteIdx
+        });
+        const next = state.melodicStudio.redoStack.pop();
+        ex.measures = next.measures;
+        state.melodicStudio.selectedNoteIdx = next.selectedNoteIdx;
+        state.melodicStudio.autoFilledPhraseVoicings = {};
+        renderMelodicStudioUI();
+        updateUndoRedoButtons();
+        showFeedbackBanner('↪️ Acción rehecha.', 'info');
+    }
+
+    function shiftSelectedMelodicNotePitch(delta) {
+        const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+        const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+        const cur = notesList[selIdx];
+        if (!cur || cur.isRest) return;
+        pushStudioUndoState();
+        const currentMidi = getNoteWithOctaveMidi(cur.note);
+        const newMidi = Math.max(36, Math.min(84, currentMidi + delta));
+        const newNote = midiToNoteWithOctave(newMidi, cur.note.includes('b'));
+        const [pName, octStr] = newNote.split('/');
+        if (el('liveEditPitchSelect')) el('liveEditPitchSelect').value = pName;
+        if (el('liveEditOctaveSelect')) el('liveEditOctaveSelect').value = octStr;
+        applyLiveNoteModification(false);
+    }
+
+    function triggerMetronomeClick(accent = false) {
+        try {
+            const ctx = Tone.context;
+            if (!ctx || ctx.state !== 'running') return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = accent ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(accent ? 1500 : 950, ctx.currentTime);
+            gain.gain.setValueAtTime(accent ? 0.25 : 0.14, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (accent ? 0.045 : 0.03));
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.05);
+        } catch (e) {}
+    }
+
     // Punto 6: Sincronización de la Barra de Modificación en Vivo para Melodía/Armonía Aleatoria o de Estudio
     function syncLiveElementEditorBar() {
         const ex = getMelodicExampleById(state.melodicStudio.exampleId);
@@ -3860,6 +4213,38 @@
                 scaleSelect.value = scalesForType[0].id;
             }
         }
+
+        const usedBeats = curMeasure.notes.reduce((sum, n) => sum + getBeatsForDuration(n.dur), 0);
+        const timeSig = curMeasure.timeSignature || ex.timeSignature || '4/4';
+        const maxBeats = parseInt(timeSig.split('/')[0], 10) || 4;
+        const balanceBadge = el('liveBarBeatBalanceBadge');
+        if (balanceBadge) {
+            const diff = +(usedBeats - maxBeats).toFixed(2);
+            if (Math.abs(diff) < 0.01) {
+                balanceBadge.className = 'px-2 py-0.5 rounded text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+                balanceBadge.textContent = `Compás ${curNote.bar}: ${usedBeats.toFixed(1)} / ${maxBeats}T ✅`;
+            } else if (diff < 0) {
+                balanceBadge.className = 'px-2 py-0.5 rounded text-xs font-mono font-bold bg-amber-100 text-amber-800 border border-amber-300';
+                balanceBadge.textContent = `Compás ${curNote.bar}: ${usedBeats.toFixed(1)} / ${maxBeats}T ⏳ (Falta ${Math.abs(diff)}T)`;
+            } else {
+                balanceBadge.className = 'px-2 py-0.5 rounded text-xs font-mono font-bold bg-rose-100 text-rose-800 border border-rose-300';
+                balanceBadge.textContent = `Compás ${curNote.bar}: ${usedBeats.toFixed(1)} / ${maxBeats}T ⚠️ (Excede +${diff}T)`;
+            }
+        }
+
+        const alertBadge = el('liveVoicingAlertBadge');
+        if (alertBadge) {
+            const comp = state.melodicStudio.autoFilledPhraseVoicings[selIdx];
+            const alertMsg = checkVoicingAcousticAlert(comp?.notesWithOct);
+            if (alertMsg) {
+                alertBadge.classList.remove('hidden');
+                alertBadge.textContent = alertMsg;
+            } else {
+                alertBadge.classList.add('hidden');
+            }
+        }
+        updateUndoRedoButtons();
+        renderLivePermutationsChips();
     }
 
     function ensureExampleAutoFilled(exId) {
@@ -4706,35 +5091,140 @@
             if (!curBar.notes.length) return;
             const activeAccidentalsInEditorBar = Object.create(null);
             const tNotes = [], bNotes = [];
+            const editorTupletsToDraw = [];
+            const editorTupletCanvasGroups = [];
+            let curEdTuplet = [];
+            let curEdTupletMeta = [];
+
+            const applyDotsToAllKeysEditor = (staveNoteObj, keysCount) => {
+                if (!staveNoteObj || !VF.Dot) return;
+                for (let k = 0; k < keysCount; k++) {
+                    try {
+                        staveNoteObj.addModifier(new VF.Dot(), k);
+                    } catch (e) {}
+                }
+            };
+
             curBar.notes.forEach((n, nIdx) => {
                 const isSel = nIdx === draft.activeNoteIdx;
                 const noteColor = isSel ? '#2563eb' : '#0f172a';
+                const isTuplet = n.dur.endsWith('t');
+                const isDotted = n.dur.endsWith('d');
+                const vfDur = isTuplet ? n.dur.replace('t', '') : (isDotted ? n.dur.replace('d', '') : n.dur);
+                const durForSn = isDotted ? (vfDur + 'd') : vfDur;
+
                 if (n.isRest) {
-                    tNotes.push(new StaveNote({ keys: ["b/4"], duration: n.dur + "r", clef: "treble" }));
-                    bNotes.push(GhostNote ? new GhostNote({ duration: n.dur }) : new StaveNote({ keys: ["d/3"], duration: n.dur + "r", clef: "bass" }));
+                    const rSn = new StaveNote({ keys: ["b/4"], duration: durForSn + "r", clef: "treble" });
+                    if (isDotted) applyDotsToAllKeysEditor(rSn, 1);
+                    tNotes.push(rSn);
+                    bNotes.push(GhostNote ? new GhostNote({ duration: durForSn }) : new StaveNote({ keys: ["d/3"], duration: durForSn + "r", clef: "bass" }));
                 } else {
                     const inTreble = getNoteWithOctaveMidi(n.note) >= 60;
-                    const sn = new StaveNote({ keys: [n.note], duration: n.dur, clef: inTreble ? "treble" : "bass" });
+                    const sn = new StaveNote({ keys: [n.note], duration: durForSn, clef: inTreble ? "treble" : "bass" });
                     const [np] = n.note.split('/');
                     const acc = np.substring(1);
                     if (shouldShowMeasureAccidental(activeAccidentalsInEditorBar, n.note)) {
                         sn.addModifier(new Accidental(acc === '' ? 'n' : acc), 0);
                     }
+                    if (isDotted) applyDotsToAllKeysEditor(sn, 1);
                     sn.setKeyStyle(0, { fillStyle: noteColor, strokeStyle: noteColor });
                     if (inTreble) {
                         tNotes.push(sn);
-                        bNotes.push(GhostNote ? new GhostNote({ duration: n.dur }) : new StaveNote({ keys: ["d/3"], duration: n.dur + "r", clef: "bass" }));
+                        bNotes.push(GhostNote ? new GhostNote({ duration: durForSn }) : new StaveNote({ keys: ["d/3"], duration: durForSn + "r", clef: "bass" }));
                     } else {
                         bNotes.push(sn);
-                        tNotes.push(GhostNote ? new GhostNote({ duration: n.dur }) : new StaveNote({ keys: ["b/4"], duration: n.dur + "r", clef: "treble" }));
+                        tNotes.push(GhostNote ? new GhostNote({ duration: durForSn }) : new StaveNote({ keys: ["b/4"], duration: durForSn + "r", clef: "treble" }));
+                    }
+                    if (isTuplet) {
+                        curEdTuplet.push(sn);
+                        curEdTupletMeta.push(sn);
+                        if (curEdTuplet.length === 3) {
+                            if (VF.Tuplet) {
+                                try {
+                                    editorTupletsToDraw.push(new VF.Tuplet(curEdTuplet, {
+                                        num_notes: 3,
+                                        notes_occupied: 2,
+                                        location: VF.Tuplet.LOCATION_TOP,
+                                        bracketed: true,
+                                        ratioed: false
+                                    }));
+                                } catch (e) {}
+                            }
+                            editorTupletCanvasGroups.push([...curEdTupletMeta]);
+                            curEdTuplet = [];
+                            curEdTupletMeta = [];
+                        }
+                    } else {
+                        if (curEdTupletMeta.length > 0) {
+                            editorTupletCanvasGroups.push([...curEdTupletMeta]);
+                        }
+                        curEdTuplet = [];
+                        curEdTupletMeta = [];
                     }
                 }
             });
+            if (curEdTupletMeta.length > 0) {
+                editorTupletCanvasGroups.push([...curEdTupletMeta]);
+                curEdTuplet = [];
+                curEdTupletMeta = [];
+            }
             const vt = new Voice({ num_beats: num, beat_value: den }).setStrict(false).addTickables(tNotes);
             const vb = new Voice({ num_beats: num, beat_value: den }).setStrict(false).addTickables(bNotes);
             new Formatter().joinVoices([vt, vb]).format([vt, vb], width - 115);
             vt.draw(ctx, trebleStave);
             vb.draw(ctx, bassStave);
+
+            // Corchete con numeral 3 visible para tresillos en el editor (sin duplicados)
+            editorTupletCanvasGroups.forEach(grp => {
+                if (!grp || !grp.length) return;
+                const firstSn = grp[0];
+                const lastSn = grp[grp.length - 1];
+                if (!firstSn || !lastSn) return;
+                const x1 = (typeof firstSn.getAbsoluteX === 'function') ? firstSn.getAbsoluteX() - 4 : 24;
+                const x2 = (typeof lastSn.getAbsoluteX === 'function') ? lastSn.getAbsoluteX() + 14 : (x1 + 35);
+                let minStemY = 28 + 15;
+                grp.forEach(noteObj => {
+                    if (noteObj && typeof noteObj.getYs === 'function') {
+                        const ys = noteObj.getYs();
+                        if (ys && ys.length) minStemY = Math.min(minStemY, ...ys);
+                    }
+                    if (noteObj && typeof noteObj.getStemExtents === 'function') {
+                        const ext = noteObj.getStemExtents();
+                        if (ext && ext.topY !== undefined) minStemY = Math.min(minStemY, ext.topY);
+                    }
+                });
+                const bracketY = Math.min(28 - 10, minStemY - 14);
+                const midX = (x1 + x2) / 2;
+                const numText = '3';
+                context.save();
+                context.font = '800 12.5px "Plus Jakarta Sans", Georgia, serif';
+                const textW = context.measureText(numText).width;
+                const gap = (textW / 2) + 5;
+
+                // Pastilla protectora blanca para lectura clara del número 3
+                context.fillStyle = '#ffffff';
+                context.fillRect(midX - gap + 1, bracketY - 8, (gap - 1) * 2, 16);
+
+                context.strokeStyle = '#0f172a';
+                context.fillStyle = '#0f172a';
+                context.lineWidth = 1.5;
+                context.lineCap = 'round';
+                context.lineJoin = 'round';
+                context.beginPath();
+                context.moveTo(x1, bracketY + 5);
+                context.lineTo(x1, bracketY);
+                context.lineTo(midX - gap, bracketY);
+                context.stroke();
+                context.beginPath();
+                context.moveTo(midX + gap, bracketY);
+                context.lineTo(x2, bracketY);
+                context.lineTo(x2, bracketY + 5);
+                context.stroke();
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(numText, midX, bracketY);
+                context.restore();
+            });
 
             if (draft.activeNoteIdx >= 0 && tNotes[draft.activeNoteIdx]) {
                 const activeSn = (curBar.notes[draft.activeNoteIdx] && !curBar.notes[draft.activeNoteIdx].isRest && getNoteWithOctaveMidi(curBar.notes[draft.activeNoteIdx].note) < 60)
@@ -4781,7 +5271,121 @@
         renderCustomMelodyEditorUI();
     }
 
-    function shiftCustomEditorNoteOctave(deltaOct) {
+    function shiftNoteOctave(noteStr, deltaOct) {
+        if (!noteStr || !noteStr.includes('/')) return noteStr;
+        const [name, octStr] = noteStr.split('/');
+        const oct = parseInt(octStr, 10) || 5;
+        const newOct = Math.max(3, Math.min(6, oct + deltaOct));
+        return `${name}/${newOct}`;
+    }
+
+    function shiftNoteChromatic(noteStr, delta, chordRoot = 'C') {
+        if (!noteStr || !noteStr.includes('/')) return noteStr;
+        const curMidi = getNoteWithOctaveMidi(noteStr);
+        const newMidi = Math.max(48, Math.min(88, curMidi + delta));
+        const isFlatKey = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb'].includes(chordRoot) || chordRoot.includes('b');
+        const preferFlats = isFlatKey ? true : (delta < 0);
+        return midiToNoteWithOctave(newMidi, preferFlats);
+    }
+
+    function shiftNoteDiatonic(noteStr, delta, chordRoot = 'C', chordTypeKey = 'maj7', scaleId = null) {
+        if (!noteStr || !noteStr.includes('/')) return noteStr;
+        const scale = getChordScaleIntervals(chordTypeKey, scaleId);
+        let scaleNotes = [];
+        if (scale && scale.length) {
+            scaleNotes = scale.map(intObj => calculateNoteName(chordRoot, intObj));
+        }
+        if (!scaleNotes.length) {
+            scaleNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        }
+
+        const scalePitches = [];
+        for (let oct = 3; oct <= 6; oct++) {
+            for (const sName of scaleNotes) {
+                const full = `${sName}/${oct}`;
+                const midi = getNoteWithOctaveMidi(full);
+                if (midi >= 48 && midi <= 88) {
+                    scalePitches.push({ note: full, midi });
+                }
+            }
+        }
+        scalePitches.sort((a, b) => a.midi - b.midi);
+        const uniquePitches = scalePitches.filter((p, i, arr) => i === 0 || p.midi !== arr[i - 1].midi);
+
+        const curMidi = getNoteWithOctaveMidi(noteStr);
+        if (delta > 0) {
+            const next = uniquePitches.find(p => p.midi > curMidi);
+            return next ? next.note : noteStr;
+        } else {
+            const prev = [...uniquePitches].reverse().find(p => p.midi < curMidi);
+            return prev ? prev.note : noteStr;
+        }
+    }
+
+    function shiftStudioSelectedNote(type, delta) {
+        const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+        const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+        const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+        const cur = notesList[selIdx];
+        if (!cur || !ex) return;
+        const curMeasure = ex.measures[cur.measureIdx];
+        if (!curMeasure) return;
+        const rawNote = curMeasure.notes[cur.noteIdxInMeasure];
+        if (!rawNote) return;
+
+        pushStudioUndoState();
+
+        if (rawNote.isRest) {
+            rawNote.isRest = false;
+            rawNote.note = 'E/5';
+        }
+
+        const hr = getActiveChordForMeasureBeat(curMeasure, cur.startBeatInBar);
+        const root = hr.root || cur.barChordRoot || 'C';
+        const typeKey = hr.type || cur.barChordTypeKey || 'maj7';
+        const scId = hr.scaleId || cur.barScaleId || null;
+
+        let newNoteStr = rawNote.note;
+        if (type === 'octave') {
+            newNoteStr = shiftNoteOctave(rawNote.note, delta);
+        } else if (type === 'chromatic') {
+            newNoteStr = shiftNoteChromatic(rawNote.note, delta, root);
+        } else if (type === 'diatonic') {
+            newNoteStr = shiftNoteDiatonic(rawNote.note, delta, root, typeKey, scId);
+        }
+
+        rawNote.note = newNoteStr;
+        const [np, oc] = newNoteStr.split('/');
+        if (el('liveEditPitchSelect')) el('liveEditPitchSelect').value = np;
+        if (el('liveEditOctaveSelect')) {
+            el('liveEditOctaveSelect').disabled = false;
+            el('liveEditOctaveSelect').value = oc;
+        }
+
+        delete state.melodicStudio.enharmonicNoteSpellingByNote[selIdx];
+        delete state.melodicStudio.selectedClassificationByNote[selIdx];
+        delete state.melodicStudio.selectedHarmonizationByNote[selIdx];
+        delete state.melodicStudio.manuallyClearedNotes[selIdx];
+        delete rawNote.groupType;
+        delete rawNote.defaultOpt;
+
+        state.melodicStudio.autoFilledPhraseVoicings = {};
+        renderMelodicStudioUI();
+        triggerUpperVoiceNotes([rawNote.note], "8n");
+
+        const modeLabels = {
+            octave: 'Octava',
+            chromatic: 'Cromático (semitono)',
+            diatonic: 'Diatónico (escala)'
+        };
+        showFeedbackBanner(`🎶 ${modeLabels[type]}: <strong>${formatScientificPitch(rawNote.note)}</strong> (${rawNote.dur}).`, 'info');
+    }
+
+    function shiftSelectedMelodicNotePitch(delta) {
+        shiftStudioSelectedNote('diatonic', delta);
+    }
+
+    function shiftCustomEditorNote(type, delta) {
         const draft = state.melodicStudio.customEditorDraft;
         if (!draft || !draft.measures.length) return;
         const curBar = draft.measures[draft.activeBarIdx];
@@ -4790,13 +5394,123 @@
             draft.activeNoteIdx = curBar.notes.length - 1;
         }
         const targetNote = curBar.notes[draft.activeNoteIdx];
-        if (!targetNote || targetNote.isRest) return;
-        const [np, octStr] = targetNote.note.split('/');
-        const newOct = Math.max(2, Math.min(6, (parseInt(octStr, 10) || 5) + deltaOct));
-        targetNote.note = `${np}/${newOct}`;
-        if (el('customNoteOctSelect')) el('customNoteOctSelect').value = String(Math.max(3, Math.min(6, newOct)));
+        if (!targetNote) return;
+        if (targetNote.isRest) {
+            targetNote.isRest = false;
+            targetNote.note = 'E/5';
+        }
+
+        const root = curBar.chord1Root || 'C';
+        const typeKey = curBar.chord1Type || 'maj7';
+
+        let newNoteStr = targetNote.note;
+        if (type === 'octave') {
+            newNoteStr = shiftNoteOctave(targetNote.note, delta);
+        } else if (type === 'chromatic') {
+            newNoteStr = shiftNoteChromatic(targetNote.note, delta, root);
+        } else if (type === 'diatonic') {
+            newNoteStr = shiftNoteDiatonic(targetNote.note, delta, root, typeKey);
+        }
+
+        targetNote.note = newNoteStr;
+        const [, oc] = newNoteStr.split('/');
+        if (el('customNoteOctSelect')) el('customNoteOctSelect').value = oc;
+
         triggerUpperVoiceNotes([targetNote.note], "8n");
         renderCustomMelodyEditorUI();
+    }
+
+    function shiftCustomEditorNoteOctave(deltaOct) {
+        shiftCustomEditorNote('octave', deltaOct);
+    }
+
+    // Exportador de la partitura y armonización a archivo estándar MIDI (.mid)
+    function exportStudioScoreToMidi() {
+        const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+        const flatNotes = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+        if (!ex || !flatNotes.length) return;
+
+        const bpm = state.melodicStudio.tempoBpm || 105;
+        const ticksPerQuarter = 480;
+        const usPerQuarter = Math.round(60000000 / bpm);
+
+        const events = [];
+        let phraseBeatCursor = 0;
+
+        flatNotes.forEach((fn, idx) => {
+            const durationBeats = getBeatsForDuration(fn.dur);
+            const startTick = Math.round(phraseBeatCursor * ticksPerQuarter);
+            const durTicks = Math.max(1, Math.round(durationBeats * ticksPerQuarter) - 10);
+            const endTick = startTick + durTicks;
+
+            if (!fn.isRest) {
+                const comp = state.melodicStudio.autoFilledPhraseVoicings[idx];
+                const showChord = state.melodicStudio.showFullVoicingInScore && comp && comp.notesWithOct && comp.notesWithOct.length;
+                const notesToPlay = showChord ? [...comp.notesWithOct] : [fn.note];
+                if (showChord && comp.implicitBassNote) {
+                    notesToPlay.push(comp.implicitBassNote);
+                }
+                notesToPlay.forEach(nStr => {
+                    const midiVal = Math.max(0, Math.min(127, getNoteWithOctaveMidi(nStr)));
+                    events.push({ tick: startTick, type: 0x90, note: midiVal, vel: 85 });
+                    events.push({ tick: endTick, type: 0x80, note: midiVal, vel: 0 });
+                });
+            }
+            phraseBeatCursor += durationBeats;
+        });
+
+        events.sort((a, b) => a.tick - b.tick || a.type - b.type);
+
+        const writeVarLen = (val) => {
+            let buffer = val & 0x7F;
+            const bytes = [];
+            while ((val >>= 7)) {
+                buffer <<= 8;
+                buffer |= ((val & 0x7F) | 0x80);
+            }
+            while (true) {
+                bytes.push(buffer & 0xFF);
+                if (buffer & 0x80) buffer >>= 8;
+                else break;
+            }
+            return bytes;
+        };
+
+        const trackBytes = [];
+        trackBytes.push(0x00, 0xFF, 0x51, 0x03, (usPerQuarter >> 16) & 0xFF, (usPerQuarter >> 8) & 0xFF, usPerQuarter & 0xFF);
+        trackBytes.push(0x00, 0xFF, 0x58, 0x04, 0x04, 0x02, 0x18, 0x08);
+
+        let lastTick = 0;
+        events.forEach(ev => {
+            const delta = Math.max(0, ev.tick - lastTick);
+            lastTick = ev.tick;
+            trackBytes.push(...writeVarLen(delta));
+            trackBytes.push(ev.type, ev.note, ev.vel);
+        });
+
+        trackBytes.push(0x00, 0xFF, 0x2F, 0x00);
+
+        const trackLen = trackBytes.length;
+        const midiData = [
+            0x4D, 0x54, 0x68, 0x64,
+            0x00, 0x00, 0x00, 0x06,
+            0x00, 0x00,
+            0x00, 0x01,
+            (ticksPerQuarter >> 8) & 0xFF, ticksPerQuarter & 0xFF,
+            0x4D, 0x54, 0x72, 0x6B,
+            (trackLen >> 24) & 0xFF,
+            (trackLen >> 16) & 0xFF,
+            (trackLen >> 8) & 0xFF,
+            trackLen & 0xFF,
+            ...trackBytes
+        ];
+
+        const blob = new Blob([new Uint8Array(midiData)], { type: 'audio/midi' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `armonizacion_${state.melodicStudio.exampleId || 'estudio'}.mid`;
+        a.click();
+        showFeedbackBanner('🎹 Archivo MIDI (.mid) exportado exitosamente.', 'success');
     }
 
     // Exportador universal de la partitura del Estudio a formato MusicXML (.musicxml)
@@ -4805,11 +5519,17 @@
         const flatNotes = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
         if (!ex || !flatNotes.length) return;
         const durMapXml = {
-            'w': { div: 16, type: 'whole' },
-            'h': { div: 8, type: 'half' },
-            'q': { div: 4, type: 'quarter' },
-            '8': { div: 2, type: 'eighth' },
-            '16': { div: 1, type: '16th' }
+            'w': { div: 48, type: 'whole' },
+            'hd': { div: 36, type: 'half', dot: true },
+            'h': { div: 24, type: 'half' },
+            'qd': { div: 18, type: 'quarter', dot: true },
+            'q': { div: 12, type: 'quarter' },
+            'qt': { div: 8, type: 'quarter', tuplet: true },
+            '8d': { div: 9, type: 'eighth', dot: true },
+            '8': { div: 6, type: 'eighth' },
+            '8t': { div: 4, type: 'eighth', tuplet: true },
+            '16': { div: 3, type: '16th' },
+            '16t': { div: 2, type: '16th', tuplet: true }
         };
         const parsePitchXml = (nWithOct) => {
             const [np, oct] = (nWithOct || 'C/5').split('/');
@@ -4824,7 +5544,7 @@
         ex.measures.forEach((m, mIdx) => {
             xml += `    <measure number="${mIdx + 1}">\n`;
             if (mIdx === 0) {
-                xml += `      <attributes>\n        <divisions>4</divisions>\n        <key><fifths>0</fifths></key>\n        <time><beats>4</beats><beat-type>4</beat-type></time>\n        <staves>2</staves>\n        <clef number="1"><sign>G</sign><line>2</line></clef>\n        <clef number="2"><sign>F</sign><line>4</line></clef>\n      </attributes>\n`;
+                xml += `      <attributes>\n        <divisions>12</divisions>\n        <key><fifths>0</fifths></key>\n        <time><beats>4</beats><beat-type>4</beat-type></time>\n        <staves>2</staves>\n        <clef number="1"><sign>G</sign><line>2</line></clef>\n        <clef number="2"><sign>F</sign><line>4</line></clef>\n      </attributes>\n`;
             }
             const hr = m.harmonicRhythm || [{ root: m.chordRoot, type: m.chordTypeKey, startBeat: 0, durationBeats: 4 }];
             m.notes.forEach((rawN) => {
@@ -4836,8 +5556,10 @@
                     const kindMap = { maj7: 'major-seventh', major: 'major', m7: 'minor-seventh', minor: 'minor', '7': 'dominant', m7b5: 'half-diminished', dim7: 'diminished-seventh' };
                     xml += `      <harmony><root><root-step>${rPitch.step}</root-step>${rPitch.alter ? `<root-alter>${rPitch.alter}</root-alter>` : ''}</root><kind>${kindMap[matchingSeg.type] || 'major-seventh'}</kind></harmony>\n`;
                 }
+                const tupletXml = dSpec.tuplet ? '<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>' : '';
+                const dotXml = dSpec.dot ? '<dot/>' : '';
                 if (fn.isRest) {
-                    xml += `      <note><rest/><duration>${dSpec.div}</duration><voice>1</voice><type>${dSpec.type}</type><staff>1</staff></note>\n`;
+                    xml += `      <note><rest/><duration>${dSpec.div}</duration><voice>1</voice><type>${dSpec.type}</type>${dotXml}${tupletXml}<staff>1</staff></note>\n`;
                 } else {
                     const comp = state.melodicStudio.autoFilledPhraseVoicings[cursor];
                     const cl = fn.activeClassObj || fn.classifications[0];
@@ -4849,7 +5571,7 @@
                         const staffNum = getNoteWithOctaveMidi(kStr) < 60 ? 2 : 1;
                         xml += `      <note>\n`;
                         if (kIdx > 0) xml += `        <chord/>\n`;
-                        xml += `        <pitch><step>${p.step}</step>${p.alter ? `<alter>${p.alter}</alter>` : ''}<octave>${p.octave}</octave></pitch>\n        <duration>${dSpec.div}</duration><voice>1</voice><type>${dSpec.type}</type><staff>${staffNum}</staff>\n`;
+                        xml += `        <pitch><step>${p.step}</step>${p.alter ? `<alter>${p.alter}</alter>` : ''}<octave>${p.octave}</octave></pitch>\n        <duration>${dSpec.div}</duration><voice>1</voice><type>${dSpec.type}</type>${dotXml}${tupletXml}<staff>${staffNum}</staff>\n`;
                         if (kIdx === 0) {
                             xml += `        <lyric number="1"><syllabic>single</syllabic><text>${cl.shortTag}:${abbr}</text></lyric>\n`;
                         }
@@ -5145,14 +5867,37 @@
 
         const bpm = state.melodicStudio.tempoBpm || 105;
         const beatMs = Math.round(60000 / bpm);
+        const isSwing = state.melodicStudio.swingMode === 'swing';
+        const isLoop = state.melodicStudio.isLoopingBar;
+        const selIdxForLoop = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+        const activeBarNum = (notesList[selIdxForLoop] || notesList[0]).bar;
+
+        let startIndex = startIdx;
+        let endIndex = notesList.length;
+        if (isLoop) {
+            const firstInBar = notesList.findIndex(n => n.bar === activeBarNum);
+            startIndex = firstInBar >= 0 ? firstInBar : 0;
+            const lastInBar = notesList.findLastIndex ? notesList.findLastIndex(n => n.bar === activeBarNum) : (startIndex + 4);
+            endIndex = (lastInBar >= 0 ? lastInBar : startIndex) + 1;
+        }
+
         let accMs = 0;
         const triggeredBassSegments = new Set();
 
-        for (let i = startIdx; i < notesList.length; i++) {
+        for (let i = startIndex; i < endIndex; i++) {
             const n = notesList[i];
             const bVal = getBeatsForDuration(n.dur);
-            const stepMs = bVal * beatMs;
-            const delay = accMs;
+            let stepMs = bVal * beatMs;
+            let noteOffset = 0;
+
+            if (isSwing && (n.dur === '8' || n.dur === '8d')) {
+                const isOffBeat = n.isWeakBeat || Math.abs((n.startBeatInBar % 1) - 0.5) < 0.05;
+                if (isOffBeat) {
+                    noteOffset = Math.round(beatMs * 0.12);
+                }
+            }
+
+            const delay = accMs + noteOffset;
             const measureObj = ex.measures[n.measureIdx];
             const hrList = (measureObj && measureObj.harmonicRhythm) || [{ root: n.barChordRoot || 'C', type: n.barChordTypeKey || 'maj7', startBeat: 0, durationBeats: 4 }];
 
@@ -5161,6 +5906,15 @@
                 updateStudioLivePlaybackBanner(n, comp, true);
                 drawMelodicPhraseScore(i);
                 scrollMelodicScoreToNote(i, 'auto');
+
+                // Claqueta en tiempos 2 y 4 de cada compás
+                if (state.melodicStudio.metronomeActive) {
+                    const beatFloor = Math.floor(n.startBeatInBar);
+                    if (beatFloor === 1 || beatFloor === 3) {
+                        triggerMetronomeClick(beatFloor === 1);
+                    }
+                }
+
                 if (!n.isRest) {
                     const noteDurTone = bVal >= 1.5 ? "2n" : (bVal >= 0.9 ? "4n" : "8n");
                     if (!melodyOnly && comp && comp.notesWithOct && comp.notesWithOct.length) {
@@ -5187,7 +5941,11 @@
 
         const endId = setTimeout(() => {
             stopStudioPhrasePlayback();
-            renderMelodicStudioUI();
+            if (isLoop && state.melodicStudio.isLoopingBar) {
+                playStudioPhrase(startIndex, melodyOnly);
+            } else {
+                renderMelodicStudioUI();
+            }
         }, accMs + 220);
         state.melodicStudio.phraseTimers.push(endId);
     }
@@ -6307,6 +7065,63 @@
         if (el('liveEditChordScaleSelect')) {
             el('liveEditChordScaleSelect').addEventListener('change', () => applyLiveChordModification(false));
         }
+
+        const completeMeasureWithRests = (curMeasure, maxBeats = 4) => {
+            if (!curMeasure || !Array.isArray(curMeasure.notes)) return;
+            const durCatalog = [
+                { dur: 'w', b: 4 },
+                { dur: 'hd', b: 3 },
+                { dur: 'h', b: 2 },
+                { dur: 'qd', b: 1.5 },
+                { dur: 'q', b: 1 },
+                { dur: '8d', b: 0.75 },
+                { dur: 'qt', b: 2 / 3 },
+                { dur: '8', b: 0.5 },
+                { dur: '8t', b: 1 / 3 },
+                { dur: '16', b: 0.25 },
+                { dur: '16t', b: 1 / 6 }
+            ];
+            let used = curMeasure.notes.reduce((s, n) => s + getBeatsForDuration(n.dur), 0);
+            let rem = +(maxBeats - used).toFixed(4);
+            while (rem > 0.01) {
+                const fitting = durCatalog.find(d => d.b <= rem + 0.001);
+                if (!fitting) break;
+                curMeasure.notes.push({
+                    note: 'B/4',
+                    dur: fitting.dur,
+                    isRest: true,
+                    isWeakBeat: false,
+                    pOrS: 'P'
+                });
+                rem = +(rem - fitting.b).toFixed(4);
+            }
+        };
+
+        const completeActiveBarWithRests = () => {
+            const ex = getMelodicExampleById(state.melodicStudio.exampleId);
+            const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
+            const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
+            const cur = notesList[selIdx];
+            if (!cur || !ex) return;
+            const curMeasure = ex.measures[cur.measureIdx];
+            if (!curMeasure) return;
+            const timeSig = curMeasure.timeSignature || ex.timeSignature || '4/4';
+            const maxBeats = parseInt(timeSig.split('/')[0], 10) || 4;
+            const used = curMeasure.notes.reduce((s, n) => s + getBeatsForDuration(n.dur), 0);
+            if (used >= maxBeats - 0.01) {
+                showFeedbackBanner(`✅ El compás ${cur.bar} ya está completo (${used.toFixed(1)} / ${maxBeats}T).`, 'info');
+                return;
+            }
+            completeMeasureWithRests(curMeasure, maxBeats);
+            curMeasure.notes.forEach((n, idx) => {
+                n.isWeakBeat = (n.dur === '8' || n.dur === '16') && (idx % 2 === 1);
+                n.pOrS = n.isWeakBeat ? 'S' : 'P';
+            });
+            state.melodicStudio.autoFilledPhraseVoicings = {};
+            renderMelodicStudioUI();
+            showFeedbackBanner(`𝄽 Compás ${cur.bar} completado con silencios balanceados.`, 'success');
+        };
+
         const applyLiveNoteModification = (showBanner = false) => {
             const ex = getMelodicExampleById(state.melodicStudio.exampleId);
             const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
@@ -6340,11 +7155,13 @@
             }
 
             if (oldDur !== newDur) {
+                const timeSig = curMeasure.timeSignature || ex.timeSignature || '4/4';
+                const maxBeats = parseInt(timeSig.split('/')[0], 10) || 4;
                 if (newBeats < oldBeats) {
                     // Si se cambia a una figura menor (ej. negra -> corchea), divide el pulso creando notas compañeras
                     // del mismo valor para que el usuario pueda escribir ambas notas sin desfasar ni añadir rellenos arbitrarios
                     const diff = +(oldBeats - newBeats).toFixed(4);
-                    const count = Math.round(diff / newBeats);
+                    const count = Math.floor(diff / newBeats);
                     for (let k = 0; k < count; k++) {
                         curMeasure.notes.splice(cur.noteIdxInMeasure + 1 + k, 0, {
                             note: rawNote.note,
@@ -6352,6 +7169,7 @@
                             isRest: rawNote.isRest
                         });
                     }
+                    completeMeasureWithRests(curMeasure, maxBeats);
                 } else if (newBeats > oldBeats) {
                     // Si se cambia a una figura mayor (ej. corchea -> negra), absorbe las notas siguientes del compás que quepan
                     let needed = +(newBeats - oldBeats).toFixed(4);
@@ -6364,10 +7182,17 @@
                         } else {
                             const remNext = +(nextB - needed).toFixed(4);
                             const durCatalog = [
+                                { dur: 'w', b: 4 },
+                                { dur: 'hd', b: 3 },
                                 { dur: 'h', b: 2 },
+                                { dur: 'qd', b: 1.5 },
                                 { dur: 'q', b: 1 },
+                                { dur: '8d', b: 0.75 },
+                                { dur: 'qt', b: 2 / 3 },
                                 { dur: '8', b: 0.5 },
-                                { dur: '16', b: 0.25 }
+                                { dur: '8t', b: 1 / 3 },
+                                { dur: '16', b: 0.25 },
+                                { dur: '16t', b: 1 / 6 }
                             ];
                             const fitting = durCatalog.find(d => Math.abs(d.b - remNext) < 0.01);
                             if (fitting) {
@@ -6376,6 +7201,7 @@
                             needed = 0;
                         }
                     }
+                    completeMeasureWithRests(curMeasure, maxBeats);
                 }
             }
 
@@ -6445,11 +7271,17 @@
             if (!cur || !ex) return;
             const curMeasure = ex.measures[cur.measureIdx];
             if (!curMeasure) return;
+            const timeSig = curMeasure.timeSignature || ex.timeSignature || '4/4';
+            const maxBeats = parseInt(timeSig.split('/')[0], 10) || 4;
             if (curMeasure.notes.length <= 1) {
-                showFeedbackBanner(`⚠️ El compás ${cur.bar} debe tener al menos una nota o silencio.`, 'error');
+                curMeasure.notes[0] = { note: 'B/4', dur: 'w', isRest: true, isWeakBeat: false, pOrS: 'P' };
+                delete state.melodicStudio.autoFilledPhraseVoicings[selIdx];
+                renderMelodicStudioUI();
+                showFeedbackBanner(`𝄽 Compás ${cur.bar} convertido a silencio completo de 4 tiempos.`, 'info');
                 return;
             }
             curMeasure.notes.splice(cur.noteIdxInMeasure, 1);
+            completeMeasureWithRests(curMeasure, maxBeats);
             curMeasure.notes.forEach((n, idx) => {
                 n.isWeakBeat = (n.dur === '8' || n.dur === '16') && (idx % 2 === 1);
                 n.pOrS = n.isWeakBeat ? 'S' : 'P';
@@ -6457,7 +7289,7 @@
             state.melodicStudio.autoFilledPhraseVoicings = {};
             state.melodicStudio.selectedNoteIdx = Math.max(0, selIdx - 1);
             renderMelodicStudioUI();
-            showFeedbackBanner(`🗑️ Nota eliminada del compás ${cur.bar}.`, 'info');
+            showFeedbackBanner(`🗑️ Nota eliminada del compás ${cur.bar} y completado con silencios.`, 'info');
         };
 
         if (el('liveEditPitchSelect')) {
@@ -6477,6 +7309,12 @@
         }
         if (el('liveDeleteNoteBtn')) {
             el('liveDeleteNoteBtn').addEventListener('click', liveDeleteNote);
+        }
+        if (el('completeLiveBarWithRestsBtn')) {
+            el('completeLiveBarWithRestsBtn').addEventListener('click', completeActiveBarWithRests);
+        }
+        if (el('liveBarBeatBalanceBadge')) {
+            el('liveBarBeatBalanceBadge').addEventListener('click', completeActiveBarWithRests);
         }
         if (el('applyLiveChordModBtn')) {
             el('applyLiveChordModBtn').addEventListener('click', () => applyLiveChordModification(true));
@@ -7051,6 +7889,47 @@
         if (el('exportStudioXmlBtn')) {
             el('exportStudioXmlBtn').addEventListener('click', exportStudioScoreToMusicXML);
         }
+        if (el('exportStudioMidiBtn')) {
+            el('exportStudioMidiBtn').addEventListener('click', exportStudioScoreToMidi);
+        }
+        if (el('loopActiveBarBtn')) {
+            el('loopActiveBarBtn').addEventListener('click', () => {
+                state.melodicStudio.isLoopingBar = !state.melodicStudio.isLoopingBar;
+                el('loopActiveBarBtn').classList.toggle('bg-purple-800', state.melodicStudio.isLoopingBar);
+                el('loopActiveBarBtn').classList.toggle('ring-2', state.melodicStudio.isLoopingBar);
+                el('loopActiveBarBtn').classList.toggle('ring-purple-300', state.melodicStudio.isLoopingBar);
+                showFeedbackBanner(state.melodicStudio.isLoopingBar ? '🔁 Modo Bucle de compás activo encendido.' : '⏹️ Modo Bucle de compás apagado.', 'info');
+                if (state.melodicStudio.isLoopingBar && !state.melodicStudio.isPlayingPhrase) {
+                    playStudioPhrase(state.melodicStudio.selectedNoteIdx || 0, false);
+                }
+            });
+        }
+        if (el('studioSwingSelect')) {
+            el('studioSwingSelect').addEventListener('change', e => {
+                state.melodicStudio.swingMode = e.target.value;
+                showFeedbackBanner(`🎷 Articulación rítmica: ${state.melodicStudio.swingMode === 'swing' ? 'Swing Jazz (Corcheas apaisadas)' : 'Directo (Straight)'}.`, 'info');
+            });
+        }
+        if (el('studioMetronomeToggle')) {
+            el('studioMetronomeToggle').addEventListener('change', e => {
+                state.melodicStudio.metronomeActive = e.target.checked;
+                showFeedbackBanner(state.melodicStudio.metronomeActive ? '🥁 Claqueta en tiempos 2 y 4 activada.' : '🥁 Claqueta desactivada.', 'info');
+            });
+        }
+        if (el('toggleVoiceLeadingLinesBtn')) {
+            el('toggleVoiceLeadingLinesBtn').addEventListener('click', () => {
+                state.melodicStudio.showVoiceLeadingLines = !state.melodicStudio.showVoiceLeadingLines;
+                el('toggleVoiceLeadingLinesBtn').classList.toggle('bg-cyan-600', state.melodicStudio.showVoiceLeadingLines);
+                el('toggleVoiceLeadingLinesBtn').classList.toggle('text-white', state.melodicStudio.showVoiceLeadingLines);
+                drawMelodicPhraseScore(-1);
+            });
+        }
+        if (el('studioUndoBtn')) {
+            el('studioUndoBtn').addEventListener('click', undoStudioAction);
+        }
+        if (el('studioRedoBtn')) {
+            el('studioRedoBtn').addEventListener('click', redoStudioAction);
+        }
         if (el('exportStudioPdfBtn')) {
             el('exportStudioPdfBtn').addEventListener('click', () => {
                 const canvas = el('melodicPhraseCanvas');
@@ -7265,13 +8144,43 @@
         if (el('applyCustomMelodyAutoBtn')) el('applyCustomMelodyAutoBtn').addEventListener('click', () => loadCustomEditorDraftIntoStudio(false));
         if (el('applyCustomMelodyManualBtn')) el('applyCustomMelodyManualBtn').addEventListener('click', () => loadCustomEditorDraftIntoStudio(true));
         if (el('closeCustomMelodyModalBtn')) el('closeCustomMelodyModalBtn').addEventListener('click', () => el('customMelodyModalOverlay')?.classList.remove('visible'));
-        // Punto 9: Tutorial actualizado con todas las herramientas y atajos
+        // Punto 9: Tutorial interactivo completo actualizado con todas las funciones y atajos
         const TUTORIAL_STEPS = [
-            { id: 'displaySection', title: '1. Bloque Armónico 4-Way Close, Variantes 1–3 y Gran Pentagrama', text: 'Construye el acorde en posición cerrada o en sus Variantes 1, 2 y 3 en estricto orden de aparición de la voz (2, 3, 4). Toda nota menor a Do central (< C4) pasa automáticamente a Clave de Fa. Usa las teclas A–G (incluida B) para ingresar notas; N abre los Lead Sheets. Usa + dos veces para ## y - dos veces para bb.' },
-            { id: 'advancedModesToolbar', title: '2. Disposiciones, Evaluador Personalizado y Reloj de Sesión', text: 'Aplica Drop 2, Drop 3, Drop 2&4, Double Lead o Spread Voicings a una nota individual o a toda la frase. Configura tu evaluación personalizada o el temporizador de sesión en minutos.' },
-            { id: 'melodicAnalysisStudioPanel', title: '3. Doble Análisis, Resolución Retardada, Tonicizaciones y Relación Escala–Acorde', text: 'Selecciona cualquier nota en la partitura o en la tira inferior para abrir su análisis. Usa ◀ / ▶ o las flechas ← / → para cambiar de nota; la partitura se desplaza para mantenerla visible. Incluye Doble Análisis, Resoluciones Retardadas, Voz Líder Independiente, Tonicizaciones y selector contextual Escala–Acorde.' },
-            { id: 'melodicAnalysisStudioPanel', title: '4. Crear Melodía con Flechas/Octavas, Guardar y Exportar MusicXML / PDF', text: 'En Crear Melodía (F) navega con las flechas ← / → por notas y compases y sube/baja la octava con ↑ / ↓. En el Estudio, B ingresa la nota Si y N abre los Lead Sheets. Guarda tus melodías (💾) y exporta tus arreglos en formato universal MusicXML (.musicxml) o PDF.' },
-            { id: 'continuityPanel', title: '5. Continuidad Armónica (8 Compases) e Importar/Exportar Datos (.JSON)', text: 'Completa los 8 compases para desbloquear la partitura con el sombreado de notas comunes (verde) y movimiento de la 1ª voz a la nota más cercana (violeta). En Estadísticas (📊) puedes exportar e importar todos tus datos (.JSON).' }
+            {
+                id: 'displaySection',
+                title: '1. Bloque Armónico 4-Way Close, Variantes 1–3 y Gran Pentagrama',
+                text: 'Construye acordes en posición cerrada (4-Way Close) y en sus Variantes 1, 2 y 3 respetando el orden estricto de aparición de las voces (2ª, 3ª y 4ª voz de agudo a grave). Toda nota inferior a Do central (< C4) pasa automáticamente a Clave de Fa en Gran Pentagrama. Usa teclas A–G (C D E F G A B) o números 1–7 para ingresar notas, + para sostenido (#), - para bemol (b), 0 para becuadro (♮), ++ para doble sostenido (##) y -- para doble bemol (bb).'
+            },
+            {
+                id: 'advancedModesToolbar',
+                title: '2. Disposiciones Armónicas (Drops, Spreads, Ambi Chords) y Alertas Acústicas',
+                text: 'Abre tus voicings con Drop 2, Drop 3, Drop 2&4, Shearing / Double Lead (5ª voz a la octava baja), Spreads a 4 y 5 voces (Métodos 1, 2 y 3) o Ambi Chords (Modelos A, B y C por cuartas). El sistema audita acústicamente cada acorde en tiempo real, alertando de disonancias de 2ª menor en la voz superior o violaciones del límite de intervalos graves (LIL).'
+            },
+            {
+                id: 'livePermutationsBar',
+                title: '3. Permutaciones de Tensiones y Regla Especial de Acordes 7',
+                text: 'Enriquece los acordes con tensiones sustitutas: 9na, b9 o #9 por fundamental o 3ra; #11, 11na, 13na o b13 por 5ta. Cuenta con la regla de permutación para acordes 7: cuando la 1ª voz tiene la fundamental del acorde, se permuta la b7 por b9 (ejemplo: G7 cerrado G-F-D-B se permuta a G-D-B-Ab). Haz clic en los chips interactivos de permutación para alternarlas al instante.'
+            },
+            {
+                id: 'melodicAnalysisStudioPanel',
+                title: '4. Análisis Melódico, Doble Análisis, Resoluciones Retardadas y Tonicizaciones',
+                text: 'Clasifica cada nota como Principal (P / notas del acorde y tensiones) o Secundaria (S / d / aproximaciones). Incluye Doble Análisis cuando una nota del acorde actúa como aproximación, Resoluciones Retardadas (diatónica/cromática/dominante/disminuida), Voz Líder Independiente (#1 a #6) y catálogo integral de Tonicizaciones de 2 y 3 acordes hacia cualquier tonalidad de llegada.'
+            },
+            {
+                id: 'studioLiveElementEditorBar',
+                title: '5. Editor Melódico en Vivo, Puntillos en Todas las Voces, Tresillos con Símbolo 3 y Silencios',
+                text: 'Modifica cualquier nota o figura en tiempo real con subdivisiones proporcionales automáticas. Dispones de figuras simples (w, h, q, 8, 16), figuras con puntillo (hd, qd, 8d) que se aplican a todas las notas y voces del bloque armónico, y Figuras de Tresillos grabadas con su corchete y símbolo 3 claramente visible: Tresillo de Negra (qt [6]), Tresillo de Corchea (8t [7]) y Tresillo de Semicorchea (16t [8]). Si faltan tiempos para completar el compás, pulsa "𝄽 + Silencios" o haz clic en la insignia de balance para autocompletar el compás con silencios. Mueve la altura de la nota seleccionada con agilidad: Ctrl + ↑ / ↓ para subir o bajar diatónicamente (escala del acorde), Ctrl + Alt + ↑ / ↓ para subir o bajar cromáticamente (semitono), y Shift + ↑ / ↓ para subir o bajar octavas.'
+            },
+            {
+                id: 'studioPlaybackToolbar',
+                title: '6. Audio Avanzado: Playback, Bucle de Compás (Loop), Swing Jazz y Claqueta',
+                text: 'Reproduce con síntesis polifónica Tone.js mediante la Barra Espaciadora. Activa el modo Bucle (🔁 Loop) para repetir indefinidamente el compás activo mientras practicas, alterna entre articulación Directa y Swing Jazz (lilt 2:1 apaisado), activa la Claqueta de metrónomo en los tiempos débiles 2 y 4, y visualiza las curvas de enlace vocal (Voice Leading) entre notas contiguas.'
+            },
+            {
+                id: 'continuityPanel',
+                title: '7. Continuidad Armónica (8 Compases) y Exportación Universal (MIDI, MusicXML, PDF, JSON)',
+                text: 'Aplica enlaces armónicos a 8 compases manteniendo notas comunes en la misma voz (verde) o conduciendo la 1ª voz por cercanía (violeta). Exporta tus arreglos en archivo estándar MIDI Type 0 (.mid) con ticks exactos de tresillos, en formato profesional MusicXML (.musicxml) para programas de partituras, en PDF vectorial o respalda todo tu perfil y melodías en JSON.'
+            }
         ];
         const showTut = () => {
             document.querySelectorAll('.tutorial-highlight').forEach(x => x.classList.remove('tutorial-highlight'));
@@ -7441,10 +8350,28 @@
             if (isCustomEditorOpen) {
                 if (e.key === 'ArrowLeft') { e.preventDefault(); navigateCustomEditorNotes(-1); return; }
                 if (e.key === 'ArrowRight') { e.preventDefault(); navigateCustomEditorNotes(1); return; }
-                if (e.key === 'ArrowUp') { e.preventDefault(); shiftCustomEditorNoteOctave(1); return; }
-                if (e.key === 'ArrowDown') { e.preventDefault(); shiftCustomEditorNoteOctave(-1); return; }
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const delta = e.key === 'ArrowUp' ? 1 : -1;
+                    if (e.shiftKey) {
+                        shiftCustomEditorNote('octave', delta);
+                    } else if ((e.ctrlKey || e.metaKey) && e.altKey) {
+                        shiftCustomEditorNote('chromatic', delta);
+                    } else if (e.ctrlKey || e.metaKey) {
+                        shiftCustomEditorNote('diatonic', delta);
+                    } else {
+                        shiftCustomEditorNote('diatonic', delta);
+                    }
+                    return;
+                }
                 if (e.key.toLowerCase() === 'r') { e.preventDefault(); el('customAddRestBtn')?.click(); return; }
                 if (e.key === 'Backspace') { e.preventDefault(); el('customBarUndoNoteBtn')?.click(); return; }
+                if (['1', '2', '3', '4', '5', '6', '7', '8'].includes(e.key)) {
+                    e.preventDefault();
+                    const durMap = { '1': 'w', '2': 'h', '3': 'q', '4': '8', '5': '16', '6': 'qt', '7': '8t', '8': '16t' };
+                    if (el('customNoteDurSelect')) el('customNoteDurSelect').value = durMap[e.key];
+                    return;
+                }
                 if (/^[a-gA-G]$/.test(e.key)) {
                     e.preventDefault();
                     const letter = e.key.toUpperCase();
@@ -7454,10 +8381,67 @@
                 }
                 return;
             }
-            const isStudioHorizontalNavigation = state.melodicStudio.isActive
+            const isStudioAllowedSelectKey = state.melodicStudio.isActive
                 && tag === 'SELECT'
-                && ['ArrowLeft', 'ArrowRight'].includes(e.key);
-            if (tag === 'INPUT' || tag === 'TEXTAREA' || (tag === 'SELECT' && !isStudioHorizontalNavigation)) return;
+                && (['ArrowLeft', 'ArrowRight'].includes(e.key) || ((e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) && ['ArrowUp', 'ArrowDown'].includes(e.key)));
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || (tag === 'SELECT' && !isStudioAllowedSelectKey)) return;
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+                e.preventDefault();
+                if (e.shiftKey) redoStudioAction();
+                else undoStudioAction();
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+                e.preventDefault();
+                redoStudioAction();
+                return;
+            }
+            if (state.melodicStudio.isActive && state.melodicStudio.selectedNoteIdx !== null && ['1', '2', '3', '4', '5', '6', '7', '8'].includes(e.key)) {
+                e.preventDefault();
+                const durMap = {
+                    '1': 'w',
+                    '2': 'h',
+                    '3': 'q',
+                    '4': '8',
+                    '5': '16',
+                    '6': 'qt',
+                    '7': '8t',
+                    '8': '16t'
+                };
+                if (el('liveEditDurSelect')) {
+                    el('liveEditDurSelect').value = durMap[e.key];
+                    applyLiveNoteModification(true);
+                }
+                return;
+            }
+            if (state.melodicStudio.isActive && state.melodicStudio.selectedNoteIdx !== null && e.key === '.') {
+                e.preventDefault();
+                const sel = el('liveEditDurSelect');
+                if (sel) {
+                    const cur = sel.value;
+                    const dotMap = {
+                        'w': 'hd', 'hd': 'w',
+                        'h': 'qd', 'qd': 'h',
+                        'q': '8d', '8d': 'q',
+                        '8': '8d', '8d': '8'
+                    };
+                    if (dotMap[cur]) {
+                        sel.value = dotMap[cur];
+                        applyLiveNoteModification(true);
+                    }
+                }
+                return;
+            }
+            if (state.melodicStudio.isActive && state.melodicStudio.selectedNoteIdx !== null && (e.key === 'Delete' || e.key === 'Backspace')) {
+                e.preventDefault();
+                liveDeleteNote();
+                return;
+            }
+            if (state.melodicStudio.isActive && (e.key === 'Insert' || (e.key === '+' && e.shiftKey) || e.key === '=')) {
+                e.preventDefault();
+                liveAddNote();
+                return;
+            }
             if (e.key.toLowerCase() === 'n') {
                 e.preventDefault();
                 el('openLeadSheetLibraryBtn')?.click();
@@ -7466,6 +8450,21 @@
             if (e.key.toLowerCase() === 'm') {
                 e.preventDefault();
                 el('mechanicalApproachBtn')?.click();
+                return;
+            }
+            if (e.key.toLowerCase() === 'j') {
+                e.preventDefault();
+                el('continuityModeBtn')?.click();
+                return;
+            }
+            if (e.key.toLowerCase() === 'y') {
+                e.preventDefault();
+                el('dictationModeBtn')?.click();
+                return;
+            }
+            if (e.key.toLowerCase() === 'p') {
+                e.preventDefault();
+                el('hintButton')?.click();
                 return;
             }
             if (/^[a-gA-G]$/.test(e.key)) { e.preventDefault(); addUserVoiceNote(e.key.toUpperCase()); return; }
@@ -7491,21 +8490,17 @@
                 navigateChordGridVoice(1);
                 return;
             }
-            if (e.key === 'ArrowUp' && state.melodicStudio.isActive && state.melodicStudio.selectedNoteIdx !== null) {
+            if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && state.melodicStudio.isActive && state.melodicStudio.selectedNoteIdx !== null) {
                 e.preventDefault();
-                const octSel = el('liveEditOctaveSelect');
-                if (octSel) {
-                    octSel.value = String(Math.min(6, (parseInt(octSel.value, 10) || 5) + 1));
-                    el('applyLiveNoteModBtn')?.click();
-                }
-                return;
-            }
-            if (e.key === 'ArrowDown' && state.melodicStudio.isActive && state.melodicStudio.selectedNoteIdx !== null) {
-                e.preventDefault();
-                const octSel = el('liveEditOctaveSelect');
-                if (octSel) {
-                    octSel.value = String(Math.max(3, (parseInt(octSel.value, 10) || 5) - 1));
-                    el('applyLiveNoteModBtn')?.click();
+                const delta = e.key === 'ArrowUp' ? 1 : -1;
+                if (e.shiftKey) {
+                    shiftStudioSelectedNote('octave', delta);
+                } else if ((e.ctrlKey || e.metaKey) && e.altKey) {
+                    shiftStudioSelectedNote('chromatic', delta);
+                } else if (e.ctrlKey || e.metaKey) {
+                    shiftStudioSelectedNote('diatonic', delta);
+                } else {
+                    shiftStudioSelectedNote('diatonic', delta);
                 }
                 return;
             }
