@@ -71,7 +71,7 @@
     <div id="tutorialOverlay" class="hidden">
         <div id="tutorialModal">
             <div class="flex justify-between items-center mb-1">
-                <span id="tutorialStepBadge" class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-800">Paso 1 de 6</span>
+                <span id="tutorialStepBadge" class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-800">Paso 1 de 7</span>
                 <button id="tutorialOpenShortcutsBtn" type="button" class="text-xs font-bold text-teal-600 underline cursor-pointer">⌨️ Ver Atajos</button>
             </div>
             <h3 id="tutorialTitle" class="text-base font-extrabold text-blue-600 mb-1"></h3>
@@ -293,15 +293,26 @@
                     </select>
                     <label class="font-bold">Figura:</label>
                     <select id="liveEditDurSelect" class="ctrl-select">
-                        <option value="w">𝅝 Redonda (4T)</option>
-                        <option value="h">𝅗𝅥 Blanca (2T)</option>
-                        <option value="q" selected>♩ Negra (1T)</option>
-                        <option value="8">♪ Corchea (½T)</option>
-                        <option value="16">♬ Semicorchea (¼T)</option>
+                        <option value="w">𝅝 Redonda (4T) [1]</option>
+                        <option value="hd">𝅗𝅥. Blanca con Puntillo (3T)</option>
+                        <option value="h">𝅗𝅥 Blanca (2T) [2]</option>
+                        <option value="qd">♩. Negra con Puntillo (1½T)</option>
+                        <option value="q" selected>♩ Negra (1T) [3]</option>
+                        <option value="qt">𝅗𝅥³ Tresillo de Negra (⅔T) [6]</option>
+                        <option value="8d">♪. Corchea con Puntillo (¾T)</option>
+                        <option value="8">♪ Corchea (½T) [4]</option>
+                        <option value="8t">♩³ Tresillo de Corchea (⅓T) [7]</option>
+                        <option value="16">♬ Semicorchea (¼T) [5]</option>
+                        <option value="16t">♪³ Tresillo Semicorchea (⅙T) [8]</option>
                     </select>
                     <button id="applyLiveNoteModBtn" type="button" class="toolbar-btn bg-amber-600 text-white">✅ Cambiar Nota/Figura</button>
                     <button id="liveAddNoteBtn" type="button" class="toolbar-btn bg-emerald-600 text-white" title="Agregar nota en este compás">➕ Agregar Nota</button>
                     <button id="liveDeleteNoteBtn" type="button" class="toolbar-btn bg-rose-600 text-white" title="Eliminar nota del compás">🗑️ Eliminar Nota</button>
+                    <button id="completeLiveBarWithRestsBtn" type="button" class="toolbar-btn bg-slate-700 text-white" title="Completar los tiempos restantes del compás con silencios">𝄽 + Silencios</button>
+                    <span id="liveBarBeatBalanceBadge" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-300 cursor-pointer" title="Clic para autocompletar tiempos restantes con silencios">Compás: 4.0 / 4T ✅</span>
+                    <button id="studioUndoBtn" type="button" class="toolbar-btn bg-slate-200 text-slate-800 hover:bg-slate-300" title="Deshacer (Ctrl+Z)" disabled>↩️ Deshacer</button>
+                    <button id="studioRedoBtn" type="button" class="toolbar-btn bg-slate-200 text-slate-800 hover:bg-slate-300" title="Rehacer (Ctrl+Y)" disabled>↪️ Rehacer</button>
+                    <span id="liveVoicingAlertBadge" class="hidden px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300"></span>
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="font-extrabold text-indigo-900">🎸 Acordes Compás:</span>
@@ -320,6 +331,10 @@
                     <select id="liveEditChordScaleSelect" class="ctrl-select max-w-[230px]" title="Relación Escala-Acorde y Análisis Contextual"></select>
                     <button id="applyLiveChordModBtn" type="button" class="toolbar-btn bg-indigo-600 text-white">✅ Aplicar Acorde/Escala</button>
                 </div>
+                <div id="livePermutationsBar" class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-200/60">
+                    <span class="font-extrabold text-purple-900 text-xs">🔀 Permutaciones Capas:</span>
+                    <div id="livePermutationsContainer" class="flex items-center gap-1 flex-wrap"></div>
+                </div>
             </div>
 
             <!-- Controles de Reproducción y Trabajo del Estudio -->
@@ -328,6 +343,12 @@
                     <button id="playMelodyOnlyBtn" type="button" class="toolbar-btn bg-sky-600 text-white">🎵 Solo Melodía</button>
                     <button id="playFullMelodicPhraseBtn" type="button" class="toolbar-btn bg-blue-600 text-white">▶️ Sonar Frase + Bajo</button>
                     <button id="playFromActiveNoteBtn" type="button" class="toolbar-btn bg-indigo-600 text-white">⏩ Desde Nota Activa</button>
+                    <button id="loopActiveBarBtn" type="button" class="toolbar-btn bg-purple-600 text-white" title="Repetir en bucle el compás activo">🔁 Bucle Compás</button>
+                    <select id="studioSwingSelect" class="ctrl-select text-xs font-bold" title="Articulación rítmica">
+                        <option value="straight">Directo (Straight)</option>
+                        <option value="swing">Swing Jazz (Corcheas)</option>
+                    </select>
+                    <label class="inline-flex items-center gap-1 font-bold text-xs cursor-pointer select-none ml-1 bg-slate-100 px-2 py-1 rounded border border-slate-300"><input id="studioMetronomeToggle" type="checkbox" class="accent-indigo-600"> 🥁 Claqueta (2 y 4)</label>
                     <div id="studioTempoControl" class="studio-tempo-control inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-100 border">
                         <label for="studioTempoInput" class="font-extrabold text-[11px]">⏱️ Tempo <span id="studioTempoValue" class="sr-only" aria-live="polite">105</span></label>
                         <input id="studioTempoInput" type="number" min="30" max="300" step="1" value="105" inputmode="numeric" aria-label="Tempo en pulsos por minuto" class="ctrl-input studio-tempo-input">
@@ -349,6 +370,7 @@
                     <button id="toggleScoreVoicingViewBtn" type="button" class="toolbar-btn bg-indigo-100 text-indigo-900">🎼 Vista: Melodía + Bloque</button>
                     <button id="toggleApproachNotationBtn" type="button" class="toolbar-btn bg-teal-100 text-teal-900" aria-label="Cambiar la letra de las aproximaciones de escala" aria-pressed="false" title="Alterna la notación de aproximación entre d y S">Aproximación: d</button>
                     <button id="toggleSelectedNoteEnharmonicBtn" type="button" class="toolbar-btn bg-amber-100 text-amber-900" disabled>Enarmonía: convertir</button>
+                    <button id="toggleVoiceLeadingLinesBtn" type="button" class="toolbar-btn bg-cyan-100 text-cyan-900" title="Ver líneas guía de enlace de voces">🔗 Guía de Voces</button>
                     <label for="scoreAnnotationModeSelect" class="font-extrabold text-[11px]">Etiquetas de partitura:</label>
                     <select id="scoreAnnotationModeSelect" class="ctrl-select" aria-label="Qué etiquetas mostrar en la partitura">
                         <option value="analysis">Análisis melódico</option>
@@ -358,6 +380,7 @@
                     </select>
                     <button id="toggleScoreZoomBtn" type="button" class="toolbar-btn bg-emerald-100 text-emerald-900">📐 Compases: 2C/fila</button>
                     <button id="saveStudioMelodyBtn" type="button" class="toolbar-btn bg-teal-700 text-white" title="Guardar esta melodía y armonización en el catálogo">💾 Guardar Melodía</button>
+                    <button id="exportStudioMidiBtn" type="button" class="toolbar-btn bg-indigo-700 text-white" title="Exportar partitura en archivo MIDI (.mid)">🎹 Exportar MIDI</button>
                     <button id="exportStudioXmlBtn" type="button" class="toolbar-btn bg-violet-700 text-white" title="Exportar partitura en formato universal MusicXML (.musicxml)">🎼 Exportar XML</button>
                     <button id="exportStudioPdfBtn" type="button" class="toolbar-btn bg-rose-600 text-white">📄 Exportar PDF</button>
                 </div>
@@ -967,11 +990,17 @@
                     <div class="p-2 rounded bg-white border border-slate-200 space-y-1.5">
                         <div class="grid grid-cols-3 gap-1">
                             <select id="customNoteDurSelect" class="ctrl-select">
-                                <option value="w">Redonda (4T) [W]</option>
-                                <option value="h">Blanca (2T) [H]</option>
-                                <option value="q" selected>Negra (1T) [Q]</option>
-                                <option value="8">Corchea (½T) [8]</option>
-                                <option value="16">Semicorc. (¼T) [6]</option>
+                                <option value="w">𝅝 Redonda (4T) [1]</option>
+                                <option value="hd">𝅗𝅥. Blanca Puntillo (3T)</option>
+                                <option value="h">𝅗𝅥 Blanca (2T) [2]</option>
+                                <option value="qd">♩. Negra Puntillo (1½T)</option>
+                                <option value="q" selected>♩ Negra (1T) [3]</option>
+                                <option value="qt">𝅗𝅥³ Tresillo Negra (⅔T) [6]</option>
+                                <option value="8d">♪. Corchea Puntillo (¾T)</option>
+                                <option value="8">♪ Corchea (½T) [4]</option>
+                                <option value="8t">♩³ Tresillo Corchea (⅓T) [7]</option>
+                                <option value="16">♬ Semicorc. (¼T) [5]</option>
+                                <option value="16t">♪³ Tresillo Semicorc. (⅙T) [8]</option>
                             </select>
                             <select id="customNoteAccSelect" class="ctrl-select">
                                 <option value="">♮ Natural</option>
@@ -1001,7 +1030,7 @@
                             <button id="customBarClearNotesBtn" type="button" class="toolbar-btn flex-1 bg-slate-500 text-white">🗑️ Vaciar</button>
                         </div>
                         <div class="text-[10px] font-bold text-teal-800 bg-teal-50 px-2 py-1 rounded border border-teal-200">
-                            ⌨️ Usa <kbd class="px-1 bg-white rounded border">←</kbd> <kbd class="px-1 bg-white rounded border">→</kbd> para navegar por notas/compases y <kbd class="px-1 bg-white rounded border">↑</kbd> <kbd class="px-1 bg-white rounded border">↓</kbd> para subir/bajar la octava.
+                            ⌨️ <kbd class="px-1 bg-white rounded border">←</kbd> <kbd class="px-1 bg-white rounded border">→</kbd> Navegar | <kbd class="px-1 bg-white rounded border">Ctrl+↑/↓</kbd> Diatónico | <kbd class="px-1 bg-white rounded border">Ctrl+Alt+↑/↓</kbd> Cromático | <kbd class="px-1 bg-white rounded border">Shift+↑/↓</kbd> Octavas.
                         </div>
                     </div>
                 </div>
@@ -1028,23 +1057,38 @@
 
     <!-- Punto 9: Modal de Atajos de Teclado Completos Actualizado -->
     <div id="shortcutsModalOverlay" class="modal-overlay">
-        <div class="modal-content max-w-lg text-left">
-            <h3 class="text-xl font-extrabold text-teal-600 text-center mb-3">⌨️ Atajos de Teclado Completos (Actualizados)</h3>
-            <div class="space-y-1.5 text-xs max-h-[65vh] overflow-y-auto pr-1">
-                <div class="font-extrabold text-teal-700 uppercase pt-1">1. Notas, Doble Sostenido y Doble Bemol (Punto 8)</div>
-                <div class="flex flex-wrap justify-between gap-1 py-1 border-b"><span>Ingresar notas naturales (Do a Si)</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">C D E F G A B (o 1–7)</kbd></div>
-                <div class="flex flex-wrap justify-between gap-1 py-1 border-b"><span>Abrir estándares de Jazz (Lead Sheets)</span><kbd class="px-2 py-0.5 bg-amber-100 text-amber-900 rounded font-mono font-bold">N</kbd></div>
-                <div class="flex justify-between py-1 border-b"><span>Sostenido (<code>#</code>) / Bemol (<code>b</code>) / Becuadro (<code>♮</code>)</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">+ / - / 0</kbd></div>
-                <div class="flex justify-between py-1 border-b"><span>Doble Sostenido (<code>## / 𝄪</code>) / Doble Bemol (<code>bb / 𝄫</code>)</span><kbd class="px-2 py-0.5 bg-amber-100 text-amber-900 rounded font-mono font-bold">+ + (2 veces +) / - - (2 veces -)</kbd></div>
-                <div class="font-extrabold text-teal-700 uppercase pt-2">2. Figuras, Silencios y Editor de Melodía (Navegación y Octavas)</div>
-                <div class="flex justify-between py-1 border-b"><span>Redonda (4T) / Blanca (2T) / Negra (1T) / Corchea (½T) / Semicorc. (¼T)</span><kbd class="px-2 py-0.5 bg-teal-100 text-teal-900 rounded font-mono font-bold">W / H / Q / 8 / 6</kbd></div>
-                <div class="flex justify-between py-1 border-b"><span>Insertar o Alternar Silencio (<code>𝄽</code>) en Estudio o Editor</span><kbd class="px-2 py-0.5 bg-teal-100 text-teal-900 rounded font-mono font-bold">R</kbd></div>
-                <div class="flex justify-between py-1 border-b"><span>Navegar por Notas y Compases en Estudio y en Crear Melodía</span><kbd class="px-2 py-0.5 bg-blue-100 text-blue-900 rounded font-mono font-bold">← / →</kbd></div>
-                <div class="flex justify-between py-1 border-b"><span>Subir / Bajar Octava de la nota activa en Crear Melodía o Estudio</span><kbd class="px-2 py-0.5 bg-indigo-100 text-indigo-900 rounded font-mono font-bold">↑ / ↓</kbd></div>
-                <div class="flex justify-between py-1 border-b"><span>Nueva Melodía Aleatoria / Abrir Editor de Melodía</span><kbd class="px-2 py-0.5 bg-purple-100 text-purple-900 rounded font-mono font-bold">G / F</kbd></div>
-                <div class="font-extrabold text-teal-700 uppercase pt-2">3. Confirmación, Exportación y Modos</div>
-                <div class="flex justify-between py-1 border-b"><span>Confirmar acorde o Siguiente ejercicio / Play-Stop en Estudio</span><kbd class="px-2 py-0.5 bg-green-100 text-green-900 rounded font-mono font-bold">Enter / Espacio</kbd></div>
-                <div class="flex justify-between py-1"><span>Estudio Melódico (M) / Continuidad 8C (J) / Dictado (Y) / Pista (P)</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">M / J / Y / P</kbd></div>
+        <div class="modal-content max-w-xl text-left">
+            <h3 class="text-xl font-extrabold text-teal-600 text-center mb-3">⌨️ Atajos de Teclado Completos</h3>
+            <div class="space-y-2 text-xs max-h-[68vh] overflow-y-auto pr-1">
+                <div class="font-extrabold text-teal-700 uppercase pt-1 border-b pb-1">1. Ingreso de Notas y Alteraciones</div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Notas naturales (Do a Si)</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">C D E F G A B (o 1–7)</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Sostenido (<code>#</code>) / Bemol (<code>b</code>) / Becuadro (<code>♮</code>)</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">+ / - / 0</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Doble Sostenido (<code>## / 𝄪</code>) / Doble Bemol (<code>bb / 𝄫</code>)</span><kbd class="px-2 py-0.5 bg-amber-100 text-amber-900 rounded font-mono font-bold">+ + (2 veces +) / - - (2 veces -)</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Teclas de Piano interactivo en pantalla</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">Clic directo en teclado</kbd></div>
+
+                <div class="font-extrabold text-teal-700 uppercase pt-2 border-b pb-1">2. Figuras Rítmicas, Puntillos y Tresillos</div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Redonda (4T) / Blanca (2T) / Negra (1T)</span><kbd class="px-2 py-0.5 bg-teal-100 text-teal-900 rounded font-mono font-bold">1 / 2 / 3</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Corchea (½T) / Semicorchea (¼T)</span><kbd class="px-2 py-0.5 bg-teal-100 text-teal-900 rounded font-mono font-bold">4 / 5</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Tresillo de Negra (𝅗𝅥³ ⅔T) / Corchea (♩³ ⅓T) / Semicorchea (♪³ ⅙T)</span><kbd class="px-2 py-0.5 bg-purple-100 text-purple-900 rounded font-mono font-bold">6 / 7 / 8</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Alternar Puntillo (<code>.</code>) en todas las notas del acorde</span><kbd class="px-2 py-0.5 bg-purple-100 text-purple-900 rounded font-mono font-bold">. (Punto)</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Alternar Silencio (<code>𝄽</code>) en la nota seleccionada</span><kbd class="px-2 py-0.5 bg-teal-100 text-teal-900 rounded font-mono font-bold">R</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Completar tiempos restantes del compás con silencios</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">Botón 𝄽 + Silencios / Clic en Insignia</kbd></div>
+
+                <div class="font-extrabold text-teal-700 uppercase pt-2 border-b pb-1">3. Edición Melódica en Vivo y Deshacer</div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Deshacer última acción / Rehacer acción</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">Ctrl+Z / Ctrl+Y (o Ctrl+Shift+Z)</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Navegar por Notas y Compases en partitura</span><kbd class="px-2 py-0.5 bg-blue-100 text-blue-900 rounded font-mono font-bold">← / →</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Subir / Bajar Diatónicamente (Escala del Acorde)</span><kbd class="px-2 py-0.5 bg-indigo-100 text-indigo-900 rounded font-mono font-bold">Ctrl + ↑ / Ctrl + ↓ (o ↑ / ↓)</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Subir / Bajar Cromáticamente (Semitono)</span><kbd class="px-2 py-0.5 bg-purple-100 text-purple-900 rounded font-mono font-bold">Ctrl + Alt + ↑ / Ctrl + Alt + ↓</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Subir / Bajar Octavas</span><kbd class="px-2 py-0.5 bg-amber-100 text-amber-900 rounded font-mono font-bold">Shift + ↑ / Shift + ↓</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Agregar Nota / Eliminar Nota del compás</span><kbd class="px-2 py-0.5 bg-rose-100 text-rose-900 rounded font-mono font-bold">Insert (+) / Delete (Backspace)</kbd></div>
+
+                <div class="font-extrabold text-teal-700 uppercase pt-2 border-b pb-1">4. Reproducción de Audio y Modos</div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Reproducir / Detener Frase Melódica</span><kbd class="px-2 py-0.5 bg-green-100 text-green-900 rounded font-mono font-bold">Barra Espaciadora</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Confirmar acorde / Siguiente ejercicio</span><kbd class="px-2 py-0.5 bg-green-100 text-green-900 rounded font-mono font-bold">Enter</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Estándares de Jazz Lead Sheets (N) / Estudio Melódico (M)</span><kbd class="px-2 py-0.5 bg-amber-100 text-amber-900 rounded font-mono font-bold">N / M</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Continuidad 8 Compases (J) / Modo Dictado Auditivo (Y)</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">J / Y</kbd></div>
+                <div class="flex justify-between items-center py-1 border-b"><span>Generar Melodía Aleatoria (G) / Editor de Melodía (F)</span><kbd class="px-2 py-0.5 bg-purple-100 text-purple-900 rounded font-mono font-bold">G / F</kbd></div>
+                <div class="flex justify-between items-center py-1"><span>Zoom Partitura: Alejar (Z) / Acercar (X)</span><kbd class="px-2 py-0.5 bg-slate-200 text-slate-900 rounded font-mono font-bold">Z / X</kbd></div>
             </div>
             <div class="flex justify-center gap-2 mt-4">
                 <button id="closeShortcutsButton" type="button" class="toolbar-btn bg-teal-600 text-white px-6 py-2">Cerrar</button>
