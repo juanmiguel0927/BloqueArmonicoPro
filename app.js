@@ -354,7 +354,7 @@
     const numberToLetterMap = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     const letterToNumberMap = { 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6 };
     const ADVANCED_TENSION_LEADS = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
-    const PRACTICE_LEAD_LABELS = ['1', '3', 'b3', '5', 'b5', '#5', '6', '7', 'b7'];
+    const PRACTICE_LEAD_LABELS = ['1', '2', '3', 'b3', '4', '5', 'b5', '#5', '6', '7', 'b7'];
     const naturalNotes = ["C", "D", "E", "F", "G", "A", "B"];
     // Punto 8: Incluye doble sostenido (##) y doble bemol (bb)
     const accidentals = ["#", "b", "♮", "##", "bb"];
@@ -366,26 +366,20 @@
             intervals: [
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
-                { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
-                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
-                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
-                { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 }
+                { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }
             ],
-            voicing_rules: { "1": ["1", "5", "3", "1"], "3": ["3", "1", "5", "3"], "5": ["5", "3", "1", "5"], "6": ["6", "5", "3", "1"], "13": ["13", "3", "1", "7"] },
-            continuity_rules: { "1": ["1", "6", "5", "3"], "3": ["3", "1", "6", "5"], "5": ["5", "3", "1", "6"], "6": ["6", "5", "3", "1"], "13": ["13", "3", "1", "7"] }
+            voicing_rules: { "1": ["1", "5", "3"], "3": ["3", "1", "5"], "5": ["5", "3", "1"] },
+            continuity_rules: { "1": ["1", "5", "3"], "3": ["3", "1", "5"], "5": ["5", "3", "1"] }
         },
         "minor": {
             name: "Menor", cifrado: "m", difficulty: "basic",
             intervals: [
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
-                { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
-                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
-                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
-                { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 }
+                { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }
             ],
-            voicing_rules: { "1": ["1", "5", "b3", "1"], "b3": ["b3", "1", "5", "b3"], "5": ["5", "b3", "1", "5"], "6": ["6", "5", "b3", "1"], "13": ["13", "b3", "1", "b7"] },
-            continuity_rules: { "1": ["1", "6", "5", "b3"], "b3": ["b3", "1", "6", "5"], "5": ["5", "b3", "1", "6"], "6": ["6", "5", "b3", "1"], "13": ["13", "b3", "1", "b7"] }
+            voicing_rules: { "1": ["1", "5", "b3"], "b3": ["b3", "1", "5"], "5": ["5", "b3", "1"] },
+            continuity_rules: { "1": ["1", "5", "b3"], "b3": ["b3", "1", "5"], "5": ["5", "b3", "1"] }
         },
         "augmented": {
             name: "Aumentado", cifrado: "aug", difficulty: "basic",
@@ -394,7 +388,7 @@
                 { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
                 { semitones: 8, name: "quinta aumentada", label: "#5", degreeOffset: 4 }
             ],
-            voicing_rules: { "1": ["1", "#5", "3", "1"], "3": ["3", "1", "#5", "3"], "#5": ["#5", "3", "1", "#5"] }
+            voicing_rules: { "1": ["1", "#5", "3"], "3": ["3", "1", "#5"], "#5": ["#5", "3", "1"] }
         },
         "diminished": {
             name: "Disminuido", cifrado: "º", difficulty: "basic",
@@ -403,7 +397,7 @@
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 }
             ],
-            voicing_rules: { "1": ["1", "b5", "b3", "1"], "b3": ["b3", "1", "b5", "b3"], "b5": ["b5", "b3", "1", "b5"] }
+            voicing_rules: { "1": ["1", "b5", "b3"], "b3": ["b3", "1", "b5"], "b5": ["b5", "b3", "1"] }
         },
         "maj7": {
             name: "Mayor 7", cifrado: "maj7", difficulty: "intermediate",
@@ -505,7 +499,7 @@
                 { semitones: 2, name: "segunda mayor", label: "2", degreeOffset: 1 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }
             ],
-            voicing_rules: { "1": ["1", "5", "2", "1"], "2": ["2", "1", "5", "2"], "5": ["5", "2", "1", "5"] }
+            voicing_rules: { "1": ["1", "5", "2"], "2": ["2", "1", "5"], "5": ["5", "2", "1"] }
         },
         "sus4": {
             name: "Suspendido 4 (sus4)", cifrado: "sus4", difficulty: "basic",
@@ -514,7 +508,7 @@
                 { semitones: 5, name: "cuarta justa", label: "4", degreeOffset: 3 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 }
             ],
-            voicing_rules: { "1": ["1", "5", "4", "1"], "4": ["4", "1", "5", "4"], "5": ["5", "4", "1", "5"] }
+            voicing_rules: { "1": ["1", "5", "4"], "4": ["4", "1", "5"], "5": ["5", "4", "1"] }
         },
         "6": {
             name: "Mayor 6", cifrado: "6", difficulty: "intermediate",
@@ -977,8 +971,8 @@
         const chordData = chordStructures[chordTypeKey] || chordStructures['maj7'];
         const rules = (state.continuityMode && chordData.continuity_rules) ? chordData.continuity_rules : chordData.voicing_rules;
         const safeLead = rules[leadLabel] ? leadLabel : Object.keys(rules)[0];
-        const isTriad = (chordData.difficulty === 'basic') && !state.continuityMode && safeLead !== '6' && safeLead !== '13';
-        const count = isTriad ? 3 : 4;
+        const isTriad = chordData.difficulty === 'basic' || state.difficulty === 'basic';
+        const count = isTriad ? 3 : (rules[safeLead].length >= 4 ? 4 : rules[safeLead].length);
         const labels = [...rules[safeLead].slice(0, count)];
 
         let topNoteWithOctave = targetTopNoteWithOctave;
@@ -3301,13 +3295,35 @@
         if (!sel) return;
         const currentVal = state.forcedChordTypeKey || 'auto';
         let html = '<option value="auto">🎲 Aleatorio (Nivel)</option>';
-        Object.keys(chordStructures).forEach(k => {
-            const chord = chordStructures[k];
-            const label = chord.cifrado ? `${chord.cifrado} (${chord.name})` : chord.name;
-            html += `<option value="${k}">${label}</option>`;
-        });
+        if (state.difficulty === 'basic') {
+            html += '<optgroup label="Nivel Básico: Tríadas a 3 voces">';
+            const basicKeys = ['major', 'minor', 'augmented', 'diminished', 'sus2', 'sus4'];
+            basicKeys.forEach(k => {
+                const chord = chordStructures[k];
+                if (!chord) return;
+                const label = chord.cifrado ? `${chord.cifrado} (${chord.name})` : chord.name;
+                html += `<option value="${k}">${label}</option>`;
+            });
+            html += '</optgroup>';
+        } else {
+            html += '<optgroup label="Tríadas a 3 voces (Básico)">';
+            ['major', 'minor', 'augmented', 'diminished', 'sus2', 'sus4'].forEach(k => {
+                const chord = chordStructures[k];
+                if (!chord) return;
+                const label = chord.cifrado ? `${chord.cifrado} (${chord.name})` : chord.name;
+                html += `<option value="${k}">${label}</option>`;
+            });
+            html += '</optgroup>';
+            html += '<optgroup label="Acordes a 4 voces (Intermedio / Avanzado)">';
+            Object.keys(chordStructures).filter(k => chordStructures[k].difficulty !== 'basic').forEach(k => {
+                const chord = chordStructures[k];
+                const label = chord.cifrado ? `${chord.cifrado} (${chord.name})` : chord.name;
+                html += `<option value="${k}">${label}</option>`;
+            });
+            html += '</optgroup>';
+        }
         sel.innerHTML = html;
-        sel.value = currentVal;
+        sel.value = (state.difficulty === 'basic' && chordStructures[currentVal]?.difficulty !== 'basic') ? 'auto' : currentVal;
     }
 
     function updateDisplay() {
@@ -3326,15 +3342,19 @@
         if (prompt) {
             prompt.textContent = state.studioHarmonicBlockVisible
                 ? '🎼 Bloque armónico de la armonización seleccionada (agudo ➔ grave):'
-                : 'Construye el acorde (agudo ➔ grave):';
+                : (state.difficulty === 'basic'
+                    ? 'Construye la tríada a 3 voces (agudo ➔ grave):'
+                    : 'Construye el acorde (agudo ➔ grave):');
         }
         if (el('chordQuestionText')) {
+            const kindLabel = state.difficulty === 'basic' ? 'de la tríada' : 'del acorde';
             el('chordQuestionText').innerHTML = hideId
                 ? `👂 <strong>${noteDisp}</strong> es la 1ª voz de un <strong>Acorde en Dictado (?)</strong>.`
-                : `<strong>${noteDisp}</strong> es <strong>${intervalName} (${state.givenLabel})</strong> del acorde de <strong>${rootDisp}${cif}</strong>.`;
+                : `<strong>${noteDisp}</strong> es <strong>${intervalName} (${state.givenLabel})</strong> ${kindLabel} de <strong>${rootDisp}${cif}</strong>.`;
         }
         if (el('staffChordHeader')) {
-            el('staffChordHeader').innerHTML = hideId ? `👂 Dictado — 1ª Voz: ${noteDisp}` : `🎼 Acorde: ${rootDisp}${cif} — 1ª Voz: ${noteDisp} (${state.givenLabel})`;
+            const typeLabel = state.difficulty === 'basic' ? 'Tríada' : 'Acorde';
+            el('staffChordHeader').innerHTML = hideId ? `👂 Dictado — 1ª Voz: ${noteDisp}` : `🎼 ${typeLabel}: ${rootDisp}${cif} — 1ª Voz: ${noteDisp} (${state.givenLabel})`;
         }
         for (let i = 0; i < 5; i++) {
             const cell = el('gridCell' + i);
@@ -4930,7 +4950,11 @@
 
         let cKey;
         if (state.forcedChordTypeKey && state.forcedChordTypeKey !== 'auto' && chordStructures[state.forcedChordTypeKey]) {
-            cKey = state.forcedChordTypeKey;
+            if (state.difficulty === 'basic' && chordStructures[state.forcedChordTypeKey].difficulty !== 'basic') {
+                cKey = 'major';
+            } else {
+                cKey = state.forcedChordTypeKey;
+            }
         } else {
             let relevant = Object.keys(chordStructures).filter(k =>
                 state.difficulty === 'basic'
@@ -4942,7 +4966,7 @@
                 const filtered = relevant.filter(k => customCfg.allowedChords.includes(k));
                 if (filtered.length) relevant = filtered;
             }
-            cKey = relevant[Math.floor(Math.random() * relevant.length)] || 'maj7';
+            cKey = relevant[Math.floor(Math.random() * relevant.length)] || (state.difficulty === 'basic' ? 'major' : 'maj7');
         }
         const root = allRoots[Math.floor(Math.random() * allRoots.length)];
         const allLeads = Object.keys(chordStructures[cKey].voicing_rules);
@@ -4962,9 +4986,10 @@
             );
         const lead = leads[Math.floor(Math.random() * leads.length)] || allLeads[0];
 
+        const activeVoicing = state.difficulty === 'basic' ? 'close' : state.voicingType;
         const built = buildCloseVoicingForChordAndLead(root, cKey, lead);
-        const disp = applyDispositionToCloseVoicing(root, cKey, lead, built.labels, built.notesWithOct, state.voicingType);
-        if (state.includeBass && disp.notesWithOct.length <= 4) {
+        const disp = applyDispositionToCloseVoicing(root, cKey, lead, built.labels, built.notesWithOct, activeVoicing);
+        if (state.includeBass && state.difficulty !== 'basic' && disp.notesWithOct.length <= 4) {
             const lowM = getNoteWithOctaveMidi(disp.notesWithOct[disp.notesWithOct.length - 1]);
             const bassNote = getImplicitBassWithOctave(root, lowM);
             disp.notesWithOct.push(bassNote);
@@ -6771,6 +6796,11 @@
                     allowedLeads: selectedLeads
                 };
                 state.difficulty = activeSettingsTab;
+                if (state.difficulty === 'basic') {
+                    state.voicingType = 'close';
+                    if (el('voicingSelect')) el('voicingSelect').value = 'close';
+                }
+                populatePracticeChordTypeSelect();
                 document.querySelectorAll('.diff-btn').forEach(button => {
                     const active = button.dataset.diff === state.difficulty;
                     button.className = 'diff-btn toolbar-btn ' +
@@ -6899,6 +6929,14 @@
         document.querySelectorAll('.diff-btn').forEach(btn => btn.addEventListener('click', e => {
             state.difficulty = e.currentTarget.dataset.diff;
             state.forcedChordTypeKey = null;
+            if (state.difficulty === 'basic') {
+                state.voicingType = 'close';
+                if (el('voicingSelect')) el('voicingSelect').value = 'close';
+                populatePracticeChordTypeSelect();
+                showFeedbackBanner('🌱 <strong>Nivel Básico activado:</strong> Práctica a 3 voces (Tríadas: Mayor, Menor, Aumentado, Disminuido, Sus2, Sus4).', 'info');
+            } else {
+                populatePracticeChordTypeSelect();
+            }
             if (el('practiceChordTypeSelect')) el('practiceChordTypeSelect').value = 'auto';
             document.querySelectorAll('.diff-btn').forEach(b => {
                 b.className = 'diff-btn toolbar-btn ' + (b.dataset.diff === state.difficulty ? 'bg-green-600 text-white' : 'bg-slate-200 text-slate-800');
@@ -8148,8 +8186,8 @@
         const TUTORIAL_STEPS = [
             {
                 id: 'displaySection',
-                title: '1. Bloque Armónico 4-Way Close, Variantes 1–3 y Gran Pentagrama',
-                text: 'Construye acordes en posición cerrada (4-Way Close) y en sus Variantes 1, 2 y 3 respetando el orden estricto de aparición de las voces (2ª, 3ª y 4ª voz de agudo a grave). Toda nota inferior a Do central (< C4) pasa automáticamente a Clave de Fa en Gran Pentagrama. Usa teclas A–G (C D E F G A B) o números 1–7 para ingresar notas, + para sostenido (#), - para bemol (b), 0 para becuadro (♮), ++ para doble sostenido (##) y -- para doble bemol (bb).'
+                title: '1. Bloque Armónico: Nivel Básico a 3 Voces y Niveles 4–5 Voces',
+                text: 'El Nivel Básico está diseñado exclusivamente para tríadas a 3 voces: Mayor, Menor, Aumentado, Disminuido, Sus2 y Sus4 en posición cerrada (1ª, 2ª y 3ª voz de agudo a grave). Los niveles Intermedio y Avanzado expanden la práctica a 4 y 5 voces (4-Way Close con séptimas, tensiones y Variantes 1, 2 y 3). Toda nota inferior a Do central (< C4) pasa automáticamente a Clave de Fa en Gran Pentagrama. Usa teclas A–G (C D E F G A B) o números 1–7 para ingresar notas, + para sostenido (#), - para bemol (b), 0 para becuadro (♮), ++ para doble sostenido (##) y -- para doble bemol (bb).'
             },
             {
                 id: 'advancedModesToolbar',
