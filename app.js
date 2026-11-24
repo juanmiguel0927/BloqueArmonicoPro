@@ -1964,7 +1964,7 @@
     }
 
     // Devuelve las permutaciones válidas según el acorde armonizado, garantizando que no se repitan notas destino
-    function getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(noteObj, baseVoicingObj, activePermIds = []) {
+    function getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(noteObj, baseVoicingObj, activePermIds = []) {
         if (!noteObj || noteObj.isRest || !baseVoicingObj || !Array.isArray(baseVoicingObj.notesWithOct)) return [];
         const effRoot = baseVoicingObj.effectiveBassRoot || noteObj.targetRoot || noteObj.barChordRoot || 'C';
         const effType = baseVoicingObj.effectiveChordTypeKey || noteObj.targetType || noteObj.barChordTypeKey || 'maj7';
@@ -2022,7 +2022,7 @@
         return ['tonic_II_V_I', 'tonic_V7ofV_V_I', 'tonic_II_bII_I', 'tonic_bVI_bII_I', 'tonic_IVm_bVII_I', 'tonic_sIVm7b5_VII7_I'].includes(techId);
     }
 
-    function getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(techId, targetRoot, targetTypeKey) {
+    function getTWXhfxWXMPAaVgQjuoSvsJo3cQygW8cN2F(techId, targetRoot, targetTypeKey) {
         const root = targetRoot || 'C';
         const type = targetTypeKey || 'maj7';
         const isMinor = type === 'm7' || type === 'minor';
@@ -2462,7 +2462,7 @@
             const isMobile = window.innerWidth < 768;
             const measuresPerRow = isMobile ? 1 : (state.melodicStudio.measuresPerRowMode === 4 ? 4 : 2);
             const numRows = Math.ceil(measures.length / measuresPerRow);
-            const width = isMobile ? 740 : (measuresPerRow === 4 ? 1560 : 1280);
+            const width = isMobile ? 560 : (measuresPerRow === 4 ? 1560 : 1280);
             const rowHeight = 439;
             const height = numRows * rowHeight + 30;
 
@@ -2471,15 +2471,24 @@
 
             const scoreScrollWrap = el('melodicScoreScrollContainer');
             const zoomInner = el('melodicScoreZoomInner');
-            const availableWidth = Math.max(1, (scoreScrollWrap?.clientWidth || width) - 16);
-            const displayWidth = isMobile
-                ? Math.max(availableWidth, width * (state.melodicStudio.scoreZoomPercent / 100))
-                : availableWidth * (state.melodicStudio.scoreZoomPercent / 100);
+            const fallbackWidth = Math.max(300, (window.innerWidth || 360) - 36);
+            const rawClientW = scoreScrollWrap?.clientWidth || 0;
+            const availableWidth = rawClientW > 120 ? (rawClientW - 16) : fallbackWidth;
+            const displayWidth = Math.max(280, Math.round(availableWidth * (state.melodicStudio.scoreZoomPercent / 100)));
+            const displayHeight = Math.max(180, Math.round(displayWidth * (height / width)));
             if (zoomInner) zoomInner.style.width = `${displayWidth}px`;
             const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
             renderer.resize(width, height);
-            canvas.style.width = '100%';
-            canvas.style.height = 'auto';
+            canvas.style.width = `${displayWidth}px`;
+            canvas.style.height = `${displayHeight}px`;
+
+            if (rawClientW <= 120 && !drawMelodicPhraseScore._rafPending) {
+                drawMelodicPhraseScore._rafPending = true;
+                requestAnimationFrame(() => {
+                    drawMelodicPhraseScore._rafPending = false;
+                    if (state.melodicStudio.isActive) drawMelodicPhraseScore(activeNoteGlobalIdx);
+                });
+            }
 
             const context = canvas.getContext('2d');
             context.fillStyle = '#ffffff';
@@ -4022,7 +4031,7 @@
         return null;
     }
 
-    function renderLivePermutationsChips() {
+    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
         const cont = el('livePermutationsContainer');
         if (!cont) return;
         const ex = getMelodicExampleById(state.melodicStudio.exampleId);
@@ -4035,7 +4044,7 @@
         }
         const curArr = state.melodicStudio.selectedMultiPermutationsByNote[selIdx] || [];
         const baseVoicingNoPerm = computeHarmonizationForMelodicNote(cur, null, true);
-        const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(cur, baseVoicingNoPerm, curArr);
+        const validPermKeys = getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(cur, baseVoicingNoPerm, curArr);
         if (!validPermKeys.length) {
             cont.innerHTML = '<span class="text-[11px] text-slate-400 italic">Sin permutaciones disponibles para este acorde</span>';
             return;
@@ -4264,7 +4273,7 @@
             }
         }
         updateUndoRedoButtons();
-        renderLivePermutationsChips();
+        rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
     }
 
     function ensureExampleAutoFilled(exId) {
@@ -4423,7 +4432,7 @@
             const baseVoicingNoPerm = selectedPermNote
                 ? computeHarmonizationForMelodicNote(selectedPermNote, null, true)
                 : null;
-            const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(selectedPermNote, baseVoicingNoPerm, curArr);
+            const validPermKeys = getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(selectedPermNote, baseVoicingNoPerm, curArr);
             if (!validPermKeys.length) {
                 permCont.innerHTML = `<span class="text-[10px] text-slate-500 italic">Sin permutaciones disponibles para este bloque</span>`;
             } else {
@@ -4634,7 +4643,7 @@
                         : 'bg-pink-50 text-pink-950 border-2 border-pink-500 hover:bg-pink-100 font-bold';
                 }
                 const previewText = isTonic
-                    ? getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
+                    ? getTWXhfxWXMPAaVgQjuoSvsJo3cQygW8cN2F(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
                     : (tObj.desc || '');
                 return `<button type="button" data-tech-opt="${tid}" aria-pressed="${isAct}" class="analysis-tech-option-btn text-left p-2 rounded-lg border text-[11px] cursor-pointer ${btnColors}">
                     <div class="font-bold">[${tObj.abbr}] ${tObj.shortName}</div>
@@ -5449,6 +5458,42 @@
         shiftCustomEditorNote('octave', deltaOct);
     }
 
+        const uint8ArrayToBase64 = (bytes) => {
+            let binary = '';
+            const chunkSize = 0x8000;
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+                binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+            }
+            return btoa(binary);
+        };
+
+        const saveOrDownloadBytes = (filename, bytesOrString, mimeType) => {
+            const bytes = typeof bytesOrString === 'string'
+                ? new TextEncoder().encode(bytesOrString)
+                : (bytesOrString instanceof Uint8Array ? bytesOrString : new Uint8Array(bytesOrString));
+            const isFletWebView = window.location.protocol === 'file:' || /Android|wv/i.test(navigator.userAgent);
+            if (isFletWebView) {
+                const b64 = uint8ArrayToBase64(bytes);
+                console.log('__FLET_SAVE_FILE__:' + JSON.stringify({ filename, base64: b64 }));
+                return;
+            }
+            const blob = new Blob([bytes], { type: mimeType || 'application/octet-stream' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+        };
+
+        const saveJsPdfDocument = (pdfDoc, filename) => {
+            const isFletWebView = window.location.protocol === 'file:' || /Android|wv/i.test(navigator.userAgent);
+            if (isFletWebView) {
+                const ab = pdfDoc.output('arraybuffer');
+                saveOrDownloadBytes(filename, new Uint8Array(ab), 'application/pdf');
+                return;
+            }
+            pdfDoc.save(filename);
+        };
+
     // Exportador de la partitura y armonización a archivo estándar MIDI (.mid)
     function exportStudioScoreToMidi() {
         const ex = getMelodicExampleById(state.melodicStudio.exampleId);
@@ -5530,11 +5575,11 @@
             ...trackBytes
         ];
 
-        const blob = new Blob([new Uint8Array(midiData)], { type: 'audio/midi' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `armonizacion_${state.melodicStudio.exampleId || 'estudio'}.mid`;
-        a.click();
+        saveOrDownloadBytes(
+            `armonizacion_${state.melodicStudio.exampleId || 'estudio'}.mid`,
+            new Uint8Array(midiData),
+            'audio/midi'
+        );
         showFeedbackBanner('🎹 Archivo MIDI (.mid) exportado exitosamente.', 'success');
     }
 
@@ -5608,11 +5653,11 @@
             xml += `    </measure>\n`;
         });
         xml += `  </part>\n</score-partwise>\n`;
-        const blob = new Blob([xml], { type: 'application/vnd.recordare.musicxml+xml;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `armonizacion_${state.melodicStudio.exampleId || 'estudio'}.musicxml`;
-        a.click();
+        saveOrDownloadBytes(
+            `armonizacion_${state.melodicStudio.exampleId || 'estudio'}.musicxml`,
+            xml,
+            'application/vnd.recordare.musicxml+xml;charset=utf-8'
+        );
         showFeedbackBanner('🎼 Partitura exportada en formato universal MusicXML (.musicxml).', 'success');
     }
 
@@ -5679,7 +5724,7 @@
                     </div>
                 </div>
 
-                ${renderLearningCurveChartsSVG()}
+                ${rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63()}
 
                 <div>
                     <div class="font-extrabold text-amber-800 uppercase text-[11px] mb-1.5">🏆 Medallas y Logros de Gamificación (${unl.length}/${BADGES_CATALOG.length}):</div>
@@ -6196,7 +6241,7 @@
         }
     }
 
-    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
+    function rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG() {
         if (!Array.isArray(state.stats.progressionHistory)) state.stats.progressionHistory = [];
         const totalExercises = Number(state.stats.totalExercises) || 0;
         if (!totalExercises) return;
@@ -6215,7 +6260,7 @@
         if (history.length > 12) history.splice(0, history.length - 12);
     }
 
-    function renderLearningCurveChartsSVG() {
+    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
         const storedHistory = Array.isArray(state.stats.progressionHistory)
             ? state.stats.progressionHistory.slice(-12)
             : [];
@@ -6489,7 +6534,7 @@
                 }
             }
 
-            pdf.save('Guia_Completa_Bloque_Armonico_Pro.pdf');
+            saveJsPdfDocument(pdf, 'Guia_Completa_Bloque_Armonico_Pro.pdf');
             showFeedbackBanner('✅ Guía exportada en formato APA 7 (papel Carta, márgenes de 1 pulgada y páginas numeradas).', 'success');
         } catch (error) {
             console.error('Error al exportar la Guía Teórica en PDF:', currentBlockDescription, error);
@@ -7461,7 +7506,7 @@
                                 retries: state.continuity.runRetries,
                                 measures: JSON.parse(JSON.stringify(state.continuity.measures))
                             });
-                            rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
+                            rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG();
                             const saved = savePersistedState();
                             unlockBadge('continuity_8c');
                             showFeedbackBanner(
@@ -7505,7 +7550,7 @@
                         state.currentSession.totalTimeSec += elapsed;
                         state.currentSession.timedCount++;
                     }
-                    rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
+                    rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG();
                     const compKey = state.melodicStudio.isActive ? 'melodicApproaches' : (state.dictationMode ? 'earDictation' : (state.voicingType === 'close' ? 'close4Way' : 'openDropsSpreads'));
                     if (state.stats.competencies && state.stats.competencies[compKey]) {
                         state.stats.competencies[compKey].total++;
@@ -7645,7 +7690,7 @@
                     const w = pdf.internal.pageSize.getWidth() - 20;
                     const h = (canvas.height * w) / canvas.width;
                     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 15, w, Math.min(h, 265));
-                    pdf.save(`reporte_sesion_${state.currentUser}.pdf`);
+                    saveJsPdfDocument(pdf, `reporte_sesion_${state.currentUser}.pdf`);
                 } catch (e) {}
             });
         }
@@ -7977,7 +8022,7 @@
                 const pageW = doc.internal.pageSize.getWidth() - 40;
                 const pageH = (canvas.height * pageW) / canvas.width;
                 doc.addImage(canvas.toDataURL('image/png'), 'PNG', 20, 20, pageW, Math.min(pageH, 540));
-                doc.save('armonizacion_melodica.pdf');
+                saveJsPdfDocument(doc, 'armonizacion_melodica.pdf');
             });
         }
         if (el('exportUserDataJsonBtn')) {
@@ -7990,11 +8035,11 @@
                     currentSession: state.currentSession,
                     customRandomExamples: state.melodicStudio.customRandomExamples
                 };
-                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `respaldo_${state.currentUser}_BloqueArmonicoPro.json`;
-                a.click();
+                saveOrDownloadBytes(
+                    `respaldo_${state.currentUser}_BloqueArmonicoPro.json`,
+                    JSON.stringify(payload, null, 2),
+                    'application/json'
+                );
                 showFeedbackBanner('📤 Datos del perfil y melodías exportados en formato .JSON.', 'success');
             });
         }
@@ -8613,10 +8658,136 @@
         }
     }
 
+    function initIntroSplash() {
+        const splash = el('introSplashOverlay');
+        const welcome = el('welcomeModalOverlay');
+
+        if (!splash) {
+            welcome?.classList.add('visible');
+            return;
+        }
+
+        let finished = false;
+        const finishSplash = () => {
+            if (finished) return;
+            finished = true;
+            welcome?.classList.add('visible');
+            splash.classList.add('fade-out');
+            setTimeout(() => {
+                splash.classList.add('hidden-splash');
+            }, 650);
+        };
+
+        setTimeout(finishSplash, 5200);
+    }
+
+    function initAppMenuDrawer() {
+        const toggleBtn = el('toggleBloqueOptionsBtn');
+        const optionsBox = el('bloqueAdvancedOptions');
+        if (toggleBtn && optionsBox) {
+            toggleBtn.addEventListener('click', () => {
+                const willShow = optionsBox.classList.contains('hidden');
+                optionsBox.classList.toggle('hidden', !willShow);
+                optionsBox.classList.toggle('flex', willShow);
+                toggleBtn.textContent = willShow ? '✕ Ocultar' : '🎛️ Opciones';
+            });
+        }
+
+        const toolsToggleBtn = el('toggleQuickToolsBtn');
+        const toolsBar = el('topQuickToolsBar');
+        if (toolsToggleBtn && toolsBar) {
+            toolsToggleBtn.addEventListener('click', () => {
+                const willShow = toolsBar.classList.contains('hidden');
+                toolsBar.classList.toggle('hidden', !willShow);
+                toolsToggleBtn.setAttribute('aria-expanded', willShow ? 'true' : 'false');
+                toolsToggleBtn.textContent = willShow ? '▲ Ocultar' : '🧰 Herramientas';
+            });
+        }
+    }
+
+    function syncMainModeTabs() {
+        const isHarmonizations = Boolean(state.melodicStudio?.isActive);
+        const isContinuity = Boolean(state.continuityMode) && !isHarmonizations;
+        const isBloque = !isHarmonizations && !isContinuity;
+
+        el('modeTabBloqueBtn')?.classList.toggle('active', isBloque);
+        el('modeTabContinuityBtn')?.classList.toggle('active', isContinuity);
+        el('modeTabHarmonizationsBtn')?.classList.toggle('active', isHarmonizations);
+        el('bloqueLevelsBar')?.classList.toggle('hidden', !isBloque);
+    }
+
+    function initMainModeTabs() {
+        el('modeTabBloqueBtn')?.addEventListener('click', () => {
+            if (state.melodicStudio.isActive) {
+                state.melodicStudio.isActive = false;
+                el('mechanicalApproachBtn')?.classList.remove('bg-emerald-600', 'text-white');
+                renderMelodicStudioUI();
+            }
+            if (state.continuityMode) {
+                state.continuityMode = false;
+                el('continuityModeBtn')?.classList.remove('bg-teal-600', 'text-white');
+                renderContinuityPanel();
+            }
+            generateStandAloneExercise();
+            syncMainModeTabs();
+        });
+
+        el('modeTabContinuityBtn')?.addEventListener('click', () => {
+            if (!state.continuityMode) {
+                el('continuityModeBtn')?.click();
+            }
+            syncMainModeTabs();
+        });
+
+        el('modeTabHarmonizationsBtn')?.addEventListener('click', () => {
+            if (!state.melodicStudio.isActive) {
+                el('mechanicalApproachBtn')?.click();
+            }
+            syncMainModeTabs();
+        });
+
+        el('mechanicalApproachBtn')?.addEventListener('click', () => setTimeout(syncMainModeTabs, 0));
+        el('continuityModeBtn')?.addEventListener('click', () => setTimeout(syncMainModeTabs, 0));
+        syncMainModeTabs();
+    }
+
+    function initStudioMobileToggles() {
+        const editorBtn = el('toggleStudioEditorBtn');
+        const editorBar = el('studioLiveElementEditorBar');
+        const toolsBtn = el('toggleStudioToolsBtn');
+        const toolsDrawer = el('studioSecondaryToolsDrawer');
+
+        editorBtn?.addEventListener('click', () => {
+            if (!editorBar) return;
+            const willShow = editorBar.classList.contains('hidden');
+            editorBar.classList.toggle('hidden', !willShow);
+            editorBar.classList.toggle('flex', willShow);
+            if (willShow && toolsDrawer) {
+                toolsDrawer.classList.add('hidden');
+                toolsDrawer.classList.remove('flex');
+            }
+        });
+
+        toolsBtn?.addEventListener('click', () => {
+            if (!toolsDrawer) return;
+            const willShow = toolsDrawer.classList.contains('hidden');
+            toolsDrawer.classList.toggle('hidden', !willShow);
+            toolsDrawer.classList.toggle('flex', willShow);
+            if (willShow && editorBar) {
+                editorBar.classList.add('hidden');
+                editorBar.classList.remove('flex');
+            }
+        });
+    }
+
     function boot() {
+        initIntroSplash();
+        initAppMenuDrawer();
         generateNoteButtons();
         generatePiano();
         setupListeners();
+        initMainModeTabs();
+        initStudioMobileToggles();
         populateMelodicStudioExamplesDropdown();
         generateStandAloneExercise();
     }
