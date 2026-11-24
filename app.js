@@ -1964,7 +1964,7 @@
     }
 
     // Devuelve las permutaciones válidas según el acorde armonizado, garantizando que no se repitan notas destino
-    function getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(noteObj, baseVoicingObj, activePermIds = []) {
+    function getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(noteObj, baseVoicingObj, activePermIds = []) {
         if (!noteObj || noteObj.isRest || !baseVoicingObj || !Array.isArray(baseVoicingObj.notesWithOct)) return [];
         const effRoot = baseVoicingObj.effectiveBassRoot || noteObj.targetRoot || noteObj.barChordRoot || 'C';
         const effType = baseVoicingObj.effectiveChordTypeKey || noteObj.targetType || noteObj.barChordTypeKey || 'maj7';
@@ -2022,7 +2022,7 @@
         return ['tonic_II_V_I', 'tonic_V7ofV_V_I', 'tonic_II_bII_I', 'tonic_bVI_bII_I', 'tonic_IVm_bVII_I', 'tonic_sIVm7b5_VII7_I'].includes(techId);
     }
 
-    function getTWXhfxWXMPAaVgQjuoSvsJo3cQygW8cN2F(techId, targetRoot, targetTypeKey) {
+    function getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(techId, targetRoot, targetTypeKey) {
         const root = targetRoot || 'C';
         const type = targetTypeKey || 'maj7';
         const isMinor = type === 'm7' || type === 'minor';
@@ -4031,7 +4031,7 @@
         return null;
     }
 
-    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
+    function renderLivePermutationsChips() {
         const cont = el('livePermutationsContainer');
         if (!cont) return;
         const ex = getMelodicExampleById(state.melodicStudio.exampleId);
@@ -4044,7 +4044,7 @@
         }
         const curArr = state.melodicStudio.selectedMultiPermutationsByNote[selIdx] || [];
         const baseVoicingNoPerm = computeHarmonizationForMelodicNote(cur, null, true);
-        const validPermKeys = getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(cur, baseVoicingNoPerm, curArr);
+        const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(cur, baseVoicingNoPerm, curArr);
         if (!validPermKeys.length) {
             cont.innerHTML = '<span class="text-[11px] text-slate-400 italic">Sin permutaciones disponibles para este acorde</span>';
             return;
@@ -4273,7 +4273,7 @@
             }
         }
         updateUndoRedoButtons();
-        rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
+        renderLivePermutationsChips();
     }
 
     function ensureExampleAutoFilled(exId) {
@@ -4432,7 +4432,7 @@
             const baseVoicingNoPerm = selectedPermNote
                 ? computeHarmonizationForMelodicNote(selectedPermNote, null, true)
                 : null;
-            const validPermKeys = getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(selectedPermNote, baseVoicingNoPerm, curArr);
+            const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(selectedPermNote, baseVoicingNoPerm, curArr);
             if (!validPermKeys.length) {
                 permCont.innerHTML = `<span class="text-[10px] text-slate-500 italic">Sin permutaciones disponibles para este bloque</span>`;
             } else {
@@ -4643,7 +4643,7 @@
                         : 'bg-pink-50 text-pink-950 border-2 border-pink-500 hover:bg-pink-100 font-bold';
                 }
                 const previewText = isTonic
-                    ? getTWXhfxWXMPAaVgQjuoSvsJo3cQygW8cN2F(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
+                    ? getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
                     : (tObj.desc || '');
                 return `<button type="button" data-tech-opt="${tid}" aria-pressed="${isAct}" class="analysis-tech-option-btn text-left p-2 rounded-lg border text-[11px] cursor-pointer ${btnColors}">
                     <div class="font-bold">[${tObj.abbr}] ${tObj.shortName}</div>
@@ -5724,7 +5724,7 @@
                     </div>
                 </div>
 
-                ${rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63()}
+                ${renderLearningCurveChartsSVG()}
 
                 <div>
                     <div class="font-extrabold text-amber-800 uppercase text-[11px] mb-1.5">🏆 Medallas y Logros de Gamificación (${unl.length}/${BADGES_CATALOG.length}):</div>
@@ -6241,7 +6241,7 @@
         }
     }
 
-    function rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG() {
+    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
         if (!Array.isArray(state.stats.progressionHistory)) state.stats.progressionHistory = [];
         const totalExercises = Number(state.stats.totalExercises) || 0;
         if (!totalExercises) return;
@@ -6260,7 +6260,7 @@
         if (history.length > 12) history.splice(0, history.length - 12);
     }
 
-    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
+    function renderLearningCurveChartsSVG() {
         const storedHistory = Array.isArray(state.stats.progressionHistory)
             ? state.stats.progressionHistory.slice(-12)
             : [];
@@ -7506,7 +7506,7 @@
                                 retries: state.continuity.runRetries,
                                 measures: JSON.parse(JSON.stringify(state.continuity.measures))
                             });
-                            rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG();
+                            rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
                             const saved = savePersistedState();
                             unlockBadge('continuity_8c');
                             showFeedbackBanner(
@@ -7550,7 +7550,7 @@
                         state.currentSession.totalTimeSec += elapsed;
                         state.currentSession.timedCount++;
                     }
-                    rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG();
+                    rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
                     const compKey = state.melodicStudio.isActive ? 'melodicApproaches' : (state.dictationMode ? 'earDictation' : (state.voicingType === 'close' ? 'close4Way' : 'openDropsSpreads'));
                     if (state.stats.competencies && state.stats.competencies[compKey]) {
                         state.stats.competencies[compKey].total++;
