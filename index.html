@@ -24,8 +24,31 @@
         </div>
     </div>
 
+    <!-- Pantalla de Presentación Inicial (Splash Intro) -->
+    <div id="introSplashOverlay" class="intro-splash-overlay" role="dialog" aria-label="Presentación de Bloque Armónico Pro">
+        <div class="intro-splash-card">
+            <div class="intro-splash-logo-wrap">
+                <div class="intro-splash-logo-inner">
+                    <img src="icon.png" alt="Logo Bloque Armónico Pro" class="intro-splash-logo">
+                </div>
+            </div>
+            <h1 class="intro-splash-title">
+                Bloque Armónico <span class="intro-splash-pro">Pro</span>
+            </h1>
+            <p class="intro-splash-subtitle">
+                Entrenamiento Armónico, Auditivo y Análisis Melódico
+            </p>
+            <div class="intro-splash-progress-track" aria-hidden="true">
+                <div id="introSplashProgressBar" class="intro-splash-progress-bar"></div>
+            </div>
+            <div class="intro-splash-credits">
+                POR JUAN MIGUEL RÍOS REDONDO
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Bienvenida -->
-    <div id="welcomeModalOverlay" class="modal-overlay visible">
+    <div id="welcomeModalOverlay" class="modal-overlay">
         <div class="modal-content max-w-lg">
             <h2 class="text-2xl font-extrabold text-blue-600 mb-2">🎹 Bienvenido a Bloque Armónico Pro</h2>
             <p class="text-xs opacity-85 mb-4">Selecciona tu perfil de estudiante o crea uno nuevo para guardar tu racha diaria, estadísticas, banco de errores y medallas.</p>
@@ -99,11 +122,11 @@
             </div>
         </div>
 
-        <!-- Barra de Estado Unificada (Punto 1 y Punto 7) -->
+        <!-- Barra Superior Minimalista -->
         <div id="statusBar" class="bar-row">
             <div class="flex flex-wrap items-center justify-center gap-1.5">
-                <div class="stat-pill text-amber-700" title="Racha por realización diaria (días seguidos practicando)">🔥 Racha Diaria: <span id="streakCounter">0</span>d</div>
-                <div id="userProfileBadge" class="stat-pill text-indigo-700 cursor-pointer" title="Cambiar Perfil (U)">👤 <span id="currentUserName">Invitado</span> ✎</div>
+                <div id="userProfileBadge" class="stat-pill text-indigo-700 cursor-pointer" title="Cambiar Perfil (U)">👤 <span id="currentUserName">Invitado</span></div>
+                <div class="stat-pill text-amber-700" title="Racha por realización diaria">🔥 <span id="streakCounter">0</span>d</div>
                 <div class="stat-pill">
                     <span class="text-green-700">✅ <span id="valCorrect">0</span></span>
                     <span class="text-red-600">❌ <span id="valIncorrect">0</span></span>
@@ -113,61 +136,51 @@
                     ⏱️ <span id="liveTimerText" class="font-mono">0.0s</span>
                     <span id="sessionRemainingBadge" class="hidden ml-1 px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 font-mono text-[11px]"></span>
                 </div>
-                <div id="batchProgressBadge" class="stat-pill text-purple-700">📋 Balance: <span id="batchProgressText" class="font-mono">0/5</span></div>
-                <div id="midiStatusBadge" class="stat-pill text-emerald-700 cursor-pointer">🎹 MIDI: <span id="midiStatusText">Conectar</span></div>
             </div>
-            <div class="flex flex-wrap items-center justify-center gap-1">
-                <div class="inline-flex rounded-full bg-slate-200 p-0.5">
-                    <button id="btnNotationAmerican" type="button" class="px-2.5 py-1 text-xs font-extrabold rounded-full bg-white text-blue-700 border-0 cursor-pointer">C,D,E</button>
-                    <button id="btnNotationLatin" type="button" class="px-2.5 py-1 text-xs font-extrabold rounded-full bg-transparent text-slate-700 border-0 cursor-pointer">Do,Re,Mi</button>
-                </div>
-                <button id="endSessionTopBtn" type="button" class="icon-pill-btn bg-red-600 text-white" title="Terminar Sesión">🏁 Terminar</button>
-                <button id="errorBankButton" type="button" class="icon-pill-btn bg-rose-600 text-white" title="Banco de Errores (W)">🔄 <span id="errorBankCount">0</span></button>
-                <button id="badgesButton" type="button" class="icon-pill-btn bg-amber-500 text-white" title="Medallas (L)">🏆</button>
-                <button id="customChallengeButton" type="button" class="icon-pill-btn bg-purple-600 text-white" title="Reto a Medida (E)">🎯</button>
-                <button id="viewHistoryButton" type="button" class="icon-pill-btn bg-indigo-600 text-white" title="Estadísticas (V)">📊</button>
-                <button id="shortcutsButton" type="button" class="icon-pill-btn bg-teal-600 text-white" title="Atajos de Teclado (K)">⌨️</button>
-                <button id="switchUserButton" type="button" class="icon-pill-btn bg-yellow-500 text-white" title="Cambiar Usuario (U)">👥</button>
-                <button id="settingsButton" type="button" class="icon-pill-btn bg-slate-200 text-slate-800" title="Ajustes (S)">⚙️</button>
-                <button id="showTutorialButton" type="button" class="icon-pill-btn bg-blue-600 text-white" title="Tutorial (H)">?</button>
-                <button id="darkModeButton" type="button" class="icon-pill-btn bg-slate-200 text-slate-800" title="Modo Oscuro (D)">🌙</button>
-            </div>
-        </div>
-
-        <!-- Barra de Nivel y Audio -->
-        <div id="difficultySelection" class="bar-row">
-            <div class="flex items-center gap-1.5 flex-wrap justify-center">
-                <span class="text-xs font-extrabold text-blue-700">Nivel:</span>
-                <button type="button" data-diff="basic" class="diff-btn toolbar-btn bg-slate-200 text-slate-800" title="Nivel Básico: Solo tríadas a 3 voces (Mayor, Menor, Aumentado, Disminuido, Sus2, Sus4)">Básico (3 Voces)</button>
-                <button type="button" data-diff="intermediate" class="diff-btn toolbar-btn bg-green-600 text-white" title="Nivel Intermedio: Acordes a 4 voces con 7ª">Intermedio (4 Voces)</button>
-                <button type="button" data-diff="advanced" class="diff-btn toolbar-btn bg-slate-200 text-slate-800" title="Nivel Avanzado: Tensiones y voicings abiertos / 5 voces">Avanzado (Tensiones)</button>
-            </div>
-            <div class="flex items-center gap-1.5 flex-wrap justify-center">
-                <div class="flex items-center gap-1">
-                    <label for="practiceChordTypeSelect" class="text-xs font-extrabold text-indigo-800">Acorde:</label>
-                    <select id="practiceChordTypeSelect" class="ctrl-select font-bold max-w-[210px]" title="Seleccionar tipo de acorde para practicar fluidamente"></select>
-                </div>
-                <select id="instrumentSelect" class="ctrl-select">
-                    <option value="piano" selected>🎹 Piano Acústico</option>
-                    <option value="rhodes">⚡ Piano Rhodes</option>
-                    <option value="sax">🎷 Saxofones (Soli)</option>
-                    <option value="strings">🎻 Cuerdas (Strings)</option>
-                </select>
-                <select id="arpeggioDirectionSelect" class="ctrl-select">
-                    <option value="block" selected>🎹 Bloque + Bajo Profundo</option>
-                    <option value="descending">📉 Descendente + Bloque</option>
-                    <option value="ascending">📈 Ascendente + Bloque</option>
-                </select>
+            <div class="flex flex-wrap items-center justify-center gap-1.5">
                 <button id="replayAudioButton" type="button" class="toolbar-btn bg-blue-600 text-white">🔊 Escuchar</button>
+                <button id="toggleQuickToolsBtn" type="button" class="toolbar-btn bg-slate-700 text-white" aria-expanded="false" aria-controls="topQuickToolsBar">🧰 Herramientas</button>
+                <button id="darkModeButton" type="button" class="icon-pill-btn bg-slate-200 text-slate-800" title="Modo Oscuro (D)">🌙</button>
+                <button id="endSessionTopBtn" type="button" class="icon-pill-btn bg-red-600 text-white" title="Terminar Sesión">🏁</button>
             </div>
         </div>
 
-        <!-- Barra de Herramientas (Disposiciones Completas, Evaluar Personalizado y Reloj de Sesión) -->
-        <div id="advancedModesToolbar" class="bar-row">
-            <div class="flex items-center gap-2 flex-wrap justify-center">
-                <div class="flex items-center gap-1">
-                    <label for="voicingSelect" class="font-extrabold">Disposición:</label>
-                    <select id="voicingSelect" class="ctrl-select max-w-[270px]">
+        <!-- Barra Superior Plegable de Utilidades -->
+        <div id="topQuickToolsBar" class="bottom-quick-tools-bar hidden" aria-label="Herramientas y utilidades">
+            <button id="openLeadSheetLibraryBtn" type="button" class="toolbar-btn bg-amber-500 text-white" title="Banco de Estándares de Jazz (Atajo: N)">🎷 Estándares</button>
+            <button id="dictationModeBtn" type="button" class="toolbar-btn bg-slate-100 text-slate-800">👂 Dictado</button>
+            <button id="pdfReferenceBtn" type="button" class="toolbar-btn bg-blue-100 text-blue-800">📘 Guía</button>
+            <button id="errorBankButton" type="button" class="toolbar-btn bg-rose-600 text-white" title="Banco de Errores (W)">🔄 Errores (<span id="errorBankCount">0</span>)</button>
+            <button id="viewHistoryButton" type="button" class="toolbar-btn bg-indigo-600 text-white" title="Estadísticas (V)">📊 Estadísticas</button>
+            <button id="badgesButton" type="button" class="toolbar-btn bg-amber-500 text-white" title="Medallas (L)">🏆 Medallas</button>
+            <button id="customChallengeButton" type="button" class="toolbar-btn bg-purple-600 text-white" title="Reto a Medida (E)">🎯 Reto</button>
+            <div id="midiStatusBadge" class="stat-pill text-emerald-700 cursor-pointer">🎹 MIDI: <span id="midiStatusText">Conectar</span></div>
+            <button id="settingsButton" type="button" class="toolbar-btn bg-slate-200 text-slate-800" title="Ajustes (S)">⚙️ Ajustes</button>
+            <button id="switchUserButton" type="button" class="toolbar-btn bg-yellow-500 text-white" title="Cambiar Usuario (U)">👥 Usuario</button>
+            <button id="shortcutsButton" type="button" class="toolbar-btn bg-teal-600 text-white" title="Atajos de Teclado (K)">⌨️ Atajos</button>
+            <button id="showTutorialButton" type="button" class="toolbar-btn bg-blue-600 text-white" title="Tutorial (H)">❓ Tutorial</button>
+        </div>
+
+        <!-- Selector de Modo Principal (3 Modos Separados) -->
+        <div id="mainModeTabs" class="mode-tabs-bar" role="tablist" aria-label="Modos principales">
+            <button id="modeTabBloqueBtn" type="button" class="mode-tab-btn active" data-mode="bloque">🎹 Bloque Armónico</button>
+            <button id="modeTabContinuityBtn" type="button" class="mode-tab-btn" data-mode="continuity">🎼 Continuidad Armónica</button>
+            <button id="modeTabHarmonizationsBtn" type="button" class="mode-tab-btn" data-mode="harmonizations">🎶 Armonizaciones</button>
+        </div>
+
+        <!-- Barra de Niveles Visible SOLO para Bloque Armónico -->
+        <div id="bloqueLevelsBar" class="bar-row flex-col gap-2">
+            <div id="difficultySelection" class="flex flex-wrap items-center justify-center gap-1.5 w-full">
+                <span class="text-xs font-extrabold text-blue-700">Nivel:</span>
+                <button type="button" data-diff="basic" class="diff-btn toolbar-btn bg-slate-200 text-slate-800" title="Nivel Básico: Solo tríadas a 3 voces">Básico (3V)</button>
+                <button type="button" data-diff="intermediate" class="diff-btn toolbar-btn bg-green-600 text-white" title="Nivel Intermedio: Acordes a 4 voces con 7ª">Intermedio (4V)</button>
+                <button type="button" data-diff="advanced" class="diff-btn toolbar-btn bg-slate-200 text-slate-800" title="Nivel Avanzado: Tensiones y voicings abiertos / 5 voces">Avanzado (5V)</button>
+                <select id="practiceChordTypeSelect" class="ctrl-select font-bold max-w-[180px]" title="Tipo de acorde"></select>
+                <button id="toggleBloqueOptionsBtn" type="button" class="toolbar-btn bg-slate-200 text-slate-800">🎛️ Opciones</button>
+            </div>
+            <div id="bloqueAdvancedOptions" class="hidden flex-wrap items-center justify-center gap-1.5 pt-2 border-t border-slate-200 w-full">
+                <div id="advancedModesToolbar" class="flex flex-wrap items-center justify-center gap-1.5">
+                    <select id="voicingSelect" class="ctrl-select max-w-[230px]" title="Disposición">
                         <optgroup label="Bloque cerrado a 4 voces y variantes">
                             <option value="close" selected>Bloque cerrado estándar a 4 voces</option>
                             <option value="close_var1">Variante 1 (Melodía + 2 Guías + 1 Tensión)</option>
@@ -192,33 +205,34 @@
                             <option value="quasi_spread5">Disposición abierta a 5 voces, método 3 (Raíz➔9.ª + Bajo)</option>
                         </optgroup>
                     </select>
-                </div>
-                <button id="addBassBtn" type="button" class="toolbar-btn bg-slate-100 text-slate-800">🎸 Agregar Bajo</button>
-                <div class="flex items-center gap-1">
-                    <label for="staffModeSelect" class="font-extrabold">Clave:</label>
-                    <select id="staffModeSelect" class="ctrl-select">
+                    <button id="addBassBtn" type="button" class="toolbar-btn bg-slate-100 text-slate-800">🎸 Bajo</button>
+                    <button id="strictEnharmonicBtn" type="button" class="toolbar-btn bg-slate-100 text-slate-800">♯♭ Enarmonía</button>
+                    <select id="instrumentSelect" class="ctrl-select" title="Instrumento">
+                        <option value="piano" selected>🎹 Piano Acústico</option>
+                        <option value="rhodes">⚡ Piano Rhodes</option>
+                        <option value="sax">🎷 Saxofones (Soli)</option>
+                        <option value="strings">🎻 Cuerdas (Strings)</option>
+                    </select>
+                    <select id="arpeggioDirectionSelect" class="ctrl-select" title="Arpegio">
+                        <option value="block" selected>🎹 Bloque + Bajo Profundo</option>
+                        <option value="descending">📉 Descendente + Bloque</option>
+                        <option value="ascending">📈 Ascendente + Bloque</option>
+                    </select>
+                    <select id="staffModeSelect" class="ctrl-select" title="Clave">
                         <option value="grand" selected>Gran Pentagrama (Sol + Fa)</option>
                         <option value="auto">Auto (Sol / Gran Pentagrama)</option>
                         <option value="treble">Solo Clave de Sol</option>
                     </select>
-                </div>
-                <!-- Punto 7: Reloj por ejercicio y Tiempo de Sesión Personalizable -->
-                <div class="flex items-center gap-1">
-                    <label for="timerModeSelect" class="font-extrabold">Reloj:</label>
-                    <select id="timerModeSelect" class="ctrl-select">
+                    <select id="timerModeSelect" class="ctrl-select" title="Reloj">
                         <option value="0">⏱️ Libre</option>
                         <option value="15">⚡ 15s / ej.</option>
                         <option value="30">🔥 30s / ej.</option>
                         <option value="session_10">⏳ Sesión 10 min</option>
                         <option value="session_20">⏳ Sesión 20 min</option>
-                        <option value="session_custom">✏️ Sesión Personalizada (min)...</option>
+                        <option value="session_custom">✏️ Sesión Personalizada...</option>
                     </select>
                     <input id="customSessionMinInput" type="number" min="1" max="180" value="15" class="ctrl-input hidden w-16" title="Minutos de sesión">
-                </div>
-                <!-- Punto 7: Evaluar con opción personalizada -->
-                <div class="flex items-center gap-1">
-                    <label for="evalBatchSelect" class="font-extrabold">Evaluar:</label>
-                    <select id="evalBatchSelect" class="ctrl-select">
+                    <select id="evalBatchSelect" class="ctrl-select" title="Evaluar">
                         <option value="5" selected>📋 Cada 5 Ej.</option>
                         <option value="10">📋 Cada 10 Ej.</option>
                         <option value="15">📋 Cada 15 Ej.</option>
@@ -226,51 +240,62 @@
                         <option value="0">♾️ Libre (Sin corte)</option>
                     </select>
                     <input id="customEvalBatchInput" type="number" min="1" max="100" value="8" class="ctrl-input hidden w-16" title="Cantidad de ejercicios para evaluar">
+                    <div class="inline-flex rounded-full bg-slate-200 p-0.5">
+                        <button id="btnNotationAmerican" type="button" class="px-2.5 py-1 text-xs font-extrabold rounded-full bg-white text-blue-700 border-0 cursor-pointer">C,D,E</button>
+                        <button id="btnNotationLatin" type="button" class="px-2.5 py-1 text-xs font-extrabold rounded-full bg-transparent text-slate-700 border-0 cursor-pointer">Do,Re,Mi</button>
+                    </div>
+                    <div id="batchProgressBadge" class="stat-pill text-purple-700">📋 Balance: <span id="batchProgressText" class="font-mono">0/5</span></div>
                 </div>
-            </div>
-            <div class="flex items-center gap-1.5 flex-wrap justify-center">
-                <button id="pdfReferenceBtn" type="button" class="toolbar-btn bg-blue-100 text-blue-800">📘 Guía</button>
-                <button id="openLeadSheetLibraryBtn" type="button" class="toolbar-btn bg-amber-500 text-white" title="Banco de Estándares de Jazz (Atajo: N)">🎷 Estándares de Jazz (Lead Sheets)</button>
-                <button id="mechanicalApproachBtn" type="button" class="toolbar-btn bg-emerald-100 text-emerald-800">🎶 Armonizaciones &amp; Análisis Melódico</button>
-                <button id="continuityModeBtn" type="button" class="toolbar-btn bg-teal-100 text-teal-800">🎼 Continuidad (8 Comp.)</button>
-                <button id="dictationModeBtn" type="button" class="toolbar-btn bg-slate-100 text-slate-800">👂 Dictado</button>
-                <button id="strictEnharmonicBtn" type="button" class="toolbar-btn bg-slate-100 text-slate-800">♯♭ Enarmonía</button>
             </div>
         </div>
 
-        <!-- Panel de Armonizaciones & Análisis Melódico (Puntos 2, 3, 5 y 6) -->
-        <div id="melodicAnalysisStudioPanel" class="hidden flex-col gap-2.5 p-3 bg-emerald-50/70 rounded-xl border-2 border-emerald-500/40 text-xs w-full">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-500/30 pb-2">
+        <!-- Botones ocultos para compatibilidad con atajos de teclado -->
+        <button id="mechanicalApproachBtn" type="button" class="hidden"></button>
+        <button id="continuityModeBtn" type="button" class="hidden"></button>
+
+        <!-- Panel de Armonizaciones & Análisis Melódico (Organizado para Móvil y Desktop) -->
+        <div id="melodicAnalysisStudioPanel" class="hidden flex-col gap-2 p-2.5 sm:p-3 bg-emerald-50/70 rounded-xl border-2 border-emerald-500/40 text-xs w-full">
+            <!-- Fila 1: Selección rápida de frase y botones de paneles -->
+            <div class="flex flex-wrap items-center justify-between gap-1.5 border-b border-emerald-500/30 pb-2">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="px-2.5 py-1 rounded-lg font-extrabold bg-emerald-600 text-white">🎶 ARMONIZACIONES &amp; ANÁLISIS MELÓDICO (Gran Pentagrama Sol/Fa • Disposición Cerrada)</span>
-                    <span id="studioProgressBadge" class="px-2 py-0.5 rounded-full font-bold bg-white text-emerald-900 border border-emerald-400">Haz clic en cualquier nota o silencio</span>
+                    <span class="px-2 py-0.5 rounded-lg font-extrabold bg-emerald-600 text-white text-[11px]">🎶 ARMONIZACIONES</span>
+                    <span id="studioProgressBadge" class="px-2 py-0.5 rounded-full font-bold bg-white text-emerald-900 border border-emerald-400 text-[11px]">Toca una nota en la partitura</span>
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap">
-                    <button id="studioLen4Btn" type="button" class="toolbar-btn bg-emerald-600 text-white">4 Compases</button>
-                    <button id="studioLen8Btn" type="button" class="toolbar-btn bg-white text-slate-800">8 Compases</button>
-                    <select id="melodicExampleSelect" class="ctrl-select max-w-[220px]"></select>
-                    <select id="melodicGeneratorStyleSelect" class="ctrl-select max-w-[230px]">
-                        <optgroup label="Técnicas Frecuentes">
-                            <option value="all">🎲 Multitonal (Aproximaciones Frecuentes)</option>
-                            <option value="chromatic">🎯 1. Aproximación Cromática (1/2T ➔ Obj.)</option>
-                            <option value="parallel">🎯 2. Aproximación Paralela (1T ➔ Obj.)</option>
-                            <option value="dominant">🎯 3. Aproximación Dominante (V7 ➔ Obj.)</option>
-                            <option value="diatonic">🎯 4. Aproximación Diatónica (Escala ➔ Obj.)</option>
-                            <option value="diminished">🎯 5. Aproximación Disminuida (º7 ➔ Obj.)</option>
-                            <option value="melodic_grouping">🎯 7. Resolución Retardada y Doble Crom.</option>
-                        </optgroup>
-                        <optgroup label="Técnicas Especiales (Por Separado)">
-                            <option value="independent_lead">⚡ 6. Voz Líder Independiente (Casos 1–6)</option>
-                            <option value="tonicization">🔗 8. Tonicizaciones en Tránsito (ii–V–I / susV7)</option>
-                        </optgroup>
-                    </select>
-                    <button id="generateRandomMelodyBtn" type="button" class="toolbar-btn bg-purple-600 text-white">🎲 Nueva Melodía Aleatoria</button>
-                    <button id="openCustomMelodyEditorBtn" type="button" class="toolbar-btn bg-teal-700 text-white">✍️ Escribir / Editar en Editor</button>
+                    <button id="studioLen4Btn" type="button" class="toolbar-btn bg-emerald-600 text-white">4C</button>
+                    <button id="studioLen8Btn" type="button" class="toolbar-btn bg-white text-slate-800">8C</button>
+                    <select id="melodicExampleSelect" class="ctrl-select max-w-[180px] sm:max-w-[220px]"></select>
+                    <button id="generateRandomMelodyBtn" type="button" class="toolbar-btn bg-purple-600 text-white">🎲 Nueva</button>
+                    <button id="openCustomMelodyEditorBtn" type="button" class="toolbar-btn bg-teal-700 text-white">✍️ Editor</button>
+                    <button id="toggleStudioEditorBtn" type="button" class="toolbar-btn bg-amber-100 text-amber-900 border border-amber-400">🛠️ Editar Nota</button>
+                    <button id="toggleStudioToolsBtn" type="button" class="toolbar-btn bg-slate-800 text-white">⚙️ Más / Exportar</button>
                 </div>
             </div>
 
-            <!-- Punto 6: Modificador en Vivo de Elementos de la Melodía/Armonía (Melódicos, Acordes y Figuras/Silencios) -->
-            <div id="studioLiveElementEditorBar" class="flex flex-wrap items-center justify-between gap-2 bg-amber-50 p-2 rounded-lg border border-amber-300 text-slate-900">
+            <!-- Fila 2: Reproducción rápida siempre visible encima de la partitura -->
+            <div class="flex flex-wrap items-center justify-between gap-1.5 bg-white p-1.5 sm:p-2 rounded-lg border border-emerald-500/30">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <button id="playFullMelodicPhraseBtn" type="button" class="toolbar-btn bg-blue-600 text-white">▶️ Sonar Frase</button>
+                    <button id="playMelodyOnlyBtn" type="button" class="toolbar-btn bg-sky-600 text-white">🎵 Melodía</button>
+                    <button id="playFromActiveNoteBtn" type="button" class="toolbar-btn bg-indigo-600 text-white">⏩ Desde Nota</button>
+                    <button id="loopActiveBarBtn" type="button" class="toolbar-btn bg-purple-600 text-white" title="Repetir en bucle el compás activo">🔁 Bucle</button>
+                </div>
+                <div id="studioTempoControl" class="studio-tempo-control inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-100 border">
+                    <label for="studioTempoInput" class="font-extrabold text-[11px]">⏱️ <span id="studioTempoValue" class="sr-only" aria-live="polite">105</span></label>
+                    <input id="studioTempoInput" type="number" min="30" max="300" step="1" value="105" inputmode="numeric" aria-label="Tempo en pulsos por minuto" class="ctrl-input studio-tempo-input">
+                    <span class="font-extrabold text-[11px]">BPM</span>
+                    <input id="studioTempoRange" type="range" min="30" max="300" step="1" value="105" aria-label="Ajustar tempo" class="studio-tempo-range cursor-pointer">
+                    <div class="studio-tempo-presets" role="group" aria-label="Tempos predefinidos">
+                        <button type="button" data-studio-tempo="60" class="studio-tempo-preset">60</button>
+                        <button type="button" data-studio-tempo="90" class="studio-tempo-preset">90</button>
+                        <button type="button" data-studio-tempo="120" class="studio-tempo-preset">120</button>
+                        <button type="button" data-studio-tempo="160" class="studio-tempo-preset">160</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel colapsable: Modificador en Vivo de Nota/Acorde -->
+            <div id="studioLiveElementEditorBar" class="hidden flex-wrap items-center justify-between gap-2 bg-amber-50 p-2 rounded-lg border border-amber-300 text-slate-900">
                 <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="font-extrabold text-amber-900">🛠️ Modificar Nota/Compás Activo:</span>
                     <label class="font-bold">Nota:</label>
@@ -306,8 +331,8 @@
                         <option value="16t">♪³ Tresillo Semicorchea (⅙T) [8]</option>
                     </select>
                     <button id="applyLiveNoteModBtn" type="button" class="toolbar-btn bg-amber-600 text-white">✅ Cambiar Nota/Figura</button>
-                    <button id="liveAddNoteBtn" type="button" class="toolbar-btn bg-emerald-600 text-white" title="Agregar nota en este compás">➕ Agregar Nota</button>
-                    <button id="liveDeleteNoteBtn" type="button" class="toolbar-btn bg-rose-600 text-white" title="Eliminar nota del compás">🗑️ Eliminar Nota</button>
+                    <button id="liveAddNoteBtn" type="button" class="toolbar-btn bg-emerald-600 text-white" title="Agregar nota en este compás">➕ Agregar</button>
+                    <button id="liveDeleteNoteBtn" type="button" class="toolbar-btn bg-rose-600 text-white" title="Eliminar nota del compás">🗑️ Eliminar</button>
                     <button id="completeLiveBarWithRestsBtn" type="button" class="toolbar-btn bg-slate-700 text-white" title="Completar los tiempos restantes del compás con silencios">𝄽 + Silencios</button>
                     <span id="liveBarBeatBalanceBadge" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-300 cursor-pointer" title="Clic para autocompletar tiempos restantes con silencios">Compás: 4.0 / 4T ✅</span>
                     <button id="studioUndoBtn" type="button" class="toolbar-btn bg-slate-200 text-slate-800 hover:bg-slate-300" title="Deshacer (Ctrl+Z)" disabled>↩️ Deshacer</button>
@@ -327,9 +352,9 @@
                         <select id="liveEditChord2Root" class="ctrl-select"></select>
                         <select id="liveEditChord2Type" class="ctrl-select"></select>
                     </span>
-                    <label class="font-extrabold text-teal-900 ml-1">🎼 Escala–Acorde:</label>
-                    <select id="liveEditChordScaleSelect" class="ctrl-select max-w-[230px]" title="Relación Escala-Acorde y Análisis Contextual"></select>
-                    <button id="applyLiveChordModBtn" type="button" class="toolbar-btn bg-indigo-600 text-white">✅ Aplicar Acorde/Escala</button>
+                    <label class="font-extrabold text-teal-900 ml-1">🎼 Escala:</label>
+                    <select id="liveEditChordScaleSelect" class="ctrl-select max-w-[200px]" title="Relación Escala-Acorde y Análisis Contextual"></select>
+                    <button id="applyLiveChordModBtn" type="button" class="toolbar-btn bg-indigo-600 text-white">✅ Aplicar</button>
                 </div>
                 <div id="livePermutationsBar" class="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-200/60">
                     <span class="font-extrabold text-purple-900 text-xs">🔀 Permutaciones Capas:</span>
@@ -337,76 +362,70 @@
                 </div>
             </div>
 
-            <!-- Controles de Reproducción y Trabajo del Estudio -->
-            <div id="studioPlaybackToolbar" class="flex flex-wrap items-center justify-between gap-2 bg-white p-2 rounded-lg border border-emerald-500/30">
-                <div class="studio-playback-main-actions flex items-center gap-1.5 flex-wrap">
-                    <button id="playMelodyOnlyBtn" type="button" class="toolbar-btn bg-sky-600 text-white">🎵 Solo Melodía</button>
-                    <button id="playFullMelodicPhraseBtn" type="button" class="toolbar-btn bg-blue-600 text-white">▶️ Sonar Frase + Bajo</button>
-                    <button id="playFromActiveNoteBtn" type="button" class="toolbar-btn bg-indigo-600 text-white">⏩ Desde Nota Activa</button>
-                    <button id="loopActiveBarBtn" type="button" class="toolbar-btn bg-purple-600 text-white" title="Repetir en bucle el compás activo">🔁 Bucle Compás</button>
+            <!-- Panel colapsable: Opciones Avanzadas, Disposiciones y Exportación -->
+            <div id="studioSecondaryToolsDrawer" class="hidden flex-col gap-2 bg-white p-2.5 rounded-lg border border-slate-300">
+                <div id="studioPlaybackToolbar" class="flex flex-wrap items-center gap-1.5">
+                    <select id="melodicGeneratorStyleSelect" class="ctrl-select max-w-[220px]">
+                        <optgroup label="Técnicas Frecuentes">
+                            <option value="all">🎲 Multitonal (Aproximaciones Frecuentes)</option>
+                            <option value="chromatic">🎯 1. Aproximación Cromática (1/2T ➔ Obj.)</option>
+                            <option value="parallel">🎯 2. Aproximación Paralela (1T ➔ Obj.)</option>
+                            <option value="dominant">🎯 3. Aproximación Dominante (V7 ➔ Obj.)</option>
+                            <option value="diatonic">🎯 4. Aproximación Diatónica (Escala ➔ Obj.)</option>
+                            <option value="diminished">🎯 5. Aproximación Disminuida (º7 ➔ Obj.)</option>
+                            <option value="melodic_grouping">🎯 7. Resolución Retardada y Doble Crom.</option>
+                        </optgroup>
+                        <optgroup label="Técnicas Especiales (Por Separado)">
+                            <option value="independent_lead">⚡ 6. Voz Líder Independiente (Casos 1–6)</option>
+                            <option value="tonicization">🔗 8. Tonicizaciones en Tránsito (ii–V–I / susV7)</option>
+                        </optgroup>
+                    </select>
                     <select id="studioSwingSelect" class="ctrl-select text-xs font-bold" title="Articulación rítmica">
                         <option value="straight">Directo (Straight)</option>
                         <option value="swing">Swing Jazz (Corcheas)</option>
                     </select>
-                    <label class="inline-flex items-center gap-1 font-bold text-xs cursor-pointer select-none ml-1 bg-slate-100 px-2 py-1 rounded border border-slate-300"><input id="studioMetronomeToggle" type="checkbox" class="accent-indigo-600"> 🥁 Claqueta (2 y 4)</label>
-                    <div id="studioTempoControl" class="studio-tempo-control inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-100 border">
-                        <label for="studioTempoInput" class="font-extrabold text-[11px]">⏱️ Tempo <span id="studioTempoValue" class="sr-only" aria-live="polite">105</span></label>
-                        <input id="studioTempoInput" type="number" min="30" max="300" step="1" value="105" inputmode="numeric" aria-label="Tempo en pulsos por minuto" class="ctrl-input studio-tempo-input">
-                        <span class="font-extrabold text-[11px]">BPM</span>
-                        <input id="studioTempoRange" type="range" min="30" max="300" step="1" value="105" aria-label="Ajustar tempo" class="studio-tempo-range cursor-pointer">
-                        <div class="studio-tempo-presets" role="group" aria-label="Tempos predefinidos">
-                            <button type="button" data-studio-tempo="60" class="studio-tempo-preset">60</button>
-                            <button type="button" data-studio-tempo="90" class="studio-tempo-preset">90</button>
-                            <button type="button" data-studio-tempo="120" class="studio-tempo-preset">120</button>
-                            <button type="button" data-studio-tempo="160" class="studio-tempo-preset">160</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="studio-playback-tool-actions flex items-center gap-1.5 flex-wrap">
+                    <label class="inline-flex items-center gap-1 font-bold text-xs cursor-pointer select-none bg-slate-100 px-2 py-1 rounded border border-slate-300"><input id="studioMetronomeToggle" type="checkbox" class="accent-indigo-600"> 🥁 Claqueta (2 y 4)</label>
                     <button id="toggleNoteRestStudioBtn" type="button" class="toolbar-btn bg-slate-700 text-white" title="Alternar entre Nota y Silencio (Atajo: R)">𝄽 Nota ⇄ Silencio</button>
                     <button id="clearSingleNoteBlockBtn" type="button" class="toolbar-btn bg-orange-500 text-white">🧹 Borrar 1 Bloque</button>
                     <button id="clearAllPhraseBlocksBtn" type="button" class="toolbar-btn bg-teal-600 text-white">🧩 Limpiar Frase</button>
                     <button id="autoFillAllPhraseBtn" type="button" class="toolbar-btn bg-amber-500 text-white">⚡ Rellenar Frase</button>
                     <button id="toggleScoreVoicingViewBtn" type="button" class="toolbar-btn bg-indigo-100 text-indigo-900">🎼 Vista: Melodía + Bloque</button>
-                    <button id="toggleApproachNotationBtn" type="button" class="toolbar-btn bg-teal-100 text-teal-900" aria-label="Cambiar la letra de las aproximaciones de escala" aria-pressed="false" title="Alterna la notación de aproximación entre d y S">Aproximación: d</button>
+                    <button id="toggleApproachNotationBtn" type="button" class="toolbar-btn bg-teal-100 text-teal-900" aria-label="Cambiar la letra de las aproximaciones de escala" aria-pressed="false">Aproximación: d</button>
                     <button id="toggleSelectedNoteEnharmonicBtn" type="button" class="toolbar-btn bg-amber-100 text-amber-900" disabled>Enarmonía: convertir</button>
-                    <button id="toggleVoiceLeadingLinesBtn" type="button" class="toolbar-btn bg-cyan-100 text-cyan-900" title="Ver líneas guía de enlace de voces">🔗 Guía de Voces</button>
-                    <label for="scoreAnnotationModeSelect" class="font-extrabold text-[11px]">Etiquetas de partitura:</label>
+                    <button id="toggleVoiceLeadingLinesBtn" type="button" class="toolbar-btn bg-cyan-100 text-cyan-900">🔗 Guía de Voces</button>
                     <select id="scoreAnnotationModeSelect" class="ctrl-select" aria-label="Qué etiquetas mostrar en la partitura">
-                        <option value="analysis">Análisis melódico</option>
-                        <option value="harmonization">Armonización</option>
-                        <option value="both" selected>Ambos</option>
-                        <option value="none">Ninguno</option>
+                        <option value="analysis">Etiquetas: Análisis melódico</option>
+                        <option value="harmonization">Etiquetas: Armonización</option>
+                        <option value="both" selected>Etiquetas: Ambos</option>
+                        <option value="none">Etiquetas: Ninguno</option>
                     </select>
                     <button id="toggleScoreZoomBtn" type="button" class="toolbar-btn bg-emerald-100 text-emerald-900">📐 Compases: 2C/fila</button>
-                    <button id="saveStudioMelodyBtn" type="button" class="toolbar-btn bg-teal-700 text-white" title="Guardar esta melodía y armonización en el catálogo">💾 Guardar Melodía</button>
-                    <button id="exportStudioMidiBtn" type="button" class="toolbar-btn bg-indigo-700 text-white" title="Exportar partitura en archivo MIDI (.mid)">🎹 Exportar MIDI</button>
-                    <button id="exportStudioXmlBtn" type="button" class="toolbar-btn bg-violet-700 text-white" title="Exportar partitura en formato universal MusicXML (.musicxml)">🎼 Exportar XML</button>
+                    <button id="saveStudioMelodyBtn" type="button" class="toolbar-btn bg-teal-700 text-white">💾 Guardar Melodía</button>
+                    <button id="exportStudioMidiBtn" type="button" class="toolbar-btn bg-indigo-700 text-white">🎹 Exportar MIDI</button>
+                    <button id="exportStudioXmlBtn" type="button" class="toolbar-btn bg-violet-700 text-white">🎼 Exportar XML</button>
                     <button id="exportStudioPdfBtn" type="button" class="toolbar-btn bg-rose-600 text-white">📄 Exportar PDF</button>
                 </div>
-            </div>
-
-            <!-- Disposiciones Completas (Aplicables por Nota Individual o a Toda la Armonización) y Permutaciones -->
-            <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg border border-indigo-500/30">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="font-extrabold text-indigo-900">📐 Disposición (Nota Activa o Frase):</span>
-                    <div class="inline-flex rounded-lg bg-slate-200 p-0.5 gap-0.5 flex-wrap">
-                        <button type="button" data-studio-drop="close" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] bg-indigo-600 text-white border-0 cursor-pointer">4-Way Close</button>
-                        <button type="button" data-studio-drop="shearing" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Double Lead (5ªV)</button>
-                        <button type="button" data-studio-drop="drop2" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Drop 2</button>
-                        <button type="button" data-studio-drop="drop3" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Drop 3</button>
-                        <button type="button" data-studio-drop="drop24" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Drop 2&amp;4</button>
-                        <button type="button" data-studio-drop="spread4" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Spread 4V</button>
-                        <button type="button" data-studio-drop="spread5_m1" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Spread 5V (M1)</button>
-                        <button type="button" data-studio-drop="drop2_spread5" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Spread 5V (M2)</button>
-                        <button type="button" data-studio-drop="quasi_spread5" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Quasi Spread (M3)</button>
+                <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg border border-indigo-500/30">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-extrabold text-indigo-900">📐 Disposición:</span>
+                        <div class="inline-flex rounded-lg bg-slate-200 p-0.5 gap-0.5 flex-wrap">
+                            <button type="button" data-studio-drop="close" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] bg-indigo-600 text-white border-0 cursor-pointer">4-Way Close</button>
+                            <button type="button" data-studio-drop="shearing" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Double Lead (5ªV)</button>
+                            <button type="button" data-studio-drop="drop2" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Drop 2</button>
+                            <button type="button" data-studio-drop="drop3" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Drop 3</button>
+                            <button type="button" data-studio-drop="drop24" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Drop 2&amp;4</button>
+                            <button type="button" data-studio-drop="spread4" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Spread 4V</button>
+                            <button type="button" data-studio-drop="spread5_m1" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Spread 5V (M1)</button>
+                            <button type="button" data-studio-drop="drop2_spread5" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Spread 5V (M2)</button>
+                            <button type="button" data-studio-drop="quasi_spread5" class="studio-drop-btn px-2 py-1 rounded font-extrabold text-[11px] text-slate-700 bg-transparent border-0 cursor-pointer">Quasi Spread (M3)</button>
+                        </div>
+                        <button id="applyDropToAllPhraseBtn" type="button" class="toolbar-btn bg-indigo-600 text-white">🔄 Aplicar a Toda la Armonización</button>
                     </div>
-                    <button id="applyDropToAllPhraseBtn" type="button" class="toolbar-btn bg-indigo-600 text-white">🔄 Aplicar a Toda la Armonización</button>
-                </div>
-                <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="font-extrabold text-purple-900">🔀 Permutaciones Válidas (Sin Repetición):</span>
-                    <div id="studioMultiPermutationContainer" class="flex items-center gap-1 flex-wrap"></div>
-                    <button id="clearNotePermutationsBtn" type="button" class="toolbar-btn bg-slate-200 text-slate-800">Limpiar Perm.</button>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-extrabold text-purple-900">🔀 Permutaciones:</span>
+                        <div id="studioMultiPermutationContainer" class="flex items-center gap-1 flex-wrap"></div>
+                        <button id="clearNotePermutationsBtn" type="button" class="toolbar-btn bg-slate-200 text-slate-800">Limpiar Perm.</button>
+                    </div>
                 </div>
             </div>
 
@@ -414,11 +433,11 @@
             <div id="studioLivePlaybackBanner" class="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-indigo-950 text-white border border-indigo-400 text-xs font-bold shadow-sm">
                 <div class="flex items-center gap-2 flex-wrap">
                     <span id="studioLivePlayStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                    <span id="studioLivePlayChordText">🎼 Partitura Activa: Selecciona una nota o pulsa Play para ver su disposición en tiempo real</span>
+                    <span id="studioLivePlayChordText">🎼 Toca una nota o pulsa Play para armonizar</span>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <span id="studioLivePlayTechBadge" class="px-2 py-0.5 rounded bg-indigo-700 text-indigo-100 font-mono text-[11px]">Técnica: 4-Way Close</span>
-                    <span id="studioLivePlayDispBadge" class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-extrabold text-[11px]">📐 Disposición: 4-Way Close (Cerrada)</span>
+                    <span id="studioLivePlayDispBadge" class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-extrabold text-[11px]">📐 4-Way Close</span>
                 </div>
             </div>
 
@@ -444,11 +463,11 @@
             <div id="floatingHarmonizationModal" class="hidden fixed z-50 bg-white text-slate-900 rounded-2xl shadow-2xl border-2 border-indigo-600 w-[95vw] max-w-[540px] max-h-[82vh] flex-col overflow-hidden" style="bottom: 16px; right: 16px;">
                 <div class="flex items-center justify-between gap-2 px-3.5 py-2 bg-indigo-700 text-white">
                     <span id="activeNoteHeaderTitle" class="text-xs font-extrabold truncate">Análisis de la nota seleccionada</span>
-                    <div class="flex items-center gap-1">
-                        <button id="prevMelodicNoteBtn" type="button" class="px-2 py-0.5 rounded bg-white/20 text-white font-bold text-xs cursor-pointer">◀</button>
-                        <button id="nextMelodicNoteBtn" type="button" class="px-2 py-0.5 rounded bg-white/20 text-white font-bold text-xs cursor-pointer">▶</button>
-                        <button id="dockSideFloatingModalBtn" type="button" class="px-2 py-0.5 rounded bg-white/20 text-white font-bold text-xs cursor-pointer" title="Cambiar el lado del panel">⇄ Lado</button>
-                        <button id="closeFloatingHarmonizationModalBtn" type="button" class="px-2 py-0.5 rounded bg-rose-500 text-white font-extrabold text-xs cursor-pointer">✕</button>
+                    <div class="flex items-center gap-1.5">
+                        <button id="prevMelodicNoteBtn" type="button" class="px-3 py-1 rounded bg-white/20 text-white font-bold text-xs cursor-pointer" title="Nota anterior">◀</button>
+                        <button id="nextMelodicNoteBtn" type="button" class="px-3 py-1 rounded bg-white/20 text-white font-bold text-xs cursor-pointer" title="Nota siguiente">▶</button>
+                        <button id="dockSideFloatingModalBtn" type="button" class="hidden sm:inline-block px-2 py-1 rounded bg-white/20 text-white font-bold text-xs cursor-pointer" title="Cambiar el lado del panel">⇄ Lado</button>
+                        <button id="closeFloatingHarmonizationModalBtn" type="button" class="px-2.5 py-1 rounded bg-rose-500 text-white font-extrabold text-xs cursor-pointer">✕</button>
                     </div>
                 </div>
                 <div class="p-3 overflow-y-auto space-y-2 text-xs">
