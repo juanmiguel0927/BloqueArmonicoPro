@@ -971,8 +971,10 @@
         const chordData = chordStructures[chordTypeKey] || chordStructures['maj7'];
         const rules = (state.continuityMode && chordData.continuity_rules) ? chordData.continuity_rules : chordData.voicing_rules;
         const safeLead = rules[leadLabel] ? leadLabel : Object.keys(rules)[0];
-        const isTriad = chordData.difficulty === 'basic' || state.difficulty === 'basic';
-        const count = isTriad ? 3 : (rules[safeLead].length >= 4 ? 4 : rules[safeLead].length);
+        const isTriad = !state.continuityMode && !state.melodicStudio?.isActive && (chordData.difficulty === 'basic' || state.difficulty === 'basic');
+        const count = (state.continuityMode || state.melodicStudio?.isActive)
+            ? (rules[safeLead].length >= 4 ? 4 : rules[safeLead].length)
+            : (isTriad ? 3 : (rules[safeLead].length >= 4 ? 4 : rules[safeLead].length));
         const labels = [...rules[safeLead].slice(0, count)];
 
         let topNoteWithOctave = targetTopNoteWithOctave;
@@ -3348,21 +3350,24 @@
             ?.find(interval => interval.label === state.givenLabel)?.name || state.givenLabel;
         const hideId = state.dictationMode && !state.exerciseSolved && !state.studioHarmonicBlockVisible;
         const prompt = el('chordConstructionPrompt');
+        const isBasicStandalone = state.difficulty === 'basic' && !state.continuityMode && !state.melodicStudio?.isActive;
         if (prompt) {
             prompt.textContent = state.studioHarmonicBlockVisible
                 ? '🎼 Bloque armónico de la armonización seleccionada (agudo ➔ grave):'
-                : (state.difficulty === 'basic'
+                : (isBasicStandalone
                     ? 'Construye la tríada a 3 voces (agudo ➔ grave):'
-                    : 'Construye el acorde (agudo ➔ grave):');
+                    : (state.continuityMode
+                        ? 'Construye el acorde a 4 voces (agudo ➔ grave):'
+                        : 'Construye el acorde (agudo ➔ grave):'));
         }
         if (el('chordQuestionText')) {
-            const kindLabel = state.difficulty === 'basic' ? 'de la tríada' : 'del acorde';
+            const kindLabel = isBasicStandalone ? 'de la tríada' : 'del acorde';
             el('chordQuestionText').innerHTML = hideId
                 ? `👂 <strong>${noteDisp}</strong> es la 1ª voz de un <strong>Acorde en Dictado (?)</strong>.`
                 : `<strong>${noteDisp}</strong> es <strong>${intervalName} (${state.givenLabel})</strong> ${kindLabel} de <strong>${rootDisp}${cif}</strong>.`;
         }
         if (el('staffChordHeader')) {
-            const typeLabel = state.difficulty === 'basic' ? 'Tríada' : 'Acorde';
+            const typeLabel = isBasicStandalone ? 'Tríada' : 'Acorde';
             el('staffChordHeader').innerHTML = hideId ? `👂 Dictado — 1ª Voz: ${noteDisp}` : `🎼 ${typeLabel}: ${rootDisp}${cif} — 1ª Voz: ${noteDisp} (${state.givenLabel})`;
         }
         for (let i = 0; i < 5; i++) {
@@ -7679,19 +7684,61 @@
             el('mainAppContainer')?.classList.remove('hidden');
             generateStandAloneExercise();
         });
+        const addSlicedCanvasToJsPdf = (pdf, canvas, marginX, marginY, usableWidth, usableHeight) => {
+            const totalPdfHeight = (canvas.height * usableWidth) / canvas.width;
+            if (totalPdfHeight <= usableHeight) {
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', marginX, marginY, usableWidth, totalPdfHeight);
+                return;
+            }
+            const pxPerUnit = canvas.width / usableWidth;
+            const sliceMaxPx = Math.max(1, Math.floor(usableHeight * pxPerUnit));
+            let offsetY = 0;
+            let pageIdx = 0;
+            while (offsetY < canvas.height) {
+                if (pageIdx > 0) pdf.addPage();
+                const sliceH = Math.min(sliceMaxPx, canvas.height - offsetY);
+                const sliceCanvas = document.createElement('canvas');
+                sliceCanvas.width = canvas.width;
+                sliceCanvas.height = sliceH;
+                const ctx = sliceCanvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+                ctx.drawImage(canvas, 0, offsetY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+                const slicePdfH = sliceH / pxPerUnit;
+                pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', marginX, marginY, usableWidth, slicePdfH);
+                offsetY += sliceH;
+                pageIdx++;
+            }
+        };
+
         if (el('saveAsPdfButton')) {
             el('saveAsPdfButton').addEventListener('click', async () => {
                 const target = el('resultsContentToCapture');
                 if (!target || typeof html2canvas === 'undefined' || !window.jspdf) return;
+                const offscreen = document.createElement('div');
+                offscreen.style.cssText = 'position:fixed;left:-10000px;top:0;width:720px;background:#ffffff;color:#0f172a;padding:16px;z-index:-1;';
+                const clone = target.cloneNode(true);
+                clone.style.maxHeight = 'none';
+                clone.style.overflow = 'visible';
+                offscreen.appendChild(clone);
+                document.body.appendChild(offscreen);
                 try {
-                    const canvas = await html2canvas(target, { backgroundColor: '#ffffff', scale: 2 });
+                    const canvas = await html2canvas(offscreen, { backgroundColor: '#ffffff', scale: 2, width: 720, windowWidth: 720 });
                     const { jsPDF } = window.jspdf;
                     const pdf = new jsPDF('p', 'mm', 'a4');
-                    const w = pdf.internal.pageSize.getWidth() - 20;
-                    const h = (canvas.height * w) / canvas.width;
-                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 15, w, Math.min(h, 265));
+                    const marginX = 12;
+                    const marginY = 12;
+                    const usableW = pdf.internal.pageSize.getWidth() - marginX * 2;
+                    const usableH = pdf.internal.pageSize.getHeight() - marginY * 2;
+                    addSlicedCanvasToJsPdf(pdf, canvas, marginX, marginY, usableW, usableH);
                     saveJsPdfDocument(pdf, `reporte_sesion_${state.currentUser}.pdf`);
-                } catch (e) {}
+                    showFeedbackBanner('📄 Reporte PDF generado correctamente.', 'success');
+                } catch (e) {
+                    console.error('Error al generar reporte PDF:', e);
+                    showFeedbackBanner('❌ No se pudo generar el PDF.', 'error');
+                } finally {
+                    offscreen.remove();
+                }
             });
         }
         if (el('generateRandomMelodyBtn')) el('generateRandomMelodyBtn').addEventListener('click', () => generateRandomMelodicPhrase(state.melodicStudio.barsCount));
@@ -8019,9 +8066,9 @@
                 if (!canvas || !window.jspdf) return;
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-                const pageW = doc.internal.pageSize.getWidth() - 40;
-                const pageH = (canvas.height * pageW) / canvas.width;
-                doc.addImage(canvas.toDataURL('image/png'), 'PNG', 20, 20, pageW, Math.min(pageH, 540));
+                const usableW = doc.internal.pageSize.getWidth() - 40;
+                const usableH = doc.internal.pageSize.getHeight() - 40;
+                addSlicedCanvasToJsPdf(doc, canvas, 20, 20, usableW, usableH);
                 saveJsPdfDocument(doc, 'armonizacion_melodica.pdf');
             });
         }
