@@ -3568,7 +3568,7 @@
 
     function generateContinuity8Bars() {
         const rootsPool = ["C", "F", "G", "Bb", "Eb", "D", "A"];
-        const typesPool = ['maj7', 'm7', '7', 'm7b5', 'dim7', 'major', 'minor'];
+        const typesPool = ['maj7', 'm7', '7', 'm7b5', 'dim7'];
         const measures = [];
         let prevVoices = null;
         for (let i = 0; i < 8; i++) {
