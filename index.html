@@ -240,6 +240,11 @@
                         <option value="0">♾️ Libre (Sin corte)</option>
                     </select>
                     <input id="customEvalBatchInput" type="number" min="1" max="100" value="8" class="ctrl-input hidden w-16" title="Cantidad de ejercicios para evaluar">
+                    <select id="advanceModeSelect" class="ctrl-select" title="Avance al responder correctamente">
+                        <option value="ask" selected>❓ Avance: Preguntar</option>
+                        <option value="auto">🚀 Avance: Automático</option>
+                        <option value="manual">👆 Avance: Manual</option>
+                    </select>
                     <div class="inline-flex rounded-full bg-slate-200 p-0.5">
                         <button id="btnNotationAmerican" type="button" class="px-2.5 py-1 text-xs font-extrabold rounded-full bg-white text-blue-700 border-0 cursor-pointer">C,D,E</button>
                         <button id="btnNotationLatin" type="button" class="px-2.5 py-1 text-xs font-extrabold rounded-full bg-transparent text-slate-700 border-0 cursor-pointer">Do,Re,Mi</button>
@@ -601,7 +606,8 @@
             <button id="clearAllSelectionButton" type="button" class="bg-gray-500">🗑️ Borrar Todo</button>
             <button id="hintButton" type="button" class="bg-yellow-500">💡 Pista</button>
             <button id="showAnswerButton" type="button" class="bg-red-600">👁️ Mostrar Respuesta</button>
-            <button id="changeQuestionButton" type="button" class="bg-blue-600 w-full basis-full">➡️ Siguiente Ejercicio</button>
+            <button id="changeQuestionButton" type="button" class="bg-indigo-600">🔄 Cambiar Ejercicio</button>
+            <button id="nextExerciseButton" type="button" class="bg-blue-600 w-full basis-full">➡️ Siguiente Ejercicio</button>
         </div>
     </div>
 
@@ -1121,6 +1127,32 @@
             <h3 class="text-xl font-bold text-amber-500 mb-3">💡 Pista</h3>
             <div id="hintModalBody" class="mb-4 text-sm"></div>
             <button id="hintModalCloseButton" type="button" class="toolbar-btn bg-amber-500 text-white px-5 py-2">Entendido</button>
+        </div>
+    </div>
+
+    <div id="correctAnswerModalOverlay" class="modal-overlay">
+        <div class="modal-content max-w-md">
+            <h3 class="text-xl font-extrabold text-green-600 mb-1">✅ ¡Respuesta Correcta!</h3>
+            <p id="correctAnswerModalSummary" class="text-xs sm:text-sm opacity-85 mb-3"></p>
+            <div class="text-left bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 space-y-2 text-xs text-slate-800">
+                <div class="font-extrabold text-blue-800">¿Cómo deseas avanzar al acertar?</div>
+                <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-blue-50">
+                    <input type="radio" name="correctAdvanceModeRadio" value="auto" class="mt-0.5">
+                    <span><strong>🚀 Avance Automático:</strong> pasa automáticamente al siguiente ejercicio tras acertar.</span>
+                </label>
+                <label class="flex items-start gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-blue-50">
+                    <input type="radio" name="correctAdvanceModeRadio" value="manual" class="mt-0.5" checked>
+                    <span><strong>👆 Avance Manual:</strong> permanece en el acorde hasta pulsar <em>Cambiar Ejercicio</em> o <em>Enter</em>.</span>
+                </label>
+                <label class="flex items-center gap-2 pt-1.5 border-t border-slate-200 cursor-pointer text-[11px] font-bold text-slate-600">
+                    <input id="rememberAdvanceModeCheckbox" type="checkbox" checked>
+                    <span>Recordar mi elección (puedes cambiarla en 🎛️ Opciones)</span>
+                </label>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2">
+                <button id="correctModalNextBtn" type="button" class="toolbar-btn bg-blue-600 text-white px-5 py-2">➡️ Siguiente Ejercicio</button>
+                <button id="correctModalStayBtn" type="button" class="toolbar-btn bg-slate-500 text-white px-4 py-2">👁️ Revisar Acorde</button>
+            </div>
         </div>
     </div>
 
