@@ -27,6 +27,8 @@
         validatedCells: [null, null, null, null, null],
         exerciseSolved: false,
         failedCurrentExercise: false,
+        advanceMode: 'ask',
+        autoAdvanceTimerId: null,
         stats: {
             totalExercises: 0, totalCorrect: 0, totalIncorrect: 0,
             currentStreak: 0, bestStreak: 0,
@@ -73,7 +75,8 @@
             runHits: 0,
             runErrors: 0,
             runRetries: 0,
-            viewingHistoryIdx: -1
+            viewingHistoryIdx: -1,
+            playbackTimers: []
         },
         customPractice: {
             basic: { isActive: false, allowedChords: [], allowedLeads: [] },
@@ -343,7 +346,7 @@
         "perm_3rd_s9": { id: "perm_3rd_s9", shortName: "Guía 3ra ➔ #9", targetRole: "3", allowedTypes: ["7"], subInt: { semitones: 3, degreeOffset: 1, label: "#9" } },
         "perm_3rd_s11": { id: "perm_3rd_s11", shortName: "Guía 3ra ➔ #11", targetRole: "3", allowedTypes: ["maj7","major"], subInt: { semitones: 6, degreeOffset: 3, label: "#11" } },
         "perm_3rd_11": { id: "perm_3rd_11", shortName: "Guía 3ra ➔ 11na", targetRole: "3", allowedTypes: ["m7","minor","7","m7b5"], subInt: { semitones: 5, degreeOffset: 3, label: "11" } },
-        "perm_7th_6": { id: "perm_7th_6", shortName: "Guía 7ma ➔ 13(6ta)", targetRole: "7", allowedTypes: ["maj7","major","m7","minor","7"], subInt: { semitones: 9, degreeOffset: 5, label: "6" } },
+        "perm_7th_6": { id: "perm_7th_6", shortName: "Guía 7ma ➔ 6ta", targetRole: "7", allowedTypes: ["maj7","major"], subInt: { semitones: 9, degreeOffset: 5, label: "6" } },
         "perm_7th_b13": { id: "perm_7th_b13", shortName: "Guía b7 ➔ #5(b13)", targetRole: "7", allowedTypes: ["7"], subInt: { semitones: 8, degreeOffset: 5, label: "b13" } },
         "perm_7th_b9": { id: "perm_7th_b9", shortName: "Guía b7 ➔ b9 (1ªV Fundamental)", targetRole: "7", allowedTypes: ["7"], requireLeadRoot: true, subInt: { semitones: 1, degreeOffset: 1, label: "b9" } },
         "perm_7th_9": { id: "perm_7th_9", shortName: "Guía b7 ➔ 9na", targetRole: "7", allowedTypes: ["m7b5"], subInt: { semitones: 2, degreeOffset: 1, label: "9" } }
@@ -354,7 +357,7 @@
     const numberToLetterMap = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     const letterToNumberMap = { 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6 };
     const ADVANCED_TENSION_LEADS = ['b9', '9', '#9', '11', '#11', 'b13', '13'];
-    const PRACTICE_LEAD_LABELS = ['1', '2', '3', 'b3', '4', '5', 'b5', '#5', '6', '7', 'b7'];
+    const PRACTICE_LEAD_LABELS = ['1', '2', '3', 'b3', '4', '5', 'b5', '#5', '6', '7', 'b7', 'bb7'];
     const naturalNotes = ["C", "D", "E", "F", "G", "A", "B"];
     // Punto 8: Incluye doble sostenido (##) y doble bemol (bb)
     const accidentals = ["#", "b", "♮", "##", "bb"];
@@ -406,15 +409,13 @@
                 { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
                 { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
-                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
                 { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
                 { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }
             ],
             voicing_rules: {
                 "1": ["1", "6", "5", "3"], "3": ["3", "1", "7", "5"], "5": ["5", "3", "1", "7"],
-                "6": ["6", "5", "3", "1"], "7": ["7", "5", "3", "1"], "9": ["9", "7", "5", "3"],
-                "#11": ["#11", "3", "1", "7"], "13": ["13", "3", "1", "7"]
+                "7": ["7", "5", "3", "1"], "9": ["9", "7", "5", "3"], "#11": ["#11", "3", "1", "7"]
             }
         },
         "m7": {
@@ -423,16 +424,13 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
-                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
-                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
                 { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
                 { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }
             ],
             voicing_rules: {
                 "1": ["1", "b7", "5", "b3"], "b3": ["b3", "1", "b7", "5"], "5": ["5", "b3", "1", "b7"],
-                "6": ["6", "5", "b3", "1"], "b7": ["b7", "5", "b3", "1"], "9": ["9", "b7", "5", "b3"],
-                "11": ["11", "b7", "5", "b3"], "13": ["13", "b3", "1", "b7"]
+                "b7": ["b7", "5", "b3", "1"], "9": ["9", "b7", "5", "b3"], "11": ["11", "b3", "1", "b7"]
             }
         },
         "7": {
@@ -441,7 +439,6 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
-                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
                 { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
                 { semitones: 1, name: "novena menor", label: "b9", degreeOffset: 1 },
@@ -453,9 +450,9 @@
             ],
             voicing_rules: {
                 "1": ["1", "b7", "5", "3"], "3": ["3", "1", "b7", "5"], "5": ["5", "3", "1", "b7"],
-                "6": ["6", "5", "3", "1"], "b7": ["b7", "5", "3", "1"], "9": ["9", "b7", "5", "3"],
+                "b7": ["b7", "5", "3", "1"], "9": ["9", "b7", "5", "3"],
                 "b9": ["b9", "b7", "5", "3"], "#9": ["#9", "b7", "5", "3"], "11": ["11", "1", "b7", "5"],
-                "#11": ["#11", "3", "9", "b7"], "13": ["13", "3", "1", "b7"], "b13": ["b13", "3", "1", "b7"]
+                "#11": ["#11", "3", "1", "b7"], "13": ["13", "3", "1", "b7"], "b13": ["b13", "3", "1", "b7"]
             }
         },
         "m7b5": {
@@ -464,17 +461,13 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 },
-                { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
-                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
                 { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
-                { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 },
-                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 }
+                { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }
             ],
             voicing_rules: {
                 "1": ["1", "b7", "b5", "b3"], "b3": ["b3", "1", "b7", "b5"], "b5": ["b5", "b3", "1", "b7"],
-                "6": ["6", "5", "b3", "1"], "b7": ["b7", "b5", "b3", "1"], "9": ["9", "b7", "b5", "b3"],
-                "11": ["11", "b7", "b5", "b3"], "13": ["13", "b3", "1", "b7"]
+                "b7": ["b7", "b5", "b3", "1"], "9": ["9", "b7", "b5", "b3"], "11": ["11", "b3", "b7", "b5"]
             }
         },
         "dim7": {
@@ -483,10 +476,10 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 6, name: "quinta disminuida", label: "b5", degreeOffset: 4 },
-                { semitones: 9, name: "séptima disminuida", label: "6", degreeOffset: 5 }
+                { semitones: 9, name: "séptima disminuida", label: "bb7", degreeOffset: 5 }
             ],
             voicing_rules: {
-                "1": ["1", "6", "b5", "b3"], "b3": ["b3", "1", "6", "b5"], "b5": ["b5", "b3", "1", "6"], "6": ["6", "b5", "b3", "1"]
+                "1": ["1", "bb7", "b5", "b3"], "b3": ["b3", "1", "bb7", "b5"], "b5": ["b5", "b3", "1", "bb7"], "bb7": ["bb7", "b5", "b3", "1"]
             }
         }
     };
@@ -517,11 +510,10 @@
                 { semitones: 4, name: "tercera mayor", label: "3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
                 { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
-                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
-                { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 },
-                { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }
+                { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
+                { semitones: 6, name: "onceava aumentada", label: "#11", degreeOffset: 3 }
             ],
-            voicing_rules: { "1": ["1", "6", "5", "3"], "3": ["3", "1", "6", "5"], "5": ["5", "3", "1", "6"], "6": ["6", "5", "3", "1"], "9": ["9", "6", "5", "3"], "13": ["13", "3", "1", "7"] }
+            voicing_rules: { "1": ["1", "6", "5", "3"], "3": ["3", "1", "6", "5"], "5": ["5", "3", "1", "6"], "6": ["6", "5", "3", "1"], "9": ["9", "6", "5", "3"], "#11": ["#11", "3", "1", "6"] }
         },
         "m6": {
             name: "Menor 6", cifrado: "m6", difficulty: "intermediate",
@@ -530,11 +522,10 @@
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
                 { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
-                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
-                { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
-                { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }
+                { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
+                { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }
             ],
-            voicing_rules: { "1": ["1", "6", "5", "b3"], "b3": ["b3", "1", "6", "5"], "5": ["5", "b3", "1", "6"], "6": ["6", "5", "b3", "1"], "9": ["9", "6", "5", "b3"], "13": ["13", "b3", "1", "b7"] }
+            voicing_rules: { "1": ["1", "6", "5", "b3"], "b3": ["b3", "1", "6", "5"], "5": ["5", "b3", "1", "6"], "6": ["6", "5", "b3", "1"], "9": ["9", "6", "5", "b3"], "11": ["11", "b3", "1", "6"] }
         },
         "mMaj7": {
             name: "Menor (Maj7)", cifrado: "m(maj7)", difficulty: "intermediate",
@@ -542,12 +533,11 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 3, name: "tercera menor", label: "b3", degreeOffset: 2 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
-                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
-                { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
                 { semitones: 11, name: "séptima mayor", label: "7", degreeOffset: 6 },
-                { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }
+                { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 },
+                { semitones: 5, name: "onceava justa", label: "11", degreeOffset: 3 }
             ],
-            voicing_rules: { "1": ["1", "7", "5", "b3"], "b3": ["b3", "1", "7", "5"], "5": ["5", "b3", "1", "7"], "6": ["6", "5", "b3", "1"], "7": ["7", "5", "b3", "1"], "9": ["9", "7", "5", "b3"], "13": ["13", "b3", "1", "7"] }
+            voicing_rules: { "1": ["1", "7", "5", "b3"], "b3": ["b3", "1", "7", "5"], "5": ["5", "b3", "1", "7"], "7": ["7", "5", "b3", "1"], "9": ["9", "7", "5", "b3"], "11": ["11", "b3", "1", "7"] }
         },
         "7sus4": {
             name: "Dominante 7sus4", cifrado: "7sus4", difficulty: "intermediate",
@@ -555,12 +545,11 @@
                 { semitones: 0, name: "fundamental", label: "1", degreeOffset: 0 },
                 { semitones: 5, name: "cuarta justa", label: "11", degreeOffset: 3 },
                 { semitones: 7, name: "quinta justa", label: "5", degreeOffset: 4 },
-                { semitones: 9, name: "sexta mayor", label: "6", degreeOffset: 5 },
                 { semitones: 9, name: "trecena mayor", label: "13", degreeOffset: 5 },
                 { semitones: 10, name: "séptima menor", label: "b7", degreeOffset: 6 },
                 { semitones: 2, name: "novena mayor", label: "9", degreeOffset: 1 }
             ],
-            voicing_rules: { "1": ["1", "b7", "5", "11"], "11": ["11", "1", "b7", "5"], "5": ["5", "11", "1", "b7"], "6": ["6", "5", "11", "1"], "b7": ["b7", "5", "11", "1"], "9": ["9", "b7", "5", "11"], "13": ["13", "11", "1", "b7"] }
+            voicing_rules: { "1": ["1", "b7", "5", "11"], "11": ["11", "1", "b7", "5"], "5": ["5", "11", "1", "b7"], "b7": ["b7", "5", "11", "1"], "9": ["9", "b7", "5", "11"], "13": ["13", "11", "1", "b7"] }
         }
     });
 
@@ -732,7 +721,7 @@
         });
     }
 
-    function enforceNoMinorSecondAtTop(notesWithOct, labels, rootNote) {
+    function enforceNoMinorSecondAtTop(notesWithOct, labels, rootNote, chordTypeKey = null) {
         if (!Array.isArray(notesWithOct) || notesWithOct.length < 2) return { notesWithOct, labels };
         const correctedNotes = [...notesWithOct];
         const correctedLabels = [...labels];
@@ -741,12 +730,17 @@
         if (topMidi - secondMidi === 1) {
             const rootPc = getNoteSemitone(rootNote);
             const topPc = ((topMidi % 12) + 12) % 12;
-            let replacementName = calculateNoteName(rootNote, { semitones: 9, degreeOffset: 5 });
-            let replacementLabel = '6 (Evita 2m)';
-            if (topPc !== rootPc) {
+            const allowsSixthSub = !chordTypeKey || ['maj7', 'major', '6', 'm6'].includes(chordTypeKey);
+            let replacementName = null;
+            let replacementLabel = null;
+            if (topPc === rootPc && allowsSixthSub) {
+                replacementName = calculateNoteName(rootNote, { semitones: 9, degreeOffset: 5 });
+                replacementLabel = '6 (Evita 2m)';
+            } else {
                 const ninthName = calculateNoteName(rootNote, { semitones: 2, degreeOffset: 1 });
                 const ninthPc = getNoteSemitone(ninthName);
-                if (((topPc - ninthPc) % 12 + 12) % 12 >= 2) {
+                const usedPcs = new Set(correctedNotes.filter((_, idx) => idx !== 1).map(n => getNoteSemitone(n.split('/')[0])));
+                if (((topPc - ninthPc) % 12 + 12) % 12 >= 2 && !usedPcs.has(ninthPc)) {
                     replacementName = ninthName;
                     replacementLabel = '9 (Evita 2m)';
                 } else {
@@ -900,7 +894,7 @@
     function build4WayCloseVariantInVoiceOrder(rootNote, chordTypeKey, leadLabel, topNoteWithOctave, variantKey) {
         const chordData = chordStructures[chordTypeKey] || chordStructures['maj7'];
         const thirdLbl = chordData.intervals.some(i => i.label === 'b3') ? 'b3' : '3';
-        const sevLbl = chordData.intervals.some(i => i.label === '7') ? '7' : (chordData.intervals.some(i => i.label === 'b7') ? 'b7' : '6');
+        const sevLbl = chordData.intervals.some(i => i.label === '7') ? '7' : (chordData.intervals.some(i => i.label === 'b7') ? 'b7' : (chordData.intervals.some(i => i.label === 'bb7') ? 'bb7' : '6'));
         const fifthLbl = chordData.intervals.some(i => i.label === 'b5') ? 'b5' : '5';
 
         const getIntNote = (lbl, fallbackSemi, fallbackDeg) => {
@@ -910,25 +904,25 @@
         const rootName = calculateNoteName(rootNote, { semitones: 0, degreeOffset: 0 });
         const thirdName = getIntNote(thirdLbl, thirdLbl === 'b3' ? 3 : 4, 2);
         const fifthName = getIntNote(fifthLbl, fifthLbl === 'b5' ? 6 : 7, 4);
-        const sevName = getIntNote(sevLbl, sevLbl === '7' ? 11 : (sevLbl === 'b7' ? 10 : 9), sevLbl === '6' ? 5 : 6);
+        const sevName = getIntNote(sevLbl, sevLbl === '7' ? 11 : (sevLbl === 'b7' ? 10 : 9), (sevLbl === '6' || sevLbl === 'bb7') ? 5 : 6);
         const ninthName = calculateNoteName(rootNote, { semitones: 2, degreeOffset: 1 });
-        const secondTensionLbl = (chordTypeKey === 'm7' || chordTypeKey === 'minor' || chordTypeKey === 'm7b5') ? '11' : '13';
-        const secondTensionInt = secondTensionLbl === '11' ? { semitones: 5, degreeOffset: 3 } : { semitones: 9, degreeOffset: 5 };
+        const secondTensionLbl = (chordTypeKey === 'm7' || chordTypeKey === 'minor' || chordTypeKey === 'm7b5' || chordTypeKey === 'm6' || chordTypeKey === 'mMaj7')
+            ? '11'
+            : ((chordTypeKey === 'maj7' || chordTypeKey === '6') ? '#11' : '13');
+        const secondTensionInt = secondTensionLbl === '11'
+            ? { semitones: 5, degreeOffset: 3 }
+            : (secondTensionLbl === '#11' ? { semitones: 6, degreeOffset: 3 } : { semitones: 9, degreeOffset: 5 });
         const secondTensionName = calculateNoteName(rootNote, secondTensionInt);
 
         const isLeadThird = leadLabel === '3' || leadLabel === 'b3';
-        const isLeadSeventh = leadLabel === '7' || leadLabel === 'b7' || leadLabel === '6';
+        const isLeadSeventh = leadLabel === '7' || leadLabel === 'b7' || leadLabel === 'bb7' || leadLabel === '6';
         const missingGuideName = isLeadThird ? sevName : (isLeadSeventh ? thirdName : sevName);
         const missingGuideLbl = isLeadThird ? sevLbl : (isLeadSeventh ? thirdLbl : sevLbl);
-        const secondGuideName = isLeadThird ? thirdName : (isLeadSeventh ? sevName : thirdName);
-        const secondGuideLbl = isLeadThird ? thirdLbl : (isLeadSeventh ? sevLbl : thirdLbl);
 
         const vNum = variantKey.endsWith('1') ? 1 : (variantKey.endsWith('2') ? 2 : 3);
         let innerSpecs = [];
 
         if (vNum === 1) {
-            // Variante 1: Nota melódica + 2 notas guías + 1 nota no guía o tensión disponible en orden de aparición
-            // Si la melodía ya es guía (ej. C# en A7), Voz 2 = 9na (B), Voz 3 = Guía faltante (G), Voz 4 = 5ta (E) -> C# - B - G - E
             if (isLeadThird || isLeadSeventh) {
                 innerSpecs = [
                     { noteName: ninthName, label: '9 (Var.1)' },
@@ -936,31 +930,42 @@
                     { noteName: fifthName, label: `${fifthLbl} (No Guía)` }
                 ];
             } else {
+                const extraSpec = (leadLabel === '9' || leadLabel === 'b9' || leadLabel === '#9')
+                    ? { noteName: fifthName, label: `${fifthLbl} (No Guía)` }
+                    : { noteName: ninthName, label: '9 (Var.1)' };
                 innerSpecs = [
                     { noteName: sevName, label: `${sevLbl} (Guía)` },
                     { noteName: thirdName, label: `${thirdLbl} (Guía)` },
-                    { noteName: ninthName, label: '9 (Var.1)' }
+                    extraSpec
                 ];
             }
         } else if (vNum === 2) {
-            // Variante 2: Nota melódica + 1 nota guía + 2 notas no guías o tensiones disponibles en orden de aparición
-            // Ej. C# en A7: Voz 2 = G (b7, guía), Voz 3 = F# (13, tensión), Voz 4 = E (5, no guía) -> C# - G - F# - E
+            const tensionSpec = leadLabel === secondTensionLbl
+                ? { noteName: ninthName, label: '9 (Var.2)' }
+                : { noteName: secondTensionName, label: `${secondTensionLbl} (Var.2)` };
+            const thirdSpec = (leadLabel === fifthLbl)
+                ? { noteName: ninthName, label: '9 (Var.2)' }
+                : { noteName: fifthName, label: `${fifthLbl} (No Guía)` };
             innerSpecs = [
                 { noteName: missingGuideName, label: `${missingGuideLbl} (Guía)` },
-                { noteName: secondTensionName, label: `${secondTensionLbl} (Var.2)` },
-                { noteName: fifthName, label: `${fifthLbl} (No Guía)` }
+                tensionSpec,
+                thirdSpec
             ];
         } else {
-            // Variante 3: Nota guía como melodía + nota guía faltante + 2 notas no guías o tensiones en orden de aparición
-            // Ej. C# en A7: Voz 1 = C# (3), Voz 2 = G (b7, guía faltante), Voz 3 = E (5, no guía), Voz 4 = A (1, no guía) -> C# - G - E - A
+            const rootOrNineSpec = (leadLabel === '1' || chordTypeKey === 'm7b5' && leadLabel === '11')
+                ? { noteName: ninthName, label: '9 (No Guía)' }
+                : { noteName: rootName, label: '1 (No Guía)' };
+            const fifthOrNineSpec = leadLabel === fifthLbl
+                ? { noteName: ninthName, label: '9 (No Guía)' }
+                : { noteName: fifthName, label: `${fifthLbl} (No Guía)` };
             innerSpecs = [
                 { noteName: missingGuideName, label: `${missingGuideLbl} (Guía)` },
-                { noteName: fifthName, label: `${fifthLbl} (No Guía)` },
-                { noteName: rootName, label: '1 (No Guía)' }
+                fifthOrNineSpec,
+                rootOrNineSpec
             ];
         }
 
-        const placed = placeVoicesInStrictOrderOfAppearance(topNoteWithOctave, innerSpecs);
+        const placed = placeVoicesInStrictOrderOfAppearance(topNoteWithOctave, innerSpecs, true);
         return {
             labels: [`${leadLabel} (Voz 1)`, ...placed.labels],
             notesWithOct: placed.notesWithOct
@@ -997,7 +1002,7 @@
             notesWithOct.push(nm + '/' + oct);
             lastMidi = cand;
         }
-        const checked = enforceNoMinorSecondAtTop(notesWithOct, labels, rootNote);
+        const checked = enforceNoMinorSecondAtTop(notesWithOct, labels, rootNote, chordTypeKey);
         return { labels: checked.labels, notesWithOct: checked.notesWithOct };
     }
 
@@ -1091,7 +1096,7 @@
         // Spread Voicings (7.pdf Pág. 2)
         const chordData = chordStructures[chordTypeKey] || chordStructures['maj7'];
         const thirdLbl = chordData.intervals.some(i => i.label === 'b3') ? 'b3' : '3';
-        const sevLbl = chordData.intervals.some(i => i.label === '7') ? '7' : (chordData.intervals.some(i => i.label === 'b7') ? 'b7' : '6');
+        const sevLbl = chordData.intervals.some(i => i.label === '7') ? '7' : (chordData.intervals.some(i => i.label === 'b7') ? 'b7' : (chordData.intervals.some(i => i.label === 'bb7') ? 'bb7' : '6'));
         const fifthLbl = chordData.intervals.some(i => i.label === 'b5') ? 'b5' : '5';
         const ninthName = calculateNoteName(rootNote, { semitones: 2, degreeOffset: 1 });
 
@@ -1147,7 +1152,7 @@
         const voicing = applyDispositionToCloseVoicingRaw(
             rootNote, chordTypeKey, leadLabel, closeLabels, closeNotesWithOct, dispositionMode
         );
-        const checked = enforceNoMinorSecondAtTop(voicing.notesWithOct, voicing.labels, rootNote);
+        const checked = enforceNoMinorSecondAtTop(voicing.notesWithOct, voicing.labels, rootNote, chordTypeKey);
         return { ...voicing, labels: checked.labels, notesWithOct: checked.notesWithOct };
     }
 
@@ -1231,6 +1236,35 @@
             triggerUpperVoiceNotes(valid, "2n", t + 0.1);
             if (bassToPlay) triggerDeepBassNote(bassToPlay, "2n", t + 0.1);
         }
+    }
+
+    function stopAllAudioPlayback() {
+        if (state.autoAdvanceTimerId) {
+            clearTimeout(state.autoAdvanceTimerId);
+            state.autoAdvanceTimerId = null;
+        }
+        if (state.continuity && Array.isArray(state.continuity.playbackTimers)) {
+            state.continuity.playbackTimers.forEach(t => clearTimeout(t));
+            state.continuity.playbackTimers = [];
+        }
+        if (state.melodicStudio) {
+            state.melodicStudio.isLoopingBar = false;
+            if (el('loopActiveBarBtn')) el('loopActiveBarBtn').classList.remove('ring-2', 'ring-amber-300');
+        }
+        try { stopHarmonizationGroupPreview(); } catch (e) {}
+        try { stopStudioPhrasePlayback(); } catch (e) {}
+        try {
+            if (pianoSampler && typeof pianoSampler.releaseAll === 'function') pianoSampler.releaseAll();
+        } catch (e) {}
+        try {
+            if (warmPolySynth && typeof warmPolySynth.releaseAll === 'function') warmPolySynth.releaseAll();
+        } catch (e) {}
+        try {
+            if (typeof Tone !== 'undefined' && Tone.Transport && Tone.Transport.state === 'started') {
+                Tone.Transport.stop();
+                Tone.Transport.cancel();
+            }
+        } catch (e) {}
     }
 
     // Ejemplos de Estudio Melódico con soporte de 2 acordes por compás (Punto 2: G7 en tiempos 1-2 y Cmaj7 en tiempos 3-4)
@@ -1966,7 +2000,7 @@
     }
 
     // Devuelve las permutaciones válidas según el acorde armonizado, garantizando que no se repitan notas destino
-    function getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(noteObj, baseVoicingObj, activePermIds = []) {
+    function getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(noteObj, baseVoicingObj, activePermIds = []) {
         if (!noteObj || noteObj.isRest || !baseVoicingObj || !Array.isArray(baseVoicingObj.notesWithOct)) return [];
         const effRoot = baseVoicingObj.effectiveBassRoot || noteObj.targetRoot || noteObj.barChordRoot || 'C';
         const effType = baseVoicingObj.effectiveChordTypeKey || noteObj.targetType || noteObj.barChordTypeKey || 'maj7';
@@ -2024,7 +2058,7 @@
         return ['tonic_II_V_I', 'tonic_V7ofV_V_I', 'tonic_II_bII_I', 'tonic_bVI_bII_I', 'tonic_IVm_bVII_I', 'tonic_sIVm7b5_VII7_I'].includes(techId);
     }
 
-    function getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(techId, targetRoot, targetTypeKey) {
+    function getTWXhfxWXMPAaVgQjuoSvsJo3cQygW8cN2F(techId, targetRoot, targetTypeKey) {
         const root = targetRoot || 'C';
         const type = targetTypeKey || 'maj7';
         const isMinor = type === 'm7' || type === 'minor';
@@ -2389,7 +2423,7 @@
         const activeDisp = state.melodicStudio.voicingDispositionByNote[noteObj.globalIdx] || state.melodicStudio.voicingDisposition || 'close';
         const checked = chosenId.startsWith('ind_')
             ? { notesWithOct, labels }
-            : enforceNoMinorSecondAtTop(notesWithOct, labels, effectiveBassRoot);
+            : enforceNoMinorSecondAtTop(notesWithOct, labels, effectiveBassRoot, effectiveChordTypeKey);
         notesWithOct = checked.notesWithOct;
         labels = checked.labels;
         const lowMidi = Math.min(...notesWithOct.map(n => getNoteWithOctaveMidi(n)));
@@ -3399,11 +3433,19 @@
             const freq = state.evaluation.exercisesPerEval;
             el('batchProgressText').textContent = freq > 0 ? `${state.evaluation.questionsAttemptedInBatch}/${freq}` : 'Libre';
         }
+        const confirmBtn = el('confirmAnswerButton');
+        if (confirmBtn) {
+            const lockConfirm = !state.continuityMode && state.exerciseSolved;
+            confirmBtn.disabled = lockConfirm;
+            confirmBtn.classList.toggle('opacity-50', lockConfirm);
+            confirmBtn.classList.toggle('cursor-not-allowed', lockConfirm);
+        }
         updatePianoVisuals(state.selectedUserNotes);
         drawMusicalStaff(state.selectedUserNotes);
     }
 
     function addUserVoiceNote(note) {
+        if (!state.continuityMode && state.exerciseSolved) return;
         const maxV = state.orderedLabelsForDisplay.length;
         const idx = state.editingCellIndex !== null ? state.editingCellIndex : state.selectedUserNotes.length;
         if (idx >= maxV) return;
@@ -3421,6 +3463,7 @@
     }
 
     function applyAccidentalToActiveVoice(acc) {
+        if (!state.continuityMode && state.exerciseSolved) return;
         const idx = state.editingCellIndex !== null ? state.editingCellIndex : (state.selectedUserNotes.length - 1);
         if (idx < 1 || !state.selectedUserNotes[idx]) return;
         const [np, oct] = state.selectedUserNotes[idx].split('/');
@@ -4001,12 +4044,16 @@
     }
 
     function playContinuitySequence(withDeepBass = true) {
+        if (Array.isArray(state.continuity.playbackTimers)) {
+            state.continuity.playbackTimers.forEach(t => clearTimeout(t));
+            state.continuity.playbackTimers = [];
+        }
         const historyList = state.stats.continuityHistory || [];
         const activeRecord = historyList[state.continuity.viewingHistoryIdx];
         const measuresToPlay = (activeRecord && activeRecord.measures) ? activeRecord.measures : state.continuity.measures;
         const stepMs = parseInt(el('continuityTempoSelect')?.value || '900', 10);
         measuresToPlay.forEach((m, idx) => {
-            setTimeout(() => {
+            const tId = setTimeout(() => {
                 drawContinuityFullScore(idx, measuresToPlay);
                 const v = (m.solvedNotes && m.solvedNotes.length === 4) ? m.solvedNotes : m.expectedNotes;
                 triggerUpperVoiceNotes(v, "2n");
@@ -4014,6 +4061,7 @@
                     triggerDeepBassNote(getImplicitBassWithOctave(m.root, getNoteWithOctaveMidi(v[3])), "2n");
                 }
             }, idx * stepMs);
+            state.continuity.playbackTimers.push(tId);
         });
     }
 
@@ -4036,7 +4084,7 @@
         return null;
     }
 
-    function renderLivePermutationsChips() {
+    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
         const cont = el('livePermutationsContainer');
         if (!cont) return;
         const ex = getMelodicExampleById(state.melodicStudio.exampleId);
@@ -4049,7 +4097,7 @@
         }
         const curArr = state.melodicStudio.selectedMultiPermutationsByNote[selIdx] || [];
         const baseVoicingNoPerm = computeHarmonizationForMelodicNote(cur, null, true);
-        const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(cur, baseVoicingNoPerm, curArr);
+        const validPermKeys = getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(cur, baseVoicingNoPerm, curArr);
         if (!validPermKeys.length) {
             cont.innerHTML = '<span class="text-[11px] text-slate-400 italic">Sin permutaciones disponibles para este acorde</span>';
             return;
@@ -4278,7 +4326,7 @@
             }
         }
         updateUndoRedoButtons();
-        renderLivePermutationsChips();
+        rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
     }
 
     function ensureExampleAutoFilled(exId) {
@@ -4437,7 +4485,7 @@
             const baseVoicingNoPerm = selectedPermNote
                 ? computeHarmonizationForMelodicNote(selectedPermNote, null, true)
                 : null;
-            const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(selectedPermNote, baseVoicingNoPerm, curArr);
+            const validPermKeys = getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(selectedPermNote, baseVoicingNoPerm, curArr);
             if (!validPermKeys.length) {
                 permCont.innerHTML = `<span class="text-[10px] text-slate-500 italic">Sin permutaciones disponibles para este bloque</span>`;
             } else {
@@ -4648,7 +4696,7 @@
                         : 'bg-pink-50 text-pink-950 border-2 border-pink-500 hover:bg-pink-100 font-bold';
                 }
                 const previewText = isTonic
-                    ? getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
+                    ? getTWXhfxWXMPAaVgQjuoSvsJo3cQygW8cN2F(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
                     : (tObj.desc || '');
                 return `<button type="button" data-tech-opt="${tid}" aria-pressed="${isAct}" class="analysis-tech-option-btn text-left p-2 rounded-lg border text-[11px] cursor-pointer ${btnColors}">
                     <div class="font-bold">[${tObj.abbr}] ${tObj.shortName}</div>
@@ -4937,17 +4985,24 @@
             else loadContinuityBar((state.continuity.currentBar + 1) % 8);
             return;
         }
+        if (state.autoAdvanceTimerId) {
+            clearTimeout(state.autoAdvanceTimerId);
+            state.autoAdvanceTimerId = null;
+        }
+        el('correctAnswerModalOverlay')?.classList.remove('visible');
         state.isCustomChallenge = false;
         state.failedCurrentExercise = false;
         state.timer.exerciseStartTime = Date.now();
 
         if (state.errorReviewMode && state.stats.errorBank && state.stats.errorBank.length > 0) {
             const errItem = state.stats.errorBank[Math.floor(Math.random() * state.stats.errorBank.length)];
-            const built = buildCloseVoicingForChordAndLead(errItem.root, errItem.chordTypeKey, errItem.leadLabel);
-            const disp = applyDispositionToCloseVoicing(errItem.root, errItem.chordTypeKey, errItem.leadLabel, built.labels, built.notesWithOct, state.voicingType);
+            const errRules = chordStructures[errItem.chordTypeKey]?.voicing_rules || {};
+            const safeLead = errRules[errItem.leadLabel] ? errItem.leadLabel : (Object.keys(errRules)[0] || '1');
+            const built = buildCloseVoicingForChordAndLead(errItem.root, errItem.chordTypeKey, safeLead);
+            const disp = applyDispositionToCloseVoicing(errItem.root, errItem.chordTypeKey, safeLead, built.labels, built.notesWithOct, state.voicingType);
             state.chordRoot = errItem.root;
             state.chordTypeKey = errItem.chordTypeKey;
-            state.givenLabel = errItem.leadLabel;
+            state.givenLabel = safeLead;
             state.givenNoteWithOctave = disp.notesWithOct[0];
             state.givenNote = disp.notesWithOct[0].split('/')[0];
             state.orderedLabelsForDisplay = [...disp.labels];
@@ -5729,7 +5784,7 @@
                     </div>
                 </div>
 
-                ${renderLearningCurveChartsSVG()}
+                ${rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63()}
 
                 <div>
                     <div class="font-extrabold text-amber-800 uppercase text-[11px] mb-1.5">🏆 Medallas y Logros de Gamificación (${unl.length}/${BADGES_CATALOG.length}):</div>
@@ -6095,6 +6150,7 @@
                 currentUser: state.currentUser,
                 stats: state.stats,
                 currentSession: state.currentSession,
+                advanceMode: state.advanceMode,
                 customRandomExamples: state.melodicStudio.customRandomExamples
             }));
             return true;
@@ -6109,6 +6165,8 @@
         state.currentSession = createEmptySession();
         state.melodicStudio.customRandomExamples = {};
         state.melodicStudio.exampleId = 'f3_4_1';
+        state.advanceMode = 'ask';
+        if (el('advanceModeSelect')) el('advanceModeSelect').value = state.advanceMode;
         if (!userName || userName === 'Invitado') {
             populateMelodicStudioExamplesDropdown();
             return;
@@ -6139,6 +6197,10 @@
                         ...parsed.currentSession,
                         startTime: Date.now()
                     };
+                }
+                if (['ask', 'auto', 'manual'].includes(parsed.advanceMode)) {
+                    state.advanceMode = parsed.advanceMode;
+                    if (el('advanceModeSelect')) el('advanceModeSelect').value = state.advanceMode;
                 }
                 if (parsed.customRandomExamples && typeof parsed.customRandomExamples === 'object' && !Array.isArray(parsed.customRandomExamples)) {
                     state.melodicStudio.customRandomExamples = parsed.customRandomExamples;
@@ -6246,7 +6308,7 @@
         }
     }
 
-    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
+    function rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG() {
         if (!Array.isArray(state.stats.progressionHistory)) state.stats.progressionHistory = [];
         const totalExercises = Number(state.stats.totalExercises) || 0;
         if (!totalExercises) return;
@@ -6265,7 +6327,7 @@
         if (history.length > 12) history.splice(0, history.length - 12);
     }
 
-    function renderLearningCurveChartsSVG() {
+    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
         const storedHistory = Array.isArray(state.stats.progressionHistory)
             ? state.stats.progressionHistory.slice(-12)
             : [];
@@ -6663,6 +6725,7 @@
         }
         if (el('switchUserButton') || el('userProfileBadge')) {
             [el('switchUserButton'), el('userProfileBadge')].forEach(b => b?.addEventListener('click', () => {
+                stopAllAudioPlayback();
                 populateWelcomeUserSelect();
                 el('mainAppContainer')?.classList.add('hidden');
                 el('welcomeModalOverlay')?.classList.add('visible');
@@ -7452,6 +7515,10 @@
 
         if (el('confirmAnswerButton')) {
             el('confirmAnswerButton').addEventListener('click', () => {
+                if (!state.continuityMode && state.exerciseSolved) {
+                    showFeedbackBanner('✅ Este ejercicio ya fue confirmado. Pulsa Enter o "Siguiente Ejercicio" para continuar.', 'info');
+                    return;
+                }
                 const exp = state.correctNotes.length;
                 if (state.selectedUserNotes.length < exp) {
                     showFeedbackBanner(`⚠️ Completa todas las voces (${state.selectedUserNotes.length}/${exp}) antes de confirmar.`, 'error');
@@ -7472,6 +7539,9 @@
                 // Punto 10: En Continuidad Armónica los 8 compases se evalúan como uno solo y se guardan en el Historial al completarse
                 if (state.continuityMode) {
                     const curBarObj = state.continuity.measures[state.continuity.currentBar];
+                    if (curBarObj && curBarObj.completed) {
+                        return;
+                    }
                     if (curBarObj) curBarObj.attemptsOnBar = (curBarObj.attemptsOnBar || 0) + 1;
                     if (allOk) {
                         if (curBarObj && !curBarObj.completed) {
@@ -7511,7 +7581,7 @@
                                 retries: state.continuity.runRetries,
                                 measures: JSON.parse(JSON.stringify(state.continuity.measures))
                             });
-                            rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
+                            rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG();
                             const saved = savePersistedState();
                             unlockBadge('continuity_8c');
                             showFeedbackBanner(
@@ -7555,7 +7625,7 @@
                         state.currentSession.totalTimeSec += elapsed;
                         state.currentSession.timedCount++;
                     }
-                    rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
+                    rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG();
                     const compKey = state.melodicStudio.isActive ? 'melodicApproaches' : (state.dictationMode ? 'earDictation' : (state.voicingType === 'close' ? 'close4Way' : 'openDropsSpreads'));
                     if (state.stats.competencies && state.stats.competencies[compKey]) {
                         state.stats.competencies[compKey].total++;
@@ -7572,15 +7642,17 @@
                     const saved = savePersistedState();
                     state.evaluation.questionsAttemptedInBatch++;
                     playNotesList(state.correctNotesWithOctave);
-                    showFeedbackBanner(
-                        saved === false
-                            ? '✅ ¡Correcto! No se pudo guardar el progreso del perfil.'
-                            : '✅ ¡Correcto! (+15 XP). Pulsa Enter o Siguiente Ejercicio para continuar.',
-                        saved === false ? 'error' : 'success'
-                    );
 
                     const evalTarget = state.evaluation.exercisesPerEval || 0;
-                    if (evalTarget > 0 && state.evaluation.questionsAttemptedInBatch >= evalTarget && !state.melodicStudio.isActive) {
+                    const willOpenEvalModal = evalTarget > 0 && state.evaluation.questionsAttemptedInBatch >= evalTarget && !state.melodicStudio.isActive;
+
+                    if (willOpenEvalModal) {
+                        showFeedbackBanner(
+                            saved === false
+                                ? '✅ ¡Correcto! No se pudo guardar el progreso del perfil.'
+                                : '✅ ¡Correcto! (+15 XP). Preparando balance de la tanda...',
+                            saved === false ? 'error' : 'success'
+                        );
                         setTimeout(() => {
                             const pct = Math.round((state.evaluation.batchCorrectFirstTry / evalTarget) * 100);
                             if (el('evalBatchSizeTag')) el('evalBatchSizeTag').textContent = `${evalTarget} Ejercicios`;
@@ -7595,6 +7667,38 @@
                             generateStandAloneExercise();
                             el('evaluationModalOverlay')?.classList.add('visible');
                         }, 550);
+                    } else if (!state.melodicStudio.isActive && state.advanceMode === 'auto') {
+                        showFeedbackBanner(
+                            saved === false
+                                ? '✅ ¡Correcto! No se pudo guardar el progreso del perfil. Avanzando...'
+                                : '✅ ¡Correcto! (+15 XP). Avanzando automáticamente al siguiente ejercicio...',
+                            saved === false ? 'error' : 'success'
+                        );
+                        state.autoAdvanceTimerId = setTimeout(() => {
+                            state.autoAdvanceTimerId = null;
+                            generateStandAloneExercise();
+                        }, 1100);
+                    } else if (!state.melodicStudio.isActive && state.advanceMode === 'ask') {
+                        showFeedbackBanner(
+                            saved === false
+                                ? '✅ ¡Correcto! No se pudo guardar el progreso del perfil.'
+                                : '✅ ¡Correcto! (+15 XP). Elige cómo avanzar al siguiente ejercicio.',
+                            saved === false ? 'error' : 'success'
+                        );
+                        const rootDisp = displayNote(state.chordRoot);
+                        const cif = chordStructures[state.chordTypeKey]?.cifrado || '';
+                        const summaryEl = el('correctAnswerModalSummary');
+                        if (summaryEl) {
+                            summaryEl.innerHTML = `<strong>${rootDisp}${cif}</strong> (1ª voz: <strong>${displayNote(state.givenNote)}</strong> — ${state.givenLabel}) • <strong>+15 XP</strong>`;
+                        }
+                        el('correctAnswerModalOverlay')?.classList.add('visible');
+                    } else {
+                        showFeedbackBanner(
+                            saved === false
+                                ? '✅ ¡Correcto! No se pudo guardar el progreso del perfil.'
+                                : '✅ ¡Correcto! (+15 XP). Pulsa Enter o Cambiar Ejercicio para continuar.',
+                            saved === false ? 'error' : 'success'
+                        );
                     }
                 } else {
                     state.failedCurrentExercise = true;
@@ -7623,19 +7727,25 @@
         if (el('playFullContinuityBtn')) el('playFullContinuityBtn').addEventListener('click', () => playContinuitySequence(true));
         if (el('finishContinuityAndGenerateNewBtn')) {
             el('finishContinuityAndGenerateNewBtn').addEventListener('click', () => {
+                stopAllAudioPlayback();
                 el('continuitySummaryModalOverlay')?.classList.remove('visible');
                 generateContinuity8Bars();
                 showFeedbackBanner('🎲 Se ha generado un nuevo ejercicio de 8 compases de Continuidad Armónica.', 'info');
             });
         }
-        if (el('closeContinuitySummaryBtn')) el('closeContinuitySummaryBtn').addEventListener('click', () => el('continuitySummaryModalOverlay')?.classList.remove('visible'));
+        if (el('closeContinuitySummaryBtn')) el('closeContinuitySummaryBtn').addEventListener('click', () => {
+            stopAllAudioPlayback();
+            el('continuitySummaryModalOverlay')?.classList.remove('visible');
+        });
         if (el('openContinuitySummaryBtn')) el('openContinuitySummaryBtn').addEventListener('click', openContinuitySummaryModal);
         if (el('newContinuityProgBtn')) el('newContinuityProgBtn').addEventListener('click', generateContinuity8Bars);
 
         if (el('undoLastNoteButton')) el('undoLastNoteButton').addEventListener('click', () => {
+            if (!state.continuityMode && state.exerciseSolved) return;
             if (state.selectedUserNotes.length > 1) { state.selectedUserNotes.pop(); updateDisplay(); }
         });
         if (el('clearAllSelectionButton')) el('clearAllSelectionButton').addEventListener('click', () => {
+            if (!state.continuityMode && state.exerciseSolved) return;
             state.selectedUserNotes = [state.givenNoteWithOctave];
             state.validatedCells = [null, null, null, null, null];
             updateDisplay();
@@ -7646,6 +7756,44 @@
             el('hintModalOverlay')?.classList.add('visible');
         });
         if (el('hintModalCloseButton')) el('hintModalCloseButton').addEventListener('click', () => el('hintModalOverlay')?.classList.remove('visible'));
+        const applyCorrectModalAdvancePreference = () => {
+            const selectedRadio = document.querySelector('input[name="correctAdvanceModeRadio"]:checked');
+            const chosenMode = selectedRadio?.value === 'auto' ? 'auto' : 'manual';
+            const shouldRemember = Boolean(el('rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63')?.checked);
+            if (shouldRemember) {
+                state.advanceMode = chosenMode;
+                if (el('advanceModeSelect')) el('advanceModeSelect').value = chosenMode;
+                savePersistedState();
+            }
+            return chosenMode;
+        };
+        if (el('correctModalNextBtn')) {
+            el('correctModalNextBtn').addEventListener('click', () => {
+                applyCorrectModalAdvancePreference();
+                el('correctAnswerModalOverlay')?.classList.remove('visible');
+                generateStandAloneExercise();
+            });
+        }
+        if (el('correctModalStayBtn')) {
+            el('correctModalStayBtn').addEventListener('click', () => {
+                applyCorrectModalAdvancePreference();
+                el('correctAnswerModalOverlay')?.classList.remove('visible');
+            });
+        }
+        if (el('advanceModeSelect')) {
+            el('advanceModeSelect').value = state.advanceMode;
+            el('advanceModeSelect').addEventListener('change', (e) => {
+                const val = e.target.value;
+                state.advanceMode = ['ask', 'auto', 'manual'].includes(val) ? val : 'ask';
+                savePersistedState();
+                const labels = {
+                    ask: '❓ Al acertar se preguntará cómo avanzar.',
+                    auto: '🚀 Avance automático activado al responder correctamente.',
+                    manual: '👆 Avance manual activado (usa Cambiar Ejercicio o Enter).'
+                };
+                showFeedbackBanner(labels[state.advanceMode], 'info');
+            });
+        }
         if (el('showAnswerButton')) el('showAnswerButton').addEventListener('click', () => {
             state.selectedUserNotes = [...state.correctNotesWithOctave];
             state.validatedCells = state.correctNotes.map((_, i) => i > 0 ? 'correct' : null);
@@ -7654,6 +7802,7 @@
             playNotesList(state.correctNotesWithOctave);
         });
         if (el('changeQuestionButton')) el('changeQuestionButton').addEventListener('click', generateStandAloneExercise);
+        if (el('nextExerciseButton')) el('nextExerciseButton').addEventListener('click', generateStandAloneExercise);
         if (el('replayAudioButton')) el('replayAudioButton').addEventListener('click', () => playNotesList(state.selectedUserNotes.length > 1 ? state.selectedUserNotes : state.correctNotesWithOctave));
         if (el('pdfReferenceBtn')) el('pdfReferenceBtn').addEventListener('click', () => el('pdfReferenceModalOverlay')?.classList.add('visible'));
         if (el('closePdfReferenceBtn')) el('closePdfReferenceBtn').addEventListener('click', () => el('pdfReferenceModalOverlay')?.classList.remove('visible'));
@@ -7665,7 +7814,9 @@
         });
         if (el('endSessionButton') || el('endSessionTopBtn')) {
             [el('endSessionButton'), el('endSessionTopBtn')].forEach(b => b?.addEventListener('click', () => {
+                stopAllAudioPlayback();
                 el('evaluationModalOverlay')?.classList.remove('visible');
+                el('correctAnswerModalOverlay')?.classList.remove('visible');
                 el('mainAppContainer')?.classList.add('hidden');
                 if (el('resultsContentToCapture')) {
                     el('resultsContentToCapture').innerHTML = buildFullGamifiedSessionReportHTML(true);
@@ -7674,6 +7825,7 @@
             }));
         }
         if (el('changeUserFromFinalBtn')) el('changeUserFromFinalBtn').addEventListener('click', () => {
+            stopAllAudioPlayback();
             populateWelcomeUserSelect();
             el('finalMessageDisplay')?.classList.add('hidden');
             el('welcomeModalOverlay')?.classList.add('visible');
@@ -8666,9 +8818,21 @@
             if (e.key === 'Backspace') { e.preventDefault(); el('undoLastNoteButton')?.click(); return; }
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (state.exerciseSolved && !state.continuityMode) el('changeQuestionButton')?.click();
-                else el('confirmAnswerButton')?.click();
+                if (el('correctAnswerModalOverlay')?.classList.contains('visible')) {
+                    el('correctModalNextBtn')?.click();
+                } else if (state.exerciseSolved && !state.continuityMode) {
+                    el('changeQuestionButton')?.click();
+                } else {
+                    el('confirmAnswerButton')?.click();
+                }
             }
+        });
+
+        // Detener todo el audio al cerrar, recargar o pasar la app a segundo plano
+        window.addEventListener('pagehide', stopAllAudioPlayback);
+        window.addEventListener('beforeunload', stopAllAudioPlayback);
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stopAllAudioPlayback();
         });
 
         // Reloj en vivo (por ejercicio y cuenta regresiva de sesión)
