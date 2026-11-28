@@ -67,6 +67,7 @@
                     <label class="block text-xs font-bold mb-1">Nombre del Nuevo Perfil:</label>
                     <input type="text" id="welcomeNewUserInput" maxlength="28" placeholder="Escribe tu nombre aquí..." class="ctrl-input w-full">
                 </div>
+                <p id="welcomeLoginError" class="hidden text-xs font-bold text-red-600 text-center bg-red-50 border border-red-200 rounded-lg p-1.5">⚠️ Selecciona un perfil guardado o escribe un nombre de usuario para continuar.</p>
             </div>
             <div class="mt-5 flex flex-wrap gap-2.5 justify-center">
                 <button id="welcomeLoginBtn" type="button" class="toolbar-btn bg-green-600 text-white px-5 py-2.5">🚀 Comenzar Sesión</button>
@@ -90,19 +91,42 @@
         </div>
     </div>
 
-    <!-- Tutorial Interactivo -->
-    <div id="tutorialOverlay" class="hidden">
+    <!-- Tutorial Interactivo Completo -->
+    <div id="tutorialOverlay" class="hidden" role="dialog" aria-label="Tutorial interactivo de Bloque Armónico Pro">
         <div id="tutorialModal">
-            <div class="flex justify-between items-center mb-1">
-                <span id="tutorialStepBadge" class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-800">Paso 1 de 7</span>
-                <button id="tutorialOpenShortcutsBtn" type="button" class="text-xs font-bold text-teal-600 underline cursor-pointer">⌨️ Ver Atajos</button>
+            <div class="flex justify-between items-center gap-2 mb-1.5">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <span id="tutorialStepBadge" class="text-[11px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-600 text-white">Paso 1 de 12</span>
+                    <span id="tutorialCategoryBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Inicio</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="tutorialOpenShortcutsBtn" type="button" class="text-xs font-bold text-teal-600 underline cursor-pointer border-0 bg-transparent">⌨️ Atajos</button>
+                    <button id="tutorialEndButton" type="button" class="text-xs font-extrabold text-slate-500 hover:text-red-600 cursor-pointer border-0 bg-transparent px-1" title="Cerrar tutorial (Esc)">✕</button>
+                </div>
             </div>
-            <h3 id="tutorialTitle" class="text-base font-extrabold text-blue-600 mb-1"></h3>
-            <p id="tutorialText" class="text-xs opacity-90 mb-3 text-left leading-relaxed"></p>
+            <div class="tutorial-progress-track mb-1.5" aria-hidden="true">
+                <div id="tutorialProgressBar" class="tutorial-progress-bar" style="width: 8%;"></div>
+            </div>
+            <div id="tutorialModuleBar" class="tutorial-module-bar mb-1.5" role="tablist" aria-label="Elegir sección del tutorial">
+                <button type="button" class="tutorial-module-pill active" data-tut-mod="all">📚 Todo</button>
+                <button type="button" class="tutorial-module-pill" data-tut-mod="tools">🧰 Barra</button>
+                <button type="button" class="tutorial-module-pill" data-tut-mod="bloque">🎹 Bloque</button>
+                <button type="button" class="tutorial-module-pill" data-tut-mod="continuity">🎼 8C</button>
+                <button type="button" class="tutorial-module-pill" data-tut-mod="harmonizations">🎶 Armoniz.</button>
+            </div>
+            <div id="tutorialStepDots" class="tutorial-step-dots mb-2" aria-label="Saltar a un paso del tutorial"></div>
+            <h3 id="tutorialTitle" class="text-sm sm:text-base font-extrabold text-blue-600 mb-1.5 text-left"></h3>
+            <div id="tutorialText" class="tutorial-body text-xs opacity-95 mb-2.5 text-left leading-relaxed"></div>
+            <div id="tutorialTryBox" class="tutorial-try-box mb-3">
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <span id="tutorialMissionText" class="text-[11px] font-bold text-left flex-1"></span>
+                    <span id="tutorialMissionStatus" class="hidden text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-600 text-white">✅ ¡Probado!</span>
+                    <button id="tutorialTryActionBtn" type="button" class="toolbar-btn bg-indigo-600 text-white text-[11px] px-2.5 py-1">⚡ Probar ahora</button>
+                </div>
+            </div>
             <div class="flex gap-2">
-                <button id="tutorialPrevButton" type="button" class="toolbar-btn flex-1 bg-slate-200 text-slate-800">Anterior</button>
-                <button id="tutorialNextButton" type="button" class="toolbar-btn flex-1 bg-blue-600 text-white">Siguiente</button>
-                <button id="tutorialEndButton" type="button" class="toolbar-btn bg-gray-500 text-white">Cerrar</button>
+                <button id="tutorialPrevButton" type="button" class="toolbar-btn flex-1 bg-slate-200 text-slate-800">⬅ Anterior</button>
+                <button id="tutorialNextButton" type="button" class="toolbar-btn flex-1 bg-blue-600 text-white">Siguiente ➜</button>
             </div>
         </div>
     </div>
@@ -177,6 +201,7 @@
                 <button type="button" data-diff="advanced" class="diff-btn toolbar-btn bg-slate-200 text-slate-800" title="Nivel Avanzado: Tensiones y voicings abiertos / 5 voces">Avanzado (5V)</button>
                 <select id="practiceChordTypeSelect" class="ctrl-select font-bold max-w-[180px]" title="Tipo de acorde"></select>
                 <button id="toggleBloqueOptionsBtn" type="button" class="toolbar-btn bg-slate-200 text-slate-800">🎛️ Opciones</button>
+                <button id="tutBloqueQuickBtn" type="button" class="toolbar-btn bg-blue-100 text-blue-800" title="Tutorial solo de Bloque Armónico">❓ Ayuda</button>
             </div>
             <div id="bloqueAdvancedOptions" class="hidden flex-wrap items-center justify-center gap-1.5 pt-2 border-t border-slate-200 w-full">
                 <div id="advancedModesToolbar" class="flex flex-wrap items-center justify-center gap-1.5">
@@ -274,6 +299,7 @@
                     <button id="openCustomMelodyEditorBtn" type="button" class="toolbar-btn bg-teal-700 text-white">✍️ Editor</button>
                     <button id="toggleStudioEditorBtn" type="button" class="toolbar-btn bg-amber-100 text-amber-900 border border-amber-400">🛠️ Editar Nota</button>
                     <button id="toggleStudioToolsBtn" type="button" class="toolbar-btn bg-slate-800 text-white">⚙️ Más / Exportar</button>
+                    <button id="tutHarmonizationsQuickBtn" type="button" class="toolbar-btn bg-emerald-100 text-emerald-900 border border-emerald-400" title="Tutorial paso a paso solo de Armonizaciones">❓ Cómo usar</button>
                 </div>
             </div>
 
@@ -410,7 +436,7 @@
                     <button id="exportStudioXmlBtn" type="button" class="toolbar-btn bg-violet-700 text-white">🎼 Exportar XML</button>
                     <button id="exportStudioPdfBtn" type="button" class="toolbar-btn bg-rose-600 text-white">📄 Exportar PDF</button>
                 </div>
-                <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg border border-indigo-500/30">
+                <div id="studioDispPermRow" class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2 bg-slate-50 p-2 rounded-lg border border-indigo-500/30">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <span class="font-extrabold text-indigo-900">📐 Disposición:</span>
                         <div class="inline-flex rounded-lg bg-slate-200 p-0.5 gap-0.5 flex-wrap">
@@ -426,7 +452,7 @@
                         </div>
                         <button id="applyDropToAllPhraseBtn" type="button" class="toolbar-btn bg-indigo-600 text-white">🔄 Aplicar a Toda la Armonización</button>
                     </div>
-                    <div class="flex items-center gap-1.5 flex-wrap">
+                    <div id="studioPermutationsSection" class="flex items-center gap-1.5 flex-wrap">
                         <span class="font-extrabold text-purple-900">🔀 Permutaciones:</span>
                         <div id="studioMultiPermutationContainer" class="flex items-center gap-1 flex-wrap"></div>
                         <button id="clearNotePermutationsBtn" type="button" class="toolbar-btn bg-slate-200 text-slate-800">Limpiar Perm.</button>
@@ -497,7 +523,7 @@
                         <div class="analysis-section-heading">3. Disposición de voces</div>
                         <div id="floatingDispositionOptions" class="flex flex-wrap gap-1"></div>
                     </div>
-                    <div class="pt-1 border-t border-slate-200">
+                    <div id="floatingPermutationsSection" class="pt-1 border-t border-slate-200">
                         <div class="analysis-section-heading">4. Permutaciones válidas</div>
                         <p class="analysis-help-text">Agrega o quita permutaciones válidas sin reemplazar las demás opciones de armonización.</p>
                         <div id="floatingPermutationsContainer" class="flex flex-wrap gap-1"></div>
@@ -543,6 +569,7 @@
                     <button id="changePositionBtn" type="button" class="toolbar-btn bg-amber-500 text-white">🔄 Cambiar Posición</button>
                     <button id="openContinuitySummaryBtn" type="button" class="toolbar-btn bg-emerald-600 text-white" title="Muestra el historial de continuidades completadas (el ejercicio en curso solo se desbloquea al terminar los 8 compases)">🗂️ Historial de Partituras (8C)</button>
                     <button id="newContinuityProgBtn" type="button" class="toolbar-btn bg-slate-200 text-slate-800">🎲 Nuevos 8 Compases</button>
+                    <button id="tutContinuityQuickBtn" type="button" class="toolbar-btn bg-teal-100 text-teal-900" title="Tutorial solo de Continuidad Armónica">❓ Cómo usar</button>
                 </div>
             </div>
             <div id="continuityBarsContainer" class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 mt-1"></div>
