@@ -1999,9 +1999,18 @@
         return rawFlat;
     }
 
+    function isAmbiChordForStudioNote(noteObj, baseVoicingObj = null) {
+        if (!noteObj) return false;
+        const idx = noteObj.globalIdx;
+        const disp = state.melodicStudio.voicingDispositionByNote[idx] || state.melodicStudio.voicingDisposition || 'close';
+        const tech = baseVoicingObj?.techniqueId || state.melodicStudio.selectedHarmonizationByNote[idx] || '';
+        return ['ambi_a', 'ambi_b', 'ambi_c'].includes(disp) || ['ambi_a', 'ambi_b', 'ambi_c'].includes(tech);
+    }
+
     // Devuelve las permutaciones válidas según el acorde armonizado, garantizando que no se repitan notas destino
-    function getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(noteObj, baseVoicingObj, activePermIds = []) {
+    function getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(noteObj, baseVoicingObj, activePermIds = []) {
         if (!noteObj || noteObj.isRest || !baseVoicingObj || !Array.isArray(baseVoicingObj.notesWithOct)) return [];
+        if (isAmbiChordForStudioNote(noteObj, baseVoicingObj)) return [];
         const effRoot = baseVoicingObj.effectiveBassRoot || noteObj.targetRoot || noteObj.barChordRoot || 'C';
         const effType = baseVoicingObj.effectiveChordTypeKey || noteObj.targetType || noteObj.barChordTypeKey || 'maj7';
         const baseNotes = baseVoicingObj.notesWithOct.slice(0, 4);
@@ -2058,7 +2067,7 @@
         return ['tonic_II_V_I', 'tonic_V7ofV_V_I', 'tonic_II_bII_I', 'tonic_bVI_bII_I', 'tonic_IVm_bVII_I', 'tonic_sIVm7b5_VII7_I'].includes(techId);
     }
 
-    function getTWXhfxWXMPAaVgQjuoSvsJo3cQygW8cN2F(techId, targetRoot, targetTypeKey) {
+    function getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(techId, targetRoot, targetTypeKey) {
         const root = targetRoot || 'C';
         const type = targetTypeKey || 'maj7';
         const isMinor = type === 'm7' || type === 'minor';
@@ -2385,7 +2394,8 @@
         if (!skipPermutationsAndDrops) {
             const normalizeRole = (r) => (r === 'b3' ? '3' : (r === 'b7' ? '7' : (r === 'b5' ? '5' : r)));
             const activePerms = state.melodicStudio.selectedMultiPermutationsByNote[noteObj.globalIdx] || [];
-            if (activePerms.length > 0 && notesWithOct.length >= 4 && !chosenId.startsWith('ind_') && !['ambi_a', 'ambi_b', 'ambi_c'].includes(chosenId)) {
+            const activeDispCheck = state.melodicStudio.voicingDispositionByNote[noteObj.globalIdx] || state.melodicStudio.voicingDisposition || 'close';
+            if (activePerms.length > 0 && notesWithOct.length >= 4 && !chosenId.startsWith('ind_') && !['ambi_a', 'ambi_b', 'ambi_c'].includes(chosenId) && !['ambi_a', 'ambi_b', 'ambi_c'].includes(activeDispCheck)) {
                 const usedPcs = new Set([getNoteSemitone(notesWithOct[0].split('/')[0])]);
                 const innerSpecs = [];
                 for (let i = 1; i < 4; i++) {
@@ -4084,20 +4094,28 @@
         return null;
     }
 
-    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
+    function renderLivePermutationsChips() {
         const cont = el('livePermutationsContainer');
+        const bar = el('livePermutationsBar');
         if (!cont) return;
         const ex = getMelodicExampleById(state.melodicStudio.exampleId);
         const notesList = getFlattenedNotesFromExample(state.melodicStudio.exampleId);
         const selIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
         const cur = notesList[selIdx];
         if (!cur || cur.isRest || !ex) {
+            if (bar) bar.classList.remove('hidden');
             cont.innerHTML = '<span class="text-[11px] text-slate-400 italic">Selecciona una nota para permutar tensiones</span>';
             return;
         }
         const curArr = state.melodicStudio.selectedMultiPermutationsByNote[selIdx] || [];
         const baseVoicingNoPerm = computeHarmonizationForMelodicNote(cur, null, true);
-        const validPermKeys = getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(cur, baseVoicingNoPerm, curArr);
+        if (isAmbiChordForStudioNote(cur, baseVoicingNoPerm)) {
+            if (bar) bar.classList.add('hidden');
+            cont.innerHTML = '';
+            return;
+        }
+        if (bar) bar.classList.remove('hidden');
+        const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(cur, baseVoicingNoPerm, curArr);
         if (!validPermKeys.length) {
             cont.innerHTML = '<span class="text-[11px] text-slate-400 italic">Sin permutaciones disponibles para este acorde</span>';
             return;
@@ -4326,7 +4344,7 @@
             }
         }
         updateUndoRedoButtons();
-        rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
+        renderLivePermutationsChips();
     }
 
     function ensureExampleAutoFilled(exId) {
@@ -4479,13 +4497,20 @@
 
         const selectedPermNoteIdx = state.melodicStudio.selectedNoteIdx !== null ? state.melodicStudio.selectedNoteIdx : 0;
         const selectedPermNote = notesList[selectedPermNoteIdx] || notesList[0];
+        const baseVoicingForPermCheck = selectedPermNote
+            ? computeHarmonizationForMelodicNote(selectedPermNote, null, true)
+            : null;
+        const hidePermsForAmbi = isAmbiChordForStudioNote(selectedPermNote, baseVoicingForPermCheck);
+        el('studioPermutationsSection')?.classList.toggle('hidden', hidePermsForAmbi);
+        el('floatingPermutationsSection')?.classList.toggle('hidden', hidePermsForAmbi);
         const renderPermutationOptions = (permCont) => {
             if (!permCont) return;
+            if (hidePermsForAmbi) {
+                permCont.innerHTML = '';
+                return;
+            }
             const curArr = state.melodicStudio.selectedMultiPermutationsByNote[selectedPermNoteIdx] || [];
-            const baseVoicingNoPerm = selectedPermNote
-                ? computeHarmonizationForMelodicNote(selectedPermNote, null, true)
-                : null;
-            const validPermKeys = getValidPerpZELkorMwhkkpShF5PvT8YnqRCupnLTNG(selectedPermNote, baseVoicingNoPerm, curArr);
+            const validPermKeys = getValidPerpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63(selectedPermNote, baseVoicingForPermCheck, curArr);
             if (!validPermKeys.length) {
                 permCont.innerHTML = `<span class="text-[10px] text-slate-500 italic">Sin permutaciones disponibles para este bloque</span>`;
             } else {
@@ -4567,9 +4592,15 @@
             const activeDisposition = state.melodicStudio.voicingDispositionByNote[curNote.globalIdx]
                 || state.melodicStudio.voicingDisposition
                 || 'close';
-            floatingDispositionOptions.innerHTML = Object.entries(DISPOSITION_HUMAN_NAMES).map(([id, name]) => {
-                const shortName = name.replace(/\s*\([^)]*\)/g, '');
-                const isActive = id === activeDisposition;
+            floatingDispositionOptions.innerHTML = Object.entries(DISPOSITION_HUMAN_NAMES)
+                .filter(([id]) => id !== 'shearing')
+                .map(([id, name]) => {
+                const shortName = id === 'spread5_m1'
+                    ? 'Spread 5V (M1)'
+                    : (id === 'drop2_spread5'
+                        ? 'Spread 5V (M2)'
+                        : (id === 'quasi_spread5' ? 'Quasi Spread (M3)' : name.replace(/\s*\([^)]*\)/g, '')));
+                const isActive = id === activeDisposition || (id === 'double_lead' && activeDisposition === 'shearing');
                 return `<button type="button" data-floating-drop="${id}" aria-pressed="${isActive}" title="${name}" class="px-2 py-1 rounded border text-[10px] font-bold ${isActive ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-white text-slate-800 border-slate-300'}">${shortName}</button>`;
             }).join('');
             floatingDispositionOptions.querySelectorAll('[data-floating-drop]').forEach(button => button.addEventListener('click', event => {
@@ -4696,7 +4727,7 @@
                         : 'bg-pink-50 text-pink-950 border-2 border-pink-500 hover:bg-pink-100 font-bold';
                 }
                 const previewText = isTonic
-                    ? getTWXhfxWXMPAaVgQjuoSvsJo3cQygW8cN2F(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
+                    ? getTWXh8n73LuT5MJ23pd8dCjFskRZckveFbP(tid, curNote.targetRoot || curNote.barChordRoot, curNote.targetType || curNote.barChordTypeKey)
                     : (tObj.desc || '');
                 return `<button type="button" data-tech-opt="${tid}" aria-pressed="${isAct}" class="analysis-tech-option-btn text-left p-2 rounded-lg border text-[11px] cursor-pointer ${btnColors}">
                     <div class="font-bold">[${tObj.abbr}] ${tObj.shortName}</div>
@@ -5784,7 +5815,7 @@
                     </div>
                 </div>
 
-                ${rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63()}
+                ${renderLearningCurveChartsSVG()}
 
                 <div>
                     <div class="font-extrabold text-amber-800 uppercase text-[11px] mb-1.5">🏆 Medallas y Logros de Gamificación (${unl.length}/${BADGES_CATALOG.length}):</div>
@@ -6217,10 +6248,15 @@
         const sel = el('welcomeUserSelect');
         if (!sel) return;
         try {
-            const users = JSON.parse(localStorage.getItem('bloqueArmonicoUsers_v3') || '[]');
-            if (!Array.isArray(users)) throw new Error('La lista de perfiles guardada no tiene un formato válido.');
+            const rawUsers = JSON.parse(localStorage.getItem('bloqueArmonicoUsers_v3') || '[]');
+            if (!Array.isArray(rawUsers)) throw new Error('La lista de perfiles guardada no tiene un formato válido.');
+            const cleanedUsers = [...new Set(rawUsers.filter(user => typeof user === 'string' && user.trim() && user.trim().toLowerCase() !== 'estudiante'))];
+            if (cleanedUsers.length !== rawUsers.length) {
+                localStorage.setItem('bloqueArmonicoUsers_v3', JSON.stringify(cleanedUsers));
+                localStorage.removeItem('bloqueArmonicoUser_v3_Estudiante');
+            }
             sel.replaceChildren(new Option('-- Cargar Perfil --', ''));
-            [...new Set(users.filter(user => typeof user === 'string' && user.trim()))].forEach(user => {
+            cleanedUsers.forEach(user => {
                 sel.add(new Option(user, user));
             });
         } catch (error) {
@@ -6308,7 +6344,7 @@
         }
     }
 
-    function rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG() {
+    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
         if (!Array.isArray(state.stats.progressionHistory)) state.stats.progressionHistory = [];
         const totalExercises = Number(state.stats.totalExercises) || 0;
         if (!totalExercises) return;
@@ -6327,7 +6363,7 @@
         if (history.length > 12) history.splice(0, history.length - 12);
     }
 
-    function rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63() {
+    function renderLearningCurveChartsSVG() {
         const storedHistory = Array.isArray(state.stats.progressionHistory)
             ? state.stats.progressionHistory.slice(-12)
             : [];
@@ -6613,7 +6649,12 @@
 
     function setupListeners() {
         populateWelcomeUserSelect();
+        const clearWelcomeLoginError = () => {
+            el('welcomeLoginError')?.classList.add('hidden');
+            el('welcomeNewUserInput')?.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
+        };
         if (el('welcomeNewUserInput')) {
+            el('welcomeNewUserInput').addEventListener('input', clearWelcomeLoginError);
             el('welcomeNewUserInput').addEventListener('keydown', e => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -6621,11 +6662,21 @@
                 }
             });
         }
+        if (el('welcomeUserSelect')) {
+            el('welcomeUserSelect').addEventListener('change', clearWelcomeLoginError);
+        }
         if (el('welcomeLoginBtn')) {
             el('welcomeLoginBtn').addEventListener('click', () => {
                 const newName = (el('welcomeNewUserInput')?.value || '').trim();
-                const selectedName = el('welcomeUserSelect')?.value || '';
-                const chosen = newName || selectedName || 'Estudiante';
+                const selectedName = (el('welcomeUserSelect')?.value || '').trim();
+                const chosen = newName || selectedName;
+                if (!chosen) {
+                    el('welcomeLoginError')?.classList.remove('hidden');
+                    el('welcomeNewUserInput')?.classList.add('border-red-500', 'ring-2', 'ring-red-300');
+                    el('welcomeNewUserInput')?.focus();
+                    return;
+                }
+                clearWelcomeLoginError();
                 let isBrandNewUser = false;
                 try {
                     isBrandNewUser = registerUserProfile(chosen);
@@ -7581,7 +7632,7 @@
                                 retries: state.continuity.runRetries,
                                 measures: JSON.parse(JSON.stringify(state.continuity.measures))
                             });
-                            rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG();
+                            rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
                             const saved = savePersistedState();
                             unlockBadge('continuity_8c');
                             showFeedbackBanner(
@@ -7625,7 +7676,7 @@
                         state.currentSession.totalTimeSec += elapsed;
                         state.currentSession.timedCount++;
                     }
-                    rpZELkorMwhkkpShF5PvT8YnqRCupnLTNG();
+                    rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63();
                     const compKey = state.melodicStudio.isActive ? 'melodicApproaches' : (state.dictationMode ? 'earDictation' : (state.voicingType === 'close' ? 'close4Way' : 'openDropsSpreads'));
                     if (state.stats.competencies && state.stats.competencies[compKey]) {
                         state.stats.competencies[compKey].total++;
@@ -7759,7 +7810,7 @@
         const applyCorrectModalAdvancePreference = () => {
             const selectedRadio = document.querySelector('input[name="correctAdvanceModeRadio"]:checked');
             const chosenMode = selectedRadio?.value === 'auto' ? 'auto' : 'manual';
-            const shouldRemember = Boolean(el('rpZEAWYtiB6bJ16NuLbGCc6CZ6jJdKfb63')?.checked);
+            const shouldRemember = Boolean(el('rememberAdvanceModeCheckbox')?.checked);
             if (shouldRemember) {
                 state.advanceMode = chosenMode;
                 if (el('advanceModeSelect')) el('advanceModeSelect').value = chosenMode;
@@ -8253,9 +8304,9 @@
                         if (!data || typeof data !== 'object' || Array.isArray(data)) {
                             throw new Error('El respaldo no tiene un formato válido.');
                         }
-                        const importedUser = typeof data.currentUser === 'string' && data.currentUser.trim()
+                        const importedUser = typeof data.currentUser === 'string' && data.currentUser.trim() && data.currentUser.trim().toLowerCase() !== 'estudiante'
                             ? data.currentUser.trim()
-                            : (state.currentUser === 'Invitado' ? 'Estudiante' : state.currentUser);
+                            : state.currentUser;
                         try {
                             registerUserProfile(importedUser);
                         } catch (error) {
@@ -8426,76 +8477,590 @@
         if (el('applyCustomMelodyAutoBtn')) el('applyCustomMelodyAutoBtn').addEventListener('click', () => loadCustomEditorDraftIntoStudio(false));
         if (el('applyCustomMelodyManualBtn')) el('applyCustomMelodyManualBtn').addEventListener('click', () => loadCustomEditorDraftIntoStudio(true));
         if (el('closeCustomMelodyModalBtn')) el('closeCustomMelodyModalBtn').addEventListener('click', () => el('customMelodyModalOverlay')?.classList.remove('visible'));
-        // Punto 9: Tutorial interactivo completo actualizado con todas las funciones y atajos
+        // Tutorial interactivo completo paso a paso: navega en vivo por cada modo, abre paneles y permite probar cada herramienta
+        const setPanelVisible = (panelId, btnId, show, openText, closedText, useFlex = false) => {
+            const panel = el(panelId);
+            const btn = el(btnId);
+            if (!panel) return;
+            panel.classList.toggle('hidden', !show);
+            if (useFlex) panel.classList.toggle('flex', show);
+            if (btn && openText && closedText) {
+                btn.textContent = show ? openText : closedText;
+                btn.setAttribute('aria-expanded', show ? 'true' : 'false');
+            }
+        };
+
+        const ensureTutorialMode = (mode) => {
+            if (mode === 'bloque') {
+                state.melodicStudio.isActive = false;
+                state.continuityMode = false;
+                el('mechanicalApproachBtn')?.classList.remove('bg-emerald-600', 'text-white');
+                el('continuityModeBtn')?.classList.remove('bg-teal-600', 'text-white');
+                el('floatingHarmonizationModal')?.classList.add('hidden');
+                renderMelodicStudioUI();
+                renderContinuityPanel();
+                if (!state.correctNotes || !state.correctNotes.length) generateStandAloneExercise();
+                else updateDisplay();
+                syncMainModeTabs();
+            } else if (mode === 'continuity') {
+                state.melodicStudio.isActive = false;
+                state.continuityMode = true;
+                el('mechanicalApproachBtn')?.classList.remove('bg-emerald-600', 'text-white');
+                el('continuityModeBtn')?.classList.add('bg-teal-600', 'text-white');
+                el('floatingHarmonizationModal')?.classList.add('hidden');
+                renderMelodicStudioUI();
+                if (!state.continuity.measures || state.continuity.measures.length !== 8) {
+                    generateContinuity8Bars();
+                } else {
+                    renderContinuityPanel();
+                    updateDisplay();
+                }
+                syncMainModeTabs();
+            } else if (mode === 'harmonizations') {
+                state.continuityMode = false;
+                state.melodicStudio.isActive = true;
+                el('continuityModeBtn')?.classList.remove('bg-teal-600', 'text-white');
+                el('mechanicalApproachBtn')?.classList.add('bg-emerald-600', 'text-white');
+                renderContinuityPanel();
+                if (state.melodicStudio.selectedNoteIdx === null) state.melodicStudio.selectedNoteIdx = 0;
+                renderMelodicStudioUI();
+                syncMainModeTabs();
+            }
+        };
+
         const TUTORIAL_STEPS = [
             {
+                id: 'statusBar',
+                module: 'tools',
+                category: 'Barra Superior',
+                title: '1. Barra de Estado, Audio y Sesión',
+                html: `<ul>
+                    <li><strong>👤 Perfil y 🔥 Racha:</strong> haz clic en tu nombre para cambiar de usuario; tu racha diaria y aciertos/errores (✅/❌) se guardan automáticamente.</li>
+                    <li><strong>⏱️ Cronómetro y 🔊 Escuchar:</strong> mide tu tiempo por ejercicio y reproduce el acorde actual en cualquier momento.</li>
+                    <li><strong>🧰 Herramientas / 🌙 Modo Oscuro / 🏁 Terminar Sesión:</strong> abre utilidades, cambia el tema visual o genera tu reporte final en PDF.</li>
+                </ul>`,
+                mission: 'Haz clic en 🔊 Escuchar (arriba) o pulsa el botón para oír el acorde actual.',
+                tryLabel: '🔊 Probar Audio',
+                detectSelector: '#statusBar button, #userProfileBadge',
+                prepare: () => {
+                    ensureTutorialMode('bloque');
+                    setPanelVisible('topQuickToolsBar', 'toggleQuickToolsBtn', false, '▲ Ocultar', '🧰 Herramientas');
+                    setPanelVisible('bloqueAdvancedOptions', 'toggleBloqueOptionsBtn', false, '✕ Ocultar', '🎛️ Opciones', true);
+                },
+                tryAction: () => el('replayAudioButton')?.click()
+            },
+            {
+                id: 'topQuickToolsBar',
+                module: 'tools',
+                category: 'Utilidades',
+                title: '2. Menú de 🧰 Herramientas (Todas las Utilidades)',
+                html: `<ul>
+                    <li><strong>🎷 Estándares:</strong> 36 progresiones de jazz (Swing, Bossa, Bebop, Blues) listas para armonizar.</li>
+                    <li><strong>👂 Dictado / 📘 Guía / 🔄 Errores:</strong> practica de oído, consulta las tablas oficiales de tensiones/permutaciones o repasa tus fallos.</li>
+                    <li><strong>📊 Estadísticas / 🏆 Medallas / 🎯 Reto:</strong> revisa tu progreso, logros desbloqueados o crea un acorde específico a medida.</li>
+                    <li><strong>🎹 MIDI / ⚙️ Ajustes / 👥 Usuario / ⌨️ Atajos:</strong> conecta teclado MIDI, filtra acordes/voces por nivel, cambia de perfil o consulta los atajos.</li>
+                </ul>`,
+                mission: 'Explora cualquier botón de la barra iluminada o abre la 📘 Guía teórica.',
+                tryLabel: '📘 Abrir Guía',
+                detectSelector: '#topQuickToolsBar button, #midiStatusBadge',
+                prepare: () => {
+                    ensureTutorialMode('bloque');
+                    setPanelVisible('topQuickToolsBar', 'toggleQuickToolsBtn', true, '▲ Ocultar', '🧰 Herramientas');
+                    setPanelVisible('bloqueAdvancedOptions', 'toggleBloqueOptionsBtn', false, '✕ Ocultar', '🎛️ Opciones', true);
+                },
+                tryAction: () => el('pdfReferenceBtn')?.click()
+            },
+            {
+                id: 'mainModeTabs',
+                module: 'tools',
+                category: 'Navegación',
+                title: '3. Los 3 Modos Principales de Entrenamiento',
+                html: `<ul>
+                    <li><strong>🎹 Bloque Armónico:</strong> entrena construcción de acordes individuales (3, 4 y 5 voces) con evaluación por tandas.</li>
+                    <li><strong>🎼 Continuidad Armónica:</strong> enlaza progresiones de 8 compases conduciendo voces con notas comunes.</li>
+                    <li><strong>🎶 Armonizaciones:</strong> analiza melodías nota por nota, elige técnicas/permutaciones y exporta MIDI/MusicXML/PDF.</li>
+                </ul>`,
+                mission: 'Usa estas pestañas para cambiar entre los 3 modos en cualquier momento.',
+                tryLabel: '✅ Entendido',
+                detectSelector: '#mainModeTabs button',
+                prepare: () => {
+                    ensureTutorialMode('bloque');
+                    setPanelVisible('topQuickToolsBar', 'toggleQuickToolsBtn', false, '▲ Ocultar', '🧰 Herramientas');
+                },
+                tryAction: () => {}
+            },
+            {
+                id: 'bloqueLevelsBar',
+                module: 'bloque',
+                category: 'Bloque Armónico',
+                title: 'Niveles (3V, 4V, 5V) y Selector de Especie',
+                html: `<ul>
+                    <li><strong>Básico (3V):</strong> tríadas cerradas a 3 voces (Mayor, Menor, Aumentado, Disminuido, Sus2, Sus4).</li>
+                    <li><strong>Intermedio (4V):</strong> bloques cerrados a 4 voces (maj7, m7, 7, m7b5, dim7, 6, m6, mMaj7, 7sus4).</li>
+                    <li><strong>Avanzado (5V):</strong> añade tensiones por permutación en bloque cerrado (9, b9, #9, 11, #11, 13, b13) y disposiciones abiertas.</li>
+                    <li><strong>Selector de Acorde:</strong> practica aleatorio o fija una especie concreta (ej. <code>m7(b5)</code>).</li>
+                </ul>`,
+                mission: 'Haz clic en un nivel (Básico / Intermedio / Avanzado) o prueba cambiarlo ahora.',
+                tryLabel: '🎚️ Probar Nivel Intermedio',
+                detectSelector: '#difficultySelection button, #practiceChordTypeSelect',
+                prepare: () => {
+                    ensureTutorialMode('bloque');
+                    setPanelVisible('bloqueAdvancedOptions', 'toggleBloqueOptionsBtn', false, '✕ Ocultar', '🎛️ Opciones', true);
+                },
+                tryAction: () => document.querySelector('#difficultySelection [data-diff="intermediate"]')?.click()
+            },
+            {
+                id: 'bloqueAdvancedOptions',
+                module: 'bloque',
+                category: 'Opciones Avanzadas',
+                title: '🎛️ Opciones de Disposición, Audio, Evaluación y Avance',
+                html: `<ul>
+                    <li><strong>Disposición:</strong> 4-Way Close, Variantes 1–3, Cuartas Ambivalentes (A/B/C), Drop 2, Drop 3, Drop 2&amp;4 y Spreads 4–5 voces.</li>
+                    <li><strong>🎸 Bajo / ♯♭ Enarmonía / Instrumento / Arpegio / Clave:</strong> añade bajo, exige ortografía exacta, cambia timbre (Piano, Rhodes, Saxos, Cuerdas) o formato del pentagrama.</li>
+                    <li><strong>⏱️ Reloj / 📋 Evaluar / ❓ Avance / C,D,E–Do,Re,Mi:</strong> define límite de tiempo, tamaño de tanda, avance automático o manual al acertar y notación americana o latina.</li>
+                </ul>`,
+                mission: 'Prueba alternar la notación (C,D,E ↔ Do,Re,Mi) o cualquier selector resaltado.',
+                tryLabel: '🎼 Alternar C,D,E / Do,Re,Mi',
+                detectSelector: '#bloqueAdvancedOptions select, #bloqueAdvancedOptions button',
+                prepare: () => {
+                    ensureTutorialMode('bloque');
+                    setPanelVisible('bloqueAdvancedOptions', 'toggleBloqueOptionsBtn', true, '✕ Ocultar', '🎛️ Opciones', true);
+                },
+                tryAction: () => {
+                    if (state.notationSystem === 'american') el('btnNotationLatin')?.click();
+                    else el('btnNotationAmerican')?.click();
+                }
+            },
+            {
                 id: 'displaySection',
-                title: '1. Bloque Armónico: Nivel Básico a 3 Voces y Niveles 4–5 Voces',
-                text: 'El Nivel Básico está diseñado exclusivamente para tríadas a 3 voces: Mayor, Menor, Aumentado, Disminuido, Sus2 y Sus4 en posición cerrada (1ª, 2ª y 3ª voz de agudo a grave). Los niveles Intermedio y Avanzado expanden la práctica a 4 y 5 voces (4-Way Close con séptimas, tensiones y Variantes 1, 2 y 3). Toda nota inferior a Do central (< C4) pasa automáticamente a Clave de Fa en Gran Pentagrama. Usa teclas A–G (C D E F G A B) o números 1–7 para ingresar notas, + para sostenido (#), - para bemol (b), 0 para becuadro (♮), ++ para doble sostenido (##) y -- para doble bemol (bb).'
+                module: 'bloque',
+                category: 'Área de Trabajo',
+                title: 'Rejilla de Voces y Gran Pentagrama Interactivo',
+                html: `<ul>
+                    <li><strong>Rejilla (agudo ➔ grave):</strong> muestra la 1ª voz dada y las voces por completar. Usa <strong>↑ / ↓</strong> o haz clic en una celda para editar una voz puntual.</li>
+                    <li><strong>Gran Pentagrama (Sol + Fa):</strong> toda nota menor a Do central (<code>&lt; C4</code>) baja automáticamente a Clave de Fa.</li>
+                    <li><strong>Clic directo en partitura:</strong> también puedes hacer clic sobre líneas o espacios del pentagrama para escribir notas.</li>
+                </ul>`,
+                mission: 'Haz clic en una celda de la rejilla o pulsa "🔊 Escuchar" para oír la 1ª voz.',
+                tryLabel: '🔊 Escuchar Referencia',
+                detectSelector: '#displaySection .grid-cell, #musicalStaffCanvas, #voiceNavUpBtn, #voiceNavDownBtn',
+                prepare: () => {
+                    ensureTutorialMode('bloque');
+                    setPanelVisible('bloqueAdvancedOptions', 'toggleBloqueOptionsBtn', false, '✕ Ocultar', '🎛️ Opciones', true);
+                },
+                tryAction: () => el('replayAudioButton')?.click()
             },
             {
-                id: 'advancedModesToolbar',
-                title: '2. Disposiciones Armónicas (Drops, Spreads, Ambi Chords) y Alertas Acústicas',
-                text: 'Abre tus voicings con Drop 2, Drop 3, Drop 2&4, Shearing / Double Lead (5ª voz a la octava baja), Spreads a 4 y 5 voces (Métodos 1, 2 y 3) o Ambi Chords (Modelos A, B y C por cuartas). El sistema audita acústicamente cada acorde en tiempo real, alertando de disonancias de 2ª menor en la voz superior o violaciones del límite de intervalos graves (LIL).'
+                id: 'noteBuildingControls',
+                module: 'bloque',
+                category: 'Ingreso de Notas',
+                title: 'Botones de Cifrado, Alteraciones y Teclado Piano',
+                html: `<ul>
+                    <li><strong>Botones Naturales y Teclado PC:</strong> pulsa <code>C–B</code> (o <code>1–7</code>) para ingresar notas de agudo a grave.</li>
+                    <li><strong>Alteraciones:</strong> <code>#</code> (<code>+</code>), <code>b</code> (<code>-</code>), <code>♮</code> (<code>0</code>), <code>##</code> (<code>++</code>) y <code>bb</code> (<code>--</code>).</li>
+                    <li><strong>🎹 Teclado Piano:</strong> usa el interruptor superior para alternar entre <em>Botones / Cifrado</em> y <em>Teclado Piano</em>.</li>
+                </ul>`,
+                mission: 'Alterna al Teclado Piano interactivo o pulsa una nota para probar el ingreso.',
+                tryLabel: '🎹 Alternar Piano / Botones',
+                detectSelector: '#noteBuildingControls button, #piano-container .piano-key, #cifradoToggle, #pianoToggle',
+                prepare: () => {
+                    ensureTutorialMode('bloque');
+                    el('cifradoToggle')?.click();
+                },
+                tryAction: () => {
+                    const isPianoHidden = el('piano-container')?.classList.contains('hidden');
+                    if (isPianoHidden) el('pianoToggle')?.click();
+                    else el('cifradoToggle')?.click();
+                }
             },
             {
-                id: 'livePermutationsBar',
-                title: '3. Permutaciones de Tensiones y Regla Especial de Acordes 7',
-                text: 'Enriquece los acordes con tensiones sustitutas: 9na, b9 o #9 por fundamental o 3ra; #11, 11na, 13na o b13 por 5ta. Cuenta con la regla de permutación para acordes 7: cuando la 1ª voz tiene la fundamental del acorde, se permuta la b7 por b9 (ejemplo: G7 cerrado G-F-D-B se permuta a G-D-B-Ab). Haz clic en los chips interactivos de permutación para alternarlas al instante.'
-            },
-            {
-                id: 'melodicAnalysisStudioPanel',
-                title: '4. Análisis Melódico, Doble Análisis, Resoluciones Retardadas y Tonicizaciones',
-                text: 'Clasifica cada nota como Principal (P / notas del acorde y tensiones) o Secundaria (S / d / aproximaciones). Incluye Doble Análisis cuando una nota del acorde actúa como aproximación, Resoluciones Retardadas (diatónica/cromática/dominante/disminuida), Voz Líder Independiente (#1 a #6) y catálogo integral de Tonicizaciones de 2 y 3 acordes hacia cualquier tonalidad de llegada.'
-            },
-            {
-                id: 'studioLiveElementEditorBar',
-                title: '5. Editor Melódico en Vivo, Puntillos en Todas las Voces, Tresillos con Símbolo 3 y Silencios',
-                text: 'Modifica cualquier nota o figura en tiempo real con subdivisiones proporcionales automáticas. Dispones de figuras simples (w, h, q, 8, 16), figuras con puntillo (hd, qd, 8d) que se aplican a todas las notas y voces del bloque armónico, y Figuras de Tresillos grabadas con su corchete y símbolo 3 claramente visible: Tresillo de Negra (qt [6]), Tresillo de Corchea (8t [7]) y Tresillo de Semicorchea (16t [8]). Si faltan tiempos para completar el compás, pulsa "𝄽 + Silencios" o haz clic en la insignia de balance para autocompletar el compás con silencios. Mueve la altura de la nota seleccionada con agilidad: Ctrl + ↑ / ↓ para subir o bajar diatónicamente (escala del acorde), Ctrl + Alt + ↑ / ↓ para subir o bajar cromáticamente (semitono), y Shift + ↑ / ↓ para subir o bajar octavas.'
-            },
-            {
-                id: 'studioPlaybackToolbar',
-                title: '6. Audio Avanzado: Playback, Bucle de Compás (Loop), Swing Jazz y Claqueta',
-                text: 'Reproduce con síntesis polifónica Tone.js mediante la Barra Espaciadora. Activa el modo Bucle (🔁 Loop) para repetir indefinidamente el compás activo mientras practicas, alterna entre articulación Directa y Swing Jazz (lilt 2:1 apaisado), activa la Claqueta de metrónomo en los tiempos débiles 2 y 4, y visualiza las curvas de enlace vocal (Voice Leading) entre notas contiguas.'
+                id: 'actionButtonsGroup',
+                module: 'bloque',
+                category: 'Acciones',
+                title: 'Confirmar, Borrar, Pista, Respuesta y Siguiente',
+                html: `<ul>
+                    <li><strong>✅ Confirmar (Enter):</strong> evalúa tu bloque (se bloquea tras acertar para no repetir el mismo intento). Al acertar puedes elegir avance automático o manual.</li>
+                    <li><strong>⬅️ Borrar Última / 🗑️ Borrar Todo:</strong> corrige la última nota o limpia las voces.</li>
+                    <li><strong>💡 Pista / 👁️ Mostrar Respuesta:</strong> consulta la siguiente voz o revela la solución con audio.</li>
+                    <li><strong>🔄 Cambiar Ejercicio / ➡️ Siguiente Ejercicio:</strong> genera un nuevo acorde al instante.</li>
+                </ul>`,
+                mission: 'Prueba pulsar 🔄 Cambiar Ejercicio para generar un nuevo acorde.',
+                tryLabel: '🔄 Probar Cambiar Ejercicio',
+                detectSelector: '#actionButtonsGroup button',
+                prepare: () => {
+                    ensureTutorialMode('bloque');
+                    el('cifradoToggle')?.click();
+                },
+                tryAction: () => el('changeQuestionButton')?.click()
             },
             {
                 id: 'continuityPanel',
-                title: '7. Continuidad Armónica (8 Compases) y Exportación Universal (MIDI, MusicXML, PDF, JSON)',
-                text: 'Aplica enlaces armónicos a 8 compases manteniendo notas comunes en la misma voz (verde) o conduciendo la 1ª voz por cercanía (violeta). Exporta tus arreglos en archivo estándar MIDI Type 0 (.mid) con ticks exactos de tresillos, en formato profesional MusicXML (.musicxml) para programas de partituras, en PDF vectorial o respalda todo tu perfil y melodías en JSON.'
+                module: 'continuity',
+                category: 'Continuidad 8C',
+                title: '🎼 Continuidad Armónica (Cómo usar los 8 Compases)',
+                html: `<ul>
+                    <li><strong>Cómo se usa:</strong> completa los 8 compases uno tras otro (todos cuentan como 1 evaluación unificada). Mantén notas comunes en la misma voz (verde) o mueve la 1ª voz por cercanía (violeta).</li>
+                    <li><strong>🎯 Dar 1ª Voz / 🔄 Cambiar Posición:</strong> activa o quita la nota inicial de referencia, o cambia la inversión de arranque.</li>
+                    <li><strong>🗂️ Historial de Partituras / 🎲 Nuevos 8 Compases:</strong> al completar los 8 compases se guarda tu partitura completa para escucharla con bajo profundo.</li>
+                </ul>`,
+                mission: 'Prueba 🔄 Cambiar Posición o 🎯 Dar 1ª Voz Inicial en el panel resaltado.',
+                tryLabel: '🔄 Cambiar Posición',
+                detectSelector: '#continuityPanel button',
+                prepare: () => {
+                    ensureTutorialMode('continuity');
+                },
+                tryAction: () => el('changePositionBtn')?.click()
+            },
+            {
+                id: 'melodicAnalysisStudioPanel',
+                module: 'harmonizations',
+                category: 'Armonizaciones (1/6)',
+                title: '🎶 Cómo Usar Armonizaciones (Flujo Paso a Paso)',
+                html: `<ul>
+                    <li><strong>Paso 1 — Elige o crea una melodía:</strong> selecciona <code>4C</code>/<code>8C</code>, un ejemplo del menú, un estándar en <strong>🎷 Estándares</strong>, pulsa <strong>🎲 Nueva</strong> o créala en <strong>✍️ Editor</strong>.</li>
+                    <li><strong>Paso 2 — Escucha y controla el tempo:</strong> usa <strong>▶️ Sonar Frase</strong>, <strong>🎵 Melodía</strong>, <strong>⏩ Desde Nota</strong>, <strong>🔁 Bucle</strong> y el control de <strong>BPM</strong>.</li>
+                    <li><strong>Paso 3 — Toca cualquier nota de la partitura</strong> (o de la tira inferior) para abrir el <em>Panel de Análisis y Armonización</em>.</li>
+                </ul>`,
+                mission: 'Prueba escuchar la melodía actual o haz clic en cualquier nota de la partitura.',
+                tryLabel: '🎵 Escuchar Melodía',
+                detectSelector: '#melodicAnalysisStudioPanel button, #melodicPhraseCanvas',
+                prepare: () => {
+                    ensureTutorialMode('harmonizations');
+                    state.melodicStudio.selectedNoteIdx = null;
+                    renderMelodicStudioUI();
+                    setPanelVisible('studioLiveElementEditorBar', null, false, null, null, true);
+                    setPanelVisible('studioSecondaryToolsDrawer', null, false, null, null, true);
+                },
+                tryAction: () => el('playMelodyOnlyBtn')?.click()
+            },
+            {
+                id: 'floatingHarmonizationModal',
+                module: 'harmonizations',
+                category: 'Armonizaciones (2/6)',
+                title: 'Panel de Nota: Contexto, Función y Técnicas (1 y 2)',
+                html: `<ul>
+                    <li><strong>Encabezado (◀ / ▶ / ⇄ Lado):</strong> muestra Compás, Acorde y Melodía; usa <code>◀/▶</code> para recorrer cada nota y <code>⇄ Lado</code> para mover el panel.</li>
+                    <li><strong>Contexto Armónico:</strong> indica el grado melódico (ej. <code>3</code>), la escala del acorde (ej. <code>Cmaj7 • Jónica</code>) y su función tonal.</li>
+                    <li><strong>1. Función de la Nota (Doble Análisis):</strong> cuando una nota puede ser Principal o Aproximación, aquí eliges su lectura y ves la explicación.</li>
+                    <li><strong>2. Elegir la Armonización:</strong> toca una tarjeta (<code>[4-WC]</code>, <code>[V1]–[V3]</code>, Aproximaciones, Resoluciones Retardadas o Doble Cromático) para aplicarla al instante.</li>
+                </ul>`,
+                mission: 'El panel de la 1ª nota está abierto abajo. Toca una tarjeta de "2. Elegir la Armonización".',
+                tryLabel: '▶ Probar Variante 1 [V1]',
+                modalPos: 'top',
+                detectSelector: '#possibleHarmonizationsContainer button, #analysisClassificationSelector button, #prevMelodicNoteBtn, #nextMelodicNoteBtn',
+                prepare: () => {
+                    ensureTutorialMode('harmonizations');
+                    setPanelVisible('studioLiveElementEditorBar', null, false, null, null, true);
+                    setPanelVisible('studioSecondaryToolsDrawer', null, false, null, null, true);
+                    state.melodicStudio.selectedNoteIdx = 0;
+                    renderMelodicStudioUI();
+                    requestAnimationFrame(() => {
+                        const scrollBody = el('floatingHarmonizationModal')?.querySelector('.overflow-y-auto');
+                        if (scrollBody) scrollBody.scrollTop = 0;
+                    });
+                },
+                tryAction: () => {
+                    const v1Btn = document.querySelector('#possibleHarmonizationsContainer button:nth-child(2)') || document.querySelector('#possibleHarmonizationsContainer button');
+                    v1Btn?.click();
+                }
+            },
+            {
+                id: 'floatingHarmonizationModal',
+                module: 'harmonizations',
+                category: 'Armonizaciones (3/6)',
+                title: 'Panel de Nota: Disposiciones, Permutaciones y Botones (3–5)',
+                html: `<ul>
+                    <li><strong>3. Disposición de Voces:</strong> cambia esta nota entre 4-Way Close, Variantes, Double Lead, Ambi Chords (A/B/C), Drop 2/3/2&amp;4 y Spreads 4–5V.</li>
+                    <li><strong>4. Permutaciones Válidas:</strong> activa o desactiva chips (<code>+ Raíz(1)➔9na</code>, <code>+ 5ta➔#11</code>, <code>+ Guía 7ma➔6ta</code>) sin reemplazar las demás opciones.</li>
+                    <li><strong>5. Otras Técnicas (cuando aplica):</strong> abre <strong>⚡ Voz líder independiente (1–6)</strong> y <strong>🔗 Tonicizaciones (2 y 3 acordes)</strong>.</li>
+                    <li><strong>Botones inferiores:</strong> <strong>✅ Aplicar y siguiente ▶</strong> avanza a la siguiente nota; <strong>✍️ Cargar en el ejercicio</strong> envía esa armonización a la rejilla principal para practicarla; <strong>🔊 Escuchar bloque</strong> reproduce el acorde.</li>
+                </ul>`,
+                mission: 'Observa las secciones 3 y 4 desplazadas abajo. Pulsa una Disposición, Permutación o 🔊 Escuchar bloque.',
+                tryLabel: '🔊 Escuchar Bloque',
+                modalPos: 'top',
+                detectSelector: '#floatingDispositionOptions button, #floatingPermutationsContainer button, #playSelectedNoteVoicingBtn, #applyAndNextNoteBtn, #loadNoteForManualPracticeBtn',
+                prepare: () => {
+                    ensureTutorialMode('harmonizations');
+                    state.melodicStudio.selectedNoteIdx = 0;
+                    renderMelodicStudioUI();
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            const scrollBody = el('floatingHarmonizationModal')?.querySelector('.overflow-y-auto');
+                            if (scrollBody) scrollBody.scrollTop = scrollBody.scrollHeight;
+                            el('floatingPermutationsContainer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        });
+                    });
+                },
+                tryAction: () => el('playSelectedNoteVoicingBtn')?.click()
+            },
+            {
+                id: 'studioLiveElementEditorBar',
+                module: 'harmonizations',
+                category: 'Armonizaciones (4/6)',
+                title: '🛠️ Editor Melódico en Vivo (Figuras, Puntillos y Tresillos)',
+                html: `<ul>
+                    <li><strong>Figuras y Silencios:</strong> cambia duraciones en vivo (w, h, q, 8, 16), aplica puntillos a todas las voces, usa tresillos con símbolo <code>3</code> y autocompleta silencios.</li>
+                    <li><strong>Acorde, Escala y Permutaciones por capas:</strong> modifica la raíz/especie/escala del compás en vivo y pulsa <strong>✅ Aplicar</strong>.</li>
+                    <li><strong>Mover alturas rápido:</strong> <code>Ctrl + ↑/↓</code> (diatónico), <code>Ctrl + Alt + ↑/↓</code> (cromático), <code>Shift + ↑/↓</code> (octavas) y <code>Ctrl+Z / Ctrl+Y</code>.</li>
+                </ul>`,
+                mission: 'El panel 🛠️ Editar Nota está abierto arriba. Haz clic en cualquiera de sus controles.',
+                tryLabel: '✅ Entendido',
+                detectSelector: '#studioLiveElementEditorBar button, #studioLiveElementEditorBar select',
+                prepare: () => {
+                    ensureTutorialMode('harmonizations');
+                    state.melodicStudio.selectedNoteIdx = 0;
+                    renderMelodicStudioUI();
+                    el('floatingHarmonizationModal')?.classList.add('hidden');
+                    setPanelVisible('studioSecondaryToolsDrawer', null, false, null, null, true);
+                    setPanelVisible('studioLiveElementEditorBar', null, true, null, null, true);
+                },
+                tryAction: () => {}
+            },
+            {
+                id: 'studioPlaybackToolbar',
+                module: 'harmonizations',
+                category: 'Armonizaciones (5/6)',
+                title: '⚙️ Más / Exportar: Generador, Vista, Audio y Exportación',
+                html: `<ul>
+                    <li><strong>Generador y Ritmo:</strong> elige qué técnica priorizar al crear frases (<em>Multitonal, Cromática, Dominante, Tonicizaciones...</em>), alterna <strong>Directo / Swing Jazz</strong> y activa la <strong>🥁 Claqueta (2 y 4)</strong>.</li>
+                    <li><strong>Bloques y Vista de Partitura:</strong> <strong>𝄽 Nota ⇄ Silencio</strong>, <strong>🧹 Borrar 1 Bloque</strong>, <strong>🧩 Limpiar Frase</strong>, <strong>⚡ Rellenar Frase</strong>, <strong>🎼 Vista Melodía+Bloque</strong>, <strong>Aproximación d/S</strong>, <strong>Enarmonía</strong>, <strong>🔗 Guía de Voces</strong>, <strong>Etiquetas</strong> y <strong>📐 Compases/fila</strong>.</li>
+                    <li><strong>Guardar y Exportar:</strong> <strong>💾 Guardar Melodía</strong>, <strong>🎹 Exportar MIDI (.mid)</strong>, <strong>🎼 Exportar XML (.musicxml)</strong> y <strong>📄 Exportar PDF</strong>.</li>
+                </ul>`,
+                mission: 'El menú ⚙️ Más / Exportar está abierto arriba. Prueba alternar 🔗 Guía de Voces o Swing Jazz.',
+                tryLabel: '🔗 Probar Guía de Voces',
+                detectSelector: '#studioPlaybackToolbar button, #studioPlaybackToolbar select, #studioMetronomeToggle',
+                prepare: () => {
+                    ensureTutorialMode('harmonizations');
+                    state.melodicStudio.selectedNoteIdx = 0;
+                    renderMelodicStudioUI();
+                    el('floatingHarmonizationModal')?.classList.add('hidden');
+                    setPanelVisible('studioLiveElementEditorBar', null, false, null, null, true);
+                    setPanelVisible('studioSecondaryToolsDrawer', null, true, null, null, true);
+                },
+                tryAction: () => el('toggleVoiceLeadingLinesBtn')?.click()
+            },
+            {
+                id: 'studioDispPermRow',
+                module: 'harmonizations',
+                category: 'Armonizaciones (6/6)',
+                title: '📐 Disposición Global del Acorde y 🔀 Permutaciones',
+                html: `<ul>
+                    <li><strong>📐 Disposición (4-Way Close, Double Lead, Drops y Spreads):</strong> cambia la disposición de la nota activa y pulsa <strong>🔄 Aplicar a Toda la Armonización</strong> para convertir la frase completa de un clic.</li>
+                    <li><strong>🔀 Permutaciones:</strong> activa o combina sustituciones válidas (<code>9</code>, <code>#11</code>, <code>11</code>, <code>13</code>, <code>6</code>, <code>b9</code>) directamente sobre la nota seleccionada y usa <strong>Limpiar Perm.</strong> para restaurar.</li>
+                    <li><strong>Atajo rápido:</strong> abre esta guía cuando quieras con los botones <strong>❓ Ayuda / ❓ Cómo usar</strong> de cada sección.</li>
+                </ul>`,
+                mission: 'Prueba elegir "Drop 2" o activar un chip de 🔀 Permutaciones en la barra resaltada.',
+                tryLabel: '📐 Probar Drop 2',
+                detectSelector: '#studioDispPermRow button',
+                prepare: () => {
+                    ensureTutorialMode('harmonizations');
+                    state.melodicStudio.selectedNoteIdx = 0;
+                    renderMelodicStudioUI();
+                    el('floatingHarmonizationModal')?.classList.add('hidden');
+                    setPanelVisible('studioLiveElementEditorBar', null, false, null, null, true);
+                    setPanelVisible('studioSecondaryToolsDrawer', null, true, null, null, true);
+                },
+                tryAction: () => document.querySelector('#studioDispPermRow [data-studio-drop="drop2"]')?.click()
             }
         ];
-        const showTut = () => {
+
+        const tutorialCompletedSteps = new Set();
+        let tutorialSnapshot = null;
+        let activeTutorialDetectCleanup = null;
+        let activeTutorialModule = 'all';
+
+        const getActiveTutorialSteps = () => (
+            activeTutorialModule === 'all'
+                ? TUTORIAL_STEPS
+                : TUTORIAL_STEPS.filter(step => step.module === activeTutorialModule)
+        );
+
+        const markCurrentTutorialStepCompleted = () => {
+            const steps = getActiveTutorialSteps();
+            const curStep = steps[state.tutorial.currentStep];
+            if (!curStep) return;
+            tutorialCompletedSteps.add(TUTORIAL_STEPS.indexOf(curStep));
+            el('tutorialTryBox')?.classList.add('completed');
+            el('tutorialMissionStatus')?.classList.remove('hidden');
+            document.querySelectorAll('#tutorialStepDots .tutorial-step-dot').forEach((dot, idx) => {
+                const s = steps[idx];
+                const globalIdx = TUTORIAL_STEPS.indexOf(s);
+                dot.classList.toggle('done', tutorialCompletedSteps.has(globalIdx) && idx !== state.tutorial.currentStep);
+            });
+        };
+
+        const cleanupTutorialStepListeners = () => {
+            if (typeof activeTutorialDetectCleanup === 'function') {
+                activeTutorialDetectCleanup();
+                activeTutorialDetectCleanup = null;
+            }
+        };
+
+        const closeTutorial = (markSeen = false) => {
+            stopAllAudioPlayback();
+            cleanupTutorialStepListeners();
             document.querySelectorAll('.tutorial-highlight').forEach(x => x.classList.remove('tutorial-highlight'));
-            const step = TUTORIAL_STEPS[state.tutorial.currentStep] || TUTORIAL_STEPS[0];
-            if (el('tutorialStepBadge')) el('tutorialStepBadge').textContent = `Paso ${state.tutorial.currentStep + 1} de ${TUTORIAL_STEPS.length}`;
+            document.body.classList.remove('tutorial-active-padding', 'tutorial-active-padding-top');
+            el('tutorialOverlay')?.classList.add('hidden');
+            el('tutorialModal')?.classList.remove('tutorial-modal-top');
+            if (markSeen) {
+                state.stats.tutorialSeen = true;
+                savePersistedState();
+            }
+            if (tutorialSnapshot) {
+                const snap = tutorialSnapshot;
+                tutorialSnapshot = null;
+                setPanelVisible('topQuickToolsBar', 'toggleQuickToolsBtn', snap.quickToolsOpen, '▲ Ocultar', '🧰 Herramientas');
+                setPanelVisible('bloqueAdvancedOptions', 'toggleBloqueOptionsBtn', snap.bloqueOptsOpen, '✕ Ocultar', '🎛️ Opciones', true);
+                setPanelVisible('studioLiveElementEditorBar', null, false, null, null, true);
+                setPanelVisible('studioSecondaryToolsDrawer', null, false, null, null, true);
+                state.melodicStudio.selectedNoteIdx = null;
+                ensureTutorialMode(snap.mode);
+            }
+        };
+
+        const showTut = () => {
+            stopAllAudioPlayback();
+            cleanupTutorialStepListeners();
+            document.querySelectorAll('.tutorial-highlight').forEach(x => x.classList.remove('tutorial-highlight'));
+            const steps = getActiveTutorialSteps();
+            if (!steps.length) return;
+            const idx = Math.max(0, Math.min(state.tutorial.currentStep, steps.length - 1));
+            state.tutorial.currentStep = idx;
+            const step = steps[idx];
+            const globalIdx = TUTORIAL_STEPS.indexOf(step);
+
+            if (typeof step.prepare === 'function') step.prepare();
+
+            document.querySelectorAll('#tutorialModuleBar .tutorial-module-pill').forEach(pill => {
+                pill.classList.toggle('active', pill.dataset.tutMod === activeTutorialModule);
+            });
+
+            if (el('tutorialStepBadge')) el('tutorialStepBadge').textContent = `Paso ${idx + 1} de ${steps.length}`;
+            if (el('tutorialCategoryBadge')) el('tutorialCategoryBadge').textContent = step.category || 'Guía';
+            if (el('tutorialProgressBar')) el('tutorialProgressBar').style.width = `${Math.round(((idx + 1) / steps.length) * 100)}%`;
             if (el('tutorialTitle')) el('tutorialTitle').textContent = step.title;
-            if (el('tutorialText')) el('tutorialText').textContent = step.text;
+            if (el('tutorialText')) el('tutorialText').innerHTML = step.html;
+            if (el('tutorialMissionText')) el('tutorialMissionText').textContent = `⚡ ${step.mission}`;
+
+            const tryBtn = el('tutorialTryActionBtn');
+            if (tryBtn) {
+                tryBtn.textContent = step.tryLabel || '⚡ Probar ahora';
+                tryBtn.onclick = () => {
+                    if (typeof step.tryAction === 'function') step.tryAction();
+                    markCurrentTutorialStepCompleted();
+                };
+            }
+
+            const isDone = tutorialCompletedSteps.has(globalIdx);
+            el('tutorialTryBox')?.classList.toggle('completed', isDone);
+            el('tutorialMissionStatus')?.classList.toggle('hidden', !isDone);
+
+            const dotsWrap = el('tutorialStepDots');
+            if (dotsWrap) {
+                dotsWrap.innerHTML = steps.map((s, i) => {
+                    const gIdx = TUTORIAL_STEPS.indexOf(s);
+                    const cls = i === idx ? 'active' : (tutorialCompletedSteps.has(gIdx) ? 'done' : '');
+                    return `<button type="button" class="tutorial-step-dot ${cls}" data-tut-step="${i}" title="${s.title}">${i + 1}</button>`;
+                }).join('');
+                dotsWrap.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        state.tutorial.currentStep = parseInt(btn.dataset.tutStep, 10) || 0;
+                        showTut();
+                    });
+                });
+            }
+
+            if (el('tutorialPrevButton')) el('tutorialPrevButton').disabled = idx === 0;
+            if (el('tutorialNextButton')) {
+                el('tutorialNextButton').textContent = idx >= steps.length - 1 ? '🎉 Finalizar Tutorial' : 'Siguiente ➜';
+            }
+
+            const placeAtTop = step.modalPos === 'top' || ['displaySection', 'noteBuildingControls', 'actionButtonsGroup'].includes(step.id);
+            const modalEl = el('tutorialModal');
+            if (modalEl) modalEl.classList.toggle('tutorial-modal-top', placeAtTop);
+            document.body.classList.toggle('tutorial-active-padding', !placeAtTop);
+            document.body.classList.toggle('tutorial-active-padding-top', placeAtTop);
+            el('tutorialOverlay')?.classList.remove('hidden');
+
             const targetEl = el(step.id);
             if (targetEl && !targetEl.classList.contains('hidden')) {
                 targetEl.classList.add('tutorial-highlight');
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (step.id !== 'floatingHarmonizationModal') {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            const rect = targetEl.getBoundingClientRect();
+                            const modalHeight = modalEl ? modalEl.getBoundingClientRect().height : 220;
+                            const targetY = placeAtTop
+                                ? window.scrollY + rect.top - (modalHeight + 24)
+                                : window.scrollY + rect.top - 18;
+                            window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+                        });
+                    });
+                }
             }
-            el('tutorialOverlay')?.classList.remove('hidden');
+
+            if (step.detectSelector) {
+                const onTargetInteract = (ev) => {
+                    if (ev.target && ev.target.closest(step.detectSelector)) {
+                        markCurrentTutorialStepCompleted();
+                    }
+                };
+                document.addEventListener('click', onTargetInteract, true);
+                document.addEventListener('change', onTargetInteract, true);
+                activeTutorialDetectCleanup = () => {
+                    document.removeEventListener('click', onTargetInteract, true);
+                    document.removeEventListener('change', onTargetInteract, true);
+                };
+            }
         };
-        if (el('showTutorialButton')) {
-            el('showTutorialButton').addEventListener('click', () => {
+
+        const openTutorialForModule = (moduleKey = 'all') => {
+            if (!tutorialSnapshot) {
+                tutorialSnapshot = {
+                    mode: state.melodicStudio.isActive ? 'harmonizations' : (state.continuityMode ? 'continuity' : 'bloque'),
+                    quickToolsOpen: !el('topQuickToolsBar')?.classList.contains('hidden'),
+                    bloqueOptsOpen: !el('bloqueAdvancedOptions')?.classList.contains('hidden')
+                };
+            }
+            activeTutorialModule = ['all', 'tools', 'bloque', 'continuity', 'harmonizations'].includes(moduleKey) ? moduleKey : 'all';
+            state.tutorial.currentStep = 0;
+            showTut();
+        };
+
+        document.querySelectorAll('#tutorialModuleBar .tutorial-module-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                activeTutorialModule = pill.dataset.tutMod || 'all';
                 state.tutorial.currentStep = 0;
                 showTut();
             });
+        });
+
+        if (el('showTutorialButton')) {
+            el('showTutorialButton').addEventListener('click', () => openTutorialForModule('all'));
+        }
+        if (el('tutBloqueQuickBtn')) {
+            el('tutBloqueQuickBtn').addEventListener('click', () => openTutorialForModule('bloque'));
+        }
+        if (el('tutContinuityQuickBtn')) {
+            el('tutContinuityQuickBtn').addEventListener('click', () => openTutorialForModule('continuity'));
+        }
+        if (el('tutHarmonizationsQuickBtn')) {
+            el('tutHarmonizationsQuickBtn').addEventListener('click', () => openTutorialForModule('harmonizations'));
         }
         if (el('tutorialPrevButton')) {
             el('tutorialPrevButton').addEventListener('click', () => {
-                state.tutorial.currentStep = (state.tutorial.currentStep - 1 + TUTORIAL_STEPS.length) % TUTORIAL_STEPS.length;
-                showTut();
+                if (state.tutorial.currentStep > 0) {
+                    state.tutorial.currentStep--;
+                    showTut();
+                }
             });
         }
         if (el('tutorialNextButton')) {
             el('tutorialNextButton').addEventListener('click', () => {
-                if (state.tutorial.currentStep >= TUTORIAL_STEPS.length - 1) {
-                    state.stats.tutorialSeen = true;
-                    savePersistedState();
-                    document.querySelectorAll('.tutorial-highlight').forEach(element => element.classList.remove('tutorial-highlight'));
-                    el('tutorialOverlay')?.classList.add('hidden');
+                const steps = getActiveTutorialSteps();
+                if (state.tutorial.currentStep >= steps.length - 1) {
+                    closeTutorial(true);
                     return;
                 }
                 state.tutorial.currentStep++;
@@ -8503,14 +9068,11 @@
             });
         }
         if (el('tutorialEndButton')) {
-            el('tutorialEndButton').addEventListener('click', () => {
-                document.querySelectorAll('.tutorial-highlight').forEach(x => x.classList.remove('tutorial-highlight'));
-                el('tutorialOverlay')?.classList.add('hidden');
-            });
+            el('tutorialEndButton').addEventListener('click', () => closeTutorial(false));
         }
         if (el('tutorialOpenShortcutsBtn')) {
             el('tutorialOpenShortcutsBtn').addEventListener('click', () => {
-                el('tutorialOverlay')?.classList.add('hidden');
+                closeTutorial(false);
                 el('shortcutsModalOverlay')?.classList.add('visible');
             });
         }
@@ -8625,8 +9187,12 @@
             const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal-overlay:not(#welcomeModalOverlay)').forEach(m => m.classList.remove('visible'));
-                el('tutorialOverlay')?.classList.add('hidden');
+                if (!el('tutorialOverlay')?.classList.contains('hidden')) closeTutorial(false);
                 return;
+            }
+            if (!el('tutorialOverlay')?.classList.contains('hidden') && !document.querySelector('.modal-overlay.visible')) {
+                if (e.key === 'ArrowRight') { e.preventDefault(); el('tutorialNextButton')?.click(); return; }
+                if (e.key === 'ArrowLeft') { e.preventDefault(); el('tutorialPrevButton')?.click(); return; }
             }
             const isCustomEditorOpen = el('customMelodyModalOverlay')?.classList.contains('visible');
             if (isCustomEditorOpen) {
